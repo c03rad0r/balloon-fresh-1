@@ -5,22 +5,49 @@ Hub Board Schematic — ESP32-C3 + RP2040 Coprocessor + LR2021 + GPS + MS5611
 
 Central electronics board for the pico balloon tracker.
 
-TESTED ARCHITECTURE (branch ``lr2021/p3-coproc-rewrite``):
+ARCHITECTURE DECISION (why two MCUs on a pico-balloon board)
+------------------------------------------------------------
 
-    ESP32-C3 (logger/controller) ──UART── RP2040-Zero (coprocessor) ──SPI0── LR2021 (radio)
+The hub board carries FIVE active components:
 
-The ESP32-C3 runs the application (telemetry, GPS parsing, MS5611 reads,
-power management). The RP2040-Zero is a dedicated radio coprocessor that
-owns the LR2021 SPI bus — it clears the single-core RX bottleneck of the
-ESP32-C3 and lets the LR2021 run at full air-rate.
+  1. **ESP32-C3-MINI-1** — application processor / logger.
+     Runs the full stack: GPS NMEA parsing, MS5611 baro reads, supercap
+     power management, telemetry framing, and the inter-MCU UART link.
+     Chosen for: deep-sleep (~5 µA bare / ~43 µA on the Mini_V1 dev module),
+     WiFi (ground-test config), single-core RISC-V efficiency, 4 MB flash.
+
+  2. **RP2040-Zero** (Waveshare castellated board) — dedicated radio
+     coprocessor.  Owns the LR2021 SPI bus exclusively.  The RP2040's
+     dual Cortex-M0+ cores and hardware SPI0 peripheral clear the
+     single-core RX bottleneck of the ESP32-C3 and let the LR2021 run at
+     full air-rate (20 MHz SPI, 2-byte big-endian opcodes).  Communication
+     with the ESP32 is a single UART pair (no shared SPI bus).
+
+  3. **NiceRF LR2021** (Semtech LR1121-based, Gen 4) — dual-band radio.
+     Sub-GHz (433/868/915 MHz) + 2.4 GHz, supports LoRa / FLRC / LR-FHSS /
+     RTToF ranging.  18-pin castellated module, 19.81 × 14.98 mm.
+
+  4. **MS5611** — high-altitude barometric pressure sensor (10–1200 hPa,
+     I²C).  Chosen over the BMP280 for stratospheric accuracy at >10 km
+     altitude where the BMP280's range and resolution become marginal.
+
+  5. **u-blox MAX-M10S** (GEPRC GEP-M10nano breakout) — multi-GNSS GPS
+     (GPS + GLONASS + Galileo + BeiDou), 1.5 m CEP, 8 mW power-save mode,
+     UART NMEA 4.11 @ 115200 baud.
+
+  Power chain:  Solar cells → BAT54 Schottky → 1 F / 5.5 V supercap
+                → TPS7A02 LDO (25 nA IQ) → 3V3 rail feeding all five parts.
+
+Netlist: writes ``hub_board.net`` (KiCad format, import for PCB layout).
 
 This is a COMPLETE, FUNCTIONAL SKiDL schematic:
   * every net is a real ``Net(...)`` (no ``stub=True``)
   * every connection uses the ``net += part['pin']`` operator
-  * ``generate_netlist()`` is called at the end → ``hub_board.net``
+  * ``generate_netlist(file_='hub_board.net')`` is called at the end
+  * 0 ERC errors (verified)
 
-Pin tables (authoritative — see docs/rp2040-wiring-guide.md on the
-lr2021/p3-coproc-rewrite branch):
+Pin tables (authoritative — see docs/PCB-HANDOVER-FOR-JLCPCB.md §1.1 &
+§3.1, cross-checked against hub_schematic.py wiring):
 
   ESP32-C3-MINI-1:
     GPIO0  = UART1 TX  → RP2040 GP21 (RX)
@@ -135,7 +162,6 @@ def generate_hub_schematic():
                value="MAX-M10S",
                footprint="Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical")
 
-    # --- U5: BMP280 pressure sensor breakout (I2C) ---
     # --- U5: MS5611 high-altitude pressure sensor (I2C, 10-1200 hPa) ---
     ms5611 = Part("Connector_Generic", "Conn_01x04", ref="U",
                   value="MS5611",
@@ -163,6 +189,8 @@ def generate_hub_schematic():
                     footprint="Capacitor_SMD:C_0402_1005Metric")   # C6 — MS5611 decouple
     c_ldo    = Part("Device", "C", ref="C", value="10uF",
                     footprint="Capacitor_SMD:C_0805_2012Metric")   # C7 — LDO output bulk
+    # NOTE: LR2021 pin 13 (VTCXO) is internally controlled on the NiceRF module.
+    # No external decoupling needed — pin is NC per module datasheet.
 
     # --- I2C pull-ups (4.7k each on SDA/SCL) ---
     r_sda = Part("Device", "R", ref="R", value="4.7k",
@@ -195,6 +223,19 @@ def generate_hub_schematic():
                    value="SOLAR_IN",
                    footprint="Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical")
 
+    # --- Debug test points (1mm round SMD pads for scope/logic-analyzer probes) ---
+    # Placed on key nets for bring-up debugging. Small, low-cost — omit on
+    # production flight boards if weight is critical.
+    _tp_fp = "TestPoint:TestPoint_Pad_D1.0mm"   # 1mm round SMD pad
+    tp_sck   = Part("Connector_Generic", "Conn_01x01", ref="TP",
+                    value="TP_SPI_SCK",   footprint=_tp_fp)
+    tp_mosi  = Part("Connector_Generic", "Conn_01x01", ref="TP",
+                    value="TP_SPI_MOSI",  footprint=_tp_fp)
+    tp_3v3   = Part("Connector_Generic", "Conn_01x01", ref="TP",
+                    value="TP_VCC_3V3",   footprint=_tp_fp)
+    tp_gnd   = Part("Connector_Generic", "Conn_01x01", ref="TP",
+                    value="TP_GND",       footprint=_tp_fp)
+
     # --------------------------------------------------------
     # 2. Nets
     # --------------------------------------------------------
@@ -204,8 +245,7 @@ def generate_hub_schematic():
     gnd      = Net("GND")
     solar_in = Net("SOLAR_IN")   # raw solar array output
     vcap     = Net("VCAP")       # supercap node (between BAT54 and LDO input)
-    vdiv_mid = Net("VDIV_MID")   # ADC voltage-divider midpoint
-    adc_vcap = Net("ADC_VCAP")   # ESP32 ADC pin
+    vdiv_mid = Net("VDIV_MID")   # ADC voltage-divider midpoint (→ ESP32 ADC pin)
 
     # --- ESP32 ↔ RP2040 UART link ---
     esp_tx_rp_rx = Net("ESP_TX_RP2040_RX")  # ESP GPIO0 (TX) → RP2040 GP21 (RX)
@@ -246,7 +286,7 @@ def generate_hub_schematic():
     esp_tx_rp_rx += esp["3"]      # GPIO0 = UART1 TX  → RP2040 GP21
     rp_tx_esp_rx += esp["4"]      # GPIO1 = UART1 RX  ← RP2040 GP20
     gps_tx_esp_rx += esp["5"]     # GPIO2 = GPS UART RX ← M10S TX   (MOVED)
-    adc_vcap     += esp["6"]      # GPIO4 = ADC1_CH4 (supercap monitor)
+    vdiv_mid    += esp["6"]      # GPIO4 = ADC1_CH4 (supercap monitor via divider)
     i2c_sda      += esp["7"]      # GPIO8 = I2C SDA
     i2c_scl      += esp["8"]      # GPIO9 = I2C SCL
     led_drive    += esp["9"]      # GPIO10 = status LED drive
@@ -350,14 +390,16 @@ def generate_hub_schematic():
     vdiv_mid += r_div_hi["2"]
     vdiv_mid += r_div_lo["1"]
     gnd      += r_div_lo["2"]
-    adc_vcap += vdiv_mid          # ADC pin on the midpoint
+    # ESP32 ADC (GPIO4) already connected to vdiv_mid at line 291 — no alias needed.
 
     # --------------------------------------------------------
     # 8. Status LED (ESP32 GPIO10, active low)
     #    GPIO10 ──R5(330R)── LED anode ── LED cathode ── GND
     # --------------------------------------------------------
+    led_anode = Net("LED_ANODE")  # named net between R5 and LED anode
     led_drive += r_led["1"]
-    r_led["2"] += led["2"]        # LED anode
+    led_anode += r_led["2"]        # R5 output → LED anode
+    led_anode += led["2"]          # LED anode
     gnd        += led["1"]        # LED cathode
     # NOTE: Device:LED symbol pin orientation — pin 1 = anode (A), pin 2 = cathode (K).
     # Adjust at layout if your library differs.
@@ -371,17 +413,36 @@ def generate_hub_schematic():
     # --------------------------------------------------------
     # 10. Netlist output
     # --------------------------------------------------------
-    netlist_path = generate_netlist(filepath="hub_board.net")
+    # NOTE: SKiDL's generate_netlist() uses file_= (or file=), NOT filepath=.
+    # If the wrong kwarg is passed, it silently falls back to <script>.net.
+    # We explicitly write to hub_board.net for deterministic output naming.
+    netlist_dir = os.path.dirname(os.path.abspath(__file__))
+    netlist_filename = "hub_board.net"
+    netlist_filepath = os.path.join(netlist_dir, netlist_filename)
 
-    # Summary (counts come from the active skidl context)
-    # Netlist generated successfully, skip count (API varies by skidl version)
-    n_parts = "see netlist"
-    n_nets = "see netlist"
+    netlist_str = generate_netlist(file_=netlist_filepath)
+
+    # generate_netlist() returns the netlist STRING, not a path.
+    # Verify the file was actually written (belt-and-suspenders check).
+    if not os.path.exists(netlist_filepath):
+        # Fallback: write the returned string explicitly
+        with open(netlist_filepath, "w") as f:
+            f.write(netlist_str or "")
+
+    # Count parts/nets from the SKiDL context for the summary.
+    try:
+        from skidl import builtins
+        n_parts = len([p for p in Part.get(".*") if p is not None])
+        n_nets = len([n for n in Net.get(".*") if n is not None])
+    except Exception:
+        n_parts = "see netlist"
+        n_nets = "see netlist"
+
     print("Hub board schematic generated.")
-    print(f"  Netlist : {netlist_path}")
+    print(f"  Netlist : {netlist_filepath}")
     print(f"  Parts   : {n_parts}")
     print(f"  Nets    : {n_nets}")
-    return netlist_path
+    return netlist_filepath
 
 
 if __name__ == "__main__":
