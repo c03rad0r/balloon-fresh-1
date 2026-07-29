@@ -1,24 +1,23 @@
 /*
- * flrc_range_rx_auto.cpp — Autonomous RX for outdoor range testing
+ * DEPRECATED — DO NOT USE. This file uses SX1280 raw SPI commands (wrong chip).
+ * Our chip is LR2021 (Gen 4), NOT SX1280. See ADR-017.
+ * Use firmware/rp2040-flrc-max/ instead (RadioLib LR2021 driver).
  *
- * Based on flrc_range_rx.cpp (proven 0% loss at bench).
- * Auto-starts RX listen on boot — NO serial commands needed.
- * Stays connected to computer to log results.
+ * flrc_range_rx_auto.cpp — FLRC RX with RSSI for outdoor range testing
  *
- * Behavior:
- * - 2s LED blink on boot (time for TX operator to walk)
- * - Enters RX mode immediately, listens for 30s windows
- * - After each window: prints summary + RANGE_RESULT_RX line
- * - Re-arms RX automatically, runs forever
- * - RSSI readback per packet via GET_PACKET_STATUS
- * - LED blinks on each packet received
+ * Auto-listens on boot, continuous RX (no timeout), outputs per-packet RSSI.
+ * Loops forever. Format optimized for Python logging script.
  *
- * Config is compile-time only:
- *   FREQ=2440, BITRATE=2600, PKTLEN=255
+ * Based on flrc_raw_rx.cpp (verified working 2026-07-22).
+ *
+ * Output format per packet:
+ *   PKT,n,seq,rssi_dbm
+ *   PKT,n,seq,rssi_dbm
+ *   ...
+ *   (no per-packet hex dump in auto mode — too slow for logging)
  *
  * Pins: SCK=GP2 MOSI=GP3 MISO=GP4 CS=GP5 BUSY=GP6 IRQ=GP7 RST=GP8
- *       UART_TX=GP12 UART_RX=GP13
- *       LED=GP25 LED_ALT=GP16
+ *       UART_TX=GP12 UART_RX=GP13  LED=GP25  LED_ALT=GP16
  */
 
 #include <Arduino.h>
@@ -38,16 +37,14 @@
 #define PIN_LED     25
 #define PIN_LED_ALT 16
 
-#define SPI_FREQ_HZ     20000000UL
+// ─── FLRC Config ─────────────────────────────────────────────────────
+#define FLRC_FREQ_MHZ   2440.0f
+#define FLRC_BR         2600
+#define FLRC_PKT_SIZE   255
+#define SPI_FREQ_HZ     16000000UL   // 16MHz RX (20MHz TX is fine, RX uses 16)
 #define XTAL_MHZ        52.0f
 
-// ─── Compile-time config ─────────────────────────────────────────────
-#define RX_FREQ_MHZ     2440.0f
-#define RX_BITRATE_KBPS 2600
-#define RX_PKT_SIZE     127
-#define RX_LISTEN_MS    30000
-#define RX_SILENCE_MS   3000
-#define PRINT_EVERY     100
+#define PRINT_EVERY     1   // print EVERY packet in auto mode
 
 // Sync word — MUST match TX
 #define SYNC_WORD_0   0x12
@@ -58,8 +55,6 @@
 // ─── SPI ─────────────────────────────────────────────────────────────
 static SPIClassRP2040 spiRf(spi0, PIN_MISO, PIN_CS, PIN_SCK, PIN_MOSI);
 static SPISettings spiSettings(SPI_FREQ_HZ, MSBFIRST, SPI_MODE0);
-
-static volatile bool radioReady = false;
 
 // ─── SPI helpers ─────────────────────────────────────────────────────
 static inline void rfWaitBusy() {
@@ -127,64 +122,30 @@ static void rfSetRx() {
     rfWriteCmd(cmd, 5);
 }
 
-// ─── RSSI readback via GET_FLRC_PACKET_STATUS (0x024B) — 9-bit assembly
-// Matches verified LR2021Raw.h implementation. SX1280's 0x0104 returns garbage.
+// ─── RSSI readback via GET_FLRC_PACKET_STATUS (0x024B) ─────────────
+// LR2021 native command — NOT SX1280's 0x0104!
+// Returns 5 bytes: [pktLen_msb][pktLen_lsb][rssiAvg][rssiSync][flags]
+// RSSI is 9-bit: bits [8:1] from buf[2], bit [0] from buf[4] bit 2
+// Call AFTER RX_DONE, BEFORE clearing IRQ
 static int8_t rfReadRssi() {
     rfWaitBusy();
     spiRf.beginTransaction(spiSettings);
     digitalWrite(PIN_CS, LOW);
-    spiRf.transfer(0x02); spiRf.transfer(0x4B); // GET_FLRC_PACKET_STATUS
+    spiRf.transfer(0x02); spiRf.transfer(0x4B);  // GET_FLRC_PACKET_STATUS = 0x024B
     digitalWrite(PIN_CS, HIGH);
     spiRf.endTransaction();
     rfWaitBusy();
 
-    // Response: [stat_msb][stat_lsb][pktLen_msb][pktLen_lsb][rssiAvg][rssiSync][flags]
     uint8_t buf[7];
     spiRf.beginTransaction(spiSettings);
     digitalWrite(PIN_CS, LOW);
     for (int i = 0; i < 7; i++) buf[i] = spiRf.transfer(0x00);
     digitalWrite(PIN_CS, HIGH);
     spiRf.endTransaction();
-
-    // 9-bit RSSI: bits [8:1] from buf[4], bit[0] from buf[6] bit[2]
+    // LR2021 response: [stat_msb][stat_lsb][pktLen_msb][pktLen_lsb][rssiAvg][rssiSync][flags]
+    // 9-bit RSSI average: (buf[4] << 1) | ((buf[6] & 0x04) >> 2), then / -2 for dBm
     uint16_t raw = ((uint16_t)buf[4] << 1) | ((buf[6] & 0x04) >> 2);
-    return -(int8_t)(raw / 2);
-}
-
-// ─── Runtime parameter setters ───────────────────────────────────────
-static void rfSetFreq(float mhz) {
-    uint32_t frf = (uint32_t)((mhz * 1e6 * (double)(1ULL << 18)) / (XTAL_MHZ * 1e6));
-    uint8_t cmd[] = {
-        0x02, 0x00,
-        (uint8_t)(frf >> 16), (uint8_t)(frf >> 8), (uint8_t)(frf & 0xFF)
-    };
-    rfWriteCmd(cmd, 5);
-}
-
-static void rfSetBitrate(uint16_t kbps) {
-    uint8_t brBw;
-    switch (kbps) {
-        case 2600: brBw = 0x00; break;  // FLRC_BR_2600
-        case 2080: brBw = 0x01; break;  // FLRC_BR_2080
-        case 1300: brBw = 0x02; break;  // FLRC_BR_1300
-        case 1040: brBw = 0x03; break;  // FLRC_BR_1040
-        case 650:  brBw = 0x04; break;  // FLRC_BR_650
-        case 520:  brBw = 0x05; break;  // FLRC_BR_520
-        case 325:  brBw = 0x06; break;  // FLRC_BR_325
-        case 260:  brBw = 0x07; break;  // FLRC_BR_260
-        default:   brBw = 0x00; break;
-    }
-    uint8_t cmd[] = { 0x02, 0x48, brBw, 0x25 };
-    rfWriteCmd(cmd, 4);
-}
-
-static void rfSetPktSize(uint16_t size) {
-    uint8_t cmd[] = {
-        0x02, 0x49,
-        0x0C, 0x4C,
-        (uint8_t)(size >> 8), (uint8_t)(size & 0xFF)
-    };
-    rfWriteCmd(cmd, 6);
+    return -(int8_t)(raw / 2);  // Returns dBm (negative)
 }
 
 // ─── Dual output ─────────────────────────────────────────────────────
@@ -202,7 +163,7 @@ static void dualPrintf(const char *fmt, ...) {
     Serial1.println(buf);
 }
 
-// ─── Full radio init ─────────────────────────────────────────────────
+// ─── Raw SPI Init ────────────────────────────────────────────────────
 static bool rawInitRadio() {
     pinMode(PIN_RST, OUTPUT);
     digitalWrite(PIN_RST, LOW);
@@ -217,13 +178,20 @@ static bool rawInitRadio() {
     { uint8_t cmd[] = { 0x02, 0x07, 0x05 }; rfWriteCmd(cmd, 3); }
     delay(1);
 
-    rfSetFreq(RX_FREQ_MHZ);
+    uint32_t frf = (uint32_t)((FLRC_FREQ_MHZ * 1e6 * (double)(1ULL << 18)) / (XTAL_MHZ * 1e6));
+    {
+        uint8_t cmd[] = {
+            0x02, 0x00,
+            (uint8_t)(frf >> 16), (uint8_t)(frf >> 8), (uint8_t)(frf & 0xFF)
+        };
+        rfWriteCmd(cmd, 5);
+    }
     delay(1);
 
     { uint8_t cmd[] = { 0x02, 0x01, 0x01, 0x00 }; rfWriteCmd(cmd, 4); }
     delay(1);
 
-    uint16_t feFreq = (uint16_t)((RX_FREQ_MHZ / 4.0f) + 0.5f) | 0x8000;
+    uint16_t feFreq = (uint16_t)((FLRC_FREQ_MHZ / 4.0f) + 0.5f) | 0x8000;
     {
         uint8_t cmd[] = {
             0x01, 0x23,
@@ -236,8 +204,7 @@ static bool rawInitRadio() {
 
     { uint8_t cmd[] = { 0x01, 0x22, 0x5F }; rfWriteCmd(cmd, 3); }
     delay(5);
-
-    rfSetBitrate(RX_BITRATE_KBPS);
+    { uint8_t cmd[] = { 0x02, 0x48, 0x00, 0x25 }; rfWriteCmd(cmd, 4); }
     delay(1);
 
     {
@@ -246,188 +213,131 @@ static bool rawInitRadio() {
     }
     delay(1);
 
-    rfSetPktSize(RX_PKT_SIZE);
+    {
+        uint8_t cmd[] = {
+            0x02, 0x49,
+            0x0C,
+            0x4C,
+            0x00, (uint8_t)FLRC_PKT_SIZE
+        };
+        rfWriteCmd(cmd, 6);
+    }
     delay(1);
 
-    { uint8_t cmd[] = { 0x02, 0x06, 0x03 }; rfWriteCmd(cmd, 3); }
+    { uint8_t cmd[] = { 0x02, 0x02, 0x80, 0x00, 0x60, 0x07, 0x10 }; rfWriteCmd(cmd, 7); }
+    delay(1);
+    { uint8_t cmd[] = { 0x02, 0x06, 0x03 }; rfWriteCmd(cmd, 3); }  // Fs fallback
     delay(1);
     { uint8_t cmd[] = { 0x01, 0x12, 0x09, 0x11 }; rfWriteCmd(cmd, 4); }
     delay(1);
-    { uint8_t cmd[] = { 0x01, 0x15, 0x09, 0x00, 0x04, 0x00, 0x00 }; rfWriteCmd(cmd, 7); }
+    { uint8_t cmd[] = { 0x01, 0x15, 0x09, 0x00, 0x08, 0x00, 0x00 }; rfWriteCmd(cmd, 7); }
     delay(1);
 
     rfClearIrq();
     delay(1);
-    rfSetRx();
-    delay(2);
 
     uint8_t st = rfReadStatus();
     uint32_t irq = rfReadIrqStatus();
     dualPrintf("INIT Status=0x%02X IRQ=0x%08lX", st, (unsigned long)irq);
 
-    if ((st >> 4) == 0x05) {
-        dualPrintln("RADIO_INIT_OK (RX mode)");
+    if ((st >> 4) == 0x04 || (st >> 4) == 0x07 || (irq & 0x00020000)) {
+        dualPrintln("RADIO_INIT_OK");
         return true;
-    } else if (irq & 0x00020000) {
-        dualPrintf("RADIO_INIT_WARN CMD_ERROR (St=0x%02X)", st);
-        return true;
-    } else {
-        dualPrintf("RADIO_INIT_FAIL (St=0x%02X)", st);
-        return false;
     }
+    dualPrintf("RADIO_INIT_FAIL (St=0x%02X)", st);
+    return false;
 }
 
-// ─── Statistics ──────────────────────────────────────────────────────
-struct RxStats {
-    uint32_t received;
-    uint32_t unique;
-    uint32_t duplicates;
-    uint32_t lastSeq;
-    uint32_t maxSeq;
-    uint32_t totalSentByTx;
-    uint32_t startMs;
-    uint32_t elapsedMs;
-    int32_t  rssiSum;
-    int16_t  rssiMin;
-    int16_t  rssiMax;
-    uint16_t rssiCount;
-};
-static RxStats stats;
+// ─── State ───────────────────────────────────────────────────────────
+static volatile bool radioReady = false;
+static uint32_t totalReceived = 0;
+static uint32_t totalUnique = 0;
+static uint32_t lastSeq = 0xFFFFFFFF;
+static int16_t rssiSum = 0;
+static int16_t rssiMin = 0;
+static int16_t rssiMax = -128;
 
-static void resetStats() {
-    memset(&stats, 0, sizeof(stats));
-    stats.lastSeq = 0xFFFFFFFF;
-    stats.rssiMin = 0;
-    stats.rssiMax = -128;
-}
+// ─── Continuous RX with RSSI logging ─────────────────────────────────
+static void runReceiveContinuous() {
+    if (!radioReady) { dualPrintln("ERR: radio not initialized"); return; }
 
-// ─── Receive session ─────────────────────────────────────────────────
-static uint32_t windowNum = 0;
+    uint8_t buf[FLRC_PKT_SIZE];
 
-static void runReceive() {
-    if (!radioReady) return;
-
-    rfClearIrq();
+    dualPrintln("RX_LISTEN_START");
     rfSetRx();
-    delay(1);
 
-    resetStats();
-    stats.startMs = millis();
-    uint32_t lastPktMs = millis();
-    uint16_t pktSize = RX_PKT_SIZE;
-    uint8_t buf[256];
-
-    dualPrintf("RX_WINDOW %lu START uptime=%lums listen=%dms",
-               (unsigned long)windowNum, (unsigned long)stats.startMs, RX_LISTEN_MS);
+    uint32_t lastReportMs = millis();
 
     while (true) {
-        uint32_t now = millis();
-        if ((now - stats.startMs) >= RX_LISTEN_MS) {
-            dualPrintln("RX_DONE timeout");
-            break;
-        }
-        if (stats.received > 0 && (now - lastPktMs) >= RX_SILENCE_MS) {
-            dualPrintln("RX_DONE silence");
-            break;
+        // Poll IRQ
+        uint32_t irq = rfReadIrqStatus();
+        if (!(irq & 0x00040000)) {
+            // No packet — check for serial commands
+            static char cmdBuf[64];
+            static size_t cmdLen = 0;
+            while (Serial1.available()) {
+                char c = (char)Serial1.read();
+                if (c == '\n' || c == '\r') {
+                    if (cmdLen > 0) {
+                        cmdBuf[cmdLen] = '\0';
+                        if (strcmp(cmdBuf, "STATS") == 0) {
+                            int16_t rssiAvg = (totalReceived > 0) ? (rssiSum / (int16_t)totalReceived) : 0;
+                            dualPrintf("STATS rx=%lu unique=%lu rssi_avg=%d rssi_min=%d rssi_max=%d",
+                                       (unsigned long)totalReceived, (unsigned long)totalUnique,
+                                       rssiAvg, rssiMin, rssiMax);
+                        }
+                        cmdLen = 0;
+                    }
+                } else if (cmdLen < sizeof(cmdBuf) - 1) {
+                    cmdBuf[cmdLen++] = c;
+                }
+            }
+            continue;
         }
 
-        // Hardware pin poll — matches proven LR2021Raw.h receive()
-        if (digitalRead(PIN_IRQ) == LOW) continue;
+        // RX_DONE — read RSSI BEFORE clearing IRQ
+        int8_t rssi = rfReadRssi();
 
         // Read packet
-        rfReadFifo(buf, pktSize);
+        rfReadFifo(buf, FLRC_PKT_SIZE);
 
-        // Re-arm FIRST (before RSSI) to minimize dead time
-        { uint8_t cmd[] = { 0x01, 0x1E }; rfWriteCmd(cmd, 2); }  // clearRxFifo
-        { uint8_t cmd[] = { 0x01, 0x11, 0x00, 0x00 }; rfWriteCmd(cmd, 4); }  // clearErrors
+        // Clear + re-arm
+        { uint8_t cmd[] = { 0x01, 0x1E }; rfWriteCmd(cmd, 2); }  // CLEAR_RX_FIFO
+        rfWaitBusy();
+        { uint8_t cmd[] = { 0x01, 0x11, 0x00, 0x00 }; rfWriteCmd(cmd, 4); }
         rfClearIrq();
         rfSetRx();
-        rfWaitBusy();  // ensure setRx completed before polling IRQ again
 
-        // Read RSSI AFTER re-arm (chip is now listening for next packet)
-        int8_t rssi = rfReadRssi();
-        stats.rssiSum += rssi;
-        stats.rssiCount++;
-        if (rssi < stats.rssiMin) stats.rssiMin = rssi;
-        if (rssi > stats.rssiMax) stats.rssiMax = rssi;
-
-        // Extract big-endian seq
+        // Extract seq (bytes 0-3) and burst_id (bytes 4-7)
         uint32_t seq = ((uint32_t)buf[0] << 24) | ((uint32_t)buf[1] << 16) |
                        ((uint32_t)buf[2] << 8)  | (uint32_t)buf[3];
+        uint32_t burstId = ((uint32_t)buf[4] << 24) | ((uint32_t)buf[5] << 16) |
+                           ((uint32_t)buf[6] << 8)  | (uint32_t)buf[7];
 
-        // DEADBEEF end marker
-        if (buf[0] == 0xDE && buf[1] == 0xAD &&
-            buf[2] == 0xBE && buf[3] == 0xEF) {
-            stats.totalSentByTx = ((uint32_t)buf[4] << 24) | ((uint32_t)buf[5] << 16) |
-                                  ((uint32_t)buf[6] << 8)  | (uint32_t)buf[7];
-            stats.elapsedMs = millis() - stats.startMs;
-            dualPrintln("RX_END DEADBEEF");
-            break;
-        }
+        totalReceived++;
+        if (seq != lastSeq) totalUnique++;
+        lastSeq = seq;
 
-        stats.received++;
-        if (stats.lastSeq != 0xFFFFFFFF && seq == stats.lastSeq) stats.duplicates++;
-        else stats.unique++;
-        stats.lastSeq = seq;
-        if (seq > stats.maxSeq) stats.maxSeq = seq;
-        lastPktMs = millis();
+        rssiSum += rssi;
+        if (rssi < rssiMin) rssiMin = rssi;
+        if (rssi > rssiMax) rssiMax = rssi;
 
-        // Blink LED on packet (non-blocking, short)
-        digitalWrite(PIN_LED, HIGH);
-        delayMicroseconds(50);
-        digitalWrite(PIN_LED, LOW);
+        // Output EVERY packet: PKT,n,seq,rssi
+        dualPrintf("PKT,%lu,%lu,%d",
+                   (unsigned long)totalReceived, (unsigned long)seq, (int)rssi);
 
-        if (stats.received <= 5 || (stats.received % PRINT_EVERY) == 0) {
-            dualPrintf("PKT %lu seq=%lu rssi=%d uptime=%lums",
-                       (unsigned long)stats.received, (unsigned long)seq, rssi,
-                       (unsigned long)millis());
+        // Periodic summary every 100 packets
+        if (totalReceived % 100 == 0) {
+            digitalWrite(PIN_LED, HIGH); delayMicroseconds(50); digitalWrite(PIN_LED, LOW);
         }
     }
-
-    if (stats.elapsedMs == 0) stats.elapsedMs = millis() - stats.startMs;
-
-    // Compute results
-    uint32_t n = stats.received;
-    uint32_t total = stats.totalSentByTx > 0 ? stats.totalSentByTx : (stats.maxSeq + 1);
-    uint32_t lost = (total > n) ? (total - n) : 0;
-    float perPct = (total > 0) ? (100.0f * (float)lost / (float)total) : 0.0f;
-    float tputKbps = (stats.elapsedMs > 0 && n > 0)
-                     ? ((float)n * (float)pktSize * 8.0f) / (float)stats.elapsedMs : 0.0f;
-    float rssiAvg = (stats.rssiCount > 0)
-                    ? (float)stats.rssiSum / (float)stats.rssiCount : 0.0f;
-
-    dualPrintln("=============================================");
-    dualPrintf("  Window:   %lu", (unsigned long)windowNum);
-    dualPrintf("  Received: %lu (unique %lu, dup %lu)", (unsigned long)n,
-               (unsigned long)stats.unique, (unsigned long)stats.duplicates);
-    dualPrintf("  TX sent:  %lu", (unsigned long)stats.totalSentByTx);
-    dualPrintf("  Lost:     %lu (%.2f%%)", (unsigned long)lost, perPct);
-    dualPrintf("  Elapsed:  %lu ms", (unsigned long)stats.elapsedMs);
-    dualPrintf("  THROUGHPUT: %.1f kbps", tputKbps);
-    if (stats.rssiCount > 0) {
-        dualPrintf("  RSSI: avg=%.1f dBm min=%d dBm max=%d dBm (n=%d)",
-                   rssiAvg, stats.rssiMin, stats.rssiMax, stats.rssiCount);
-    } else {
-        dualPrintln("  RSSI: (no packets received)");
-    }
-    dualPrintln("=============================================");
-
-    // Structured result line for automated parsing
-    dualPrintf("RANGE_RESULT_RX,window=%lu,rx=%lu,unique=%lu,lost=%lu,total=%lu,per=%.2f,elapsed_ms=%lu,throughput_kbps=%.1f,rssi_avg=%.1f,rssi_min=%d,freq=%.1f,bitrate=%d,pktSize=%d,uptime_ms=%lu",
-               (unsigned long)windowNum,
-               (unsigned long)n, (unsigned long)stats.unique, (unsigned long)lost,
-               (unsigned long)total, perPct, (unsigned long)stats.elapsedMs, tputKbps,
-               rssiAvg, stats.rssiMin, RX_FREQ_MHZ, RX_BITRATE_KBPS, RX_PKT_SIZE,
-               (unsigned long)stats.startMs);
-
-    windowNum++;
 }
 
 // ─── Arduino entry points ────────────────────────────────────────────
 void setup() {
     Serial.begin(115200);
-    delay(2000);  // give TinyUSB time to enumerate
-    Serial.println("BOOT RX RANGE AUTO");
+    delay(2000);
+    Serial.println("BOOT RX AUTO");
     Serial1.setTX(PIN_UART_TX);
     Serial1.setRX(PIN_UART_RX);
     Serial1.begin(115200);
@@ -435,15 +345,14 @@ void setup() {
 
     pinMode(PIN_LED, OUTPUT);
     pinMode(PIN_LED_ALT, OUTPUT);
-    for (int i = 0; i < 4; i++) {
-        digitalWrite(PIN_LED, HIGH); digitalWrite(PIN_LED_ALT, HIGH); delay(250);
-        digitalWrite(PIN_LED, LOW);  digitalWrite(PIN_LED_ALT, LOW);  delay(250);
+    for (int i = 0; i < 3; i++) {
+        digitalWrite(PIN_LED, HIGH); digitalWrite(PIN_LED_ALT, HIGH); delay(120);
+        digitalWrite(PIN_LED, LOW);  digitalWrite(PIN_LED_ALT, LOW);  delay(120);
     }
 
     dualPrintln();
-    dualPrintln("=== RP2040 FLRC RANGE RX (AUTONOMOUS) ===");
-    dualPrintf("Config: freq=%.1f br=%d pktSize=%d listen=%dms",
-               RX_FREQ_MHZ, RX_BITRATE_KBPS, RX_PKT_SIZE, RX_LISTEN_MS);
+    dualPrintln("=== RP2040 FLRC RANGE RX AUTO ===");
+    dualPrintln("Continuous RX with RSSI logging");
 
     spiRf.begin();
     pinMode(PIN_CS, OUTPUT);
@@ -455,28 +364,19 @@ void setup() {
 
     if (radioReady) {
         digitalWrite(PIN_LED_ALT, HIGH);
-        dualPrintln("AUTO RX LISTENING");
-    } else {
-        dualPrintln("INIT FAILED — retrying...");
+        dualPrintln("Auto-start RX in 2s...");
         delay(2000);
-        radioReady = rawInitRadio();
-        if (radioReady) {
-            digitalWrite(PIN_LED_ALT, HIGH);
-            dualPrintln("AUTO RX LISTENING (2nd init)");
-        } else {
-            dualPrintln("INIT FAILED TWICE — stuck");
+    } else {
+        digitalWrite(PIN_LED_ALT, LOW);
+        dualPrintln("INIT FAILED");
+        while (true) {
+            digitalWrite(PIN_LED, HIGH); delay(500);
+            digitalWrite(PIN_LED, LOW); delay(500);
         }
     }
 }
 
 void loop() {
-    if (radioReady) {
-        runReceive();
-        delay(500);  // brief pause between windows
-    } else {
-        // Blink SOS if radio dead
-        digitalWrite(PIN_LED, HIGH); delay(100); digitalWrite(PIN_LED, LOW); delay(100);
-        digitalWrite(PIN_LED, HIGH); delay(100); digitalWrite(PIN_LED, LOW); delay(100);
-        digitalWrite(PIN_LED, HIGH); delay(100); digitalWrite(PIN_LED, LOW); delay(500);
-    }
+    // Continuous RX — never returns
+    runReceiveContinuous();
 }
