@@ -1,0 +1,658 @@
+{
+    "$schema": "https://schemas.kicad.org/drc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-10-13T18:43:26+0200",
+    "included_severities": [
+        "error",
+        "warning"
+    ],
+    "kicad_version": "9.0.8",
+    "schematic_parity": [],
+    "source": "wing_board_v9.kicad_pcb",
+    "unconnected_items": [],
+    "violations": [
+        {
+            "description": "Non-Mirrored text on back layer",
+            "items": [
+                {
+                    "description": "Footprint text of SC4 (+)",
+                    "pos": {
+                        "x": 4.0,
+                        "y": 36.1
+                    },
+                    "uuid": "56dd4185-2ce2-5714-a83a-d1fa7931e788"
+                }
+            ],
+            "severity": "warning",
+            "type": "nonmirrored_text_on_back_layer"
+        },
+        {
+            "description": "Non-Mirrored text on back layer",
+            "items": [
+                {
+                    "description": "Footprint text of SC4 (-)",
+                    "pos": {
+                        "x": 56.0,
+                        "y": 36.1
+                    },
+                    "uuid": "514ddb5a-5a8e-53e9-ae3f-7e309c1765f7"
+                }
+            ],
+            "severity": "warning",
+            "type": "nonmirrored_text_on_back_layer"
+        },
+        {
+            "description": "Non-Mirrored text on back layer",
+            "items": [
+                {
+                    "description": "Footprint text of SC5 (+)",
+                    "pos": {
+                        "x": 62.0,
+                        "y": 36.1
+                    },
+                    "uuid": "93544f2a-0a2b-53ec-a335-9972407b0c64"
+                }
+            ],
+            "severity": "warning",
+            "type": "nonmirrored_text_on_back_layer"
+        },
+        {
+            "description": "Non-Mirrored text on back layer",
+            "items": [
+                {
+                    "description": "Footprint text of SC5 (-)",
+                    "pos": {
+                        "x": 114.0,
+                        "y": 36.1
+                    },
+                    "uuid": "6a8d3163-6df0-51ed-8681-79c38bd778e1"
+                }
+            ],
+            "severity": "warning",
+            "type": "nonmirrored_text_on_back_layer"
+        },
+        {
+            "description": "Non-Mirrored text on back layer",
+            "items": [
+                {
+                    "description": "Footprint text of SC6 (+)",
+                    "pos": {
+                        "x": 120.0,
+                        "y": 36.1
+                    },
+                    "uuid": "6ad73be4-14c6-59d1-9ed2-83e15ab5431e"
+                }
+            ],
+            "severity": "warning",
+            "type": "nonmirrored_text_on_back_layer"
+        },
+        {
+            "description": "Non-Mirrored text on back layer",
+            "items": [
+                {
+                    "description": "Footprint text of SC6 (-)",
+                    "pos": {
+                        "x": 172.0,
+                        "y": 36.1
+                    },
+                    "uuid": "415845e8-1514-5183-a976-364553307aba"
+                }
+            ],
+            "severity": "warning",
+            "type": "nonmirrored_text_on_back_layer"
+        },
+        {
+            "description": "Silkscreen overlap",
+            "items": [
+                {
+                    "description": "Footprint text of J1 (N)",
+                    "pos": {
+                        "x": -5.0,
+                        "y": 16.9
+                    },
+                    "uuid": "7ef76356-8d87-58d1-9e1a-351ce269b20c"
+                },
+                {
+                    "description": "Rectangle of J1 on F.Silkscreen",
+                    "pos": {
+                        "x": -7.0,
+                        "y": 8.4
+                    },
+                    "uuid": "c6f16a2c-5456-54f1-badb-a4ea90499e2f"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen overlap",
+            "items": [
+                {
+                    "description": "Footprint text of J1 (P)",
+                    "pos": {
+                        "x": -5.0,
+                        "y": 8.1
+                    },
+                    "uuid": "615a68b1-fca2-5a8a-99d4-44e66b674903"
+                },
+                {
+                    "description": "Rectangle of J1 on F.Silkscreen",
+                    "pos": {
+                        "x": -7.0,
+                        "y": 8.4
+                    },
+                    "uuid": "c6f16a2c-5456-54f1-badb-a4ea90499e2f"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Rectangle of J1 on F.Silkscreen",
+                    "pos": {
+                        "x": -7.0,
+                        "y": 8.4
+                    },
+                    "uuid": "c6f16a2c-5456-54f1-badb-a4ea90499e2f"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.6000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of J1 (P)",
+                    "pos": {
+                        "x": -5.0,
+                        "y": 8.1
+                    },
+                    "uuid": "615a68b1-fca2-5a8a-99d4-44e66b674903"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.6000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of J1 (N)",
+                    "pos": {
+                        "x": -5.0,
+                        "y": 16.9
+                    },
+                    "uuid": "7ef76356-8d87-58d1-9e1a-351ce269b20c"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'WingV9'.",
+            "items": [
+                {
+                    "description": "Footprint SC1",
+                    "pos": {
+                        "x": 30.0,
+                        "y": 12.5
+                    },
+                    "uuid": "5f2ba4b6-f342-534d-b3e0-d27e217d221e"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'WingV9'.",
+            "items": [
+                {
+                    "description": "Footprint SC2",
+                    "pos": {
+                        "x": 88.0,
+                        "y": 12.5
+                    },
+                    "uuid": "60d60caf-5b42-5805-89a5-fd1825c33383"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'WingV9'.",
+            "items": [
+                {
+                    "description": "Footprint SC3",
+                    "pos": {
+                        "x": 146.0,
+                        "y": 12.5
+                    },
+                    "uuid": "0f9c7a6c-48a5-594c-9b8b-7adde8c99523"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'WingV9'.",
+            "items": [
+                {
+                    "description": "Footprint SC4",
+                    "pos": {
+                        "x": 30.0,
+                        "y": 12.5
+                    },
+                    "uuid": "826a3c70-4510-5d1c-ab0e-bd37cf08118c"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'WingV9'.",
+            "items": [
+                {
+                    "description": "Footprint SC5",
+                    "pos": {
+                        "x": 88.0,
+                        "y": 12.5
+                    },
+                    "uuid": "7fbdad50-205d-5293-bf6f-72786b1cdb7b"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'WingV9'.",
+            "items": [
+                {
+                    "description": "Footprint SC6",
+                    "pos": {
+                        "x": 146.0,
+                        "y": 12.5
+                    },
+                    "uuid": "b3226a5d-44e4-5483-bfcf-9f41f8717783"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'WingV9'.",
+            "items": [
+                {
+                    "description": "Footprint J1",
+                    "pos": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "uuid": "bd5b25a3-0d6d-5b11-bd37-a549ebb63cf7"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'WingV9'.",
+            "items": [
+                {
+                    "description": "Footprint H1",
+                    "pos": {
+                        "x": 8.0,
+                        "y": 1.7
+                    },
+                    "uuid": "aa34c0e4-2806-5c40-9f98-7f30009c096f"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'WingV9'.",
+            "items": [
+                {
+                    "description": "Footprint H2",
+                    "pos": {
+                        "x": 88.0,
+                        "y": 1.7
+                    },
+                    "uuid": "e6d2730b-c9a3-51f6-ac8e-173d6f389b14"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'WingV9'.",
+            "items": [
+                {
+                    "description": "Footprint H3",
+                    "pos": {
+                        "x": 170.0,
+                        "y": 1.7
+                    },
+                    "uuid": "c1e8e062-3c21-593c-aab2-35afd5501e70"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'WingV9'.",
+            "items": [
+                {
+                    "description": "Footprint FID1",
+                    "pos": {
+                        "x": 30.0,
+                        "y": 1.7
+                    },
+                    "uuid": "48993405-857d-560d-9f89-131938ca7890"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'WingV9'.",
+            "items": [
+                {
+                    "description": "Footprint FID2",
+                    "pos": {
+                        "x": 105.0,
+                        "y": 1.7
+                    },
+                    "uuid": "9bb729bc-e072-5b27-ac65-dd3cf0b56b8b"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'WingV9'.",
+            "items": [
+                {
+                    "description": "Footprint FID3",
+                    "pos": {
+                        "x": 145.0,
+                        "y": 1.7
+                    },
+                    "uuid": "d4848cb6-b288-549e-b657-20f317c918e6"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'WingV9'.",
+            "items": [
+                {
+                    "description": "Footprint FB1",
+                    "pos": {
+                        "x": 58.0,
+                        "y": 1.7
+                    },
+                    "uuid": "176885a5-57fa-5109-b4f4-8fab325e3302"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'WingV9'.",
+            "items": [
+                {
+                    "description": "Footprint RF1",
+                    "pos": {
+                        "x": 118.0,
+                        "y": 1.7
+                    },
+                    "uuid": "ca41d823-a250-5a86-9a18-b594a1149ef0"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "Silkscreen clipped by board edge",
+            "items": [
+                {
+                    "description": "Segment on Edge.Cuts",
+                    "pos": {
+                        "x": 176.0,
+                        "y": 25.0
+                    },
+                    "uuid": "9ffb93db-5bd4-53e6-8a72-3e904795ff3b"
+                },
+                {
+                    "description": "PCB text 'WING v9  SOLAR 176x25x0.6  4-pin tab  ADR-046' on F.Silkscreen",
+                    "pos": {
+                        "x": 88.0,
+                        "y": 24.2
+                    },
+                    "uuid": "baf32413-2927-5e3c-8555-2db4a84d0b97"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_edge_clearance"
+        },
+        {
+            "description": "Silkscreen clipped by board edge",
+            "items": [
+                {
+                    "description": "Segment on Edge.Cuts",
+                    "pos": {
+                        "x": 176.0,
+                        "y": 25.0
+                    },
+                    "uuid": "9ffb93db-5bd4-53e6-8a72-3e904795ff3b"
+                },
+                {
+                    "description": "Rectangle of SC1 on F.Silkscreen",
+                    "pos": {
+                        "x": 4.0,
+                        "y": 15.5
+                    },
+                    "uuid": "ee35c424-83a3-5e9b-8e1c-f6300b927c4a"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_edge_clearance"
+        },
+        {
+            "description": "Silkscreen clipped by board edge",
+            "items": [
+                {
+                    "description": "Segment on Edge.Cuts",
+                    "pos": {
+                        "x": 176.0,
+                        "y": 25.0
+                    },
+                    "uuid": "9ffb93db-5bd4-53e6-8a72-3e904795ff3b"
+                },
+                {
+                    "description": "Rectangle of SC2 on F.Silkscreen",
+                    "pos": {
+                        "x": 62.0,
+                        "y": 15.5
+                    },
+                    "uuid": "4915072f-6b0c-5a90-8782-2212387078b7"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_edge_clearance"
+        },
+        {
+            "description": "Silkscreen clipped by board edge",
+            "items": [
+                {
+                    "description": "Segment on Edge.Cuts",
+                    "pos": {
+                        "x": 176.0,
+                        "y": 25.0
+                    },
+                    "uuid": "9ffb93db-5bd4-53e6-8a72-3e904795ff3b"
+                },
+                {
+                    "description": "Rectangle of SC3 on F.Silkscreen",
+                    "pos": {
+                        "x": 120.0,
+                        "y": 15.5
+                    },
+                    "uuid": "66522f3e-38e0-5df6-99f5-ec450bba0895"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_edge_clearance"
+        },
+        {
+            "description": "Silkscreen clipped by board edge",
+            "items": [
+                {
+                    "description": "Segment on Edge.Cuts",
+                    "pos": {
+                        "x": 176.0,
+                        "y": 25.0
+                    },
+                    "uuid": "9ffb93db-5bd4-53e6-8a72-3e904795ff3b"
+                },
+                {
+                    "description": "Rectangle of SC4 on B.Silkscreen",
+                    "pos": {
+                        "x": 4.0,
+                        "y": 15.5
+                    },
+                    "uuid": "5e7f98ff-01ad-5f8c-a0db-302670249322"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_edge_clearance"
+        },
+        {
+            "description": "Silkscreen clipped by board edge",
+            "items": [
+                {
+                    "description": "Segment on Edge.Cuts",
+                    "pos": {
+                        "x": 176.0,
+                        "y": 25.0
+                    },
+                    "uuid": "9ffb93db-5bd4-53e6-8a72-3e904795ff3b"
+                },
+                {
+                    "description": "Rectangle of SC5 on B.Silkscreen",
+                    "pos": {
+                        "x": 62.0,
+                        "y": 15.5
+                    },
+                    "uuid": "2678ca0d-6d44-5e55-b6f1-105b6c7cdb15"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_edge_clearance"
+        },
+        {
+            "description": "Silkscreen clipped by board edge",
+            "items": [
+                {
+                    "description": "Segment on Edge.Cuts",
+                    "pos": {
+                        "x": 176.0,
+                        "y": 25.0
+                    },
+                    "uuid": "9ffb93db-5bd4-53e6-8a72-3e904795ff3b"
+                },
+                {
+                    "description": "Rectangle of SC6 on B.Silkscreen",
+                    "pos": {
+                        "x": 120.0,
+                        "y": 15.5
+                    },
+                    "uuid": "3614fb7e-20a7-5f3c-be40-0c81e82349e4"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_edge_clearance"
+        },
+        {
+            "description": "Silkscreen clipped by board edge",
+            "items": [
+                {
+                    "description": "Segment on Edge.Cuts",
+                    "pos": {
+                        "x": -8.0,
+                        "y": 8.0
+                    },
+                    "uuid": "42d479fe-3445-5b0e-b8be-0b476ffce79e"
+                },
+                {
+                    "description": "Footprint text of J1 (P)",
+                    "pos": {
+                        "x": -5.0,
+                        "y": 8.1
+                    },
+                    "uuid": "615a68b1-fca2-5a8a-99d4-44e66b674903"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_edge_clearance"
+        },
+        {
+            "description": "Silkscreen clipped by board edge",
+            "items": [
+                {
+                    "description": "Segment on Edge.Cuts",
+                    "pos": {
+                        "x": 0.0,
+                        "y": 17.0
+                    },
+                    "uuid": "e0f8dbfb-1ca7-5130-86f5-c908744031bf"
+                },
+                {
+                    "description": "Footprint text of J1 (N)",
+                    "pos": {
+                        "x": -5.0,
+                        "y": 16.9
+                    },
+                    "uuid": "7ef76356-8d87-58d1-9e1a-351ce269b20c"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_edge_clearance"
+        },
+        {
+            "description": "Track has unconnected end",
+            "items": [
+                {
+                    "description": "Track [SOLAR_P] on B.Cu, length 7.0000 mm",
+                    "pos": {
+                        "x": 2.0,
+                        "y": 9.8
+                    },
+                    "uuid": "9c4e5c44-dc0f-556e-bbf0-0d7e726af7b7"
+                }
+            ],
+            "severity": "warning",
+            "type": "track_dangling"
+        },
+        {
+            "description": "Track has unconnected end",
+            "items": [
+                {
+                    "description": "Track [SOLAR_N] on B.Cu, length 8.4000 mm",
+                    "pos": {
+                        "x": 3.4,
+                        "y": 15.2
+                    },
+                    "uuid": "b03770ba-8112-504d-ae02-955d032a71cd"
+                }
+            ],
+            "severity": "warning",
+            "type": "track_dangling"
+        }
+    ]
+}
