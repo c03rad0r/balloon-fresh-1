@@ -238,6 +238,22 @@ def test_test_keys_are_distinct_and_wellformed():
     assert len({EXPECTED_PUBKEY_A, EXPECTED_PUBKEY_B, EXPECTED_PUBKEY_SERVER}) == 3
 
 
+def test_module_reads_the_documented_env_names():
+    """Pin the exact literal env names the contract documents.
+
+    The rest of this suite resolves names through ``km.ENV_*`` so that it tracks
+    the module, which means a *rename* of a literal would otherwise pass
+    unnoticed.  This test is the detector: ``load_keys`` must read exactly
+    ``E80_CLIENT_NSEC`` / ``E80_CLIENT_HEXKEY`` / ``E80_SERVER_NSEC`` /
+    ``E80_SERVER_PUBKEY`` / ``E80_RELAY_AUTH``.
+    """
+    assert km.ENV_CLIENT_NSEC == "E80_CLIENT_NSEC"
+    assert km.ENV_CLIENT_HEXKEY == "E80_CLIENT_HEXKEY"
+    assert km.ENV_SERVER_NSEC == "E80_SERVER_NSEC"
+    assert km.ENV_SERVER_PUBKEY == "E80_SERVER_PUBKEY"
+    assert km.ENV_RELAY_AUTH == "E80_RELAY_AUTH"
+
+
 # ---------------------------------------------------------------------------
 # 1. Happy path.
 # ---------------------------------------------------------------------------
