@@ -145,8 +145,10 @@ rejected.
    parts, plus dual radios, 4 wings, and more storage.** The C3 board's rejected
    lineage (REJECT sign-off: 20 unrouted nets, GPIO18/19 wired against the
    explicit rule) is therefore **historical** — re-routing it would duplicate a
-   board the hub already supersedes. **Recommendation: retire the C3 flight
-   lineage; the balloon payload = hub v9 + wing v9.** (Operator confirm.)
+   board the hub already supersedes. **Recommendation ACCEPTED — OPERATOR
+   CONFIRMED RETIREMENT 2026-10-13.** The C3 flight lineage is retired; the
+   balloon payload = **hub v9 + wing v9**. No further C3 board work; its 20
+   unrouted nets and the GPIO18/19 violation are closed as historical.
 2. ~~Wing board spatial review~~ — **DONE 2026-10-13: APPROVED**, both release
    caveats closed (`docs/WING-RELEASE-CAVEATS.md`). Remaining human step: confirm
    the physical solar-cell tab orientation at assembly.
