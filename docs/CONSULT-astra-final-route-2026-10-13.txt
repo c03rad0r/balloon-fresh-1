@@ -1,0 +1,54 @@
+**The new inner-layer escape looks reasonable at the supplied rendering scale, but I would not release this board for fabrication with the reported 0.0012 mm clearance.** Routing feasibility and fabrication clearance are separate requirements.
+
+I reviewed the attached renders; I cannot directly open the `/tmp/viz/*.svg` paths here. The images support a topology-level review, not measurement of individual QFN clearances or verification of net identities.
+
+### 1. New DIO2 and MISO routes
+
+The visible In2 routing is localized to the upper component cluster and takes generally direct diagonal paths. **I do not see a gross detour or a long excursion alongside the apparent RF region.** A few routing-grid jogs are not inherently an electrical problem.
+
+However, the combined render does not resolve the antenna-net identity and exact overlap well enough to certify absence of parallel coupling. The important mitigating feature is **In1 GND between the F.Cu RF path and In2 digital signals**, provided that plane is continuous. Check that the new signal-via antipads do not create a slot or narrow ground neck underneath the RF feed/matching network.
+
+### 2. In2 signal layer and RF return paths
+
+**In2 carrying signals is not, by itself, a return-path problem for F.Cu.** F.Cu references the adjacent In1 GND plane; replacing an underlying In2 plane with signals does not remove that reference.
+
+The qualifications are:
+
+- In1 must remain continuous beneath the RF trace and its launch.
+- Dense via antipads must not substantially interrupt that return corridor.
+- The In2 routes’ own return paths depend on the actual dielectric spacing and B.Cu copper beneath them. If In2 is much closer to B.Cu than In1, transitions between bottom GND, +3V3, and copper voids deserve attention.
+- Nearby GND stitching at signal-layer transitions is useful where it connects relevant ground copper back to In1.
+
+The large +3V3 pour area does not establish RF return quality.
+
+### 3. U4 via-in-pad and U1-side vias
+
+**The escape strategy is sensible; dimensional fabrication approval remains unresolved.** A centered filled-and-capped via can be appropriate in a narrow QFN pad, and a short via-to-pad connection at U1 is preferable to a lengthy surface escape.
+
+But a via centered in a **0.25 × 0.80 mm pad** is not automatically manufacturable just because its center is correct. Confirm:
+
+- Finished drill, copper land diameter, registration allowance, and neighboring-pad clearances.
+- Any via-land extension beyond the original QFN pad.
+- Solder-mask and paste treatment.
+- Explicit filled, planarized, copper-capped via-in-pad processing accepted for the selected JLCPCB service—not simply tented vias.
+
+The reported **0.150/0.175 mm neighbor clearances may be acceptable under an appropriate fabrication rule**, but need explicit qualification and documented local rule exceptions. An existing identical via pattern is useful precedent, not fabrication approval.
+
+### 4. Order-blocking red flags
+
+**The reported 0.0012 clearance is the blocker, assuming that means actual different-net copper separation in millimeters: 1.2 µm.** That is not a defensible PCB production clearance. Zero nominal shorts does not protect against manufacturing variation at that gap.
+
+If instead **0.0012 mm is the amount by which the rule is missed**, rather than the actual gap, obtain the actual clearance before deciding—the distinction is critical.
+
+“No alternative shape exists on a 0.025 mm grid” does not justify retaining an unmanufacturable gap. It means the local constraints must change: move a via/component, change the escape topology or layer, or alter geometry within approved manufacturing limits. A grid search also does not prove impossibility for all geometries.
+
+Before ordering, also resolve:
+
+- The four pre-existing clearance grazes; being pre-existing is not acceptance.
+- The exact baseline unconnected items. “Unchanged” is not equivalent to “intentionally unconnected.”
+- Confirmation that the **new signal vias**, not just the 18 power vias, use a supported via construction.
+- Final zone refill, DRC, and Gerber/drill review against the selected fabrication process.
+
+**Bottom line:** Nothing visible makes the In2 escape concept inherently objectionable, and the stackup is compatible with F.Cu RF routing over continuous In1 GND. The stated minimum clearance prevents fabrication sign-off as reported.
+
+VERDICT: CHANGES_REQUESTED
