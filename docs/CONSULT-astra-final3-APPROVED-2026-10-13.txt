@@ -1,0 +1,37 @@
+1. **Yes — approved for a JLCPCB standard 4-layer order**, based on the evidence provided.
+
+The three remaining copper-clearance findings are not manufacturing violations against the stated JLCPCB capability:
+
+- 0.1750 mm via-to-pad clearance
+- 0.1750 mm via-to-pad clearance
+- 0.1648 mm track-to-track clearance
+
+All exceed the stated 0.15 mm JLCPCB minimum. The remaining DRC findings are non-order-blocking documentation, silkscreen, library, dangling, solder-mask, or intentional same-net items. The via-in-pad locations are now geometrically compliant rather than relying on an IPC-4761 exception.
+
+The approval assumes the fabrication order explicitly specifies:
+
+- 4-layer stackup
+- 0.20 mm finished through-drill capability
+- 0.40 mm via diameter
+- via-in-pad **filled and capped**
+- the supplied v30 Gerber/drill package, not an earlier revision
+
+2. **Yes, v30 is an acceptable design-rule change.**
+
+Aligning the board rules to the documented manufacturing capability is preferable to retaining stricter 0.50/0.30 mm limits that do not represent the selected fabricator’s capability. The change is adequately justified by the measured via geometry and the stated JLCPCB documentation.
+
+For configuration control, I recommend retaining the previous 0.50/0.30 mm values as the project’s conservative default or historical baseline, while documenting v30 as the approved JLCPCB-specific manufacturing profile. That prevents the relaxed limits from being unintentionally reused for another fabricator.
+
+3. **No additional PCB-design blocker is evident.**
+
+Before payment/release, perform the normal final manufacturing checks:
+
+- confirm the order quote explicitly accepts filled-and-capped via-in-pad;
+- confirm the selected stackup and finished-drill interpretation;
+- upload only the v30 fabrication package;
+- inspect the Gerber/drill package in a CAM viewer once more;
+- retain the board hash, exported-file provenance, and controlled-exception table with the release record.
+
+The 0.20 mm internal rule exceptions should remain documented because they are exceptions to the project rule, even though they are not exceptions to the stated JLCPCB manufacturing minimum.
+
+VERDICT: APPROVED
