@@ -126,3 +126,66 @@ ansible/
 The playbook references the existing udev rules at
 `tools/99-balloon-boards.rules` (relative to repo root). If you move the
 rules file, update the `src` path in the "Install RP2040 udev rules" task.
+
+---
+
+## KiCad inspection workstation (kicad-workstation.yml)
+
+Installs everything needed to **inspect** (and generate) the boards on a fresh
+Ubuntu box — not just the KiCad GUI.
+
+```bash
+make kicad-setup                 # install on this machine (idempotent)
+make kicad-setup TARGET=cobrador # install on a remote host
+make kicad-setup-dry             # --check --diff, no changes
+make kicad-check                 # verify the capability matrix, change nothing
+```
+
+What "the way we need it" means — five capabilities, all verified by the playbook:
+
+| Capability | Provided by | Used for |
+|---|---|---|
+| GUI inspection | `kicad`, `pcbnew`, `eeschema`, `gerbview` | opening boards by hand |
+| Headless CLI | `kicad-cli` | DRC, gerbers, drill, SVG/STEP export |
+| Python geometry | `pcbnew` bindings | `wingcheck.py`, `edges.py`, solder-mask audits |
+| Netlist generation | `skidl` in `~/venvs/kicad` | `base_station_netlist.py` (ADR-054) |
+| Fab viewing | `gerbv`, `freecad`, `meshlab` | gerbers, STEP, meshes |
+
+**Measured facts this playbook encodes (each cost real time to discover):**
+
+- KiCad 9 comes from `ppa:kicad/kicad-9.0-releases` — not the Ubuntu archive.
+- The `pcbnew` Python bindings ship **inside the `kicad` package**
+  (`dpkg -S /usr/lib/python3/dist-packages/pcbnew.py` → `kicad`).
+  There is **no `python3-kicad` package**; asking for it fails.
+- `skidl` is not in apt. Its venv **must** use `--system-site-packages`,
+  because it has to import the apt-provided `pcbnew`.
+- `freecad` is **snap-only** on Ubuntu 24.04 (`apt-cache policy freecad` →
+  `Candidate: (none)`), so it is installed via snap, guarded by `snap list`
+  so re-runs stay `changed=0`.
+- Do **not** use `ansible_env.HOME` for the target user's home: facts are
+  gathered under `become: true`, so `HOME` is `/root`. The playbook resolves
+  the real home from `getent_passwd` (entry index **4**), not the environment.
+
+**Inspection targets** (see `kicad-make-targets.mk`):
+
+```bash
+make inspect              # manifest of every openable artifact + its command
+make open-hub             # hub board in pcbnew
+make open-hub-3d          # hub in the 3D viewer
+make open-wing            # wing board in pcbnew
+make open-wing-3d         # wing in the 3D viewer
+make open-hub-gerbers     # hub gerbers + drill in gerbv
+make open-wing-gerbers    # wing gerbers + drill in gerbv
+make open-hub-step        # hub STEP 3D model
+make open-wing-step       # wing STEP 3D model
+make open-netlist         # shack + masthead netlists
+make kicad-drc-hub        # headless DRC on the hub
+make kicad-drc-wing       # headless DRC on the wing
+make kicad-help           # list these targets
+```
+
+Default worktree: `~/worktrees/hub-v9-orderable`. Override with `WT=...`:
+
+```bash
+make open-hub WT=~/worktrees/pcb-defects
+```

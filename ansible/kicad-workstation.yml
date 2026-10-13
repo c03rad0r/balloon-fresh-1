@@ -1,0 +1,226 @@
+---
+# Ansible playbook: KiCad 9 PCB inspection + generation workstation
+#
+# PURPOSE — "the way WE need it" is not just the KiCad GUI. The balloon-fresh
+# workflow needs five capabilities on one machine:
+#   1. GUI inspection        kicad, pcbnew, eeschema, gerbview
+#   2. CLI, headless         kicad-cli (drc, gerbers, drill, svg, step export)
+#   3. Python bindings       pcbnew  -> the geometry scripts (wingcheck.py, edges.py)
+#   4. Netlist generation    skidl   -> base_station_netlist.py (ADR-054)
+#   5. Fab-viewing           gerbv (gerbers), freecad (STEP), meshlab (meshes)
+#
+# Measured facts this playbook is built on (x280, Ubuntu 24.04.3, 2026-10-13):
+#   - KiCad 9.0.9 comes from ppa:kicad/kicad-9.0-releases  (NOT the Ubuntu archive)
+#   - The pcbnew Python bindings ship INSIDE the `kicad` package:
+#         dpkg -S /usr/lib/python3/dist-packages/pcbnew.py  ->  kicad
+#     There is NO `python3-kicad` package. Installing it fails. (An earlier
+#     playbook in this repo asked for it — corrected here.)
+#   - skidl is NOT in apt and NOT installed by default; it must be pip-installed
+#     into a venv. The venv MUST use --system-site-packages, because skidl has
+#     to import the apt-provided pcbnew from /usr/lib/python3/dist-packages.
+#   - skidl on this box needs EXPLICIT /usr/share/kicad/symbols/*.kicad_sym
+#     paths — bare library names ("Device") do not resolve.
+#
+# USAGE
+#   Local:   ansible-playbook -i ansible/inventory.ini ansible/kicad-workstation.yml -K
+#   Remote:  ansible-playbook -i ansible/inventory.ini ansible/kicad-workstation.yml -K -e target=<host>
+#   Or via make:  make kicad-setup     (see Makefile)
+#
+# IDEMPOTENT: safe to re-run. Second run must report changed=0.
+- name: KiCad 9 PCB workstation (inspection + generation)
+  hosts: "{{ target | default('localhost') }}"
+  connection: "{{ 'local' if (target | default('localhost')) == 'localhost' else 'ssh' }}"
+  become: true
+
+  vars:
+    kicad_version: "9.0"
+    kicad_target_user: "{{ lookup('env', 'SUDO_USER') or lookup('env', 'USER') }}"
+    # NOTE: do NOT use ansible_env.HOME here — facts are gathered with become=true,
+    # so HOME is /root and the venv would be created in /root (measured failure).
+    # getent_passwd entry = [passwd, uid, gid, gecos, home, shell] -> home is index 4.
+    kicad_user_home: "{{ ansible_facts.get('getent_passwd', {}).get(kicad_target_user, ['x','0','0','','/home/' ~ kicad_target_user,'/bin/sh'])[4] }}"
+    # venv for skidl + netlist tooling. Held outside the repo so worktrees share it.
+    kicad_venv: "{{ kicad_user_home }}/venvs/kicad"
+    # Heavy optional viewers. Set -e install_heavy_tools=false to skip (~1.5 GB).
+    install_heavy_tools: true
+
+  pre_tasks:
+    - name: Resolve the real (non-root) user home
+      ansible.builtin.getent:
+        database: passwd
+        key: "{{ kicad_target_user }}"
+      become: false
+
+    - name: Gather OS facts
+      ansible.builtin.setup:
+        gather_subset:
+          - os_family
+          - distribution
+          - distribution_version
+
+    - name: Assert we are on a Debian-family host
+      ansible.builtin.assert:
+        that:
+          - ansible_os_family == "Debian"
+        fail_msg: "This playbook supports Debian/Ubuntu (got {{ ansible_os_family }})."
+
+  tasks:
+
+    # ---------- 1. KiCad 9 from the official PPA ----------
+    - name: Install prerequisites
+      ansible.builtin.apt:
+        name:
+          - software-properties-common
+          - python3-apt
+        state: present
+
+    - name: Add the KiCad 9 PPA (Ubuntu)
+      ansible.builtin.apt_repository:
+        repo: "ppa:kicad/kicad-{{ kicad_version }}-releases"
+        state: present
+        update_cache: true
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Add the KiCad apt repo (Debian)
+      ansible.builtin.apt_repository:
+        repo: "deb https://downloads.kicad.org/kicad-{{ kicad_version }}-releases debian bookworm main"
+        state: present
+        update_cache: true
+      when: ansible_distribution == "Debian"
+
+    - name: Install KiCad 9 and the full library set
+      ansible.builtin.apt:
+        name:
+          - kicad                  # GUI + kicad-cli + pcbnew bindings
+          - kicad-symbols
+          - kicad-footprints
+          - kicad-packages3d
+          - kicad-templates
+          - kicad-doc-en
+        state: present
+
+    # ---------- 2. Fab-inspection viewers ----------
+    - name: Install gerber and waveform viewers
+      ansible.builtin.apt:
+        name:
+          - gerbv                  # gerber / drill inspection
+          - gtkwave                # SPI capture viewing (sigrok VCD)
+        state: present
+
+    # Meshlab is in the archive; FreeCAD is NOT packaged for Ubuntu 24.04
+    # (measured: `apt-cache policy freecad` -> Candidate: (none); it is snap-only).
+    # A nice-to-have viewer must never fail the play, so this is best-effort and
+    # the report below states honestly what ended up available.
+    - name: Install meshlab (mesh inspection)
+      ansible.builtin.apt:
+        name: meshlab
+        state: present
+      when: install_heavy_tools | bool
+      failed_when: false
+
+    - name: Check whether freecad is already present
+      ansible.builtin.command: command -v freecad
+      register: freecad_bin
+      changed_when: false
+      failed_when: false
+
+    - name: Check whether the FreeCAD snap is already installed
+      ansible.builtin.command: snap list freecad
+      register: freecad_snap_list
+      changed_when: false
+      failed_when: false
+      when: install_heavy_tools | bool
+
+    - name: Install FreeCAD via snap (Ubuntu 24.04 ships it only as a snap)
+      # Guarded by `snap list` so a re-run is genuinely changed=0: a bare
+      # `snap install` is a no-op in effect but always reports changed, which
+      # makes idempotency unprovable.
+      ansible.builtin.command: snap install freecad
+      when:
+        - install_heavy_tools | bool
+        - freecad_bin.rc != 0
+        - freecad_snap_list.rc != 0
+      failed_when: false
+
+    # ---------- 3. Python tooling: skidl in a system-site-packages venv ----------
+    - name: Install Python venv prerequisites
+      ansible.builtin.apt:
+        name:
+          - python3
+          - python3-pip
+          - python3-venv
+        state: present
+
+    - name: Create the venv that shares apt-provided pcbnew
+      # --system-site-packages is REQUIRED: pcbnew lives in
+      # /usr/lib/python3/dist-packages and skidl imports it.
+      ansible.builtin.command:
+        cmd: "python3 -m venv --system-site-packages {{ kicad_venv }}"
+        creates: "{{ kicad_venv }}/pyvenv.cfg"
+      become: false
+
+    - name: Install skidl into the venv
+      ansible.builtin.pip:
+        name:
+          - skidl
+        state: present
+        virtualenv: "{{ kicad_venv }}"
+        virtualenv_site_packages: true
+      become: false
+
+    # ---------- 4. Config + convenience ----------
+    - name: Ensure the KiCad config directory exists
+      ansible.builtin.file:
+        path: "{{ kicad_user_home }}/.config/kicad/{{ kicad_version }}"
+        state: directory
+        owner: "{{ kicad_target_user }}"
+        mode: "0755"
+
+    - name: Register KiCad as the default handler for .kicad_pcb
+      ansible.builtin.command:
+        cmd: "xdg-mime default kicad.desktop application/x-kicad-pcb"
+      become: false
+      changed_when: false
+      failed_when: false
+
+    # ---------- 5. VERIFY — a playbook that cannot prove itself is a liability ----------
+    - name: Verify kicad-cli
+      ansible.builtin.command: kicad-cli version
+      register: kicad_cli_v
+      changed_when: false
+      failed_when: kicad_cli_v.rc != 0
+
+    - name: Verify the pcbnew Python bindings import
+      ansible.builtin.command:
+        cmd: "python3 -c 'import pcbnew; print(pcbnew.GetBuildVersion())'"
+      register: pcbnew_v
+      changed_when: false
+      failed_when: pcbnew_v.rc != 0
+
+    - name: Verify skidl imports inside the venv (with pcbnew visible)
+      ansible.builtin.command:
+        cmd: "{{ kicad_venv }}/bin/python -c 'import skidl, pcbnew; print(skidl.__version__)'"
+      register: skidl_v
+      changed_when: false
+      failed_when: skidl_v.rc != 0
+
+    - name: Verify the symbol libraries resolve
+      ansible.builtin.stat:
+        path: /usr/share/kicad/symbols/Device.kicad_sym
+      register: symlib
+
+    - name: Report the workstation capability matrix
+      ansible.builtin.debug:
+        msg:
+          - "kicad-cli      : {{ kicad_cli_v.stdout }}"
+          - "pcbnew (py)    : {{ pcbnew_v.stdout }}"
+          - "skidl (venv)   : {{ skidl_v.stdout }}"
+          - "symbol libs    : {{ 'OK  /usr/share/kicad/symbols' if symlib.stat.exists else 'MISSING' }}"
+          - "gerbv          : {{ 'present' if install_heavy_tools | bool else 'skipped' }}"
+          - "meshlab        : {{ 'install attempted' if install_heavy_tools | bool else 'skipped' }}"
+          - "freecad        : {{ 'already present' if freecad_bin.rc == 0 else ('snap install attempted' if install_heavy_tools | bool else 'skipped') }}"
+          - "                 (STEP also viewable in the KiCad 3D viewer: make open-hub-3d)"
+          - ""
+          - "Next: make inspect        (lists everything openable)"
+          - "      make open-hub       (hub board in pcbnew)"
+          - "      make open-wing-3d   (wing in the 3D viewer)"

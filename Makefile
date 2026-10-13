@@ -1106,3 +1106,6 @@ clean: ## Clean PlatformIO build artifacts
 	cd $(RP2040_DIR) && pio run -t clean
 	rm -rf .pytest_cache tests/__pycache__
 
+
+# KiCad inspection targets (see kicad-make-targets.mk)
+-include kicad-make-targets.mk
