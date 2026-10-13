@@ -155,3 +155,45 @@ rejected.
 3. **Consolidation route** for the hub work (separate scoped PR vs the existing
    10-PR queue) — asked, not yet answered.
 4. **Base-station decisions** (listed above).
+
+---
+
+## CORRECTION 2026-10-13 — hub overall outline is 115 × 103 mm, not 103 × 103
+
+**Measured, two independent instruments agreeing:**
+
+| Instrument | Result |
+|---|---|
+| `pcbnew` — all Edge.Cuts geometry (board + footprint graphics) | Y spans **−6.03 … 108.97** → **115.05 mm** |
+| `kicad-cli` Edge_Cuts gerber (`.gm1`, 20 distinct corner coords) | Y range **−109 … +6** (gerber frame) → **115 mm** |
+| **JLCPCB gerber detection** (quote snapshot `quote-20261013-202023.txt`) | *"Detected 4 layer board of **115x103mm**"* |
+
+**Why the earlier "103 × 103 mm" was wrong:** it counted only *board-level*
+`Edge.Cuts` drawings. The hub's wing-interface tabs (`J_W1`…`J_W4`) carry their
+outline as `PCB_SHAPE` graphics **inside the footprints**, so a board-level scan
+sees just the 103 × 103 body:
+
+```
+fp J_W4  PCB_SHAPE  bbox=0.05x6.05 @ 51.02,-6.03     <- reaches y = -6.03 (up)
+fp J_W2  PCB_SHAPE  bbox=0.05x6.05 @ 51.02,102.97    <- reaches y = 108.97 (down)
+```
+
+The tabs are real, intended geometry: they are the mechanical interface the
+solar wings plug into, and they are present as distinct corner points in the
+exported `.gm1` gerber, so they **will be fabricated**.
+
+**Consequences — none are blocking, but state them on the order:**
+
+- **Footprint on the panel:** 115 × 103 mm, not 103 × 103. Confirm the JLC quote
+  dimensions match the gerber (they do: JLC itself detected 115x103).
+- **Board size tier:** 115 mm crosses the 100 mm boundary on some JLC tiers.
+  The snapshot's price is what it is; just be sure the cart shows 115 × 103.
+- **Mechanical:** the tabs stick out ±6 mm from the square body on two opposite
+  edges. The enclosure/stacking design must clear them.
+- **Wing board is unaffected:** its outline (184 × 25 mm incl. the castellated
+  tab at x −8…0) is entirely board-level Edge.Cuts, verified as 8 contiguous
+  segments, and matches JLC's *"2 layer board of 25x184mm"*.
+
+**Lesson (recorded):** when measuring a board outline, scan Edge.Cuts geometry
+from **both** board drawings *and* footprint graphics. A board-level-only scan
+silently under-reports whenever tabs or cutouts are defined inside footprints.
