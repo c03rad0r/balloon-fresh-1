@@ -128,10 +128,25 @@ rejected.
 
 ## Flagged for the operator
 
-1. **What is the C3 flight board's relationship to hub v9?** If hub v9
-   supersedes it, the rejected C3 lineage is historical and the register closes
-   it. If both are needed, the C3 board must be re-routed (20 nets) and the
-   GPIO18/19 violation fixed. **This changes the deliverable count.**
+1. **C3 flight board vs hub v9 — MEASURED (2026-10-13): hub v9 is a strict
+   functional superset.** Component-set comparison:
+
+   | Function | Flight C3 v4b (20 parts) | Hub v9 (44 parts) |
+   |---|---|---|
+   | MCU | ESP32-**C3**-WROOM-02 | ESP32-**S3**-WROOM-1U-N8R8 |
+   | FLRC radio | 1× LR2021F33 | 2× (LoRa2021F33-2G4 + LoRa2021_Castellated) **+ SX1280** |
+   | GNSS | MAX-M10S | MAX-M10S ✓ |
+   | Barometer | BMP280 | **MS5611-01BA** (better) |
+   | Antennas | 1× U.FL | 4× U.FL (433 TX, 2G4 range, 2G4 RX, GNSS) |
+   | Solar/storage | 1F 5.5V cap + SOLAR_In | 2× 3.3F SCC + 4× wing sockets + supervisor/dividers + NTC |
+   | Wing interface | — | J_W1..J_W4 ✓ |
+
+   **Every function the C3 board provides exists on hub v9 with equal or better
+   parts, plus dual radios, 4 wings, and more storage.** The C3 board's rejected
+   lineage (REJECT sign-off: 20 unrouted nets, GPIO18/19 wired against the
+   explicit rule) is therefore **historical** — re-routing it would duplicate a
+   board the hub already supersedes. **Recommendation: retire the C3 flight
+   lineage; the balloon payload = hub v9 + wing v9.** (Operator confirm.)
 2. ~~Wing board spatial review~~ — **DONE 2026-10-13: APPROVED**, both release
    caveats closed (`docs/WING-RELEASE-CAVEATS.md`). Remaining human step: confirm
    the physical solar-cell tab orientation at assembly.
