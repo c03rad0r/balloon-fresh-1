@@ -1,0 +1,51 @@
+1. **Direction is correct, but the board is not yet release-ready.** Relocating an unconstrained anchoring via is the appropriate first choice, provided the move preserves:
+
+- connectivity and plane access,
+- annular ring and hole clearance,
+- copper-to-edge and copper-to-component clearances,
+- controlled-impedance requirements where applicable,
+- thermal/current capacity for power vias, and
+- the stated via construction.
+
+However, the current state still has **eight clearance violations**. “Actively being closed” is not equivalent to closed, and the five via-in-pad violations are not automatically waived by selecting filled-and-capped processing. The final board should have zero unreviewed clearance violations, or each remaining violation must have a documented, fab-confirmed exception.
+
+Also, after the three relocations, rerun DRC, refill zones, regenerate all fabrication outputs, and verify that the exported files correspond to the final board—not merely to the current pre-relocation board of record.
+
+2. The separate-wing explanation is substantively valid, but I would not use “DNP” for these pads. They are populated interface pads whose electrical partner is outside this PCB; they are not do-not-populate components.
+
+The release package should explicitly document them as **external-board interface connections**, including:
+
+- the exact 22 pads/nets,
+- the mating wing-board design references,
+- the fact that no same-board copper connection is expected,
+- the connector or assembly boundary, and
+- the expected connection when the wing board is installed.
+
+For KiCad acceptance, use the appropriate intentional-unconnected treatment where applicable—such as schematic no-connect markers or explicit DRC exclusions/waivers—but do not change a real external interface net into a false NC net merely to suppress DRC. The two same-net zone/via items should also be documented as intentional and verified after zone refill. The F33_SCK residual remains a real tracked item and should either be corrected or receive a specific engineering waiver.
+
+3. For the three dense-locality cases, **relocating the anchoring via is preferred** over forcing a trace through the existing via cluster. Use the same method as the DIO1 correction, but evaluate the complete local clearance graph before committing the move. A good relocation should clear all neighboring objects with margin rather than merely moving the violation to another pair.
+
+If relocation cannot provide margin, the next preferable topology changes are, in order:
+
+1. reroute the escape and change the layer transition location;
+2. move the via cluster as a group while preserving the intended return-current path;
+3. use a different supported via size only if the fabricator’s capability and reliability requirements permit it; and
+4. revise the component escape topology if the locality is structurally over-constrained.
+
+Do not resolve these by retaining sub-rule clearances without a written manufacturing and engineering justification.
+
+4. **IPC-4761 Type VII filled-and-capped via-in-pad processing addresses solder wicking and planarity; it does not, by itself, waive copper-clearance rules.** Therefore, the five 0.125/0.150 mm clearances against a 0.20 mm rule are not automatically acceptable merely because the vias are filled and capped.
+
+They can be released only if all of the following are true:
+
+- the exact JLCPCB service and stackup support the geometry;
+- JLCPCB confirms in writing that those local copper relationships are manufacturable under the selected filled-and-capped process;
+- the locations are identified in the fabrication notes or a controlled exception table;
+- the DRC violation is explicitly documented as an approved local-rule exception; and
+- the exception does not create solder-mask, breakout, drill-to-copper, or assembly-reliability problems.
+
+The fab-readiness document should therefore include a table listing each affected via/pad pair, measured clearance, applicable default rule, reason for the exception, and the corresponding JLCPCB confirmation/order evidence. If JLCPCB will not explicitly accept the geometry, the vias or neighboring pads must be relocated or the clearance must be made compliant.
+
+Accordingly, the overall review direction is sound, and the manufacturing documentation is substantially improved. It is not yet an approval because the three dense-locality clearances remain open, the via-in-pad clearances require explicit fab-backed exceptions rather than only a process selection, and the final outputs must be regenerated after the last board edits.
+
+VERDICT: CHANGES_REQUESTED
