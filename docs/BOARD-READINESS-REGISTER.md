@@ -51,10 +51,12 @@ Per `tracker/hardware/FLIGHT-BOARD-PLAN.md` (flight set) and
 | Order gate | `wing_v9-GATE-RECORD.json` → **`"status": "PASS", "errors": 0, "unconnected": 0`** (tool `pcb_order_gate`, kicad 9.0.8) |
 | DRC (independent re-run) | **unconnected 0**, 37 violations — all cosmetic/metadata: `lib_footprint_issues 15`, `silk_edge_clearance 9`, `nonmirrored_text_on_back_layer 6`, `silk_overlap 2`, `text_height 2`, `track_dangling 2`, `silk_over_copper 1` |
 | Fab packet | `tracker/hardware/output/gerbers_wing_v9` — fab sha256 `d0bcd707caea321b022624b3589b0d5f5941b5d18f13c77b665871257ae69df9` |
-| Spatial review | ⚠️ **not found on file** — no Astra verdict artifact located for the wing board. Gap to close per the Done gate. |
+| Spatial review | **`docs/CONSULT-astra-wing-APPROVED-2026-10-13.txt` → VERDICT: APPROVED** (on `renders/wing_v9_top.png` + `wing_v9_iso.png`, 1768×1376) |
+| Release caveats | **both closed** — `docs/WING-RELEASE-CAVEATS.md`: (1) castellated edge plating **N/A**, measured 0 edge-adjacent pads (plain rectangle, 184.10×25.10 mm, outline 418.00 mm = bbox perimeter; interface is the J1 4-pin connector); (2) solar net mapping **verified** — 2 parallel strings × 3 series cells, all terminals assigned, no polarity inversion. Residual = physical cell tab orientation, a build-time check. |
 
-**Verdict: gate PASS with zero electrical defects.** One gate item outstanding:
-a spatial-review artifact (the hub's final-3 style verdict) is not on disk.
+**Verdict: ORDER-READY.** Gate PASS, zero unconnected, APPROVED, gerbers
+present, both caveats closed with measurement. *Note:* the hub — not the wing —
+carries the castellation requirement (its wing sockets).
 
 ---
 
@@ -113,7 +115,7 @@ separate, second board in this family.
 | Board | State | Can order today? |
 |---|---|---|
 | Hub v9 | APPROVED, fab packet with provenance | **YES** |
-| Wing v9 | gate PASS, 0 unconnected, gerbers present | **YES** (pending a spatial-review artifact) |
+| Wing v9 | APPROVED, gate PASS, 0 unconnected, caveats closed | **YES** |
 | Base-station | plan only | NO — needs decisions + Stage 1–2 |
 | Flight (C3 lineage) | REJECTED, 20 unrouted nets, GPIO18/19 violation | NO |
 | Bench-rig | not needed | — |
@@ -130,8 +132,9 @@ rejected.
    supersedes it, the rejected C3 lineage is historical and the register closes
    it. If both are needed, the C3 board must be re-routed (20 nets) and the
    GPIO18/19 violation fixed. **This changes the deliverable count.**
-2. **Wing board spatial review** — no Astra artifact found. A review is a
-   Done-gate requirement; run it or record why it is waived.
+2. ~~Wing board spatial review~~ — **DONE 2026-10-13: APPROVED**, both release
+   caveats closed (`docs/WING-RELEASE-CAVEATS.md`). Remaining human step: confirm
+   the physical solar-cell tab orientation at assembly.
 3. **Consolidation route** for the hub work (separate scoped PR vs the existing
    10-PR queue) — asked, not yet answered.
 4. **Base-station decisions** (listed above).
