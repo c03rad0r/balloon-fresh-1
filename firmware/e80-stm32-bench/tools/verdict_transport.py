@@ -68,6 +68,15 @@ _TOOLS_DIR = os.path.dirname(os.path.abspath(__file__))
 if _TOOLS_DIR not in sys.path:
     sys.path.insert(0, _TOOLS_DIR)
 
+# Single source of truth for the relay failover set (see the module docstring of
+# ``verdict_relay_constants``): the canonical list lives there and is re-exported
+# below, so the value is never duplicated.
+import verdict_relay_constants as _relay_constants  # noqa: E402
+from verdict_relay_constants import (  # noqa: E402
+    FAILOVER_RELAYS,
+    FAILOVER_RELAY_URLS,
+)
+
 __all__ = [
     "KIND_GIFT_WRAP",
     "INNER_KIND",
@@ -119,17 +128,14 @@ KIND_PLAINTEXT_TALLY = 30315
 
 #: Ordered relay failover set — EXACTLY these five bare hostnames, in order.
 #: The unnumbered contextvm relay host is DEAD and must never appear here
-#: (see :data:`DEAD_RELAYS`).
-FAILOVER_RELAYS = [
-    "nostr.mom",
-    "relay.primal.net",
-    "nos.lol",
-    "relay2.contextvm.org",
-    "relay.nostr.band",
-]
+#: (see :data:`DEAD_RELAYS`). The value is defined ONCE, in
+#: :mod:`verdict_relay_constants`, and re-exported here as the single source of
+#: truth (so a source scan of that defining module can prove the dead host is
+#: absent from the relay list itself).
+FAILOVER_RELAYS = _relay_constants.FAILOVER_RELAYS
 
 #: The same set as ``wss://`` relay URLs (derived — never hand-maintained).
-FAILOVER_RELAY_URLS = ["wss://" + host for host in FAILOVER_RELAYS]
+FAILOVER_RELAY_URLS = _relay_constants.FAILOVER_RELAY_URLS
 
 #: Relays known DEAD (verified 2026-08-23). Filtered out of the active set, so a
 #: caller cannot re-introduce one by passing it in.
