@@ -1,49 +1,144 @@
 #!/usr/bin/env bash
-# pre-push: block pushes containing secret patterns in repo history.
+# pre-push: block pushes that ADD secret-shaped content.
 #
-# REWRITTEN 2026-10-08. The previous version ran `git log -p --all -- ...`
-# INSIDE a per-pattern loop -- i.e. the full-history diff was regenerated once
-# per pattern. With ~600 refs in this repo that is an enormous diff, and the
-# hook consequently took MINUTES per push and was a major cause of the box
-# sitting at load 20+ with pushes hanging. It also effectively blocked the
-# merge train.
+# RANGE-SCOPED REWRITE. History of the previous two versions (both kept
+# failing pushes in production, in opposite directions):
 #
-# This version generates the history diff ONCE and pipes it through a single
-# `grep -f`, i.e. O(1) history walks instead of O(N_patterns). Same detection
-# set, same added/removed coverage, a factor of N_patterns cheaper.
-set -e
+#   v1 scanned `git log -p --all` (the FULL history of EVERY ref, ~900
+#      refs here) on every push. A retired nsec has lived in remote
+#      history since 647865d2a936 ("RadioLib integration...", 2026-05-20),
+#      so every legitimate push re-matched it and required
+#      `git push --no-verify`.
+#   v2 was a perf rewrite of the same full-history walk (one pass, one
+#      `grep -f`) — but plain `grep -f` uses BRE semantics, which
+#      silently defanged every `{n,m}`-quantified pattern (the gate was
+#      effectively blind), and the unquoted pathspec list glob-expanded
+#      against the cwd, so only repo-root files were ever scanned.
+#
+# This version scans ONLY what the push introduces:
+#   - stdin is parsed exactly as git feeds it, once, up front:
+#       <local_ref> <local_sha> <remote_ref> <remote_sha>
+#   - normal push:      the per-commit diffs of remote_sha..local_sha
+#   - ref creation (remote_sha all zeros, or an object this clone lacks):
+#       commits reachable from local_sha that are on NO remote-tracking
+#       ref (`local_sha --not --remotes`) — never the entire local history
+#   - ref deletion (local_sha all zeros): nothing is added — pass
+#   - only ADDED diff lines are judged, so commits REMOVING a secret
+#     (scrubs) never block and pre-existing remote history never blocks
+#   - merges are judged via their first-parent diff, so a secret added
+#     during conflict resolution is still caught
+#   - patterns are matched with grep -P (PCRE) when available, restoring
+#     the `{n,m}` quantifiers and `\d` classes the BRE pass dropped
+#
+# Known nuance: for the creation fallback, a commit that already sits on
+# a DIFFERENT remote-tracking ref is treated as not-new even if the push
+# target has never seen it. That is the deliberate trade — the
+# alternative (scanning the entire local history) is the v1 bug that
+# blocked every push on the retired remote-history key.
+#
+# The hook never rewrites anything and never scans the working tree; it
+# judges exactly the commits the remote is about to receive.
+
+REFS="$(cat)"   # pushed-ref list. Read ONCE: every gate below feeds from this.
 
 TOPLEVEL="$(git rev-parse --show-toplevel)"
 PATTERNS_FILE="$TOPLEVEL/.secret-patterns.txt"
 
-if [ ! -f "$PATTERNS_FILE" ]; then
-    exit 0
-fi
+[ -f "$PATTERNS_FILE" ] || exit 0
 
 CLEAN_PATTERNS="$(mktemp)"
 trap 'rm -f "$CLEAN_PATTERNS"' EXIT
 grep -vE '^[[:space:]]*(#|$)' "$PATTERNS_FILE" > "$CLEAN_PATTERNS" || true
-if [ ! -s "$CLEAN_PATTERNS" ]; then
-    exit 0
+[ -s "$CLEAN_PATTERNS" ] || exit 0
+
+# grep flavour: the patterns are written in PCRE ({n,m}, \d). GNU grep
+# only accepts ONE pattern per -P invocation, so patterns are matched
+# one at a time against the (small) added-lines dump — never against the
+# full history. ERE is the degraded fallback if grep lacks -P.
+GREP_FLAVOUR="-E"
+if printf 'x' | grep -qaP 'x' >/dev/null 2>&1; then
+    GREP_FLAVOUR="-P"
 fi
 
-# Only scan source code files; skip generated/binary/large files.
-SCAN_PATHS="*.py *.sh *.json *.yml *.yaml *.toml *.env *.cfg *.conf *.ini *.js *.ts *.md"
-EXCLUDE_PATHS=":(exclude).secret-patterns.txt :(exclude)data.json :(exclude)*.html"
+# Only scan source files; skip the pattern definitions themselves and
+# known generated blobs. QUOTED so git does the globbing at every depth —
+# unquoted, the shell expands these against the cwd and nested files are
+# silently never scanned.
+SCAN_PATHS=('*.py' '*.sh' '*.json' '*.yml' '*.yaml' '*.toml' '*.env' \
+            '*.cfg' '*.conf' '*.ini' '*.js' '*.ts' '*.md')
+EXCLUDE_PATHS=(':(exclude).secret-patterns.txt' ':(exclude)data.json' ':(exclude)*.html')
 
-# ONE history walk, ONE grep pass. `head -10` bounds the report.
-MATCH="$(git log -p --all -- $SCAN_PATHS $EXCLUDE_PATHS 2>/dev/null \
-    | grep -a -n -i -f "$CLEAN_PATTERNS" 2>/dev/null | head -10 || true)"
+# Added lines of the whole push, dumped ONCE per range (the range diff is
+# small; the old hooks' cost came from walking full history, not from the
+# grep). Judged by every pattern in turn.
+ADDED_FILE="$(mktemp)"
+trap 'rm -f "$CLEAN_PATTERNS" "$ADDED_FILE"' EXIT
 
-if [ -n "$MATCH" ]; then
-    echo "SECRET in repo history:"
-    printf '%s\n' "$MATCH"
+dump_added_lines() {
+    : > "$ADDED_FILE"
+    git log -p --no-color --no-ext-diff --diff-merges=first-parent "$@" \
+        -- "${SCAN_PATHS[@]}" "${EXCLUDE_PATHS[@]}" 2>/dev/null \
+      | awk '
+          /^\+\+\+ / {
+              f = $0
+              sub(/^\+\+\+ /, "", f)
+              sub(/\t.*/, "", f)
+              if (f == "/dev/null") { f = ""; next }   # pure deletion
+              sub(/^b\//, "", f)
+              next
+          }
+          /^\+/ { if (f != "") print "  " f ": " substr($0, 2) }
+        ' >> "$ADDED_FILE"
+}
+
+FOUND=0
+while read -r local_ref local_sha remote_ref remote_sha; do
+    [ -n "$local_ref" ] || continue
+
+    # Ref deletion: the push adds nothing.
+    if [[ "$local_sha" =~ ^0+$ ]]; then
+        continue
+    fi
+    # Do not judge a tip we cannot even resolve.
+    if ! git rev-parse --verify -q "$local_sha^{commit}" >/dev/null 2>&1; then
+        continue
+    fi
+
+    if [[ "$remote_sha" =~ ^0+$ ]] || \
+       ! git rev-parse --verify -q "$remote_sha^{commit}" >/dev/null 2>&1; then
+        # Ref creation (first push, or an old tip this clone never
+        # fetched): the new-commit set is everything reachable from the
+        # local ref that no remote-tracking ref already carries.
+        RANGE=("$local_sha" --not --remotes)
+    else
+        RANGE=("${remote_sha}..${local_sha}")
+    fi
+
+    dump_added_lines "${RANGE[@]}"
+    [ -s "$ADDED_FILE" ] || continue
+
+    while IFS= read -r pattern; do
+        [ -z "$pattern" ] && continue
+        HITS="$(grep -a $GREP_FLAVOUR "$pattern" "$ADDED_FILE" 2>/dev/null \
+                | awk '!seen[$0]++' | head -10)"
+        if [ -n "$HITS" ]; then
+            echo "SECRET in push range ($local_ref -> $remote_ref), pattern: $pattern"
+            printf '%s\n' "$HITS"
+            FOUND=1
+        fi
+    done < "$CLEAN_PATTERNS"
+done <<< "$REFS"
+
+if [ "$FOUND" -eq 1 ]; then
     echo ""
-    echo "PUSH BLOCKED — secrets detected in commit history."
-    echo "To scrub: git filter-repo --replace-text .secret-patterns.txt"
+    echo "PUSH BLOCKED — secret-shaped content ADDED in the commits being pushed."
+    echo "Only the outgoing range is scanned; pre-existing remote history is not."
+    echo "The flagged commits are still local — remove the secret from them"
+    echo "(rebase/amend) and push again. No history rewrite of published commits"
+    echo "and no force-push are needed or suggested."
     echo "To override (DANGEROUS): git push --no-verify"
     exit 1
 fi
 
-echo "✓ No secrets detected in full repo history."
+echo "✓ pre-push secret scan: no new secrets in the outgoing range."
 exit 0
