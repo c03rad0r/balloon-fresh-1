@@ -1,14 +1,14 @@
 {
     "$schema": "https://schemas.kicad.org/drc.v1.json",
     "coordinate_units": "mm",
-    "date": "2026-10-13T14:44:47+0200",
+    "date": "2026-10-13T14:47:03+0200",
     "included_severities": [
         "error",
         "warning"
     ],
     "kicad_version": "9.0.8",
     "schematic_parity": [],
-    "source": "v2f.kicad_pcb",
+    "source": "v3f.kicad_pcb",
     "unconnected_items": [
         {
             "description": "Missing connection between items",
@@ -152,12 +152,12 @@
             "description": "Missing connection between items",
             "items": [
                 {
-                    "description": "Track [/SCAP_MID] on B.Cu, length 0.0000 mm",
+                    "description": "Track [/SCAP_MID] on B.Cu, length 0.2857 mm",
                     "pos": {
-                        "x": 42.217125,
-                        "y": 25.891673
+                        "x": 41.9836,
+                        "y": 26.0563
                     },
-                    "uuid": "fcab5aaf-3d0e-4035-9803-d724c1c1c244"
+                    "uuid": "41ca590a-c7b1-4091-958f-8328d98ebfbb"
                 },
                 {
                     "description": "Track [/SCAP_MID] on B.Cu, length 4.2869 mm",
@@ -175,20 +175,20 @@
             "description": "Missing connection between items",
             "items": [
                 {
-                    "description": "Track [/W1_SOLAR_N] on B.Cu, length 18.2822 mm",
+                    "description": "Track [/W1_SOLAR_N] on B.Cu, length 2.3017 mm",
                     "pos": {
-                        "x": 18.2292,
-                        "y": 41.2725
+                        "x": 3.0,
+                        "y": 54.2
                     },
-                    "uuid": "47d9824b-db1d-4663-ba17-4c8bb7679005"
+                    "uuid": "8022d167-aecc-44b5-9b6a-a33b88c991c2"
                 },
                 {
-                    "description": "Pad 1 [/W1_SOLAR_N] of J_W2 on B.Cu",
+                    "description": "Pad 1 [/W1_SOLAR_N] of J_W2 on F.Cu",
                     "pos": {
                         "x": 54.2,
                         "y": 106.0
                     },
-                    "uuid": "3b2f3638-63e2-4bd8-a327-26a4e22131c0"
+                    "uuid": "3af025ed-6467-4af9-9683-7547bfb66608"
                 }
             ],
             "severity": "error",
@@ -198,20 +198,20 @@
             "description": "Missing connection between items",
             "items": [
                 {
-                    "description": "Pad 1 [/W1_SOLAR_N] of J_W2 on F.Cu",
-                    "pos": {
-                        "x": 54.2,
-                        "y": 106.0
-                    },
-                    "uuid": "3af025ed-6467-4af9-9683-7547bfb66608"
-                },
-                {
                     "description": "Pad 1 [/W1_SOLAR_N] of J_W2 on B.Cu",
                     "pos": {
                         "x": 54.2,
                         "y": 106.0
                     },
                     "uuid": "3b2f3638-63e2-4bd8-a327-26a4e22131c0"
+                },
+                {
+                    "description": "Pad 1 [/W1_SOLAR_N] of J_W2 on F.Cu",
+                    "pos": {
+                        "x": 54.2,
+                        "y": 106.0
+                    },
+                    "uuid": "3af025ed-6467-4af9-9683-7547bfb66608"
                 }
             ],
             "severity": "error",
@@ -252,12 +252,12 @@
                     "uuid": "67929089-c86c-4397-9f68-d7c386447584"
                 },
                 {
-                    "description": "Pad 4 [/W2_SOLAR_N] of J_W2 on B.Cu",
+                    "description": "Pad 4 [/W2_SOLAR_N] of J_W2 on F.Cu",
                     "pos": {
                         "x": 48.8,
                         "y": 106.0
                     },
-                    "uuid": "c61db335-c611-44d8-9c45-019f5316aa89"
+                    "uuid": "244d2674-667b-44a7-ad90-10f92da25390"
                 }
             ],
             "severity": "error",
@@ -290,12 +290,12 @@
             "description": "Missing connection between items",
             "items": [
                 {
-                    "description": "Pad 1 [/W3_SOLAR_N] of J_W4 on F.Cu",
+                    "description": "Pad 1 [/W3_SOLAR_N] of J_W4 on B.Cu",
                     "pos": {
                         "x": 48.8,
                         "y": -3.0
                     },
-                    "uuid": "befdb11c-838d-48bd-80fd-f9d43798d92c"
+                    "uuid": "135b15b4-b1c9-4747-8410-4ce3c1db85fa"
                 },
                 {
                     "description": "Track [/W3_SOLAR_N] on F.Cu, length 2.4735 mm",
@@ -313,20 +313,20 @@
             "description": "Missing connection between items",
             "items": [
                 {
+                    "description": "Zone 'GND_PLANE_F.Cu' [GND] on F.Cu, priority 0",
+                    "pos": {
+                        "x": 0.425,
+                        "y": 0.425
+                    },
+                    "uuid": "d8c9b044-4afd-4b66-9517-5fdf6413d130"
+                },
+                {
                     "description": "Pad 2 [GND] of J_W1 on F.Cu",
                     "pos": {
                         "x": 3.0,
                         "y": 50.6
                     },
                     "uuid": "5a37cace-da2f-4112-8244-7d103599e608"
-                },
-                {
-                    "description": "Pad 2 [GND] of J_W1 on B.Cu",
-                    "pos": {
-                        "x": 3.0,
-                        "y": 50.6
-                    },
-                    "uuid": "21b04093-843c-48e6-9f2e-9b0b623850bd"
                 }
             ],
             "severity": "error",
@@ -336,12 +336,12 @@
             "description": "Missing connection between items",
             "items": [
                 {
-                    "description": "Zone 'GND_PLANE_B.Cu' [GND] on B.Cu, priority 0",
+                    "description": "Pad 2 [GND] of J_W1 on F.Cu",
                     "pos": {
-                        "x": 0.425,
-                        "y": 0.425
+                        "x": 3.0,
+                        "y": 50.6
                     },
-                    "uuid": "d8da0899-e55c-470c-95b2-1c22208b0211"
+                    "uuid": "5a37cace-da2f-4112-8244-7d103599e608"
                 },
                 {
                     "description": "Pad 2 [GND] of J_W1 on B.Cu",
@@ -428,20 +428,20 @@
             "description": "Missing connection between items",
             "items": [
                 {
-                    "description": "Pad 2 [GND] of J_W2 on B.Cu",
-                    "pos": {
-                        "x": 52.4,
-                        "y": 106.0
-                    },
-                    "uuid": "4ce2980e-78cc-4630-81fc-f7d127991a9d"
-                },
-                {
                     "description": "Pad 2 [GND] of J_W2 on F.Cu",
                     "pos": {
                         "x": 52.4,
                         "y": 106.0
                     },
                     "uuid": "b50c366e-24a3-403f-8ce2-691f732acb1a"
+                },
+                {
+                    "description": "Pad 2 [GND] of J_W2 on B.Cu",
+                    "pos": {
+                        "x": 52.4,
+                        "y": 106.0
+                    },
+                    "uuid": "4ce2980e-78cc-4630-81fc-f7d127991a9d"
                 }
             ],
             "severity": "error",
@@ -497,12 +497,12 @@
             "description": "Missing connection between items",
             "items": [
                 {
-                    "description": "Pad 4 [GND] of J_W4 on B.Cu",
+                    "description": "Pad 4 [GND] of J_W4 on F.Cu",
                     "pos": {
                         "x": 54.2,
                         "y": -3.0
                     },
-                    "uuid": "574bf006-f98f-40b5-ad91-168bb179006f"
+                    "uuid": "bdd56efc-0cc3-42ab-ab49-82c143c53629"
                 },
                 {
                     "description": "Pad 2 [GND] of J_W4 on B.Cu",
@@ -543,20 +543,20 @@
             "description": "Missing connection between items",
             "items": [
                 {
-                    "description": "Pad 2 [GND] of J_W3 on B.Cu",
-                    "pos": {
-                        "x": 100.0,
-                        "y": 52.4
-                    },
-                    "uuid": "33747d3c-5e67-4be0-9a54-917eafcd6089"
-                },
-                {
                     "description": "Pad 2 [GND] of J_W3 on F.Cu",
                     "pos": {
                         "x": 100.0,
                         "y": 52.4
                     },
                     "uuid": "af5349d4-b581-4a01-a23a-a64adff8c954"
+                },
+                {
+                    "description": "Pad 2 [GND] of J_W3 on B.Cu",
+                    "pos": {
+                        "x": 100.0,
+                        "y": 52.4
+                    },
+                    "uuid": "33747d3c-5e67-4be0-9a54-917eafcd6089"
                 }
             ],
             "severity": "error",
@@ -677,8 +677,8 @@
                 {
                     "description": "Via [/SX1280_DIO2] on F.Cu - B.Cu",
                     "pos": {
-                        "x": 58.85,
-                        "y": 15.65
+                        "x": 59.95,
+                        "y": 16.149999
                     },
                     "uuid": "b68345c5-f45d-4483-90eb-1e876c13b397"
                 }
@@ -1522,27 +1522,27 @@
             "type": "clearance"
         },
         {
-            "description": "Items shorting two nets (nets /SX1280_DIO2 and /SX1280_BUSY)",
+            "description": "Clearance violation ( clearance 0.2000 mm; actual 0.1968 mm)",
             "items": [
+                {
+                    "description": "Track [/SX1280_BUSY] on B.Cu, length 0.7304 mm",
+                    "pos": {
+                        "x": 60.7603,
+                        "y": 16.1163
+                    },
+                    "uuid": "545a289d-337e-4db8-850c-205c1b970075"
+                },
                 {
                     "description": "Via [/SX1280_DIO2] on F.Cu - B.Cu",
                     "pos": {
-                        "x": 58.85,
-                        "y": 15.65
+                        "x": 59.95,
+                        "y": 16.149999
                     },
                     "uuid": "b68345c5-f45d-4483-90eb-1e876c13b397"
-                },
-                {
-                    "description": "Track [/SX1280_BUSY] on B.Cu, length 2.6569 mm",
-                    "pos": {
-                        "x": 60.2438,
-                        "y": 15.5998
-                    },
-                    "uuid": "e1338768-f8fd-4464-b7d2-2ba00d060c8c"
                 }
             ],
             "severity": "error",
-            "type": "shorting_items"
+            "type": "clearance"
         },
         {
             "description": "Clearance violation ( clearance 0.2000 mm; actual 0.0938 mm)",
@@ -1562,6 +1562,29 @@
                         "y": 4.7138
                     },
                     "uuid": "e22c7e34-7178-4073-821c-30eb5651959d"
+                }
+            ],
+            "severity": "error",
+            "type": "clearance"
+        },
+        {
+            "description": "Clearance violation ( clearance 0.2000 mm; actual 0.1502 mm)",
+            "items": [
+                {
+                    "description": "Via [/SX1280_DIO2] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 59.95,
+                        "y": 16.149999
+                    },
+                    "uuid": "b68345c5-f45d-4483-90eb-1e876c13b397"
+                },
+                {
+                    "description": "Track [/SX1280_BUSY] on B.Cu, length 2.6569 mm",
+                    "pos": {
+                        "x": 60.2438,
+                        "y": 15.5998
+                    },
+                    "uuid": "e1338768-f8fd-4464-b7d2-2ba00d060c8c"
                 }
             ],
             "severity": "error",
@@ -1608,29 +1631,6 @@
                         "y": 31.035
                     },
                     "uuid": "9565257f-aa32-4a90-9010-d2c1fb438237"
-                }
-            ],
-            "severity": "error",
-            "type": "clearance"
-        },
-        {
-            "description": "Clearance violation ( clearance 0.2000 mm; actual 0.0143 mm)",
-            "items": [
-                {
-                    "description": "Via [+3V3] on F.Cu - B.Cu",
-                    "pos": {
-                        "x": 41.645,
-                        "y": 26.295
-                    },
-                    "uuid": "28576d1a-89d8-421c-8149-325c6f280f76"
-                },
-                {
-                    "description": "Track [/SCAP_MID] on B.Cu, length 0.2857 mm",
-                    "pos": {
-                        "x": 41.9836,
-                        "y": 26.0563
-                    },
-                    "uuid": "41ca590a-c7b1-4091-958f-8328d98ebfbb"
                 }
             ],
             "severity": "error",
@@ -1706,6 +1706,52 @@
             "type": "clearance"
         },
         {
+            "description": "Clearance violation ( clearance 0.2000 mm; actual 0.1061 mm)",
+            "items": [
+                {
+                    "description": "Pad 12 [/F33_BUSY] of U1 on F.Cu",
+                    "pos": {
+                        "x": 58.95,
+                        "y": 16.92
+                    },
+                    "uuid": "3ce1528f-4c37-4667-84a5-19c59d3e51c6"
+                },
+                {
+                    "description": "Via [/SX1280_DIO2] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 59.95,
+                        "y": 16.149999
+                    },
+                    "uuid": "b68345c5-f45d-4483-90eb-1e876c13b397"
+                }
+            ],
+            "severity": "error",
+            "type": "clearance"
+        },
+        {
+            "description": "Clearance violation ( clearance 0.2000 mm; actual 0.1523 mm)",
+            "items": [
+                {
+                    "description": "Track [/SX1280_MISO] on In2.Cu, length 0.2500 mm",
+                    "pos": {
+                        "x": 52.25,
+                        "y": 8.75
+                    },
+                    "uuid": "15e0e9f9-805a-42bb-a5ca-6d1e06fe4390"
+                },
+                {
+                    "description": "Track [/SX1280_DIO2] on In2.Cu, length 13.3830 mm",
+                    "pos": {
+                        "x": 50.0,
+                        "y": 7.2
+                    },
+                    "uuid": "c309d9d1-4e21-4829-b143-732938f5fac4"
+                }
+            ],
+            "severity": "error",
+            "type": "clearance"
+        },
+        {
             "description": "Clearance violation ( clearance 0.2000 mm; actual 0.1000 mm)",
             "items": [
                 {
@@ -1752,6 +1798,75 @@
             "type": "clearance"
         },
         {
+            "description": "Clearance violation ( clearance 0.2000 mm; actual 0.1523 mm)",
+            "items": [
+                {
+                    "description": "Track [/SX1280_MISO] on In2.Cu, length 0.2500 mm",
+                    "pos": {
+                        "x": 52.25,
+                        "y": 8.5
+                    },
+                    "uuid": "a7e3af4f-4f6f-4155-8cc0-98b9ae484991"
+                },
+                {
+                    "description": "Track [/SX1280_DIO2] on In2.Cu, length 13.3830 mm",
+                    "pos": {
+                        "x": 50.0,
+                        "y": 7.2
+                    },
+                    "uuid": "c309d9d1-4e21-4829-b143-732938f5fac4"
+                }
+            ],
+            "severity": "error",
+            "type": "clearance"
+        },
+        {
+            "description": "Clearance violation ( clearance 0.2000 mm; actual 0.1327 mm)",
+            "items": [
+                {
+                    "description": "Track [/SX1280_MISO] on In2.Cu, length 3.5355 mm",
+                    "pos": {
+                        "x": 52.5,
+                        "y": 8.75
+                    },
+                    "uuid": "b0822e00-afff-45c6-a929-5b6d1883e529"
+                },
+                {
+                    "description": "Track [/SX1280_DIO2] on In2.Cu, length 13.3830 mm",
+                    "pos": {
+                        "x": 50.0,
+                        "y": 7.2
+                    },
+                    "uuid": "c309d9d1-4e21-4829-b143-732938f5fac4"
+                }
+            ],
+            "severity": "error",
+            "type": "clearance"
+        },
+        {
+            "description": "Clearance violation ( clearance 0.2000 mm; actual 0.1327 mm)",
+            "items": [
+                {
+                    "description": "Track [/SX1280_DIO2] on In2.Cu, length 13.3830 mm",
+                    "pos": {
+                        "x": 50.0,
+                        "y": 7.2
+                    },
+                    "uuid": "c309d9d1-4e21-4829-b143-732938f5fac4"
+                },
+                {
+                    "description": "Track [/SX1280_MISO] on In2.Cu, length 0.2500 mm",
+                    "pos": {
+                        "x": 55.0,
+                        "y": 11.25
+                    },
+                    "uuid": "e9811254-5e60-4ae2-ac0f-d52e07a1761b"
+                }
+            ],
+            "severity": "error",
+            "type": "clearance"
+        },
+        {
             "description": "Clearance violation ( clearance 0.2000 mm; actual 0.1000 mm)",
             "items": [
                 {
@@ -1769,6 +1884,29 @@
                         "y": 7.2
                     },
                     "uuid": "bafda903-29e0-414e-9a4c-c0c0a2afa6a8"
+                }
+            ],
+            "severity": "error",
+            "type": "clearance"
+        },
+        {
+            "description": "Clearance violation ( clearance 0.2000 mm; actual 0.0143 mm)",
+            "items": [
+                {
+                    "description": "Via [+3V3] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 41.645,
+                        "y": 26.295
+                    },
+                    "uuid": "28576d1a-89d8-421c-8149-325c6f280f76"
+                },
+                {
+                    "description": "Track [/SCAP_MID] on B.Cu, length 0.2857 mm",
+                    "pos": {
+                        "x": 41.9836,
+                        "y": 26.0563
+                    },
+                    "uuid": "41ca590a-c7b1-4091-958f-8328d98ebfbb"
                 }
             ],
             "severity": "error",
