@@ -1,8 +1,8 @@
 (export 
   (version "D")
   (design
-    (source "base_station_schematic.py")
-    (date "10/13/2026 07:03 PM")
+    (source "base_station_netlist.py")
+    (date "10/13/2026 08:08 PM")
     (tool "SKiDL (2.3.0)")
     (sheet
       (number 1)
@@ -13,7 +13,7 @@
         (company)
         (rev)
         (date)
-        (source "base_station_schematic.py")
+        (source "base_station_netlist.py")
         (comment
           (number "1")
           (value ""))
@@ -46,18 +46,18 @@
       (ref "ATT1")
       (value "XR-613_resistive_pad_6dB")
       (description "Resistor")
-      (footprint "RF:ATT_0402")
+      (footprint "Resistor_SMD:R_0603_1608Metric")
       (fields
         (field
           (name "Description") "Resistor")
         (field
-          (name "Footprint") "RF:ATT_0402")
+          (name "Footprint") "Resistor_SMD:R_0603_1608Metric")
         (field
           (name "Datasheet") "~")
         (field
-          (name "SKiDL Tag") "dpMvQZmpLA")
+          (name "SKiDL Tag") "u04gBIS6Ma")
         (field
-          (name "SKiDL Line") "base_station_schematic.py:119"))
+          (name "SKiDL Line") "base_station_netlist.py:98"))
       (libsource
         (lib "/usr/share/kicad/symbols/Device.kicad_sym")
         (part "R"))
@@ -65,31 +65,31 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "e0bab609-ec9c-5d0d-9467-cb154327f642"))
+      (tstamps "0908bae3-76cd-5b53-9532-c86096fcac5e"))
     (comp
-      (ref "BPF433")
-      (value "FBP-433s_class_BPF")
-      (description "Resistor")
-      (footprint "RF_Filter:Sawtek_1-1-2_SMD")
+      (ref "C_BIAS_FEED")
+      (value "1nF_DC_return")
+      (description "Unpolarized capacitor")
+      (footprint "Capacitor_SMD:C_0402_1005Metric")
       (fields
         (field
-          (name "Description") "Resistor")
+          (name "Description") "Unpolarized capacitor")
         (field
-          (name "Footprint") "RF_Filter:Sawtek_1-1-2_SMD")
+          (name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
         (field
           (name "Datasheet") "~")
         (field
-          (name "SKiDL Tag") "KzBj4i92uF")
+          (name "SKiDL Tag") "s9wFTUjrsW")
         (field
-          (name "SKiDL Line") "base_station_schematic.py:75"))
+          (name "SKiDL Line") "base_station_netlist.py:63"))
       (libsource
         (lib "/usr/share/kicad/symbols/Device.kicad_sym")
-        (part "R"))
+        (part "C"))
       (sheetpath
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "1eb3b066-758a-58ea-89c6-35d8ccf6fa2c"))
+      (tstamps "631611c3-9ad2-53c1-a9f3-5de2005d3111"))
     (comp
       (ref "C_DCBLOCK")
       (value "100pF_DC_block")
@@ -103,9 +103,9 @@
         (field
           (name "Datasheet") "~")
         (field
-          (name "SKiDL Tag") "R6CYaxiv8T")
+          (name "SKiDL Tag") "Isb1cUIfR9")
         (field
-          (name "SKiDL Line") "base_station_schematic.py:97"))
+          (name "SKiDL Line") "base_station_netlist.py:69"))
       (libsource
         (lib "/usr/share/kicad/symbols/Device.kicad_sym")
         (part "C"))
@@ -113,7 +113,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "3d5fd91b-c3fd-5e3c-a63b-5920c3b19b60"))
+      (tstamps "34f6bcff-2321-5905-a524-3fc9afe75361"))
     (comp
       (ref "C_DEC1")
       (value "100nF")
@@ -127,9 +127,9 @@
         (field
           (name "Datasheet") "~")
         (field
-          (name "SKiDL Tag") "bleGkN9Hfy")
+          (name "SKiDL Tag") "2T6ZSUstu3")
         (field
-          (name "SKiDL Line") "base_station_schematic.py:147"))
+          (name "SKiDL Line") "base_station_netlist.py:121"))
       (libsource
         (lib "/usr/share/kicad/symbols/Device.kicad_sym")
         (part "C"))
@@ -137,7 +137,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "349d4092-16d2-5df5-8d36-f306b547ea18"))
+      (tstamps "e608748b-5df9-5411-a8be-d1298afe411c"))
     (comp
       (ref "C_DEC2")
       (value "100nF")
@@ -151,9 +151,9 @@
         (field
           (name "Datasheet") "~")
         (field
-          (name "SKiDL Tag") "t9B1SbVuDH")
+          (name "SKiDL Tag") "UUlIbU1xfP")
         (field
-          (name "SKiDL Line") "base_station_schematic.py:147"))
+          (name "SKiDL Line") "base_station_netlist.py:121"))
       (libsource
         (lib "/usr/share/kicad/symbols/Device.kicad_sym")
         (part "C"))
@@ -161,7 +161,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "e058ac79-c6f7-5094-a34e-e22e3255825f"))
+      (tstamps "8e130372-dcab-5e8e-97ac-9616500df68b"))
     (comp
       (ref "DSA1")
       (value "PE43711-CLASS")
@@ -175,9 +175,9 @@
         (field
           (name "Datasheet") "~")
         (field
-          (name "SKiDL Tag") "QbX9_nx7UG")
+          (name "SKiDL Tag") "k8qEFtNTgj")
         (field
-          (name "SKiDL Line") "base_station_schematic.py:125"))
+          (name "SKiDL Line") "base_station_netlist.py:104"))
       (libsource
         (lib "/usr/share/kicad/symbols/Device.kicad_sym")
         (part "R"))
@@ -185,31 +185,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "733537fd-b3f1-51af-93c1-6429ceefc7ea"))
-    (comp
-      (ref "D_LIM")
-      (value "PIN_RF_limiter_10-20dBm")
-      (description "Schottky diode")
-      (footprint "Package_TO_SOT_SMD:SOT-143")
-      (fields
-        (field
-          (name "Description") "Schottky diode")
-        (field
-          (name "Footprint") "Package_TO_SOT_SMD:SOT-143")
-        (field
-          (name "Datasheet") "~")
-        (field
-          (name "SKiDL Tag") "7ww6JV3QqG")
-        (field
-          (name "SKiDL Line") "base_station_schematic.py:86"))
-      (libsource
-        (lib "/usr/share/kicad/symbols/Device.kicad_sym")
-        (part "D_Schottky"))
-      (sheetpath
-        (names "/")
-        (tstamps "/"))
-      (component_classes)
-      (tstamps "db2c9221-34a9-59ba-a895-51108b690e38"))
+      (tstamps "d73df3be-1657-5e06-854f-c04ecdf85704"))
     (comp
       (ref "J_ANT2G4")
       (value "SMA_2G4_antenna")
@@ -223,9 +199,9 @@
         (field
           (name "Datasheet") "~")
         (field
-          (name "SKiDL Tag") "2QjPZr_eM6")
+          (name "SKiDL Tag") "XdzPQQampl")
         (field
-          (name "SKiDL Line") "base_station_schematic.py:63"))
+          (name "SKiDL Line") "base_station_netlist.py:46"))
       (libsource
         (lib "/usr/share/kicad/symbols/Connector.kicad_sym")
         (part "Conn_Coaxial"))
@@ -233,34 +209,10 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "1f4ba663-8f7b-5c47-91bd-ba4ae159f4c2"))
-    (comp
-      (ref "J_ANT433")
-      (value "SMA_433_antenna_masthead")
-      (description "coaxial connector (BNC, SMA, SMB, SMC, Cinch/RCA, LEMO, ...)")
-      (footprint "Connector_Coaxial:SMA_Amphenol_132289_EdgeMount")
-      (fields
-        (field
-          (name "Description") "coaxial connector (BNC, SMA, SMB, SMC, Cinch/RCA, LEMO, ...)")
-        (field
-          (name "Footprint") "Connector_Coaxial:SMA_Amphenol_132289_EdgeMount")
-        (field
-          (name "Datasheet") "~")
-        (field
-          (name "SKiDL Tag") "iNFHxnVOqo")
-        (field
-          (name "SKiDL Line") "base_station_schematic.py:51"))
-      (libsource
-        (lib "/usr/share/kicad/symbols/Connector.kicad_sym")
-        (part "Conn_Coaxial"))
-      (sheetpath
-        (names "/")
-        (tstamps "/"))
-      (component_classes)
-      (tstamps "b31781e0-64f3-5bad-aae7-b3f3999c6922"))
+      (tstamps "323d6983-0b34-56ba-902e-9831d7ce56ea"))
     (comp
       (ref "J_FEED")
-      (value "SMA_feed_to_shack")
+      (value "SMA_feed_from_masthead")
       (description "coaxial connector (BNC, SMA, SMB, SMC, Cinch/RCA, LEMO, ...)")
       (footprint "Connector_Coaxial:SMA_Amphenol_132289_EdgeMount")
       (fields
@@ -271,9 +223,9 @@
         (field
           (name "Datasheet") "~")
         (field
-          (name "SKiDL Tag") "2nqqoVIEHt")
+          (name "SKiDL Tag") "BQGTWMBBT2")
         (field
-          (name "SKiDL Line") "base_station_schematic.py:54"))
+          (name "SKiDL Line") "base_station_netlist.py:46"))
       (libsource
         (lib "/usr/share/kicad/symbols/Connector.kicad_sym")
         (part "Conn_Coaxial"))
@@ -281,7 +233,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "1f662a77-78fe-54c2-ac97-21b039f9b0b9"))
+      (tstamps "66902d20-fdbe-5a4a-afc4-ec5d706ba00e"))
     (comp
       (ref "J_IN2G4")
       (value "SMA_2G4_TX_in")
@@ -295,9 +247,9 @@
         (field
           (name "Datasheet") "~")
         (field
-          (name "SKiDL Tag") "rJv8rW4lpW")
+          (name "SKiDL Tag") "ZLkW007qAb")
         (field
-          (name "SKiDL Line") "base_station_schematic.py:60"))
+          (name "SKiDL Line") "base_station_netlist.py:46"))
       (libsource
         (lib "/usr/share/kicad/symbols/Connector.kicad_sym")
         (part "Conn_Coaxial"))
@@ -305,7 +257,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "6e1ca2a8-d1ab-507f-8128-94191dbd9b2f"))
+      (tstamps "31c198bb-ad58-5bee-9273-b7cdfd3058e1"))
     (comp
       (ref "J_RXOUT")
       (value "SMA_433_RX_out")
@@ -319,9 +271,9 @@
         (field
           (name "Datasheet") "~")
         (field
-          (name "SKiDL Tag") "fAATQ5zRZp")
+          (name "SKiDL Tag") "dWlTwrear6")
         (field
-          (name "SKiDL Line") "base_station_schematic.py:57"))
+          (name "SKiDL Line") "base_station_netlist.py:46"))
       (libsource
         (lib "/usr/share/kicad/symbols/Connector.kicad_sym")
         (part "Conn_Coaxial"))
@@ -329,31 +281,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "8f234194-8163-5ec1-a748-8bc21c4cf0f4"))
-    (comp
-      (ref "LNA1")
-      (value "TQP3M9037")
-      (description "Resistor")
-      (footprint "Package_TO_SOT_SMD:SOT-89-3")
-      (fields
-        (field
-          (name "Description") "Resistor")
-        (field
-          (name "Footprint") "Package_TO_SOT_SMD:SOT-89-3")
-        (field
-          (name "Datasheet") "~")
-        (field
-          (name "SKiDL Tag") "D_VF8q9gT7")
-        (field
-          (name "SKiDL Line") "base_station_schematic.py:81"))
-      (libsource
-        (lib "/usr/share/kicad/symbols/Device.kicad_sym")
-        (part "R"))
-      (sheetpath
-        (names "/")
-        (tstamps "/"))
-      (component_classes)
-      (tstamps "2fc5a752-6382-5356-addc-864e86c87014"))
+      (tstamps "7a91b51f-245c-5740-ac28-73bd678ed5b6"))
     (comp
       (ref "L_BIAS")
       (value "1uH_bias_tee_DC_inject")
@@ -367,9 +295,9 @@
         (field
           (name "Datasheet") "~")
         (field
-          (name "SKiDL Tag") "aHDaXMn26G")
+          (name "SKiDL Tag") "tBKB3TXRie")
         (field
-          (name "SKiDL Line") "base_station_schematic.py:132"))
+          (name "SKiDL Line") "base_station_netlist.py:59"))
       (libsource
         (lib "/usr/share/kicad/symbols/Device.kicad_sym")
         (part "L"))
@@ -377,10 +305,10 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "b966bebb-b4e2-52ab-8a59-9cafe669ff36"))
+      (tstamps "5b27239a-6f44-59f0-b0d4-679d482fd45a"))
     (comp
       (ref "R_AGC_BYPASS")
-      (value "0R_DNP_will_populate_VGA")
+      (value "0R__populate_U_VGA_here")
       (description "Resistor")
       (footprint "Resistor_SMD:R_0402_1005Metric")
       (fields
@@ -391,9 +319,9 @@
         (field
           (name "Datasheet") "~")
         (field
-          (name "SKiDL Tag") "KsySxBBrdU")
+          (name "SKiDL Tag") "4Wpxmjbsto")
         (field
-          (name "SKiDL Line") "base_station_schematic.py:110"))
+          (name "SKiDL Line") "base_station_netlist.py:83"))
       (libsource
         (lib "/usr/share/kicad/symbols/Device.kicad_sym")
         (part "R"))
@@ -401,7 +329,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "748e82ca-d1e4-5806-b5a0-ba7f7380957b"))
+      (tstamps "b8470c5a-6b98-5726-808d-0065306b3603"))
     (comp
       (ref "U_PSU")
       (value "AP2112K-3.3_SOT23_600mA")
@@ -415,9 +343,9 @@
         (field
           (name "Datasheet") "https://www.diodes.com/assets/Datasheets/AP2112.pdf")
         (field
-          (name "SKiDL Tag") "I7aiEExvzc")
+          (name "SKiDL Tag") "5XfR9u785p")
         (field
-          (name "SKiDL Line") "base_station_schematic.py:138"))
+          (name "SKiDL Line") "base_station_netlist.py:115"))
       (libsource
         (lib "/usr/share/kicad/symbols/Regulator_Linear.kicad_sym")
         (part "AP2112K-3.3"))
@@ -425,7 +353,7 @@
         (names "/")
         (tstamps "/"))
       (component_classes)
-      (tstamps "4bc09c50-9e5f-5e8f-bb6c-8e033ade8048")))
+      (tstamps "2fc3d760-a72b-52f0-b4ad-611db73e3c1d")))
   (nets
     (net
       (code 1)
@@ -444,6 +372,10 @@
       (name "GND")
       (class "Default")
       (node
+        (ref "C_BIAS_FEED")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
         (ref "C_DEC1")
         (pin "2")
         (pintype "PASSIVE"))
@@ -452,15 +384,7 @@
         (pin "2")
         (pintype "PASSIVE"))
       (node
-        (ref "D_LIM")
-        (pin "2")
-        (pintype "PASSIVE"))
-      (node
         (ref "J_ANT2G4")
-        (pin "2")
-        (pintype "PASSIVE"))
-      (node
-        (ref "J_ANT433")
         (pin "2")
         (pintype "PASSIVE"))
       (node
@@ -481,18 +405,6 @@
         (pintype "POWER-IN")))
     (net
       (code 3)
-      (name "RF24_PAD")
-      (class "Default")
-      (node
-        (ref "ATT1")
-        (pin "2")
-        (pintype "PASSIVE"))
-      (node
-        (ref "DSA1")
-        (pin "1")
-        (pintype "PASSIVE")))
-    (net
-      (code 4)
       (name "RF24_TX_IN")
       (class "Default")
       (node
@@ -504,7 +416,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 5)
+      (code 4)
       (name "RF24_TX_OUT")
       (class "Default")
       (node
@@ -516,59 +428,31 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
+      (code 5)
+      (name "RF24_TX_PAD")
+      (class "Default")
+      (node
+        (ref "ATT1")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "DSA1")
+        (pin "1")
+        (pintype "PASSIVE")))
+    (net
       (code 6)
-      (name "RF433_IN")
+      (name "RF433_FEED")
       (class "Default")
       (node
-        (ref "BPF433")
+        (ref "C_BIAS_FEED")
         (pin "1")
         (pintype "PASSIVE"))
-      (node
-        (ref "BPF433")
-        (pin "2")
-        (pintype "PASSIVE"))
-      (node
-        (ref "J_ANT433")
-        (pin "1")
-        (pintype "PASSIVE"))
-      (node
-        (ref "LNA1")
-        (pin "1")
-        (pintype "PASSIVE")))
-    (net
-      (code 7)
-      (name "RF433_LNA")
-      (class "Default")
-      (node
-        (ref "D_LIM")
-        (pin "1")
-        (pintype "PASSIVE"))
-      (node
-        (ref "LNA1")
-        (pin "2")
-        (pintype "PASSIVE")))
-    (net
-      (code 8)
-      (name "RF433_OUT")
-      (class "Default")
-      (node
-        (ref "R_AGC_BYPASS")
-        (pin "2")
-        (pintype "PASSIVE")))
-    (net
-      (code 9)
-      (name "RF433_OUT1")
-      (class "Default")
-      (node
-        (ref "J_RXOUT")
-        (pin "1")
-        (pintype "PASSIVE")))
-    (net
-      (code 10)
-      (name "RF433_RX")
-      (class "Default")
       (node
         (ref "C_DCBLOCK")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "J_FEED")
         (pin "1")
         (pintype "PASSIVE"))
       (node
@@ -576,23 +460,31 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 11)
-      (name "RF433_SHACK")
+      (code 7)
+      (name "RF433_RX")
       (class "Default")
       (node
         (ref "C_DCBLOCK")
         (pin "2")
-        (pintype "PASSIVE")))
-    (net
-      (code 12)
-      (name "RF433_SHACK1")
-      (class "Default")
+        (pintype "PASSIVE"))
       (node
         (ref "R_AGC_BYPASS")
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 13)
+      (code 8)
+      (name "RF433_RX_OUT")
+      (class "Default")
+      (node
+        (ref "J_RXOUT")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R_AGC_BYPASS")
+        (pin "2")
+        (pintype "PASSIVE")))
+    (net
+      (code 9)
       (name "VIN")
       (class "Default")
       (node
