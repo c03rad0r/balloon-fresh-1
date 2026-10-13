@@ -1,14 +1,14 @@
 {
     "$schema": "https://schemas.kicad.org/drc.v1.json",
     "coordinate_units": "mm",
-    "date": "2026-10-13T15:36:52+0200",
+    "date": "2026-10-13T15:43:25+0200",
     "included_severities": [
         "error",
         "warning"
     ],
     "kicad_version": "9.0.8",
     "schematic_parity": [],
-    "source": "v19f.kicad_pcb",
+    "source": "v22f.kicad_pcb",
     "unconnected_items": [
         {
             "description": "Missing connection between items",
@@ -60,20 +60,20 @@
             "description": "Missing connection between items",
             "items": [
                 {
-                    "description": "Pad 3 [/CUT_SENSE_W2] of J_W2 on F.Cu",
-                    "pos": {
-                        "x": 50.6,
-                        "y": 106.0
-                    },
-                    "uuid": "094e90f8-8871-4d13-80cb-cafe1d64e7d3"
-                },
-                {
                     "description": "Pad 3 [/CUT_SENSE_W2] of J_W2 on B.Cu",
                     "pos": {
                         "x": 50.6,
                         "y": 106.0
                     },
                     "uuid": "28886a90-0574-449a-9751-51284e3a6d4a"
+                },
+                {
+                    "description": "Pad 3 [/CUT_SENSE_W2] of J_W2 on F.Cu",
+                    "pos": {
+                        "x": 50.6,
+                        "y": 106.0
+                    },
+                    "uuid": "094e90f8-8871-4d13-80cb-cafe1d64e7d3"
                 }
             ],
             "severity": "error",
@@ -160,10 +160,10 @@
                     "uuid": "9565257f-aa32-4a90-9010-d2c1fb438237"
                 },
                 {
-                    "description": "Track [/SCAP_MID] on B.Cu, length 0.2857 mm",
+                    "description": "Track [/SCAP_MID] on B.Cu, length 0.0857 mm",
                     "pos": {
-                        "x": 41.9836,
-                        "y": 26.0563
+                        "x": 42.147064,
+                        "y": 25.941063
                     },
                     "uuid": "41ca590a-c7b1-4091-958f-8328d98ebfbb"
                 }
@@ -175,10 +175,10 @@
             "description": "Missing connection between items",
             "items": [
                 {
-                    "description": "Track [/SCAP_MID] on B.Cu, length 0.2857 mm",
+                    "description": "Track [/SCAP_MID] on B.Cu, length 0.0857 mm",
                     "pos": {
-                        "x": 41.9836,
-                        "y": 26.0563
+                        "x": 42.147064,
+                        "y": 25.941063
                     },
                     "uuid": "41ca590a-c7b1-4091-958f-8328d98ebfbb"
                 },
@@ -206,12 +206,12 @@
                     "uuid": "47d9824b-db1d-4663-ba17-4c8bb7679005"
                 },
                 {
-                    "description": "Pad 1 [/W1_SOLAR_N] of J_W2 on B.Cu",
+                    "description": "Pad 1 [/W1_SOLAR_N] of J_W2 on F.Cu",
                     "pos": {
                         "x": 54.2,
                         "y": 106.0
                     },
-                    "uuid": "3b2f3638-63e2-4bd8-a327-26a4e22131c0"
+                    "uuid": "3af025ed-6467-4af9-9683-7547bfb66608"
                 }
             ],
             "severity": "error",
@@ -244,20 +244,20 @@
             "description": "Missing connection between items",
             "items": [
                 {
-                    "description": "Pad 4 [/W2_SOLAR_N] of J_W2 on F.Cu",
-                    "pos": {
-                        "x": 48.8,
-                        "y": 106.0
-                    },
-                    "uuid": "244d2674-667b-44a7-ad90-10f92da25390"
-                },
-                {
                     "description": "Pad 4 [/W2_SOLAR_N] of J_W2 on B.Cu",
                     "pos": {
                         "x": 48.8,
                         "y": 106.0
                     },
                     "uuid": "c61db335-c611-44d8-9c45-019f5316aa89"
+                },
+                {
+                    "description": "Pad 4 [/W2_SOLAR_N] of J_W2 on F.Cu",
+                    "pos": {
+                        "x": 48.8,
+                        "y": 106.0
+                    },
+                    "uuid": "244d2674-667b-44a7-ad90-10f92da25390"
                 }
             ],
             "severity": "error",
@@ -275,12 +275,12 @@
                     "uuid": "244d2674-667b-44a7-ad90-10f92da25390"
                 },
                 {
-                    "description": "Track [/W2_SOLAR_N] on B.Cu, length 0.6077 mm",
+                    "description": "Track [/W2_SOLAR_N] on B.Cu, length 0.5262 mm",
                     "pos": {
-                        "x": 98.6781,
+                        "x": 98.0704,
                         "y": 55.3611
                     },
-                    "uuid": "d8e871c8-5344-4397-93c1-16bfa1f2c558"
+                    "uuid": "67929089-c86c-4397-9f68-d7c386447584"
                 }
             ],
             "severity": "error",
@@ -289,14 +289,6 @@
         {
             "description": "Missing connection between items",
             "items": [
-                {
-                    "description": "Pad 1 [/W3_SOLAR_N] of J_W4 on F.Cu",
-                    "pos": {
-                        "x": 48.8,
-                        "y": -3.0
-                    },
-                    "uuid": "befdb11c-838d-48bd-80fd-f9d43798d92c"
-                },
                 {
                     "description": "Pad 1 [/W3_SOLAR_N] of J_W4 on B.Cu",
                     "pos": {
@@ -304,6 +296,14 @@
                         "y": -3.0
                     },
                     "uuid": "135b15b4-b1c9-4747-8410-4ce3c1db85fa"
+                },
+                {
+                    "description": "Pad 1 [/W3_SOLAR_N] of J_W4 on F.Cu",
+                    "pos": {
+                        "x": 48.8,
+                        "y": -3.0
+                    },
+                    "uuid": "befdb11c-838d-48bd-80fd-f9d43798d92c"
                 }
             ],
             "severity": "error",
@@ -321,12 +321,12 @@
                     "uuid": "befdb11c-838d-48bd-80fd-f9d43798d92c"
                 },
                 {
-                    "description": "Track [/W3_SOLAR_N] on F.Cu, length 2.4735 mm",
+                    "description": "Pad 1 [/W3_SOLAR_N] of D_BP4 on F.Cu",
                     "pos": {
-                        "x": 51.294,
-                        "y": 22.544
+                        "x": 49.545,
+                        "y": 20.795
                     },
-                    "uuid": "fd6049ff-df4a-4203-88d3-c38e81802489"
+                    "uuid": "c367afe2-5469-4e69-8ca7-feb7c724c173"
                 }
             ],
             "severity": "error",
@@ -336,35 +336,35 @@
             "description": "Missing connection between items",
             "items": [
                 {
-                    "description": "Zone 'GND_PLANE_F.Cu' [GND] on F.Cu, priority 0",
+                    "description": "Pad 2 [GND] of J_W1 on F.Cu",
+                    "pos": {
+                        "x": 3.0,
+                        "y": 50.6
+                    },
+                    "uuid": "5a37cace-da2f-4112-8244-7d103599e608"
+                },
+                {
+                    "description": "Pad 2 [GND] of J_W1 on B.Cu",
+                    "pos": {
+                        "x": 3.0,
+                        "y": 50.6
+                    },
+                    "uuid": "21b04093-843c-48e6-9f2e-9b0b623850bd"
+                }
+            ],
+            "severity": "error",
+            "type": "unconnected_items"
+        },
+        {
+            "description": "Missing connection between items",
+            "items": [
+                {
+                    "description": "Zone 'GND_PLANE_B.Cu' [GND] on B.Cu, priority 0",
                     "pos": {
                         "x": 0.425,
                         "y": 0.425
                     },
-                    "uuid": "d8c9b044-4afd-4b66-9517-5fdf6413d130"
-                },
-                {
-                    "description": "Pad 2 [GND] of J_W1 on F.Cu",
-                    "pos": {
-                        "x": 3.0,
-                        "y": 50.6
-                    },
-                    "uuid": "5a37cace-da2f-4112-8244-7d103599e608"
-                }
-            ],
-            "severity": "error",
-            "type": "unconnected_items"
-        },
-        {
-            "description": "Missing connection between items",
-            "items": [
-                {
-                    "description": "Pad 2 [GND] of J_W1 on F.Cu",
-                    "pos": {
-                        "x": 3.0,
-                        "y": 50.6
-                    },
-                    "uuid": "5a37cace-da2f-4112-8244-7d103599e608"
+                    "uuid": "d8da0899-e55c-470c-95b2-1c22208b0211"
                 },
                 {
                     "description": "Pad 2 [GND] of J_W1 on B.Cu",
@@ -405,20 +405,20 @@
             "description": "Missing connection between items",
             "items": [
                 {
-                    "description": "Zone 'GND_PLANE_B.Cu' [GND] on B.Cu, priority 0",
+                    "description": "Zone 'GND_PLANE_F.Cu' [GND] on F.Cu, priority 0",
                     "pos": {
                         "x": 0.425,
                         "y": 0.425
                     },
-                    "uuid": "d8da0899-e55c-470c-95b2-1c22208b0211"
+                    "uuid": "d8c9b044-4afd-4b66-9517-5fdf6413d130"
                 },
                 {
-                    "description": "Pad 2 [GND] of J_W4 on B.Cu",
+                    "description": "Pad 2 [GND] of J_W4 on F.Cu",
                     "pos": {
                         "x": 50.6,
                         "y": -3.0
                     },
-                    "uuid": "ef2c992d-085c-4ae4-bbe3-b395eb8f3b20"
+                    "uuid": "3f4627e2-bbfe-40d2-b6ff-cbb9b07231d9"
                 }
             ],
             "severity": "error",
@@ -474,20 +474,20 @@
             "description": "Missing connection between items",
             "items": [
                 {
-                    "description": "Pad 2 [GND] of J_W2 on B.Cu",
+                    "description": "Pad 2 [GND] of J_W2 on F.Cu",
                     "pos": {
                         "x": 52.4,
                         "y": 106.0
                     },
-                    "uuid": "4ce2980e-78cc-4630-81fc-f7d127991a9d"
+                    "uuid": "b50c366e-24a3-403f-8ce2-691f732acb1a"
                 },
                 {
-                    "description": "Pad 2 [GND] of ANT4 on F.Cu",
+                    "description": "Zone 'GND_PLANE_F.Cu' [GND] on F.Cu, priority 0",
                     "pos": {
-                        "x": 76.805,
-                        "y": 100.455
+                        "x": 0.425,
+                        "y": 0.425
                     },
-                    "uuid": "18a0b79e-43f2-45c7-82c1-ffb5372a05de"
+                    "uuid": "d8c9b044-4afd-4b66-9517-5fdf6413d130"
                 }
             ],
             "severity": "error",
@@ -528,12 +528,12 @@
                     "uuid": "bdd56efc-0cc3-42ab-ab49-82c143c53629"
                 },
                 {
-                    "description": "Pad 2 [GND] of J_W4 on B.Cu",
+                    "description": "Pad 2 [GND] of J_W4 on F.Cu",
                     "pos": {
                         "x": 50.6,
                         "y": -3.0
                     },
-                    "uuid": "ef2c992d-085c-4ae4-bbe3-b395eb8f3b20"
+                    "uuid": "3f4627e2-bbfe-40d2-b6ff-cbb9b07231d9"
                 }
             ],
             "severity": "error",
@@ -543,20 +543,20 @@
             "description": "Missing connection between items",
             "items": [
                 {
-                    "description": "Zone 'GND_PLANE_F.Cu' [GND] on F.Cu, priority 0",
+                    "description": "Pad 10 [GND] of U5 on F.Cu",
                     "pos": {
-                        "x": 0.425,
-                        "y": 0.425
+                        "x": 89.695,
+                        "y": 28.745
                     },
-                    "uuid": "d8c9b044-4afd-4b66-9517-5fdf6413d130"
+                    "uuid": "1844a525-6217-4314-b716-015ba1adf974"
                 },
                 {
-                    "description": "Pad 2 [GND] of J_W3 on F.Cu",
+                    "description": "Pad 2 [GND] of J_W3 on B.Cu",
                     "pos": {
                         "x": 100.0,
                         "y": 52.4
                     },
-                    "uuid": "af5349d4-b581-4a01-a23a-a64adff8c954"
+                    "uuid": "33747d3c-5e67-4be0-9a54-917eafcd6089"
                 }
             ],
             "severity": "error",
@@ -1430,29 +1430,6 @@
             "type": "clearance"
         },
         {
-            "description": "Clearance violation ( clearance 0.2000 mm; actual 0.0143 mm)",
-            "items": [
-                {
-                    "description": "Via [+3V3] on F.Cu - B.Cu",
-                    "pos": {
-                        "x": 41.645,
-                        "y": 26.295
-                    },
-                    "uuid": "28576d1a-89d8-421c-8149-325c6f280f76"
-                },
-                {
-                    "description": "Track [/SCAP_MID] on B.Cu, length 0.2857 mm",
-                    "pos": {
-                        "x": 41.9836,
-                        "y": 26.0563
-                    },
-                    "uuid": "41ca590a-c7b1-4091-958f-8328d98ebfbb"
-                }
-            ],
-            "severity": "error",
-            "type": "clearance"
-        },
-        {
             "description": "Clearance violation ( clearance 0.2000 mm; actual 0.0938 mm)",
             "items": [
                 {
@@ -1499,29 +1476,6 @@
             "type": "clearance"
         },
         {
-            "description": "Clearance violation ( clearance 0.2000 mm; actual 0.0450 mm)",
-            "items": [
-                {
-                    "description": "Via [/ANT1_433_TX] on F.Cu - B.Cu",
-                    "pos": {
-                        "x": 38.5827,
-                        "y": 30.308
-                    },
-                    "uuid": "4d049f6d-024f-4b3a-85bc-2f12e8224ec0"
-                },
-                {
-                    "description": "Track [/SCAP_MID] on B.Cu, length 6.6625 mm",
-                    "pos": {
-                        "x": 37.0049,
-                        "y": 31.035
-                    },
-                    "uuid": "9565257f-aa32-4a90-9010-d2c1fb438237"
-                }
-            ],
-            "severity": "error",
-            "type": "clearance"
-        },
-        {
             "description": "Clearance violation ( clearance 0.2000 mm; actual 0.1500 mm)",
             "items": [
                 {
@@ -1539,6 +1493,29 @@
                         "y": 7.2
                     },
                     "uuid": "9a6bc352-1871-48cd-9dfd-c70e985fd164"
+                }
+            ],
+            "severity": "error",
+            "type": "clearance"
+        },
+        {
+            "description": "Clearance violation ( clearance 0.2000 mm; actual 0.0450 mm)",
+            "items": [
+                {
+                    "description": "Via [/ANT1_433_TX] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 38.5827,
+                        "y": 30.308
+                    },
+                    "uuid": "4d049f6d-024f-4b3a-85bc-2f12e8224ec0"
+                },
+                {
+                    "description": "Track [/SCAP_MID] on B.Cu, length 6.6625 mm",
+                    "pos": {
+                        "x": 37.0049,
+                        "y": 31.035
+                    },
+                    "uuid": "9565257f-aa32-4a90-9010-d2c1fb438237"
                 }
             ],
             "severity": "error",
@@ -1608,29 +1585,6 @@
                         "y": 5.1352
                     },
                     "uuid": "a1b84fc9-aa03-4272-824a-cd0df1c0ae84"
-                }
-            ],
-            "severity": "error",
-            "type": "clearance"
-        },
-        {
-            "description": "Clearance violation ( clearance 0.2000 mm; actual 0.1416 mm)",
-            "items": [
-                {
-                    "description": "Via [+3V3] on F.Cu - B.Cu",
-                    "pos": {
-                        "x": 41.645,
-                        "y": 26.295
-                    },
-                    "uuid": "28576d1a-89d8-421c-8149-325c6f280f76"
-                },
-                {
-                    "description": "Track [/SX1280_SCK] on B.Cu, length 5.7157 mm",
-                    "pos": {
-                        "x": 38.6131,
-                        "y": 28.5609
-                    },
-                    "uuid": "3dfc1c33-14e1-49ff-ae03-8f7b386f1474"
                 }
             ],
             "severity": "error",
@@ -2782,10 +2736,10 @@
             "description": "Track has unconnected end",
             "items": [
                 {
-                    "description": "Track [/SCAP_MID] on B.Cu, length 0.2857 mm",
+                    "description": "Track [/SCAP_MID] on B.Cu, length 0.0857 mm",
                     "pos": {
-                        "x": 41.9836,
-                        "y": 26.0563
+                        "x": 42.147064,
+                        "y": 25.941063
                     },
                     "uuid": "41ca590a-c7b1-4091-958f-8328d98ebfbb"
                 }
