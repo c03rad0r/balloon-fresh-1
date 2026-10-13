@@ -1,0 +1,45 @@
+ref,value,footprint,lib
+ANT1,U.FL_433_TX,U.FL_Molex_MCRF_73412-0110_Vertical,Connector_Coaxial
+ANT2,U.FL_2G4_RANGE,U.FL_Molex_MCRF_73412-0110_Vertical,Connector_Coaxial
+ANT3,U.FL_2G4_RX,U.FL_Molex_MCRF_73412-0110_Vertical,Connector_Coaxial
+ANT4,U.FL_GNSS_L1,U.FL_Molex_MCRF_73412-0110_Vertical,Connector_Coaxial
+C4,10uF,C_0402_1005Metric,Capacitor_SMD
+C_BULK,100uF,C_1206_3216Metric,Capacitor_SMD
+C_CAP1,3.3F 2.7V (AVX SCC),CP_Radial_D10.0mm_P5.00mm,Capacitor_THT
+C_CAP2,3.3F 2.7V (AVX SCC),CP_Radial_D10.0mm_P5.00mm,Capacitor_THT
+C_HF,100nF,C_0402_1005Metric,Capacitor_SMD
+C_MON,10nF,C_0402_1005Metric,Capacitor_SMD
+D1,BAT54,D_SOD-123,Diode_SMD
+D_BP1,SS24,D_SMA,Diode_SMD
+D_BP2,SS24,D_SMA,Diode_SMD
+D_BP3,SS24,D_SMA,Diode_SMD
+D_BP4,SS24,D_SMA,Diode_SMD
+D_CLAMP,TVS clamp (set point TODO(unverified)),D_SOD-323,Diode_SMD
+D_HUB1,SS24,D_SMA,Diode_SMD
+D_HUB2,SS24,D_SMA,Diode_SMD
+FID1,Fiducial,Fiducial_1mm_Mask2mm,Fiducial
+FID3,Fiducial,Fiducial_1mm_Mask2mm,Fiducial
+FID3,Fiducial,Fiducial_1mm_Mask2mm,Fiducial
+J_VCC,F33_VCC_SEL (5V raw | 3V3),SolderJumper-3_P1.3mm_Open_RoundedPad1.0x1.5mm,Jumper
+J_W1,WING_SOCKET_4P (hub wing interface 1),Wing_Tab_4P,Tracker_Mechanical
+J_W2,WING_SOCKET_4P (hub wing interface 2),Wing_Tab_4P,Tracker_Mechanical
+J_W3,WING_SOCKET_4P (hub wing interface 3),Wing_Tab_4P,Tracker_Mechanical
+J_W4,WING_SOCKET_4P (hub wing interface 4),Wing_Tab_4P,Tracker_Mechanical
+R_BAL1,10k,R_0402_1005Metric,Resistor_SMD
+R_BAL2,10k,R_0402_1005Metric,Resistor_SMD
+R_DIV1,1M,R_0402_1005Metric,Resistor_SMD
+R_DIV2,1M,R_0402_1005Metric,Resistor_SMD
+R_F1,100R,R_0402_1005Metric,Resistor_SMD
+R_MON1,4.7M,R_0402_1005Metric,Resistor_SMD
+R_MON2,4.7M,R_0402_1005Metric,Resistor_SMD
+R_NTC1,TODO(unverified) (sets ntc_r_ratio),R_0402_1005Metric,Resistor_SMD
+TH1,MountingHole,MountingHole_1.5mm,MountingHole
+TH2,MountingHole,MountingHole_1.5mm,MountingHole
+TH_NTC1,"TODO(unverified) (NTC, R25/beta TODO)",R_0402_1005Metric,Resistor_SMD
+U1,ESP32-S3-WROOM-1U-N8R8,ESP32-S3-WROOM-1U,RF_Module
+U2,LoRa2021F33-2G4,LoRa2021F33_2G4,balloon_flight_v9
+U3,LoRa2021_Castellated,LoRa2021_Castellated,balloon_flight_v9
+U4,SX1280,SX1280_QFN24,balloon_flight_v9
+U5,MAX-M10S,ublox_MAX,RF_GPS
+U6,MS5611-01BA,LGA-8_3x5mm_P1.25mm,Package_LGA
+U7,TPS7A02,SOT-23-5,Package_TO_SOT_SMD
