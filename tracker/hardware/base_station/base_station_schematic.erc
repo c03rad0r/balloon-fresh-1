@@ -1,0 +1,12 @@
+ERC WARNING: Merging two named nets (RF433_RX and RF433_LIM_OUT) into RF433_RX.
+ERC WARNING: Only one pin (PASSIVE pin 2/~ of R/R_AGC_BYPASS) attached to net RF433_OUT.
+ERC WARNING: Insufficient drive current on net VIN for pin POWER-IN pin 1/VIN of AP2112K-3.3/U_PSU.
+ERC WARNING: Only one pin (PASSIVE pin 1/~ of R/R_AGC_BYPASS) attached to net RF433_SHACK1.
+ERC WARNING: Only one pin (PASSIVE pin 2/~ of C/C_DCBLOCK) attached to net RF433_SHACK.
+ERC WARNING: Only one pin (PASSIVE pin 1/In of Conn_Coaxial/J_RXOUT) attached to net RF433_OUT1.
+ERC WARNING: Insufficient drive current on net GND for pin POWER-IN pin 2/GND of AP2112K-3.3/U_PSU.
+ERC WARNING: Unconnected pin: PASSIVE pin 1/In of Conn_Coaxial/J_FEED.
+ERC WARNING: Unconnected pin: POWER-OUT pin 5/VOUT of AP2112K-3.3/U_PSU.
+ERC INFO: 9 warnings found while running ERC.
+ERC INFO: 0 errors found while running ERC.
+
