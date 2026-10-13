@@ -1,0 +1,12 @@
+FAB PACKET PROVENANCE
+board: tracker/hardware/hub_board_v9_d1c_routed.kicad_pcb
+a5e0cca3211eafdc4bd9de7795ac0901  tracker/hardware/hub_board_v9_d1c_routed.kicad_pcb
+mtime: 2026-10-13 17:03:14.831211588 +0200
+commit: dd0feba3 feat(pcb): v29+v30 -- ZERO copper-rule violations; all 6 order-blocks CLEARED
+generated: 2026-10-13T15:05:33Z
+tool: kicad-cli (KiCad 9)
+
+FAB PROCESS REQUIRED:
+  4-layer, 1.6mm, JLCPCB standard tier
+  Via-in-Pad: FILLED & CAPPED (IPC-4761 Type VII)
+  min via 0.40mm / min drill 0.20mm (JLCPCB 4L standard)
