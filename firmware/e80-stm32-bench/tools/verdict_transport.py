@@ -72,10 +72,6 @@ if _TOOLS_DIR not in sys.path:
 # ``verdict_relay_constants``): the canonical list lives there and is re-exported
 # below, so the value is never duplicated.
 import verdict_relay_constants as _relay_constants  # noqa: E402
-from verdict_relay_constants import (  # noqa: E402
-    FAILOVER_RELAYS,
-    FAILOVER_RELAY_URLS,
-)
 
 __all__ = [
     "KIND_GIFT_WRAP",
