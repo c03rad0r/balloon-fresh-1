@@ -212,3 +212,40 @@ here — this is a new module. The `template_values.sh` → `meshcore.h` →
 compiled-constants chain, with the host test diffing all three and a counter-test
 that the check fails on drift, is deliberate single-source-of-truth hygiene for
 the new code, not a repair of an existing defect.
+
+## Delivery
+
+Branch `feat/lib-meshcore`, worktree `/home/c03rad0r/worktrees/lib-meshcore`.
+Four atomic commits, pushed to both remotes and verified by `git ls-remote`:
+
+```
+9f03641b  (pre-existing) feat(radio_core): freeze the radio HAL contract
+59cb8905  test(meshcore): RED host suite + frozen interfaces
+e2663e2c  feat(meshcore): strict L1 header codec with all-or-nothing decode
+cf859d51  feat(meshcore): flood/TTL transport core with dedup, ACK retry, reassembly
+9810f0de  docs(report): MeshCore transport core -- RED/sabotage evidence
+
+local  : 9810f0de350d9a7340551cd3b4f49659415725b2
+github : 9810f0de350d9a7340551cd3b4f49659415725b2   MATCH
+ngit   : 9810f0de350d9a7340551cd3b4f49659415725b2   MATCH
+```
+
+Push notes, stated plainly:
+
+* **ngit needed a PATH fix, and the first attempt genuinely failed.** The push
+  first returned
+  `git: 'remote-nostr' is not a git command. See 'git --help'.`
+  `fatal: remote helper 'nostr' aborted session` (exit 128). The `nostr` remote
+  helper is installed at `~/.local/bin/git-remote-nostr`
+  (`/home/c03rad0r/.local/bin/git-remote-nostr`), which is not on the PATH of a
+  non-interactive `ssh cobrador` session. Re-running with
+  `export PATH="$HOME/.local/bin:$PATH"` pushed correctly. **No force was used.**
+  The fix is in the invoking environment, not the repository: the worktree's git
+  config was not modified.
+* **ngit reached 1 of 2 relays.** The push reported
+  `Published 1 state event to 1/2 relays (failed: nos.lol)`. The branch is
+  published to `relay.ngit.dev`; the second relay did not accept the state event.
+  That is a partial relay publication, not a silent success.
+* The GitHub push reported `* [new branch] feat/lib-meshcore -> feat/lib-meshcore`
+  and passed the repository's pre-push secret scanner
+  (`✓ No secrets detected in full repo history.`).
