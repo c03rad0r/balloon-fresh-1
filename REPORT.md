@@ -216,24 +216,29 @@ the new code, not a repair of an existing defect.
 ## Delivery
 
 Branch `feat/lib-meshcore`, worktree `/home/c03rad0r/worktrees/lib-meshcore`.
-Four atomic commits, pushed to both remotes and verified by `git ls-remote`:
+The feature commits, in the order they landed:
 
 ```
-9f03641b  (pre-existing) feat(radio_core): freeze the radio HAL contract
 59cb8905  test(meshcore): RED host suite + frozen interfaces
 e2663e2c  feat(meshcore): strict L1 header codec with all-or-nothing decode
 cf859d51  feat(meshcore): flood/TTL transport core with dedup, ACK retry, reassembly
-9810f0de  docs(report): MeshCore transport core -- RED/sabotage evidence
-
-9810f0de  docs(report): ... (evidence section)   <- tip at the first push
-bed87606  docs(report): delivery section           <- current tip
-
-After this report's last commit the tip is, on both remotes:
-
-local  : bed8760678d0ab7d75aa52cf9114bc02e0167100
-github : bed8760678d0ab7d75aa52cf9114bc02e0167100   MATCH
-ngit   : bed8760678d0ab7d75aa52cf9114bc02e0167100   MATCH
 ```
+
+(followed by `docs(report)` commits that only touch this file.)
+
+Rather than embed a branch tip -- which the act of writing it down would
+invalidate -- the delivery invariant is stated as the thing that was actually
+checked and that stays checkable:
+
+```
+git ls-remote github feat/lib-meshcore
+git ls-remote ngit   feat/lib-meshcore
+git rev-parse        feat/lib-meshcore     # all three must be equal
+```
+
+At the time of writing, all three returned the same SHA and the working tree was
+clean, and `make -C firmware/lib test` printed
+`RESULT: all module tests green` with meshcore at `281 checks passed`.
 
 Push notes, stated plainly:
 
@@ -244,13 +249,15 @@ Push notes, stated plainly:
   helper is installed at `~/.local/bin/git-remote-nostr`
   (`/home/c03rad0r/.local/bin/git-remote-nostr`), which is not on the PATH of a
   non-interactive `ssh cobrador` session. Re-running with
-  `export PATH="$HOME/.local/bin:$PATH"` pushed correctly. **No force was used.**
-  The fix is in the invoking environment, not the repository: the worktree's git
-  config was not modified.
+  `export PATH="$HOME/.local/bin:$PATH"` pushed correctly. **No force was used
+  anywhere.** The fix lives in the invoking environment, not the repository: the
+  worktree's git config was not modified.
 * **ngit reached 1 of 2 relays.** The push reported
   `Published 1 state event to 1/2 relays (failed: nos.lol)`. The branch is
   published to `relay.ngit.dev`; the second relay did not accept the state event.
-  That is a partial relay publication, not a silent success.
-* The GitHub push reported `* [new branch] feat/lib-meshcore -> feat/lib-meshcore`
+  That is a partial relay publication, and it is reported here rather than
+  glossed as success.
+* The GitHub push reported
+  `* [new branch] feat/lib-meshcore -> feat/lib-meshcore` (then a fast-forward)
   and passed the repository's pre-push secret scanner
   (`✓ No secrets detected in full repo history.`).
