@@ -174,3 +174,33 @@ Counter-tests in the suite:
 | `f870564b` | `test(radio_core)`: counter-test the command path (closes the sabotage-D hole) |
 
 Reproduce: `make -C firmware/lib test` (plain `g++`, no PlatformIO).
+
+## 8. Push verification (both remotes)
+
+```
+local  c9ebba4f1214510720a356ad5e2668299c8b3c79
+github c9ebba4f1214510720a356ad5e2668299c8b3c79
+ngit   c9ebba4f1214510720a356ad5e2668299c8b3c79
+```
+
+- `git push github feat/lib-radio-core` -> `* [new branch] feat/lib-radio-core -> feat/lib-radio-core`
+- `git push ngit feat/lib-radio-core` -> `* [new branch] feat/lib-radio-core -> feat/lib-radio-core`
+  (`Published 1 state event to 1/2 relays (failed: nos.lol)`; ngit needed
+  `~/.local/bin` on PATH for `git-remote-nostr`.) No force-push was used or
+  needed. (The SHAs above are the code+report tip taken immediately after the
+  first push; a later docs-only commit moves the tip forward without touching
+  any code.)
+
+Reproduce the whole thing from a clean tree:
+
+```sh
+make -C firmware/lib test        # -> radio_core: ok 160 checks passed
+```
+
+### Verdict
+
+The HAL is implemented against the frozen contract and is host-green, with the
+read-back-verification property carried by a counter-test that survives having
+the implementation sabotaged underneath it. **It has never spoken to a radio.**
+The next honest step is a bench run with real SX1280 silicon, which would also
+confirm or refute the two UNVERIFIED register addresses in `sx1280_map.h`.
