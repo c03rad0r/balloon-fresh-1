@@ -51,6 +51,10 @@ class FakeSpi : public SpiBus {
   bool transfer(const uint8_t *tx, uint8_t *rx, size_t len) override {
     ++calls;
     if (fail_transfers) return false;      // simulated wiring/SPI fault
+    // Simulated fault in the COMMAND path only: the status no-op still answers.
+    // This isolates error propagation in the register access layer from the
+    // BUSY probe that runs before it.
+    if (fail_data_transfers && tx != nullptr && tx[0] != kCmdNone) return false;
     if (tx == nullptr || rx == nullptr) return false;
     if (len == 0) return true;
     registered = true;                     // a real chip always answers something
@@ -129,6 +133,7 @@ class FakeSpi : public SpiBus {
   bool cs_at_rest() const { return cs_high; }
 
   bool fail_transfers = false;
+  bool fail_data_transfers = false;
   uint64_t now = 1000;  // "powered on" a second ago
   uint32_t step = 0;    // 0 = clock frozen
 
@@ -458,6 +463,18 @@ void run_tests() {
     CHECK(r->read_config(&back) != Result::Ok);
     CHECK(r->configure(configA()) != Result::Ok);
     bus.fail_transfers = false;
+    CHECK(r->bus_read_reg(0x0024, &v) == Result::Ok);
+
+    // Same, but with the status probe still answering, so the failure has to be
+    // caught by the register-access layer itself. Without this, an
+    // implementation that swallowed the command-transfer failure but kept the
+    // BUSY probe would pass.
+    bus.fail_data_transfers = true;
+    CHECK(r->bus_read_reg(0x0024, &v) == Result::BusError);
+    CHECK(r->bus_write_reg(0x0024, 0x11) == Result::BusError);
+    CHECK(r->read_config(&back) != Result::Ok);
+    CHECK(r->configure(configA()) != Result::Ok);
+    bus.fail_data_transfers = false;
     CHECK(r->bus_read_reg(0x0024, &v) == Result::Ok);
     delete r;
   }
