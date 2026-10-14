@@ -1,0 +1,19 @@
+row,block,function,part,status,qty,unit_price,line_price,is_bench,is_costly
+1,RX 433,antenna,"Diamond A-430S15R 430–440 MHz 15-el Yagi, 14.8 dBi, PL/SO-239",TO-BUY,1,74.5,74.5,False,True
+2,RX 433,**band-pass filter BEFORE the LNA**,"433 MHz BPF, FBP-433s class",TO-BUY,1,24.19,24.19,False,True
+3,RX 433,**LNA** (masthead gain),Qorvo TQP3M9037,OWNED,1,3.0,3.0,False,False
+4,RX 433,input protection (optional insurance),"PIN-diode RF limiter, SMA, 10 MHz–6 GHz, 10–20 dBm class",TO-BUY,1,4.39,4.39,False,False
+5,RX 433,**level control (AGC element)**,"Analog Devices ADL5240 digital VGA: 100 MHz–4 GHz, +20.3/−12 dB, 6-bit DSA 0.5 dB step, NF 2.8 dB @450 MHz, SPI+parallel",TO-BUY,1,2.09,2.09,False,False
+6,LEVEL CTRL,**digital step attenuator (RX path alt / TX path)**,"pSemi PE43711-class SMA DSA: 9 kHz–6 GHz, 0–31.75 dB, 0.25 dB step",TO-BUY,1,18.89,18.89,False,False
+7,LEVEL CTRL,**log detector** (AGC feedback),"Analog Devices AD8318ACPZ-R7: 1 MHz–8 GHz, 70 dB, ±1.0 dB /55 dB, 10/12 ns",TO-BUY,1,,,False,False
+8,LEVEL CTRL,**ADC + MCU** (digital AGC + TX LUT),Raspberry Pi RP2040 (QFN-56),TO-BUY,1,,,False,False
+9,TX 2.4,antenna,"Sirio SLP-17 log-periodic, 1700–2500 MHz, 11.1 dBi",TO-BUY,1,59.0,59.0,False,True
+10,TX 2.4,band-pass filter,2.4 GHz BPF,TO-BUY,1,17.79,17.79,False,False
+11,TX 2.4,**uplink PA / FEM**,DNP — no PA/FEM in v1,CLOSED (D9),1,,,False,False
+12,interconnect,coax + connectors,Airborne 10 (LMR-400 class) + N-male crimps + PL→SMA adapter,TO-BUY,1,73.72999999999999,73.72999999999999,False,True
+13,bench,**VNA to verify every passive at 433 AND 2.4 GHz**,LiteVNA 62 (50 kHz–6.3 GHz),TO-BUY,1,166.99,166.99,True,True
+14,power/bias,bias tee + rails,Mini-Circuits ZFBT-4R2GW+ bias tee; TI TPS62162 5 V buck; switched +5V_LNA_SW / +5V_VGA / +5V_DET; local 100 nF + 1 µF / 10 µF decoupling,TO-BUY,1,,,False,False
+15,bench (owned),IF instruments,Red Pitaya STEMlab 125-14,OWNED,1,125.0,125.0,True,True
+16,bench (owned),divider,XR-613 resistive power divider (DC–5 GHz),OWNED,1,,,False,False
+17,bench (owned),mixer (for an IF/downconverter path),unmarked RF/LO/IF mixer module,OWNED,1,,,False,False
+18,mechanical,mast-head mounting / enclosure,DNP on PCBA; external weatherproof enclosure + mast clamp,CLOSED (MECHANICAL),1,,,False,False
