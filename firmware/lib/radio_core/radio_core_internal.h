@@ -23,7 +23,7 @@ struct DeviceDescriptor {
   uint16_t reg_rssi;    // RSSI, int8 two's complement
   uint16_t reg_snr;     // SNR, int8 two's complement
   uint16_t config_base; // where the config image is written/read back
-  uint8_t config_len;   // image length in bytes
+  uint8_t config_len;   // image length in bytes, checksum included
   uint8_t status_width; // bytes returned by a status read
   bool status_read_supported;
 };
@@ -36,7 +36,8 @@ const DeviceDescriptor &descriptorFor(Device dev);
 // Byte image: magic(1) version(1) modulation(1) frequency LE32 bandwidth LE32
 //             spreading_factor(1) coding_rate(1) tx_power(1)
 //             preamble LE16 crc(1) then an XOR checksum byte.
-constexpr size_t kConfigImageBytes = 18;  // without the trailing checksum
+// 17 config bytes + 1 trailing XOR checksum = 18 on the bus.
+constexpr size_t kConfigImageBytes = 18;
 constexpr uint8_t kConfigMagic = 0xB1;
 constexpr uint8_t kConfigVersion = 1;
 
@@ -52,6 +53,10 @@ class RadioCore : public RadioHal {
   static constexpr uint32_t kResetBudgetMs = 50;
   static constexpr uint32_t kTxBudgetMs = 50;
   static constexpr uint32_t kChunkBytes = 32;  // burst chunk size
+  // Hard iteration cap on every device wait. The time budget is the primary
+  // bound; this one keeps the loop finite even if the injected clock stands
+  // still, so a wedged device can never hang the flight computer.
+  static constexpr uint32_t kBusyPollMaxIters = 64;
 
   explicit RadioCore(SpiBus *bus, Device dev = Device::Sx1280);
 

@@ -37,6 +37,9 @@ enum : uint8_t {
   kCmdReadBurst = 0x1B,
 };
 enum : uint16_t { kRegStatus = 0x0010, kRegRssi = 0x001A, kRegSnr = 0x001B };
+// Far above any legitimate poll budget (the driver caps at 64), so tripping it
+// always means the driver lost its bound.
+constexpr uint32_t kProbeLimit = 10000;
 
 constexpr uint16_t kRegEnd = 0x0080u;  // 128-byte register file, like a real SX1280 map
 
@@ -53,11 +56,17 @@ class FakeSpi : public SpiBus {
     registered = true;                     // a real chip always answers something
     switch (tx[0]) {
       case kCmdNone:
+        // The status/command byte comes back on the no-op transfer; this is
+        // where a real SX1280 reports BUSY. Counted: the test can see the wire.
         if (len != 1) return false;
-        rx[0] = status_idle;
+        // Hard cap: if the driver ever loses its bound, the suite FAILS here
+        // instead of hanging the CI runner forever.
+        if (++perms > kProbeLimit) return false;
+        rx[0] = read_reg(kRegStatus);
         break;
       case kCmdWriteSingle:
-        if (len != 3) return false;
+        // opcode + addrH + addrL + data
+        if (len != 4) return false;
         regs[(uint16_t)(((uint16_t)tx[1] << 8) | tx[2])] = tx[3];
         break;
       case kCmdReadSingle: {
@@ -111,14 +120,14 @@ class FakeSpi : public SpiBus {
   // -- fixture knobs -------------------------------------------------------
   bool busy() const { return (regs.count(kRegStatus) ? regs.at(kRegStatus) : 0) & 0x80; }
   void set_busy(bool b) {
-    regs[kRegStatus] = (uint8_t)(b ? (status_idle | 0x80) : status_idle);
+    regs[kRegStatus] = (uint8_t)(b ? (read_reg(kRegStatus) | 0x80)
+                                   : (read_reg(kRegStatus) & (uint8_t)~0x80));
   }
   void set_reg(uint16_t a, uint8_t v) { regs[a] = v; }
   uint8_t get_reg(uint16_t a) const { return regs.count(a) ? regs.at(a) : 0; }
   bool was_registered() const { return registered; }
   bool cs_at_rest() const { return cs_high; }
 
-  uint32_t status_idle = 0x00;
   bool fail_transfers = false;
   uint64_t now = 1000;  // "powered on" a second ago
   uint32_t step = 0;    // 0 = clock frozen
@@ -127,7 +136,7 @@ class FakeSpi : public SpiBus {
   size_t cs_assert = 0;
   size_t cs_calls = 0;
   size_t cs_double_assert = 0;
-  uint32_t perms = 0;
+  uint32_t perms = 0;  // no-op/status probes seen on the wire
   uint32_t slept = 0;
   std::map<uint16_t, uint8_t> regs;
 
@@ -227,13 +236,16 @@ void run_tests() {
     RadioCore *r = make(bus);
     uint8_t out[32];
     for (int i = 0; i < 32; ++i) out[i] = (uint8_t)(0xA0 + i);
-    CHECK(r->bus_write_burst(0x0000, out, sizeof out) == Result::Ok);
+    // 0x0020..0x003F: clear of the status register (0x0010), the statistics
+    // registers and the config image at 0x0040.
+    CHECK(r->bus_write_burst(0x0020, out, sizeof out) == Result::Ok);
     uint8_t in[32];
     for (int i = 0; i < 32; ++i) in[i] = 0;
-    CHECK(r->bus_read_burst(0x0000, in, sizeof in) == Result::Ok);
+    CHECK(r->bus_read_burst(0x0020, in, sizeof in) == Result::Ok);
     CHECK(std::memcmp(out, in, sizeof out) == 0);
     // and each byte really is at its own address
-    for (int i = 0; i < 32; ++i) CHECK_EQ(bus.get_reg((uint16_t)i), out[i]);
+    for (int i = 0; i < 32; ++i) CHECK_EQ(bus.get_reg((uint16_t)(0x20 + i)), out[i]);
+    CHECK_EQ(bus.get_reg(kRegStatus), 0x00);  // the status register was untouched
     delete r;
   }
 
@@ -335,11 +347,12 @@ void run_tests() {
     // Another host (or a glitch) changes one byte of the stored image...
     const uint16_t freq_lo = (uint16_t)(d.config_base + 3);
     bus.set_reg(freq_lo, (uint8_t)(bus.get_reg(freq_lo) ^ 0x01));
-    // ...and repairs the checksum, so a naive corruption check still passes.
+    // ...and repairs the trailing checksum, so an integrity check alone cannot
+    // tell the difference. Only reading the bus back can.
     uint8_t x = 0;
-    for (uint16_t i = 0; i < d.config_len; ++i)
+    for (uint16_t i = 0; i + 1 < d.config_len; ++i)
       x = (uint8_t)(x ^ bus.get_reg((uint16_t)(d.config_base + i)));
-    bus.set_reg((uint16_t)(d.config_base + d.config_len), x);
+    bus.set_reg((uint16_t)(d.config_base + d.config_len - 1), x);
 
     Config back{};
     CHECK(r->read_config(&back) == Result::Ok);
@@ -355,7 +368,7 @@ void run_tests() {
     CHECK(r->acquire(0) == Result::Ok);
     const auto &d = descriptorFor(balloon::radio::Device::Sx1280);
     CHECK(r->configure(configA()) == Result::Ok);
-    bus.set_reg((uint16_t)(d.config_base + 6), 0x00);  // scramble the image
+    bus.set_reg((uint16_t)(d.config_base + 6), 0x00);  // scramble the image (freq)
     Config back{};
     CHECK(r->read_config(&back) != Result::Ok);
     delete r;
@@ -390,6 +403,28 @@ void run_tests() {
     CHECK(bus.perms < 40);  // ...and gave up: bounded
     Config back{};
     CHECK(r->read_config(&back) == Result::Timeout);  // still never Ok
+    delete r;
+  }
+
+  CASE("COUNTER-TEST: BUSY-forever with a FROZEN clock still terminates");
+  {
+    // millis() never advances, so an elapsed-time-only bound would spin for
+    // ever. This case was written after the first green run hung here for
+    // real: the burst test had clobbered the status register, the fixture was
+    // BUSY, and the clock was frozen. The driver must bound the loop by
+    // iterations too, not only by time.
+    FakeSpi bus;
+    bus.step = 0;  // clock stands still: this is what a wedged device looks like
+    bus.set_busy(true);
+    RadioCore *r = make(bus);
+    CHECK(r->acquire(0) == Result::Ok);
+    CHECK(r->configure(configA()) == Result::Timeout);
+    CHECK(r->reset() == Result::Timeout);
+    CHECK(r->send((const uint8_t *)"x", 1) == Result::Timeout);
+    Config back{};
+    CHECK(r->read_config(&back) == Result::Timeout);
+    CHECK(bus.perms > 0);      // it really polled
+    CHECK(bus.perms < 500);    // ...and gave up
     delete r;
   }
 
@@ -432,7 +467,6 @@ void run_tests() {
     FakeSpi bus;
     RadioCore *r = make(bus);
     CHECK(r->acquire(0) == Result::Ok);
-    uint8_t v = 0;
     CHECK(r->bus_read_reg(0x0010, nullptr) == Result::BadArgument);
     CHECK(r->bus_write_burst(0x0000, nullptr, 4) == Result::BadArgument);
     CHECK(r->bus_read_burst(0x0000, nullptr, 4) == Result::BadArgument);
