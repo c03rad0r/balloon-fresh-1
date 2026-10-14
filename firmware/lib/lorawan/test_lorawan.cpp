@@ -205,28 +205,41 @@ void build_join_accept(const uint8_t app_key[16], const uint8_t join_nonce_le3[3
                        const uint8_t net_id_wire[3], const uint8_t dev_addr_wire[4],
                        uint8_t dls, uint8_t rxdelay, bool corrupt_mic,
                        uint8_t *out, size_t *out_len) {
-  uint8_t plain[16];
-  plain[0] = 0x20;
-  plain[1] = join_nonce_le3[0];
-  plain[2] = join_nonce_le3[1];
-  plain[3] = join_nonce_le3[2];
-  plain[4] = net_id_wire[0];
-  plain[5] = net_id_wire[1];
-  plain[6] = net_id_wire[2];
-  plain[7] = dev_addr_wire[0];
-  plain[8] = dev_addr_wire[1];
-  plain[9] = dev_addr_wire[2];
-  plain[10] = dev_addr_wire[3];
-  plain[11] = dls;
-  plain[12] = rxdelay;
+  // [LW104] Sec. 6.2.3 layout. The 16-byte encrypted block is
+  //   MACPayload(12) | MIC(4)
+  // where MACPayload = JoinNonce(3, LE) | NetID(3, wire) | DevAddr(4, LE) |
+  // DLSettings | RxDelay, and MIC = cmac(AppKey, MHDR | MACPayload).
+  // The MHDR is NOT inside the ciphertext -- it is the 0x20 that precedes it on
+  // the air. (The published join-accept vector 493eeb51.. decrypts to exactly
+  // this shape, which is what pins the layout.)
+  uint8_t pt[16];
+  pt[0] = join_nonce_le3[0];
+  pt[1] = join_nonce_le3[1];
+  pt[2] = join_nonce_le3[2];
+  pt[3] = net_id_wire[0];
+  pt[4] = net_id_wire[1];
+  pt[5] = net_id_wire[2];
+  pt[6] = dev_addr_wire[0];
+  pt[7] = dev_addr_wire[1];
+  pt[8] = dev_addr_wire[2];
+  pt[9] = dev_addr_wire[3];
+  pt[10] = dls;
+  pt[11] = rxdelay;
+  uint8_t msg[13];
+  msg[0] = 0x20;
+  std::memcpy(msg + 1, pt, 12);
   uint8_t mic16[16];
-  aes_cmac(app_key, plain, 13, mic16);
+  aes_cmac(app_key, msg, 13, mic16);
   if (corrupt_mic) mic16[0] ^= 0x01;
-  plain[13] = mic16[0];
-  plain[14] = mic16[1];
-  plain[15] = mic16[2];
+  pt[12] = mic16[0];
+  pt[13] = mic16[1];
+  pt[14] = mic16[2];
+  pt[15] = mic16[3];
   uint8_t ct[16];
-  aes128_ecb_decrypt(app_key, plain, ct);  // join-accept uses the inverse cipher
+  // In LoRaWAN 1.0 the network INVERSE-ciphers the join-accept, so the air
+  // bytes are the inverse cipher's output and a 1.0 device recovers the
+  // plaintext with the forward cipher.
+  aes128_ecb_decrypt(app_key, pt, ct);
   out[0] = 0x20;
   std::memcpy(out + 1, ct, 16);
   *out_len = 17;
@@ -479,19 +492,19 @@ void test_join_mic_and_session_keys() {
   CASE("[BROCAAR] join-request MIC over MHDR|JoinEUI|DevEUI|DevNonce");
   {
     // base64 AAQDAgEEAwIBBQQDAgUEAwItEGqZDhI= , AppKey 01*16 -> MIC 6a990e12
-    uint8_t key[16], msg[16], mic[4];
+    uint8_t key[16], msg[19], mic[4];
     hex2bin("01010101010101010101010101010101", key, 16);
-    hex2bin("00010203040102030402030405020304052d10", msg, 15);
-    lorawan_join_request_mic(key, msg, 15, mic);
+    hex2bin("00040302010403020105040302050403022d10", msg, 19);
+    lorawan_join_request_mic(key, msg, 19, mic);
     if (!eq_hex(mic, "6a990e12", 4)) hexdump("mic", mic, 4);
     CHECK(eq_hex(mic, "6a990e12", 4));
 
     // COUNTER-TEST: one byte of the DevNonce flipped
-    uint8_t msg2[16];
-    std::memcpy(msg2, msg, 15);
+    uint8_t msg2[19];
+    std::memcpy(msg2, msg, 19);
     msg2[14] ^= 0x01;
     uint8_t mic2[4];
-    lorawan_join_request_mic(key, msg2, 15, mic2);
+    lorawan_join_request_mic(key, msg2, 19, mic2);
     CHECK(std::memcmp(mic, mic2, 4) != 0);
   }
 
@@ -501,7 +514,12 @@ void test_join_mic_and_session_keys() {
     uint8_t key[16], ct[16], plain[16];
     hex2bin("00112233445566778899aabbccddeeff", key, 16);
     hex2bin("493eeb51fba2116f810edb3742975142", ct, 16);
-    aes128_ecb_decrypt(key, ct, plain);
+    // [LW104] Sec. 6.2.3: in LoRaWAN 1.0 the network inverse-ciphers the
+    // join-accept, so a 1.0 device recovers the plaintext by running the cipher
+    // FORWARD over the 16 bytes it heard. (Encrypting rather than decrypting
+    // here is the quirk, not a typo: the MIC below only validates if the
+    // direction is right, and 43485bbc is the published MIC for this frame.)
+    aes128_ecb_encrypt(key, ct, plain);
     if (!eq_hex(plain, "c70b5701112280190302000043485bbc", 16)) hexdump("plain", plain, 16);
     CHECK(eq_hex(plain, "c70b5701112280190302000043485bbc", 16));
 
@@ -580,7 +598,7 @@ void test_frmpayload_crypto() {
     CHECK(eq_hex(a, "a694642615", 5));
 
     // wrong key must also differ
-    uint8_t k2[16], c[5];
+    uint8_t c[5];
     hex2bin("02020202020202020202020202020202", key, 16);
     lorawan_crypt_frmpayload(key, 0x01020304u, 0, 1, in, c, 5);
     CHECK(std::memcmp(a, c, 5) != 0);
@@ -776,9 +794,9 @@ void test_duty_cycle_limiter() {
     CHECK_EQ(lim.blocked_count(), 8u);
 
     // the RULE, not the magic number: 12 frames fit, 13 would not
-    CHECK(accepted * toa <= 36000u);
-    CHECK((accepted + 1u) * toa <= 36000u);
-    CHECK((accepted + 2u) * toa > 36000u);   // 13 * 2794 = 36322 > 36000
+    CHECK(accepted * toa <= 36000u);          // 12 * 2794 = 33528 <= 36000
+    CHECK((accepted + 1u) * toa > 36000u);    // 13 * 2794 = 36322 > 36000
+    CHECK((accepted + 2u) * toa > 36000u);
 
     DutyCycleVerdict blocked = lim.request(868100000u, toa, 0);
     CHECK(!blocked.allowed);
@@ -788,7 +806,13 @@ void test_duty_cycle_limiter() {
 
   CASE("the three default channels share ONE budget (sub-band, not per-channel)");
   {
-    const uint32_t toa = 2794;
+    // 51 B FRMPayload at DR0 -> 64 B PHY -> the same 2794 ms used above, so a
+    // 1% hour holds 12 of them. A per-channel model would hand each of the
+    // three default channels its own 12; the sub-band model gives the trio 12
+    // BETWEEN them, which is the actual regulatory reading. Real airtime is
+    // used deliberately: a 69 ms frame would fit 20 times and prove nothing.
+    const uint32_t toa = (eu868_time_on_air_us(0, 51 + 13, 8, 5) + 999u) / 1000u;
+    CHECK_EQ(toa, 2794u);
     DutyCycleLimiter single(0), spread(0);
     uint32_t a_single = 0, a_spread = 0;
     for (int i = 0; i < 20; ++i) {
@@ -797,6 +821,10 @@ void test_duty_cycle_limiter() {
     }
     CHECK_EQ(a_single, 12u);
     CHECK_EQ(a_spread, 12u);  // identical: 868.1/868.3/868.5 are one sub-band
+    CHECK(a_spread < 3u * 12u);   // ...and NOT one budget per channel
+    // rotating across the three channels cannot escape the shared charge
+    CHECK_EQ(eu868_sub_band_index(kEu868DefaultChannelsHz[0]),
+             eu868_sub_band_index(kEu868DefaultChannelsHz[1]));
     CHECK_EQ(single.band_airtime_ms(0, 0, 3600000), spread.band_airtime_ms(0, 0, 3600000));
   }
 
@@ -1289,15 +1317,19 @@ void test_mac_against_frozen_hal() {
     CHECK_EQ(f[2], 0x03);
     CHECK_EQ(f[3], 0x02);
     CHECK_EQ(f[4], 0x01);
-    CHECK_EQ(f[7], 0x00);                                   // FCnt 0 on the first uplink
-    CHECK_EQ(f[8], 0x00);
-    CHECK_EQ(f[9], 1);                                      // FPort
+    // A 9-byte FHDR: MHDR(0) | DevAddr(1..4) | FCtrl(5) | FCnt(6..7) | FPort(8).
+    // The 18-byte total above (1+4+1+2+1+5+4) is what fixes these indices;
+    // FCtrl is 0 so FOptsLen is 0 and there are no FOpts.
+    CHECK_EQ(f[5], 0x00);                                   // FCtrl: no ADR/ACK, FOptsLen 0
+    CHECK_EQ(f[6], 0x00);                                   // FCnt 0 on the first uplink
+    CHECK_EQ(f[7], 0x00);
+    CHECK_EQ(f[8], 1);                                      // FPort
 
     // FRMPayload must be the LoRaWAN ciphertext, not plaintext
     uint8_t want_ct[5];
     lorawan_crypt_frmpayload(mac.session().app_skey, 0x01020304u, 0, 0, payload, want_ct, 5);
-    CHECK(std::memcmp(f.data() + 10, want_ct, 5) == 0);
-    CHECK(std::memcmp(f.data() + 10, "hello", 5) != 0);
+    CHECK(std::memcmp(f.data() + 9, want_ct, 5) == 0);
+    CHECK(std::memcmp(f.data() + 9, "hello", 5) != 0);
 
     // and the MIC verifies against the session NwkSKey + the frame's own FCnt
     uint8_t mine[4];
@@ -1322,8 +1354,8 @@ void test_mac_against_frozen_hal() {
     std::vector<uint8_t> f0 = hal.sent;
     CHECK(mac.send_uplink(payload, 5, 1, 0, 868100000u, 4000) == radio::Result::Ok);
     std::vector<uint8_t> f1 = hal.sent;
-    CHECK(f0[7] != f1[7] || f0[8] != f1[8]);              // FCnt advanced
-    CHECK(std::memcmp(f0.data() + 10, f1.data() + 10, 5) != 0);  // keystream moved
+    CHECK(f0[6] != f1[6] || f0[7] != f1[7]);              // FCnt advanced
+    CHECK(std::memcmp(f0.data() + 9, f1.data() + 9, 5) != 0);    // keystream moved
     CHECK_EQ(mac.counters().uplink_next(), 2u);
   }
 

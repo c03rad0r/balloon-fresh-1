@@ -211,7 +211,6 @@ class JoinBackoff {
   int head_ = 0;
   int size_ = 0;
   uint64_t reset_ms_ = 0;
-  uint32_t used_since_reset_ = 0;
 };
 
 // ===========================================================================
@@ -244,6 +243,10 @@ class FrameCounters {
   uint32_t downlink_last_ = 0;
   bool has_downlink_ = false;
   bool allow_rollover_ = false;
+  // Set the instant 0xFFFFFFFF wraps, but only REPORTED once the counter has
+  // actually been re-used at 0 -- i.e. the wrap has been handed out, not just
+  // scheduled.
+  bool wrap_pending_ = false;
   bool rolled_over_ = false;
 };
 
