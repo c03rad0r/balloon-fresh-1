@@ -225,9 +225,14 @@ e2663e2c  feat(meshcore): strict L1 header codec with all-or-nothing decode
 cf859d51  feat(meshcore): flood/TTL transport core with dedup, ACK retry, reassembly
 9810f0de  docs(report): MeshCore transport core -- RED/sabotage evidence
 
-local  : 9810f0de350d9a7340551cd3b4f49659415725b2
-github : 9810f0de350d9a7340551cd3b4f49659415725b2   MATCH
-ngit   : 9810f0de350d9a7340551cd3b4f49659415725b2   MATCH
+9810f0de  docs(report): ... (evidence section)   <- tip at the first push
+bed87606  docs(report): delivery section           <- current tip
+
+After this report's last commit the tip is, on both remotes:
+
+local  : bed8760678d0ab7d75aa52cf9114bc02e0167100
+github : bed8760678d0ab7d75aa52cf9114bc02e0167100   MATCH
+ngit   : bed8760678d0ab7d75aa52cf9114bc02e0167100   MATCH
 ```
 
 Push notes, stated plainly:
