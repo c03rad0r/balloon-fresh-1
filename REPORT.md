@@ -7,3 +7,20 @@ RED evidence: `python3 -m pytest tests/test_wing_double_sided.py -q` initially f
 Fab regeneration: `bash tracker/hardware/wing_board/export_wing_v9_gerbers.sh` completed and generated the ZIP. Courtyard gate output: 15/15 (100%), 0 overlaps, PASS. The checker was made face-aware so intentional SC1/SC4, SC2/SC5, SC3/SC6 opposite-face coincidence is not treated as same-face overlap. Gate record hashes: board `62e00d43e0c7d3be8a293f431e6d1110587791d7be6127a4763017702953f715`; fab ZIP `d0bcd707caea321b022624b3589b0d5f5941b5d18f13c77b665871257ae69df9`.
 
 Not yet done: commit/push, full project quality gates, PR creation, and mandatory cross-family review handoff.
+
+---
+
+## L0 radio_core (feat/lib-radio-core, 2026-10-14)
+
+Adds the device-agnostic radio HAL implementation + the SX1280 register-map
+descriptor under `firmware/lib/radio_core/`. **Full report:**
+[`firmware/lib/radio_core/REPORT.md`](firmware/lib/radio_core/REPORT.md).
+
+- `make -C firmware/lib test` -> `radio_core: ok 160 checks passed`,
+  `RESULT: all module tests green`; `-Wall -Wextra -Werror` clean.
+- TDD: test committed first, observed RED = link failure. Sabotage-tested; one
+  sabotage (deleted SPI-error propagation) initially went **uncaught** and the
+  suite was strengthened until it failed (see the report, section 4).
+- **No hardware.** No radio is attached to the build host; the SPI peer is a
+  register-file fixture, not silicon. RSSI/SNR register addresses are marked
+  UNVERIFIED in `sx1280_map.h`.

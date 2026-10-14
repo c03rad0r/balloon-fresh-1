@@ -46,6 +46,12 @@ Result configDecode(const uint8_t *in, Config *out);
 uint8_t configChecksum(const uint8_t *img, size_t n);
 
 // --- the HAL ---------------------------------------------------------------
+// Device build note: radio_core.cpp supplies a host stub for the contract's
+// make_radio_hal(SpiBus*) factory (it returns null rather than inventing a
+// device, and the host test drives RadioCore directly). A device build that
+// defines the real factory elsewhere must compile radio_core.cpp with
+// -DBALLOON_RADIO_CORE_DEVICE_FACTORY so the stub is left out and the real
+// factory is the only definition.
 class RadioCore : public RadioHal {
  public:
   static constexpr uint32_t kAcquirePollBudgetMs = 50;
