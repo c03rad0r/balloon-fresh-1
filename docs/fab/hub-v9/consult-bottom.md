@@ -1,0 +1,15 @@
+1. **The supplied view does not show the populated component side.** It shows routing, copper regions, holes, and edge pads, but no identifiable ESP32-S3, SX1280, U.FL bodies, or component reference designators. Consequently, I cannot identify a through-hole **component among SMD parts**, check package-to-footprint matching, or approve assembly from this image.
+
+2. **Upper-right quadrant: four exposed drilled pads in two pairs.** These appear to be through-hole footprints rather than ordinary SMD pads. If they are the stated **DNP supercapacitor positions**, that is not an assembly defect; explicitly mark them DNP in the BOM and assembly drawing. If intended for another populated part, verify its mounting technology and whether through-hole assembly is included in the quote. The image alone does not establish the part identity.
+
+3. **Center to lower-right: a large copper-region boundary needs checking against the RF routing.** A near-vertical boundary descends from the upper routing cluster, then runs diagonally toward the bottom edge; another boundary follows the upper-right routing. These are visible changes in copper coverage, **not proof of an erroneous ground split**. Check the actual copper layers and net assignments: RF feeds must not cross a reference-plane void, and both radios need appropriate ground returns. No RF isolation gap or continuous RF ground can be certified from this single view.
+
+4. **Antenna and U.FL locations are not identifiable—clearance remains unverified.** This view cannot establish antenna keepouts on every layer, clearance around a mating U.FL plug, or coax exit/bend space. If an onboard ESP32 antenna is fitted on the opposite side, specifically check that the broad visible copper regions do not extend underneath its required keepout. Obtain a populated-side render and connector/antenna keepout overlay before ordering.
+
+5. **Mid-left and mid-right edges: the solar-tab pad groups sit very close to the board outline.** Confirm copper-to-routed-edge clearance in the fabrication files and specify any intentional edge plating/castellation; this render does not establish either. For flight, soldered solar interconnects need compliant leads and strain relief so panel motion and thermal contraction do not load these pads directly. No strain-relief arrangement is evident here, although it could be provided off-board.
+
+6. **Whole assembly: −55 °C operation is an unresolved qualification issue, not something this render proves.** Check the exact populated BOM—including radio/MCU variants, oscillators, regulators, and capacitors—against that temperature. Parts rated only to −40 °C would be outside their specified range. With supercaps DNP, also validate cold, weak-sun startup and transmit-current brownouts using the actual solar source and populated decoupling. These checks can invalidate a ten-board flight order even if fabrication DRC passes.
+
+**There is no clearly demonstrated unmanufacturable feature or definite respin defect in this view, but insufficient evidence to approve the board as-is.**
+
+VERDICT: PARTIAL
