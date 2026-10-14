@@ -1,10 +1,11 @@
 # Host tests for the flight-software libraries. g++ only; no PlatformIO.
-# `make test` builds and runs every module that has a test.
+#
+# Modules AUTO-DISCOVER: any directory containing test_*.cpp is built and run.
+# Adding a module therefore never edits this file -> parallel workers adding
+# separate module directories cannot conflict on it.
 CXX      ?= g++
 CXXFLAGS ?= -std=c++17 -O1 -Wall -Wextra -g
-BUILD    := build
-
-MODULES  := telemetry resetlog ringstore scheduler gpsconfig expframework
+BUILD    ?= build
 
 .PHONY: all test clean
 
@@ -12,16 +13,17 @@ all: test
 
 test:
 	@mkdir -p $(BUILD)
-	@fail=0; \
-	for m in $(MODULES); do \
-	  if [ ! -f $$m/test_$$m.cpp ]; then \
-	    echo "SKIP  $$m  (no test_$$m.cpp yet)"; continue; \
-	  fi; \
-	  echo "== $$m =="; \
-	  $(CXX) $(CXXFLAGS) -I. -I. -I$$m -o $(BUILD)/test_$$m $$m/test_$$m.cpp $$m/$$m.cpp \
-	    || { echo "FAIL  $$m  (does not build)"; fail=1; continue; }; \
-	  ./$(BUILD)/test_$$m || { echo "FAIL  $$m"; fail=1; }; \
+	@fail=0; found=0; \
+	for d in $$(ls -d */ 2>/dev/null); do \
+		m=$${d%/}; \
+		ls $$m/test_*.cpp >/dev/null 2>&1 || continue; \
+		found=1; \
+		echo "== $$m =="; \
+		if $(CXX) $(CXXFLAGS) -I. -I$$m -o $(BUILD)/$$m.test $$m/*.cpp; then \
+			if ./$(BUILD)/$$m.test; then :; else fail=1; fi; \
+		else fail=1; fi; \
 	done; \
+	if [ $$found -eq 0 ]; then echo "no module tests found"; exit 1; fi; \
 	if [ $$fail -ne 0 ]; then echo "RESULT: FAILURES"; exit 1; fi; \
 	echo "RESULT: all module tests green"
 
