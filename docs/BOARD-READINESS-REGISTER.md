@@ -98,9 +98,22 @@ Remaining need: the **LiteVNA 62** (€166.99) as the RF measurement instrument.
 
 ---
 
-## 5. Base-station board — ⏳ NOT STARTED (blocked on decisions)
+## 5. Base-station board — ⏳ STAGE 1 COMPLETE, blocked on Gate-2 decisions
 
-No schematic, netlist, board or gerbers. Plan: `docs/PLAN-base-station-board.md`
+**CORRECTION 2026-10-14:** this section previously read "NOT STARTED / no
+schematic, netlist". That was stale. Two SKiDL netlists exist and are ERC-clean:
+`tracker/hardware/base_station/base_station_shack.net` and
+`base_station_masthead.net` (commit `dcf2a028`, "two-board split netlists,
+0 errors each (ADR-051 gate 1)"). No schematic symbol file, board, placement,
+routing or gerbers exists yet — Stage 1 only.
+
+**Masthead Dispute A is RESOLVED** (see `docs/MASTHEAD-DISPUTE-RESOLVED.md`):
+Qorvo's own page states the TQP3M9037 is 0.7–6 GHz, so 433 MHz is below spec.
+That is now a costed three-option decision, not an unknown.
+
+Open Gate-2 items: masthead topology · layer count · first-flight population ·
+enclosure. See `docs/OPERATOR-DECISION-PACKAGE.md`. Nothing is placed, routed or
+ordered until these are answered (the plan's own words). Plan: `docs/PLAN-base-station-board.md`
 (ADR-051 Stage 1–2, stopped at the operator approval gate).
 
 Open decisions: masthead topology · layer count · first-flight population ·
