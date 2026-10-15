@@ -116,6 +116,35 @@ def thickness_for_out_of_plane_EI(E_MPa: float, ref_E_MPa: float,
 FR4_E_MPa, FR4_T_MM, FR4_RHO = 20000.0, 0.6, 1800.0
 
 
+# --- sourced material constants (BASF Styrodur technical-data handbook) -------
+XPS_CTE_PER_K = 80e-6      # in-plane, BASF handbook 0.08 mm/(m*K)
+FR4_CTE_PER_K = 17e-6
+SI_CTE_PER_K = 2.6e-6
+XPS_E_MPa_RANGE = (15.0, 40.0)   # BASF handbook: 15000-40000 kPa
+XPS_MAX_USE_C = 75.0             # upper bound only; no low-temp limit published
+LONGEST_CELL_MM = 78.55          # a large cell's long dimension
+ASSEMBLY_TO_FLIGHT_dT = 80.0     # 20 C -> -60 C
+SI_FRACTURE_MICROSTRAIN = (1000.0, 2000.0)
+
+
+def thermal_differential_um(alpha_sub: float, alpha_cell: float = SI_CTE_PER_K,
+                            dT: float = ASSEMBLY_TO_FLIGHT_dT,
+                            length_mm: float = LONGEST_CELL_MM) -> float:
+    """Differential contraction between substrate and cell, in micrometres."""
+    return (alpha_sub - alpha_cell) * dT * length_mm * 1000.0
+
+
+def rigid_bond_strain_microstrain(alpha_sub: float,
+                                  dT: float = ASSEMBLY_TO_FLIGHT_dT) -> float:
+    """Strain a RIGID bond would impose on the cell, in microstrain."""
+    return (alpha_sub - SI_CTE_PER_K) * dT * 1e6
+
+
+def rigid_bond_is_fatal(alpha_sub: float) -> bool:
+    """True when a rigid bond exceeds silicon's LOW-end fracture strain."""
+    return rigid_bond_strain_microstrain(alpha_sub) > SI_FRACTURE_MICROSTRAIN[0]
+
+
 def main() -> int:
     print("=" * 88)
     print("FOAM AIRFRAME SELECTION -- mass and stiffness for the operator's wing")
@@ -201,7 +230,25 @@ def main() -> int:
               f"{w/1000*SHOCK_G*9.80665*DESIGN_MARGIN*1000:>6.1f} mN")
 
     print()
-    print("-- 6. NOT answered here ------------------------------------------------")
+    print("-- 6. THERMAL: why ends-only mounting is MANDATORY (sourced CTE) -------")
+    print(f"  XPS CTE {XPS_CTE_PER_K*1e6:.0f}e-6/K (BASF handbook), silicon {SI_CTE_PER_K*1e6:.1f}e-6/K")
+    print(f"  over {ASSEMBLY_TO_FLIGHT_dT:.0f} K on a {LONGEST_CELL_MM} mm cell:")
+    for label, a in (("XPS", XPS_CTE_PER_K), ("FR4", FR4_CTE_PER_K)):
+        um = thermal_differential_um(a)
+        ms = rigid_bond_strain_microstrain(a)
+        print(f"    {label:<5} differential {um:>6.0f} um   rigid bond "
+              f"{ms:>6.0f} ue = {ms/1e4:.2f} %  "
+              f"({'FATAL' if rigid_bond_is_fatal(a) else 'ok'} vs "
+              f"{SI_FRACTURE_MICROSTRAIN[0]:.0f}-{SI_FRACTURE_MICROSTRAIN[1]:.0f} ue limit)")
+    print("  -> a RIGID bond cracks the cell for BOTH substrates;")
+    print("     ends-only mounting is the mitigation, and it is now arithmetic")
+    print("     rather than community practice (ADR-052 brings the practice).")
+    print(f"  NOTE foam makes the mismatch "
+          f"{thermal_differential_um(XPS_CTE_PER_K)/thermal_differential_um(FR4_CTE_PER_K):.0f}x "
+          f"worse than FR4 -- ends-only is MORE load-bearing here, not less.")
+
+    print()
+    print("-- 7. NOT answered here ------------------------------------------------")
     for s in ("vacuum: does a closed cell survive ~81 kPa differential?",
               "bead-fused EPS vents through the bead boundaries -- asserted, not tested",
               "UV/degradation over the flight",
