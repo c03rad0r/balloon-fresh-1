@@ -95,6 +95,50 @@ proven in vacuum — it is not — but because it is the standard airframe sheet
 already builds with (NIBBB foam plate, KC9IKB Styrofoam airframe), and it is the one that
 survives handling.**
 
+## Sourced material values (BASF Styrodur handbook)
+
+The class values used in the model are now backed by a **manufacturer handbook** rather than
+assumption. From the BASF Styrodur technical-data handbook:
+
+| property | value | note |
+|---|---|---|
+| **elastic / flexural modulus E** | **15–40 MPa** | the model uses 30 MPa — mid-range, now sourced |
+| **CTE, in-plane** | **80 × 10⁻⁶ /K** | this is the one that matters for cell cracking |
+| CTE, perpendicular to the plate | 60 × 10⁻⁶ /K | |
+| max use temperature | 75 °C | an **upper** bound only; no low-temperature limit published |
+| long-term water absorption | 0.7 vol % | closed cell — supports the venting question below |
+
+**The handbook publishes no low-temperature limit.** The −60 °C figure is a flight requirement,
+not a manufacturer claim, and no cold-service data was found for XPS. That gap is recorded, not
+papered over.
+
+### The thermal argument is now quantified, not asserted
+
+XPS has a **high** CTE (80 × 10⁻⁶/K) against silicon's **~3 × 10⁻⁶/K**. Over the 80 K assembly-to-flight
+swing on a 78.55 mm long cell:
+
+| | contraction over 80 K | differential vs the cell |
+|---|---|---|
+| XPS | 503 µm | **486 µm** |
+| FR4 | 107 µm | 90 µm |
+| silicon cell | 16 µm | — |
+
+A **rigid** bond would impose **~6200 microstrain (0.62 %)** on the cell. Silicon's fracture
+strain is ~1000–2000 microstrain. **A rigid bond is fatal by ~4×.**
+
+Two things follow, and both matter:
+
+1. **ADR-052's ends-only mandate is now backed by arithmetic, not just community practice.** It
+   is not optional and it is not conservative — it is the difference between a wing and a wing
+   with cracked cells.
+2. **Foam makes the mismatch 5× worse than FR4** (486 µm vs 90 µm), so ends-only mounting is
+   *more* load-bearing here than it was with the board. Note the FR4 design **also** fails a
+   rigid bond (0.8× fracture strain), which is precisely why ADR-052 chose ends-only for it too.
+
+**The `E` willingness to allow free movement is what saves this** — a 15–40 MPa substrate simply
+cannot transmit the contraction into the cell. A stiff substrate paired with a rigid bond is the
+failure case.
+
 ## Binding constraints (ADR-052)
 
 > **Each cell is attached at its two ends only, and is otherwise free to move. There is no

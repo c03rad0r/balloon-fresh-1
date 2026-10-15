@@ -113,3 +113,36 @@ def test_heavier_wing_needs_more_holding_force(m: ModuleType) -> None:
     light = m.wing_g(15.0, 3.0)
     heavy = m.wing_g(32.0, 6.0)
     assert heavy > light
+
+
+# --- 5. the thermal argument (sourced CTE) -----------------------------------
+def test_xps_cte_is_high_against_silicon(m: ModuleType) -> None:
+    """XPS is ~31x silicon's CTE -- the reason a rigid bond is fatal."""
+    assert m.XPS_CTE_PER_K / m.SI_CTE_PER_K > 30.0
+
+
+def test_rigid_bond_is_fatal_for_xps(m: ModuleType) -> None:
+    assert m.rigid_bond_is_fatal(m.XPS_CTE_PER_K) is True
+    assert m.rigid_bond_strain_microstrain(m.XPS_CTE_PER_K) > m.SI_FRACTURE_MICROSTRAIN[0]
+
+
+def test_rigid_bond_is_ALSO_fatal_for_fr4(m: ModuleType) -> None:
+    """The point that makes ADR-052 substrate-independent: FR4 fails too."""
+    assert m.rigid_bond_is_fatal(m.FR4_CTE_PER_K) is True
+
+
+def test_foam_makes_the_thermal_mismatch_worse_than_fr4(m: ModuleType) -> None:
+    """Ends-only mounting is MORE load-bearing with foam, not less."""
+    assert m.thermal_differential_um(m.XPS_CTE_PER_K) > 4 * m.thermal_differential_um(m.FR4_CTE_PER_K)
+
+
+def test_thermal_differential_matches_the_handbook_arithmetic(m: ModuleType) -> None:
+    # (80e-6 - 2.6e-6) * 80 K * 78.55 mm = 486 um
+    assert m.thermal_differential_um(m.XPS_CTE_PER_K) == pytest.approx(486, abs=2)
+
+
+def test_xps_modulus_is_within_the_sourced_handbook_range(m: ModuleType) -> None:
+    """The model's 30 MPa must sit inside BASF's published 15-40 MPa band."""
+    lo, hi = m.XPS_E_MPa_RANGE
+    xps = next(f for f in m.FOAMS if "XPS" in f.name)
+    assert lo <= xps.E_MPa <= hi
