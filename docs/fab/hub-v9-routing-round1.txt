@@ -1,0 +1,72 @@
+VERDICT: CHANGES_REQUESTED
+
+**The main visible problem is the arrangement of U4’s supporting parts, not proven lack of board area or simply insufficient separation between U1 and U4.** Keep the 70 × 70 mm outline for the next iteration. Rebuild the radio’s local placement and escape routing before trying more aggressive autorouting.
+
+## A. What is causing the congestion?
+
+### U1 and U4 are close, but that is not inherently wrong
+Your measured **1.99 mm gap means no overlap**. With so many connections between them, keeping these devices near each other is sensible. The 14.5 mm MOSI endpoint separation is not, by itself, an unreasonable PCB connection length.
+
+However, a footprint-to-footprint gap is **not a measurement of available routing capacity**. Pad escapes, via clearances, nearby components and already occupied tracks determine that capacity.
+
+Spatially, U4 sits in a constrained pocket:
+
+- **North:** U1’s bottom pad row.
+- **West:** the large U2 footprint and, farther south, U5.
+- **East:** D_BP4 and the right-edge component column.
+- **South:** D_HUB1, L4 and other parts.
+
+That arrangement leaves limited freedom to build a good radio support cluster, even though the overall board is not full.
+
+### The stronger placement objection is the scattered radio support network
+In Image 1:
+
+- **L1 is on the far-left edge**, while U4 is near the right side.
+- **C0 is in the right-edge column, substantially below U4.**
+- **L4 sits below D_HUB1**, rather than immediately alongside U4’s regulator pins.
+
+Using the 70 mm outline as a visual scale, the labeled L1 is roughly **50 mm** from the radio RF pad, and C0 roughly **16 mm** away. These are screenshot estimates, not board-file measurements.
+
+**If those labeled footprints are indeed the matching components you identify, this is a definite placement problem independent of the routing failures.** A matching network spread across that distance is not a close-to-chip match. Likewise, routing U4’s internal regulator connection around intervening components is a poor starting geometry for a compact regulator loop.
+
+### What your experiments establish—and what they do not
+The failure swapping is evidence of **competition for routing resources under the current placement and routing rules**:
+
+- More rip-up does not fix it.
+- Prioritizing two nets merely displaces failures onto other nets.
+- The displaced nets include RF and the internal regulator connection, which should not be treated as freely detourable general-purpose connections.
+
+It does **not** prove that the board is mathematically unroutable, or that the outline must grow. Nor does it prove that the 1.99 mm gap is the particular bottleneck.
+
+Image 2 supports a localized routing concentration near U4, but its scale and displayed layers do not let me establish exact choke points or ground-plane integrity.
+
+## B and D. Remedies, with a checkable limiting assumption for each
+
+| Recommendation | Spatial purpose | One limiting assumption to check by measurement |
+|---|---|---|
+| **Move C0 and L1 into a compact RF network immediately beside U4 pad 22, at (52.50, 29.15).** Establish this geometry before routing digital signals. | Eliminates the visibly dispersed match; gives the RF connection a short, intentional path. | **Assumption:** the pictured L1 and C0 are the stated match. Confirm their pad nets and measure pad-22-to-matching-pad distances in the board file. |
+| **Bring L4 and the associated regulator capacitors beside the relevant U4 pins; move intervening unrelated components out of that neighborhood.** | Shortens the DCC_SW/VDD regulator loop instead of requiring it to weave around D_HUB1 or other parts. | **Assumption:** there is room for the complete regulator cluster locally. Measure its courtyard envelope and resulting loop geometry against the manufacturer’s reference layout. |
+| **Move unrelated neighboring circuitry downward before moving U4 far away from U1.** Candidates are the non-radio parts occupying the south/east escape area, after checking their functional relationships. | Opens room for U4 support parts and digital fanout while preserving short U1–U4 connections. | **Assumption:** these neighbors are not mechanically fixed or required to stay beside another device. Measure their allowable displacement and critical connection lengths. |
+| **Manually establish and lock the RF path, regulator loop and legal U4 escapes; then route the remaining digital connections around them.** Use available signal layers without cutting the RF reference plane. | Prevents ordinary signal routes from consuming the space needed for physically constrained radio connections. This is more than “route the failed two first.” | **Assumption:** legal escapes exist at the frozen rules. Measure pad gaps and available via sites using the actual trace widths, via diameters and 0.2 mm clearance. |
+| **Reserve continuous reference ground beneath the RF path and match.** Inspect the actual reference layer, not merely the red top-layer fill. | Meets the stated ground-under-RF requirement and protects the return path. | **Assumption:** the intended reference plane remains continuous after routing. Measure/check slots and via antipads beneath the entire RF footprint and route corridor. |
+
+A small U4 shift or rotation may help, but **do not prescribe it from package spacing alone**. Compare the digital escape direction, RF-pad direction and regulator-pin direction together. Simply pulling U4 downward while leaving its support parts scattered would not address the fundamental issue.
+
+## C. Is there usable empty area? Where?
+
+**Yes—there is substantial candidate relocation space in the lower interior.** It is not all automatically usable, but the image does not support “the board is too small.”
+
+Using the upper-left origin implied by your coordinates:
+
+- The clearest broad area is approximately **x = 5–60 mm, y = 53–64 mm**: below the capacitor/body region and above the bottom-edge ANT2/J_W2/ANT4 footprints.
+- The **lower-center interior**, beneath the C_BULK/C7–C10/C_HF row and the small cut-switch circuitry, is another useful relocation direction.
+- The **lower-left interior below C_CAP1** offers space away from the radio pocket.
+- On the right, preserve clearance around **ANT3**, the right-edge parts and any cable-access requirements.
+
+Those are approximate candidate regions, not certified free rectangles. Image 2 already has some routes across them; relocation would require rerouting.
+
+**Limiting assumption:** that lower area is not reserved for enclosure hardware, capacitor bodies, underside components or connector/cable keepouts. Measure the largest free *courtyard-and-mechanical* rectangle there—not just unoccupied copper area.
+
+Also, **do not count the blank interiors of U2 or U3 as free component-placement area** merely because the image shows copper inside their outlines.
+
+**Bottom line:** the U1–U4 proximity is defensible; the dispersed RF match and regulator-support geometry are not. Use the lower interior to relieve the radio neighborhood, build a compact U4 support cluster, and then establish constrained routing. Neither a larger outline nor another generic rip-up pass is the justified first remedy.
