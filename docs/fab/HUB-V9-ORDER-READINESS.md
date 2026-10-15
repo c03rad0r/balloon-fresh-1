@@ -45,11 +45,15 @@ F.Cu pad is not reached by `Zone 'GND_PLANE_F.Cu'`. The stitcher reported
 `pads already stitched: 18` but `UNRESOLVABLE: 55`, naming `U1.41` repeated, `C0.2`, `C10.2`,
 `C_CAP2.2`, `R_BAL2.2`, `D_BP4.2`, `U_CUT1.2`, `C4.2`, …
 
-**`U1.41` appearing 15 times is itself suspicious** — one pad reported repeatedly suggests the
-stitcher is iterating a pad list it cannot resolve, not that 15 distinct pads are blocked. Worth
-checking before treating "UNRESOLVABLE: 55" as 55 real defects. *(This is the same shape as the
-false FAILs found earlier this session: an instrument reporting a number that does not survive
-scrutiny.)*
+**RESOLVED — and my own speculation here was WRONG.** I wrote that `U1.41` repeating looked like a
+duplication artifact. It is not: `U1` **genuinely has 13 distinct pads all numbered `41`**, which is
+the standard KiCad idiom for a module that exposes many ground pads under one number. Verified by
+reading the footprint. **13 real pads, all legitimately needing a stitch.**
+
+**"UNRESOLVABLE: 55" is also predicate-dependent, not a board fact.** It was measured with the
+uncorrected predicate (bbox clearance, no hole check, no edge check). With the corrected predicate
+the same board reports **38–43** depending on mode. **A number from an instrument that has since been
+shown wrong must be re-measured, not quoted** — the same rule that caught the false FAILs earlier.
 
 ### 3. DRC errors: 29
 
@@ -102,21 +106,55 @@ floor. **The fix is a PLACEMENT change -- spread the U4 support/RF parts, or mov
 routing pass.** That is consistent with `HUB-LAST-NET-DIO1.md`, which recorded the same region as
 "a placement decision, not a routing one" (`U2` courtyard x = 46.670 vs `U1` x = 47.099).
 
-### Rejected: `stitch_gnd_planes.py --offset` (measured trap, DO NOT ENABLE)
+### `stitch_gnd_planes.py --offset`: three defects found, fixed, and still OFF
 
-The v3 stitcher's offset mode is opt-in and `fab_grade.sh` never passes it -- which is why 55 pads
-report UNRESOLVABLE. Enabling it looks like a win and is not:
+The v3 stitcher's offset mode is opt-in and `fab_grade.sh` never passes it. Enabling it *was* a trap:
 
-| | centre-only | `--offset` |
+| | centre-only | `--offset` (original `free()`) |
 |---|---|---|
-| unresolvable pads | 55 | **12** |
-| unconnected items | 10 | **6** |
+| unconnected items | 10 | 6 |
 | **errors** | **29** | **56** |
-| new classes | -- | `hole_to_hole` 34, **`shorting_items` 5 (real shorts)**, `clearance` 4, `solder_mask_bridge` 3, `tracks_crossing` 2, `holes_co_located` 2 |
+| new classes | -- | `hole_to_hole` 34, **`shorting_items` 5 (real shorts)**, `clearance` 10, `solder_mask_bridge` 3, `tracks_crossing` 2 |
 
-**Root cause: `free()` tests pad/via clearance only** -- it never checks hole-to-hole spacing or
-whether the stub crosses an existing track. Vias land in ring positions free of *pads* but colliding
-with *holes and traces*. **The metric it optimises (unresolvable pads) is not the metric that matters.**
+**Root cause: `free()` tested clearance against axis-aligned BOUNDING BOXES, not shapes** — a point
+could clear a diagonal track's bbox corner *and still sit on the track* — and it never checked
+hole-to-hole (a *drill* rule; the predicate only used the *copper* diameter).
+
+**Three fixes landed, each measured:**
+
+| defect | fix | effect on the self-inflicted classes |
+|---|---|---|
+| bbox, not shape | `TransformShapeToPolygon` + `SHAPE_POLY_SET.Distance` | `clearance` 10 → 0 |
+| no hole-to-hole test | added, against the frozen 0.25 mm | `hole_to_hole` 34 → 0 |
+| **stub track never clearance-checked** | `stub_ok()`, sampled at 17 points along the segment | `shorting_items` 5 → 0 |
+| no board-edge rule | real `Edge.Cuts` shapes (not a bbox) | `copper_edge_clearance` +3 → 0 extra |
+
+**The stub was the last defect and the subtlest**: `free()` validated the *via site*, but the stub
+joining pad→site is drawn *after* the site is chosen and was never tested. It is sampled rather than
+solved analytically because a stub can pass **THROUGH** a forbidden region while both endpoints are
+legal — the *same* error the original bbox code made in the other direction.
+
+**Every self-inflicted error class is now zero.** Re-measured on the strict routed board:
+
+| metric | centre-only | `--offset` (fixed) |
+|---|---|---|
+| unconnected items | 8 | **6** |
+| errors | **29** | 31 |
+| warnings | 139 | 139 |
+| — of which `copper_edge_clearance` | 28 | 30 |
+| — every other class | identical | identical |
+
+**So offset is now a CLEAN TRADE, not a trap: −2 unconnected for +2 edge violations, with no new
+error classes. RECOMMENDED: centre-only**, because the +2 lands in the class that is *already* the
+open operator ruling (BLOCKER 4) and the two pads saved are *redundancy* (lower-impedance plane ties),
+not functional opens. **Adding to a hard fab constraint to save two redundant stitches is the wrong
+trade.** The mode stays opt-in and OFF.
+
+**This comparison is a per-run measurement, not a rule.** `recommend_stitch_mode.py` re-measures both
+modes and prints the trade, because the answer depends on how much room the *current* placement gives.
+A hardcoded "offset is safe" table would repeat the stale-snapshot defect already found in
+`fix_starved_thermal.py`, where a fixed pad list named two pads that needed nothing and **missed the
+one pad that was actually broken**.
 
 ### A self-grading hazard to preserve
 
