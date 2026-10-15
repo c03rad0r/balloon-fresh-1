@@ -125,7 +125,7 @@
 			(roundrect_rratio 0.25)
 		)
 
-		(pad "25" smd rect (at 0.00 0.00) (size 2.70 2.70)
+		(pad "0" smd rect (at 0.00 0.00) (size 2.70 2.70)
 			(layers "F.Cu" "F.Paste" "F.Mask")
 			(roundrect_rratio 0.25)
 		)
