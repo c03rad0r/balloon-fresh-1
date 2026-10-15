@@ -37,6 +37,7 @@ import pcbnew  # noqa: E402
 VIA_D = 0.6
 VIA_DRILL = 0.3
 CLEARANCE = 0.2
+BOARD_EDGE = 0.5      # jlcpcb-s1-frozen.kicad_dru: copper-to-edge minimum
 TRACK_W = 0.2
 RING_STEP = 0.25
 R_MAX = 4.0
@@ -143,6 +144,17 @@ def main():
     # `foreign` already holds only NON-GND pads/tracks; add their drills for the hole test.
     foreign_polys = []
     foreign_holes = []            # (cx, cy, radius) of every drill/via hole
+
+    # Real Edge.Cuts geometry (shapes, not a bounding box), for the board-edge keepout in free().
+    edge_shapes = []
+    for d_ in board.GetDrawings():
+        if d_.GetLayer() == pcbnew.Edge_Cuts:
+            try:
+                ps = pcbnew.SHAPE_POLY_SET()
+                d_.TransformShapeToPolygon(ps, pcbnew.Edge_Cuts, 0, ARC_ERR, pcbnew.ERROR_INSIDE)
+                edge_shapes.append(ps)
+            except Exception:
+                pass
     for fp in board.GetFootprints():
         for pad in fp.Pads():
             # ONLY foreign (non-GND) copper blocks a GND via. Adding the GND pad's OWN polygon made
@@ -193,6 +205,62 @@ def main():
         for hx, hy, hr in foreign_holes:
             if (cx - hx) ** 2 + (cy - hy) ** 2 < (VIA_DRILL / 2.0 + HOLE_TO_HOLE + hr) ** 2:
                 return False
+        # --- board edge ---
+        # A THIRD rule the predicate never knew. Measured 2026-10-15: stitching took
+        # copper_edge_clearance 27 -> 30, i.e. it placed three vias too near Edge.Cuts. The frozen
+        # ruleset's board_edge minimum is BOARD_EDGE; the via's OWN radius counts toward it, so the
+        # centre must sit at least (BOARD_EDGE + VIA_D/2) inside. Edge.Cuts geometry is used directly
+        # rather than the board bounding box: the outline is not necessarily rectangular, and a bbox
+        # would both miss corners and over-reject near them.
+        for es in edge_shapes:
+            try:
+                pt = pcbnew.VECTOR2I(int(round(cx * 1e6)), int(round(cy * 1e6)))
+                if es.Distance(pt) < int(round((BOARD_EDGE + VIA_D / 2.0) * 1e6)):
+                    return False
+            except Exception:
+                pass
+        return True
+
+    # ---------------------------------------------------------------------------------------------
+    # THE STUB TRACK WAS NEVER CLEARANCE-CHECKED (the last offset-mode defect, measured 2026-10-15)
+    # ---------------------------------------------------------------------------------------------
+    # `free()` validates the VIA SITE. The stub track that joins the pad to that site is drawn AFTER
+    # the site is chosen and was never tested against anything. Measured consequence of enabling
+    # offset mode with the shape-accurate predicate: unconnected fell 10 -> 4 (good) but errors sat at
+    # 46 vs a 29 baseline, with `clearance` 10 and `shorting_items` 2 that the via placement cannot
+    # explain -- the via IS shape-tested. Those are the STUB.
+    #
+    # Sampled at STUB_SAMPLES+1 points rather than solved analytically: the stub may pass THROUGH a
+    # forbidden region while both endpoints are legal, which an endpoint-only test would miss --
+    # exactly the error the original bbox code made in the other direction.
+    STUB_SAMPLES = 16
+
+    def stub_ok(cx, cy, sx, sy):
+        """The stub (pad centre -> via site), width TRACK_W, must clear foreign copper.
+
+        A track carries no drill, so no hole-to-hole rule applies to the stub itself; the dominant
+        missing rule was copper clearance. Required: distance >= TRACK_W/2 + CLEARANCE at every
+        sampled point along the segment.
+        """
+        need = TRACK_W / 2.0 + CLEARANCE
+        need_i = int(round(need * 1e6))
+        for i in range(STUB_SAMPLES + 1):
+            t = i / float(STUB_SAMPLES)
+            px = cx + (sx - cx) * t
+            py = cy + (sy - cy) * t
+            for ps, bb in foreign_polys:
+                x0, y0, x1, y1 = bb
+                nx = min(max(px, x0), x1)
+                ny = min(max(py, y0), y1)
+                if (px - nx) ** 2 + (py - ny) ** 2 > (need + 1.0) ** 2:
+                    continue
+                try:
+                    pt = pcbnew.VECTOR2I(int(round(px * 1e6)), int(round(py * 1e6)))
+                    if ps.Distance(pt) < need_i:
+                        return False
+                except Exception:
+                    if (px - nx) ** 2 + (py - ny) ** 2 < need ** 2:
+                        return False
         return True
 
     def near_gnd_via(cx, cy):
@@ -229,7 +297,8 @@ def main():
                     for k in range(n):
                         a = 2 * math.pi * k / n
                         tx, ty = cx + ring * math.cos(a), cy + ring * math.sin(a)
-                        if free(tx, ty):
+                        # BOTH the via site AND the stub that reaches it must be legal
+                        if free(tx, ty) and stub_ok(cx, cy, tx, ty):
                             site = (tx, ty)
                             break
                     ring += RING_STEP
