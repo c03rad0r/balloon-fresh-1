@@ -71,8 +71,8 @@
     "crystal": [
       {"part": "Q1", "value": "52 MHz", "lcsc": "C7502106", "library": "expand",
        "package": "SMD3225-4P",
-       "connections": ["p1 -> U4.4 (XTA)", "p2 -> U4.6 (XTB)", "p3 -> GND", "p4 -> GND"],
-       "note_4pin": "A 4-pad crystal is a 2-electrode crystal in a 4-pad package; the extra two pads are ground/shield, which is why p3 and p4 go to GND.",
+       "connections": ["p1 -> U4.4 (XTA)", "p3 -> U4.6 (XTB)", "p2 -> GND", "p4 -> GND"],
+       "note_4pin": "CORRECTED 2026-10-15 (card t_5c5937f9): the earlier mapping here said p2->XTB and p3/p4->GND. The vendor's OWN Figure 15-1 (page 145 of docs/sx1280/SX1280-81_Rev3.2_Mar2020.pdf) refutes that -- pins 1 and 3 are the two crystal ELECTRODES and pins 2 and 4 are the package GROUND pads. Wired as the file previously said, one electrode would have been grounded (a dead oscillator). Two independent reads agree: pdftotext -bbox token coordinates on page 145 ('3' at 88.97,239.20 / '1' at 88.97,275.93 = the two electrodes; '4' at 107.15,252.15 and '2' at 107.15,262.99 adjacent to 'GND' at 116.89,266.51), and a 3x zoomed visual read. IMPLEMENTED as p1->XTA, p3->XTB, p2&p4->GND via Device:Crystal_GND24.",
        "NO_LOAD_CAPS": "Figure 15-1 shows NO external load capacitors. The datasheet states the foot capacitances are INTERNALLY INTEGRATED. Do NOT add load caps; do NOT infer that they were omitted by mistake.",
        "constraint_used": "Table 3-9: F_XOSC 52 MHz, C_LOAD 10 pF typical, C0 max 5 pF, R_S max 50 ohm.",
        "why_this_part": "Cheapest of 14 of 41 candidates whose load capacitance is 10 pF. The cheapest overall candidate is 8 pF and would sit off-frequency."
@@ -90,6 +90,54 @@
       {"net": "/SX1280_DIO2",    "to": "U4.9 (DIO2)"},
       {"net": "/SX1280_DIO3",    "to": "U4.10 (DIO3)"},
       {"net": "GND",             "to": "U4.5, U4.13, U4.20, U4.21, U4.23, U4.24, U4.0 (exposed pad)"}
+    ]
+  },
+
+  "MEASURED_RESULT_2026_10_15": {
+    "card": "t_5c5937f9 (U4 SX1280 schematic wiring REBUILD onto the real pinout)",
+    "commit": "322f37b5 on pr/u4-rewire",
+    "method": "tracker/hardware/rewrite_sch_u4_wiring.py --write, then `kicad-cli sch export netlist` and a pin-by-pin assertion of EVERY U4 pin and every new part pin against the tables above. The assertion is part of the script, so the generator cannot report success while writing a broken file.",
+    "export_rc": 0,
+    "u4_pins_checked": 25,
+    "u4_mismatches": 0,
+    "components_before": 44,
+    "components_after": 59,
+    "measured_pin_to_net": {
+      "0": "GND", "1": "/SX1280_VR_PA", "2": "/SX1280_VDD", "3": "/SX1280_RESET_N",
+      "4": "/SX1280_XTA", "5": "GND", "6": "/SX1280_XTB", "7": "/SX1280_BUSY",
+      "8": "/SX1280_DIO1", "9": "/SX1280_DIO2", "10": "/SX1280_DIO3", "11": "/SX1280_VBAT_IO",
+      "12": "/SX1280_VDD", "13": "GND", "14": "/SX1280_DCC_SW", "15": "+3V3",
+      "16": "/SX1280_MISO", "17": "/SX1280_MOSI", "18": "/SX1280_SCK", "19": "/SX1280_CS_N",
+      "20": "GND", "21": "GND", "22": "/SX1280_RF", "23": "GND", "24": "GND"
+    },
+    "measured_part_to_net": {
+      "C5": {"1": "/SX1280_VR_PA", "2": "GND"},
+      "C6": {"1": "/SX1280_VDD", "2": "GND"},
+      "C9": {"1": "/SX1280_VDD", "2": "GND"},
+      "C8": {"1": "/SX1280_VBAT_IO", "2": "GND"},
+      "C10": {"1": "+3V3", "2": "GND"},
+      "R15": {"1": "+3V3", "2": "/SX1280_VBAT_IO"},
+      "L4": {"1": "/SX1280_DCC_SW", "2": "/SX1280_VDD"},
+      "Q1": {"1": "/SX1280_XTA", "2": "GND", "3": "/SX1280_XTB", "4": "GND"},
+      "C0": {"1": "/SX1280_RF", "2": "GND"},
+      "L1": {"1": "/SX1280_RF", "2": "/SX1280_RF_MATCH"},
+      "C1": {"1": "/SX1280_RF_MATCH", "2": "GND"},
+      "L2": {"1": "/SX1280_RF_MATCH", "2": "/SX1280_RF_FILT"},
+      "C7": {"1": "/SX1280_RF_MATCH", "2": "/SX1280_RF_FILT"},
+      "C2": {"1": "/SX1280_RF_FILT", "2": "GND"},
+      "C3": {"1": "/SX1280_RF_FILT", "2": "/ANT2_2G4_RANGE"}
+    },
+    "designator_deviations": [
+      {"vendor_ref": "C4", "as_built": "C7", "why": "C4 is ALREADY a populated 10 uF /GNSS_VCC decoupling cap on this sheet; a second C4 would be a duplicate designator and would silently lose one part. Value (0.5 pF), MPN (GRM1555C1HR50WA01D) and topology (in parallel with L2) are unchanged."}
+    ],
+    "node_names_added": {
+      "/SX1280_RF_MATCH": "RFIO-C0-L1-C1 node (internal; the vendor figure leaves it unnamed)",
+      "/SX1280_RF_FILT": "L2||C7-C2 node (internal)",
+      "antenna_side": "/ANT2_2G4_RANGE -- the EXISTING net. There is no ANT5 part on this sheet; ADR-108 R1 re-pointed ANT2 at the SX1280 RFIO."
+    },
+    "not_done": [
+      "hub_board_v9.kicad_pcb was NOT touched: the 15 new parts are in the schematic only, so test_netlist_integrity gate C now reports them as MISSING FROM THE BOARD (59 declared vs 44 placed). Placing + routing them is the next card.",
+      "build_flight_sch.py was NOT made to reproduce this sheet -- it is 75 hunks stale and re-running it REVERTS step 1 plus the part-number pass. See REPORT.md s4."
     ]
   },
 
@@ -120,7 +168,7 @@
       "Nets touching U4 should be 13 (the original count) or more, NOT the collapsed 7.",
       "The 7 wrong connections must be gone.",
       "L4 and C9 must both be present (mandatory internal-regulator parts).",
-      "Q1 must be present with p3/p4 to GND.",
+      "Q1 must be present with its two ELECTRODES on XTA/XTB and its two GROUND pads to GND (pins 1 & 3 electrodes, 2 & 4 ground -- corrected 2026-10-15 from Figure 15-1, see the crystal entry above).",
       "NO crystal load capacitors.",
       "GND must reach every ground pin AND the exposed pad."
     ],

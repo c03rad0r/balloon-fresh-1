@@ -736,25 +736,48 @@ V9_BARE_PINS = [
     ("18", "GND", "power_in"),
 ]
 
-# --- SX1280.  *** PIN NUMBERS NOT VERIFIED ***  The Semtech SX1280 datasheet is
-# unreachable from this host (see PROGRESS.md / REPORT.md).  The *signal names*
-# are those the repo's own pin plan and the RadioLib SX1280 module interface
-# expose (NSS/SCK/MOSI/MISO/BUSY/NRESET/DIO1-3); the QFN pad NUMBERING is a
-# declared-unverified placeholder and MUST be re-done when the datasheet is read.
+# --- SX1280.  REAL pinout, VERIFIED.  Source: Semtech SX1280/SX1281 Data Sheet Rev 3.2
+# (March 2020) Table 2-1 + Figure 2-1, vendored at docs/sx1280/ -- transcribed to
+# docs/fab/SX1280-WIRING-SPEC.json and docs/fab/OPEN-13-CLOSED-SX1280-PINOUT.md, and built into
+# the sheet of record by commit b7b47df7 (STEP 1).
+#
+# The FOURTH field is the pin's REAL SIDE.  This is the whole point: the previous version of this
+# table was a declared-unverified PLACEHOLDER (VDD_IN/VDD_IO/NSS/SCK/MOSI/MISO/ANT_SW) whose
+# 25 entries were laid out by _v9_symbol()'s 50/50 half-split -- 13 left / 12 right at 2.54 mm --
+# which is structurally unable to represent a part with 6 LEFT / 3 BOTTOM / 9 RIGHT / 6 TOP pins.
+# The placeholder also gave the part an ANT_SW pin, which the real SX1280 does NOT have (that net
+# was removed from the sheet in commit 96d219b3).
+#
+# ORDER MATTERS: pins are placed in list order along their own side, so this list is also the
+# pin-escape order.  Pin 0 is the exposed pad, whose connectable end lands at the body CENTRE --
+# that is what STEP 1 built and what the sheet's wiring assumes (it needs a dedicated wire run
+# out to a ground flag).  Making the EP a normal side pin is a separate, still-open improvement.
 V9_SX1280_PINS = [
-    ("1", "VDD_IN", "power_in"), ("2", "VDD_IO", "power_in"),
-    ("3", "GND", "power_in"), ("4", "NRESET", "input"),
-    ("5", "BUSY", "output"), ("6", "NSS", "input"),
-    ("7", "SCK", "input"), ("8", "MOSI", "input"),
-    ("9", "MISO", "output"), ("10", "DIO1", "bidirectional"),
-    ("11", "DIO2", "bidirectional"), ("12", "DIO3", "bidirectional"),
-    ("13", "ANT_SW", "output"), ("14", "RFIO", "passive"),
-    ("15", "GND", "power_in"), ("16", "GND", "power_in"),
-    ("17", "GND", "power_in"), ("18", "GND", "power_in"),
-    ("19", "GND", "power_in"), ("20", "GND", "power_in"),
-    ("21", "GND", "power_in"), ("22", "GND", "power_in"),
-    ("23", "GND", "power_in"), ("24", "GND", "power_in"),
-    ("25", "GND_EP", "power_in"),
+    ("0",  "GND",     "passive",       "centre"),
+    ("1",  "VR_PA",   "passive",       "LEFT"),
+    ("2",  "VDD_IN",  "power_in",      "LEFT"),
+    ("3",  "NRESET",  "input",         "LEFT"),
+    ("4",  "XTA",     "passive",       "LEFT"),
+    ("5",  "GND",     "passive",       "LEFT"),
+    ("6",  "XTB",     "passive",       "LEFT"),
+    ("7",  "BUSY",    "output",        "BOTTOM"),
+    ("8",  "DIO1",    "bidirectional", "BOTTOM"),
+    ("9",  "DIO2",    "bidirectional", "BOTTOM"),
+    ("10", "DIO3",    "bidirectional", "RIGHT"),
+    ("11", "VBAT_IO", "power_in",      "RIGHT"),
+    ("12", "DCC_FB",  "passive",       "RIGHT"),
+    ("13", "GND",     "passive",       "RIGHT"),
+    ("14", "DCC_SW",  "passive",       "RIGHT"),
+    ("15", "VBAT",    "power_in",      "RIGHT"),
+    ("16", "MISO_TX", "output",        "RIGHT"),
+    ("17", "MOSI_RX", "input",         "RIGHT"),
+    ("18", "SCK_RTSN", "input",        "RIGHT"),
+    ("19", "NSS_CTS", "input",         "TOP"),
+    ("20", "GND",     "passive",       "TOP"),
+    ("21", "GND",     "passive",       "TOP"),
+    ("22", "RFIO",    "bidirectional", "TOP"),
+    ("23", "GND",     "passive",       "TOP"),
+    ("24", "GND",     "passive",       "TOP"),
 ]
 
 # --- TPS7A02 3.3 V ultra-low-Iq LDO, SOT-23-5 (ADR-006).  Pin *names* follow the
@@ -767,16 +790,79 @@ V9_TPS7A02_PINS = [
 
 
 def _v9_symbol(libname, name, value, footprint, descr, datasheet, pins):
-    """Build a balloon_flight_v9:<name> symbol from [(num, pname, etype), ...].
+    """Build a balloon_flight_v9:<name> symbol from a pin table.
 
-    Odd-indexed halves are placed left/right exactly like the LR2021F33 custom
-    symbol the C3 generator already emits (pins 1..N/2 left, rest right).
+    TWO FORMS, and the difference matters:
+
+    * 3-tuples (num, pname, etype) -- LEGACY.  Pins are split 50/50 left/right at 2.54 mm pitch,
+      exactly like the LR2021F33 custom symbol the C3 generator emits (pins 1..N/2 left, rest
+      right).  Unchanged; every other custom symbol on this sheet still uses it.
+
+    * 4-tuples (num, pname, etype, side) with side in LEFT / BOTTOM / RIGHT / TOP / centre --
+      the REAL SX1280 layout.  Pins are placed on their OWN side, spread evenly across the body,
+      which is what a 6 LEFT / 3 BOTTOM / 9 RIGHT / 6 TOP part requires.  A 50/50 half-split
+      CANNOT represent it: 25 pins that way is 13 left / 12 right at 2.54 mm, and that 13-row
+      2.54 mm stub field is exactly the geometry that re-landed the old wiring on the wrong pins.
+      The geometry below reproduces rewrite_sch_sx1280.py (STEP 1, commit b7b47df7) pin for pin,
+      so the generator's symbol and the sheet of record stay identical.  A 'centre' pin is placed
+      at the symbol origin -- that is the exposed pad, whose connectable end lands inside the body.
     """
+    sided = bool(pins) and len(pins[0]) == 4
+    if sided:
+        groups = {}
+        for num, pname, etype, side in pins:
+            if side == "centre":
+                continue
+            groups.setdefault(side, []).append((num, pname, etype))
+        bx, by, lead = 12.7, 17.78, 2.54
+        for side in ("LEFT", "BOTTOM", "RIGHT", "TOP"):
+            if side not in groups:
+                continue
+            grp = groups[side]
+            n_side = len(grp)
+            step = (by * 2 if side in ("LEFT", "RIGHT") else bx * 2) / (n_side + 1)
+            for i, (num, pname, etype) in enumerate(grp):
+                off = step * (i + 1)
+                if side == "LEFT":
+                    x, y, ang = -bx - lead, by - off, 0.0
+                elif side == "RIGHT":
+                    x, y, ang = bx + lead, -by + off, 180.0
+                elif side == "BOTTOM":
+                    x, y, ang = -bx + off, -by - lead, 90.0
+                else:                                    # TOP
+                    x, y, ang = bx - off, by + lead, 270.0
+                groups[side][i] = (num, pname, etype, x, y, ang)
+        centres = [(num, pname, etype, 0.0, 0.0, 0.0)
+                   for num, pname, etype, side in pins if side == "centre"]
+        body_pins = centres + [p for side in ("LEFT", "BOTTOM", "RIGHT", "TOP")
+                               for p in groups.get(side, [])]
+        body = [_v9_pin(num, pname, etype, x, y, ang)
+                for num, pname, etype, x, y, ang in body_pins]
+        out = _v9_symbol_head(libname, name, value, footprint, descr, datasheet, bx, by)
+        out.append('\t\t(symbol "%s_1_1"\n%s\n\t\t)' % (name, "\n".join(body)))
+        out.append("\t)")
+        return "\n".join(out)
+
     half = (len(pins) + 1) // 2
     left, right = pins[:half], pins[half:]
     n = max(len(left), len(right))
     by = (n - 1) * 2.54 / 2.0 + 2.54
     bx = 12.7
+    out = _v9_symbol_head(libname, name, value, footprint, descr, datasheet, bx, by)
+    body = []
+    for i, (num, pname, etype) in enumerate(left):
+        body.append(_v9_pin(num, pname, etype, -bx - 2.54,
+                            by - 2.54 - i * 2.54, 0.0))
+    for i, (num, pname, etype) in enumerate(right):
+        body.append(_v9_pin(num, pname, etype, bx + 2.54,
+                            by - 2.54 - i * 2.54, 180.0))
+    out.append('\t\t(symbol "%s_1_1"\n%s\n\t\t)' % (name, "\n".join(body)))
+    out.append("\t)")
+    return "\n".join(out)
+
+
+def _v9_symbol_head(libname, name, value, footprint, descr, datasheet, bx, by):
+    """Everything of a custom symbol before its pin body: headers, properties, body rectangle."""
     out = ['(symbol "%s:%s"' % (libname, name)]
     out.append('\t\t(pin_names\n\t\t\t(offset 1.016)\n\t\t\t(hide no)\n\t\t)')
     out.append('\t\t(exclude_from_sim no)\n\t\t(in_bom yes)\n\t\t(on_board yes)')
@@ -801,16 +887,7 @@ def _v9_symbol(libname, name, value, footprint, descr, datasheet, pins):
                '\t\t\t\t\t(type default)\n\t\t\t\t)\n'
                '\t\t\t\t(fill\n\t\t\t\t\t(type background)\n\t\t\t\t)\n\t\t\t)\n\t\t)'
                % (name, fmt(-bx), fmt(by), fmt(bx), fmt(-by)))
-    body = []
-    for i, (num, pname, etype) in enumerate(left):
-        body.append(_v9_pin(num, pname, etype, -bx - 2.54,
-                            by - 2.54 - i * 2.54, 0.0))
-    for i, (num, pname, etype) in enumerate(right):
-        body.append(_v9_pin(num, pname, etype, bx + 2.54,
-                            by - 2.54 - i * 2.54, 180.0))
-    out.append('\t\t(symbol "%s_1_1"\n%s\n\t\t)' % (name, "\n".join(body)))
-    out.append("\t)")
-    return "\n".join(out)
+    return out
 
 
 def _v9_pin(num, pname, etype, x, y, ang):
@@ -1235,7 +1312,7 @@ for _i in range(1, 5):
 V9_NETS = [
     ("+3V3", [("U1", "2"), ("U2", "5"), ("U3", "1"), ("U5", "6"), ("U5", "7"),
               ("U5", "9"), ("U6", "1"), ("U6", "4"), ("U7", "5"), ("R_F1", "1"),
-              ("U4", "1"), ("U4", "2"), ("J_VCC", "3")],
+              ("U4", "15"), ("J_VCC", "3")],
      "ADR-006 3.3 V rail (TPS7A02 OUT); U2 pin 5 CE strapped to 3V3 per the "
      "ADR-029 pin plan (blocker 3: confirm CE vs the purchased revision). "
      "U5 pins 6/7/9 (V_BCKP / VCC_IO / ~RESET) are tied to +3V3 on the precedent "
@@ -1244,8 +1321,13 @@ V9_NETS = [
      "the v8i board is sha256-pinned in this generator). J_VCC pin 3 is the "
      "3.3 V position of the ADR-029 D8 pin-1 selector (nested bare LoRa2021). "
      "R_F1 pin 1 feeds the GNSS RC filter per ADR-029 2(d). "
-     "ADR-108 Revision R1 (2026-10-07) CLOSES OPEN-1: U4 pins 1/2 (SX1280 "
-     "VDD_IN / VDD_IO) are on +3V3. The 3.3 V rail IS the SX1280 supply of "
+     "ADR-108 Revision R1 (2026-10-07) CLOSED OPEN-1 as 'U4 pins 1/2 are on "
+     "+3V3'.  THE PINOUT REVISION OF 2026-10-15 SUPERSEDES THE PIN NUMBERS IN "
+     "THAT RULING: on the REAL part the radio supply is pin 15 (VBAT), and pins "
+     "1 and 2 are VR_PA (a regulator OUTPUT, bypassed by C5 to GND) and VDD_IN "
+     "(the internal regulator's output node, tied to pin 12 DCC_FB through L4) "
+     "-- NEITHER may sit on a rail.  So the rail of record is unchanged (the "
+     "3.3 V rail IS the SX1280 supply of "
      "record - ADR-047 2.3 states verbatim that the 3.3 V rail also carries "
      "the ESP32-S3, the SX1280 and the GNSS, and docs/POWER-BUDGET-V9-D2BE.md "
      "2 puts BOTH SX1280 states (ranging TX 70 mA, ranging RX 15 mA) on the "
@@ -1263,9 +1345,11 @@ V9_NETS = [
              ("U2", "2"), ("U2", "3"), ("U2", "4"), ("U2", "6"), ("U2", "7"),
              ("U2", "8"), ("U2", "11"),
              ("U3", "2"), ("U3", "8"), ("U3", "11"), ("U3", "12"), ("U3", "18"),
-             ("U4", "3"), ("U4", "15"), ("U4", "16"), ("U4", "17"), ("U4", "18"),
-             ("U4", "19"), ("U4", "20"), ("U4", "21"), ("U4", "22"), ("U4", "23"),
-             ("U4", "24"), ("U4", "25"),
+             # U4's REAL ground pads: 0 is the exposed pad (whose connectable end lands at the
+             # symbol origin), 5/13/20/21/23/24 are the GND pins.  The placeholder list (3/15..25)
+             # was the 13/12 half-split numbering and would now short the SPI pins to ground.
+             ("U4", "0"), ("U4", "5"), ("U4", "13"), ("U4", "20"), ("U4", "21"),
+             ("U4", "23"), ("U4", "24"),
              ("U5", "1"), ("U6", "2"), ("U6", "3"), ("U6", "6"), ("U7", "2"), ("C_CAP2", "2"),
              ("R_DIV2", "2"), ("C4", "2"), ("R_BAL2", "2"),
              ("C_BULK", "2"), ("C_HF", "2"), ("D_CLAMP", "2"), ("R_MON2", "2"),
@@ -1372,28 +1456,30 @@ V9_NETS = [
      "F33 IRQ/DIO1 on GPIO9 (ADR-029 pin plan)."),
     ("F33_RESET_N", [("U1", "18"), ("U2", "17")],
      "F33 RESET on GPIO10 (ADR-029 pin plan)."),
-    ("SX1280_SCK", [("U1", "22"), ("U4", "7")],
-     "SPI3 clock on GPIO14 (ADR-029 pin plan). SX1280 pad numbers UNVERIFIED."),
-    ("SX1280_MOSI", [("U1", "8"), ("U4", "8")],
-     "SPI3 MOSI on GPIO15 (ADR-029 pin plan)."),
-    ("SX1280_MISO", [("U1", "9"), ("U4", "9")],
-     "SPI3 MISO on GPIO16 (ADR-029 pin plan)."),
-    ("SX1280_CS_N", [("U1", "10"), ("U4", "6")],
-     "SPI3 CS on GPIO17 (ADR-029 pin plan)."),
-    ("SX1280_BUSY", [("U1", "31"), ("U4", "5")],
-     "SX1280 BUSY on GPIO38 (ADR-029 pin plan)."),
-    ("SX1280_RESET_N", [("U1", "32"), ("U4", "4")],
+    # U4's pin numbers below are the REAL SX1280 pad numbers (Table 2-1).  They were 4/5/6/7/8/
+    # 9/10/11/12 in the placeholder table, and the numbers moved with the pinout: leaving them
+    # would re-create the 7 dead connections this card removes (CS_N driving NRESET, MOSI driving
+    # XTA, DIO1 shorted to GND, ...).  SX1280_ANT_SW is GONE: the real part has no ANT_SW pin
+    # (removed from the sheet in commit 96d219b3, operator-confirmed).
+    ("SX1280_SCK", [("U1", "22"), ("U4", "18")],
+     "SPI3 clock on GPIO14 (ADR-029 pin plan). U4 pad 18 = SCK_RTSN (real pinout)."),
+    ("SX1280_MOSI", [("U1", "8"), ("U4", "17")],
+     "SPI3 MOSI on GPIO15 (ADR-029 pin plan). U4 pad 17 = MOSI_RX."),
+    ("SX1280_MISO", [("U1", "9"), ("U4", "16")],
+     "SPI3 MISO on GPIO16 (ADR-029 pin plan). U4 pad 16 = MISO_TX."),
+    ("SX1280_CS_N", [("U1", "10"), ("U4", "19")],
+     "SPI3 CS on GPIO17 (ADR-029 pin plan). U4 pad 19 = NSS_CTS."),
+    ("SX1280_BUSY", [("U1", "31"), ("U4", "7")],
+     "SX1280 BUSY on GPIO38 (ADR-029 pin plan). U4 pad 7 = BUSY."),
+    ("SX1280_RESET_N", [("U1", "32"), ("U4", "3")],
      "SX1280 RESET on GPIO39 - native JTAG MTCK lost (ADR-029 pin plan, "
-     "explicit trade-off)."),
-    ("SX1280_DIO1", [("U1", "33"), ("U4", "10")],
-     "SX1280 DIO1/IRQ on GPIO40 - native MTDO/JTAG lost (pin plan)."),
-    ("SX1280_DIO2", [("U1", "11"), ("U4", "11")],
-     "SX1280 DIO2 on GPIO18 (pin plan, optional function)."),
-    ("SX1280_DIO3", [("U1", "34"), ("U4", "12")],
-     "SX1280 DIO3 on GPIO41 - native MTDI/JTAG lost (pin plan)."),
-    ("SX1280_ANT_SW", [("U1", "35"), ("U4", "13")],
-     "SX1280 antenna-switch control on GPIO42 (pin plan: fit only if the RF "
-     "front end proves the switch exists)."),
+     "explicit trade-off). U4 pad 3 = NRESET."),
+    ("SX1280_DIO1", [("U1", "33"), ("U4", "8")],
+     "SX1280 DIO1/IRQ on GPIO40 - native MTDO/JTAG lost (pin plan). U4 pad 8 = DIO1."),
+    ("SX1280_DIO2", [("U1", "11"), ("U4", "9")],
+     "SX1280 DIO2 on GPIO18 (pin plan, optional function). U4 pad 9 = DIO2."),
+    ("SX1280_DIO3", [("U1", "34"), ("U4", "10")],
+     "SX1280 DIO3 on GPIO41 - native MTDI/JTAG lost (pin plan). U4 pad 10 = DIO3."),
     ("GNSS_PPS", [("U1", "23"), ("U5", "4")],
      "MAX-M10S TIMEPULSE/PPS on GPIO21 (ADR-029 pin plan)."),
     ("GNSS_TX", [("U1", "36"), ("U5", "2")],
@@ -1410,7 +1496,7 @@ V9_NETS = [
      "says GPIO0, the ADR-029 pin plan reserves IO0 as a boot strap."),
     ("ANT1_433_TX", [("U2", "9"), ("ANT1", "1")],
      "ADR-034 D1/D2 + ADR-029 D3: 433 MHz TX, F33 sub-GHz ANT."),
-    ("ANT2_2G4_RANGE", [("U4", "14"), ("ANT2", "1")],
+    ("ANT2_2G4_RANGE", [("U4", "22"), ("ANT2", "1")],
      "ADR-108 Revision R1 (2026-10-07) CLOSES OPEN-2. ANT2 is re-pointed "
      "from the F33 2.4 GHz port to the SX1280 RFIO. ADR-029 D2b/D3 "
      "enumerated FOUR connectors (GNSS L1, F33 sub-GHz, F33 ANT-2G4, "
@@ -2229,7 +2315,8 @@ def v9_emit():
         "U1 ESP32-S3-WROOM-1U-N8R8",
         "U2 LoRa2021F33-2G4  (433 MHz TX) - VCC PRE-LDO, ADR-047",
         "U3 bare LoRa2021  (2.4 GHz RX)",
-        "U4 SX1280  (2.4 GHz ranging)  *** PINOUT UNVERIFIED ***",
+        "U4 SX1280  (2.4 GHz ranging) - REAL pinout, OPEN-13 closed 2026-10-14; "
+        "wiring rebuilt 2026-10-15",
         "F33 RAIL PROVISION (ADR-047): pin-1 selector / bulk / clamp / monitor",
         "SUPERCAP BANK (SERIES + BALANCING) / BAT54 / DIVIDER / GNSS RC",
         "U.FL ANTENNAS (4 feeds: ANT1 433 TX / ANT2 2.4 ranging / ANT3 2.4 RX "
