@@ -76,6 +76,55 @@ class is handled, so nobody looks again. Two honest options:
 1. remove it and record the 27 items as an **explicit counted delta**, or
 2. find a condition that actually fires.
 
+## ROUTING: the U1/U4 channel is OVER-SUBSCRIBED -- proved by controlled test
+
+Three attempts, all measured, all with `--escalation off` (nothing narrowed) and
+`min_clearance_used = 0.2` (the frozen floor honoured exactly):
+
+| attempt | unconnected | errors | failed nets |
+|---|---|---|---|
+| single-phase, default rip metric | 10 | **29** | `/SX1280_MOSI`, `/SX1280_VBAT_IO` |
+| single-phase, `--ripup-abandon-metric weighted-probe` | 10 | 29 | **identical** -- 55/59, same 2, same 306 vias |
+| **two-phase** (route the 2 problem nets FIRST, then the rest) | **13** | **36** | MOSI/VBAT_IO **now connect**, but `/SX1280_MISO`, `/SX1280_VDD`, `/SX1280_RF` open |
+
+**Conclusion: routing ORDER relocates the failure, it does not fix it.** A stronger rip metric changes
+nothing; routing the congested nets first fixes those two and breaks three others.
+
+**The isolation test is MISLEADING and this is the trap worth recording.** Routing ONLY
+`/SX1280_MOSI` on the placed board succeeds (`Single-ended 1/1 routed`, via the router's own rescue
+path) -- which looks like proof of routability. It is not: an isolated net is handed the entire board.
+`/SX1280_VBAT_IO` behaves the same way (2/2 routed in isolation, fails in the full run). **"It routes
+alone" does not imply "it routes".**
+
+**Where that leaves it:** the channel between `U1` (ESP32-S3, 53 pads of which 13 are ground) and
+`U4` (SX1280, 25 pads) plus `U2` (the 39.0 x 21.0 mm LoRa2021F33-2G4) is over-subscribed at the frozen
+floor. **The fix is a PLACEMENT change -- spread the U4 support/RF parts, or move U4 -- not another
+routing pass.** That is consistent with `HUB-LAST-NET-DIO1.md`, which recorded the same region as
+"a placement decision, not a routing one" (`U2` courtyard x = 46.670 vs `U1` x = 47.099).
+
+### Rejected: `stitch_gnd_planes.py --offset` (measured trap, DO NOT ENABLE)
+
+The v3 stitcher's offset mode is opt-in and `fab_grade.sh` never passes it -- which is why 55 pads
+report UNRESOLVABLE. Enabling it looks like a win and is not:
+
+| | centre-only | `--offset` |
+|---|---|---|
+| unresolvable pads | 55 | **12** |
+| unconnected items | 10 | **6** |
+| **errors** | **29** | **56** |
+| new classes | -- | `hole_to_hole` 34, **`shorting_items` 5 (real shorts)**, `clearance` 4, `solder_mask_bridge` 3, `tracks_crossing` 2, `holes_co_located` 2 |
+
+**Root cause: `free()` tests pad/via clearance only** -- it never checks hole-to-hole spacing or
+whether the stub crosses an existing track. Vias land in ring positions free of *pads* but colliding
+with *holes and traces*. **The metric it optimises (unresolvable pads) is not the metric that matters.**
+
+### A self-grading hazard to preserve
+
+The router prints `FAB FLOOR RELAXED` and writes its own project, warning that *"every checker
+(check_drc, board_score, KiCad's own DRC) grades against the NEW value, so this copper will read
+clean."* **`fab_grade.sh` avoids this by copying the FROZEN project over the router's before DRC** --
+which is why its numbers are trustworthy and a raw router output is not.
+
 ## What is NOT blocking the order (say it explicitly)
 
 - **Schematic / netlist integrity**: section C passes — the board carries all 59 components.
