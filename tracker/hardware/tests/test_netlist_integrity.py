@@ -23,6 +23,7 @@ THE CLASSES GUARDED (all real, all measured 2026-10-14):
 """
 import os
 import re
+import glob
 import subprocess
 import sys
 
@@ -65,18 +66,63 @@ def comps_of(net_path):
 
 
 def all_installed_libs():
+    """Map library NAME -> [dirs], the way KiCad actually resolves a lib_id.
+
+    KiCad matches a `Lib:Footprint` lib_id against the name DECLARED in an
+    `fp-lib-table` -- not against the `.pretty` directory's basename. Those two can
+    differ in case (the v9 project declares `Tracker_Mechanical` for the directory
+    `tracker_mechanical.pretty`), and keying on the basename then INVENTS a defect:
+    measured 2026-10-15, `J_W1..J_W4 -> Tracker_Mechanical:Wing_Tab_4P` was reported
+    as "library not installed" while the table declared it and the 8,176-byte
+    `Wing_Tab_4P.kicad_mod` was present. That false FAIL is indistinguishable from a
+    real one at the call site, which is why the table is now the primary source.
+
+    Resolution order: fp-lib-table DECLARED names (authoritative) -> .pretty
+    directory basenames (fallback, for libs with no table entry). A
+    case-insensitive alias is also registered so a case-only difference can never
+    fabricate a failure again.
+    """
     libs = {}
+
+    def add(name, path):
+        if not path:
+            return
+        libs.setdefault(name, [])
+        if path not in libs[name]:
+            libs[name].insert(0, path)
+        # case-insensitive alias: a case-only mismatch must never invent a defect
+        low = name.lower()
+        if low != name:
+            libs.setdefault(low, [])
+            if path not in libs[low]:
+                libs[low].insert(0, path)
+
+    # 1. authoritative: names DECLARED in any fp-lib-table, URI resolved
+    for tbl in glob.glob(os.path.join(HW, "**", "fp-lib-table"), recursive=True):
+        here = os.path.dirname(tbl)
+        try:
+            t = open(tbl, encoding="utf-8", errors="replace").read()
+        except OSError:
+            continue
+        for m in re.finditer(r'\(lib \(name "([^"]+)"\)(.*?)\(uri "([^"]+)"\)', t, re.S):
+            name, uri = m.group(1), m.group(3)
+            p = uri.replace("${KIPRJMOD}", here)
+            p = p.replace("${KICAD9_FOOTPRINT_DIR}", KICAD_PRETTY)
+            if not os.path.isabs(p):
+                p = os.path.normpath(os.path.join(here, p))
+            add(name, os.path.normpath(p))
+
+    # 2. fallback: stock + demo dirs and repo-local .pretty dirs by basename
     for base in (KICAD_PRETTY, DEMO_PRETTY):
         if not os.path.isdir(base):
             continue
         for d in os.listdir(base):
             if d.endswith(".pretty"):
-                libs.setdefault(d[:-7], []).append(os.path.join(base, d))
-    # repo-local libraries win
+                add(d[:-7], os.path.join(base, d))
     for root, dirs, _files in os.walk(HW):
         for d in dirs:
             if d.endswith(".pretty"):
-                libs.setdefault(d[:-7], []).insert(0, os.path.join(root, d))
+                add(d[:-7], os.path.join(root, d))
     return libs
 
 
