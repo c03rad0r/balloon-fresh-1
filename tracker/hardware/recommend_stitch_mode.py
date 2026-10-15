@@ -22,8 +22,8 @@ import tempfile
 from collections import Counter
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-PY = sys.executable
 KICAD_PY = os.path.expanduser("~/venvs/kicad/bin/python")
+PY = KICAD_PY   # refill_zones.py needs pcbnew; python3.12 does not have it
 DRU = os.path.join(HERE, "jlcpcb-s1-frozen.kicad_dru")
 PRO = os.path.join(HERE, "hub_board_v9.kicad_pro")
 
@@ -36,12 +36,23 @@ def run(mode, src, work):
     if mode == "offset":
         args.append("--offset")
     r = subprocess.run(args, capture_output=True, text=True, timeout=900)
+    # The stitcher's summary lands on STDERR (measured: the parse found nothing in stdout while the
+    # same lines were visible in the combined capture). Merge both streams rather than assume.
+    combined = (r.stdout or "") + "\n" + (r.stderr or "")
     shape = {}
-    for line in r.stdout.splitlines():
+    for line in combined.splitlines():
         for k in ("vias at pad centre", "vias OFFSET + GND stub", "pads already stitched",
                   "UNRESOLVABLE"):
             if line.strip().startswith(k):
-                shape[k] = int(line.split(":")[1])
+                try:
+                    shape[k] = int(line.split(":")[1].strip().split()[0])
+                except (IndexError, ValueError):
+                    pass
+    if not os.path.exists(out) or "vias at pad centre" not in shape:
+        print(f"  [{mode}] stitch produced nothing usable (rc={r.returncode})")
+        print("  --- combined output tail ---")
+        print(combined[-900:])
+        raise SystemExit(2)
     subprocess.run([PY, os.path.join(HERE, "refill_zones.py"), out, filled],
                    capture_output=True, text=True, timeout=900)
     shutil.copy(PRO, filled[:-len(".kicad_pcb")] + ".kicad_pro")
@@ -66,6 +77,11 @@ def main():
         return 2
     src = sys.argv[1]
     work = sys.argv[2] if len(sys.argv) > 2 else tempfile.mkdtemp(prefix="stitchcmp-")
+    # MEASURED BUG (mine, 2026-10-15): the work dir was never created. `pcbnew.SaveBoard` then failed
+    # silently while the stitcher still printed "wrote <path>" (that line is unconditional), so the
+    # comparison died on a missing file. Create it, and treat "wrote" as unproven unless the file is
+    # actually there -- which the caller now asserts.
+    os.makedirs(work, exist_ok=True)
 
     centre = run("centre", src, work)
     offset = run("offset", src, work)
@@ -81,9 +97,11 @@ def main():
                      ("pads already stitched", "pads already stitched"),
                      ("UNRESOLVABLE", "unresolvable pads")):
         print(f"  {label:30} {centre[0].get(k, 0):>13} {offset[0].get(k, 0):>10}")
-    print(f"  {'unconnected items':30} {centre[1]['unconnected']:>13} {offset[1]['unconnected']:>10}")
-    print(f"  {'errors':30} {centre[1]['errors']:>13} {offset[1]['errors']:>10}")
-    print(f"  {'warnings':30} {centre[1]['warnings']:>13} {offset[1]['warnings']:>10}")
+    def f(v):
+        return "n/a" if v is None else str(v)
+    print(f"  {'unconnected items':30} {f(centre[1]['unconnected']):>13} {f(offset[1]['unconnected']):>10}")
+    print(f"  {'errors':30} {f(centre[1]['errors']):>13} {f(offset[1]['errors']):>10}")
+    print(f"  {'warnings':30} {f(centre[1]['warnings']):>13} {f(offset[1]['warnings']):>10}")
     print()
     alltypes = sorted(set(centre[1]["types"]) | set(offset[1]["types"]))
     print(f"  {'violation type':30} {'centre':>8} {'offset':>8}")
