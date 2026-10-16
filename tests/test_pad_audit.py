@@ -34,6 +34,13 @@ REPO = pathlib.Path(__file__).resolve().parents[1]
 AUDIT = REPO / "tracker" / "hardware" / "pad_audit.py"
 BOARD = REPO / "tracker" / "hardware" / "hub_board_v9.kicad_pcb"
 
+# Host footprint for the injected missing-nickname fault. Deliberately a part with NO other defect --
+# U6/LGA-8 has 8 uniquely-numbered pads, no repeated numbers and no unnamed pads, so it contributes no
+# findings of its own. U1 and U4 both carry pad idioms the audit must ignore (U1: 13x pad '41' on GND
+# plus 9 paste-only apertures), which would make the "every ERROR is the nickname finding" assertion
+# below depend on those idioms being handled -- they get their own dedicated test instead.
+FPID_HOST_REF = "U6"
+
 
 def _pcbnew_python() -> str:
     """An interpreter that can import pcbnew, chosen by TESTING rather than by assuming a path."""
@@ -56,8 +63,51 @@ def _run(board, *extra, root=None):
     cmd = [PY, str(AUDIT)]
     if root:
         cmd += ["--root", root]
+    cmd += list(extra)
     cmd.append(str(board))
     return subprocess.run(cmd, cwd=str(REPO), capture_output=True, text=True, timeout=300)
+
+
+def _inject_nicknameless_fpid(src, dst, ref):
+    """Copy `src` to `dst` and strip `ref`'s library nickname, with pcbnew, then verify it round-trips.
+
+    MUTATE WITH pcbnew AND RE-LOAD, never by editing the board TEXT. Slicing the s-expression at an
+    offset cuts it mid-expression, so pcbnew cannot parse the result and the audit correctly reports
+    "could not be read" -- a broken test masquerading as an audit bug. This is also why the fault is
+    INJECTED rather than read off the shipped board: the board used to carry exactly this defect (U4
+    read a bare `SX1280_QFN24`), commit 905b35272 repaired it, and a test that asserted against the
+    LIVE file would encode one board's condition instead of the audit's rule.
+
+    Returns the injection subprocess so the caller can report a TEST defect (not an audit one).
+    """
+    script = dst.parent / "inject_fpid.py"
+    script.write_text(
+        "import sys, shutil, pcbnew\n"
+        "src, dst, ref = sys.argv[1], sys.argv[2], sys.argv[3]\n"
+        "shutil.copy(src, dst)\n"
+        "b = pcbnew.LoadBoard(dst)\n"
+        "assert b is not None, 'could not load the board to inject into'\n"
+        "fp = b.FindFootprintByReference(ref)\n"
+        "assert fp is not None, 'no %s on the board' % ref\n"
+        "item = str(fp.GetFPID().GetLibItemName())\n"
+        "assert item.strip(), 'the host footprint has no library item name to preserve'\n"
+        "print('BEFORE nick=%r item=%r' % (str(fp.GetFPID().GetLibNickname()), item))\n"
+        "fp.SetFPID(pcbnew.LIB_ID('', item))   # the fault: a footprint ID with NO library nickname\n"
+        "pcbnew.SaveBoard(dst, b)\n"
+        "# Prove the mutated file is still READABLE and actually carries the fault. If a future change\n"
+        "# corrupts it, this fails with a clear message instead of looking like an audit defect.\n"
+        "chk = pcbnew.LoadBoard(dst)\n"
+        "assert chk is not None, 'the injected board is unreadable -- the injection corrupted it'\n"
+        "g = chk.FindFootprintByReference(ref)\n"
+        "assert g is not None, 'the host footprint vanished from the injected board'\n"
+        "assert not str(g.GetFPID().GetLibNickname()).strip(), \\\n"
+        "    'the nickname survived SaveBoard -- the injection did not take'\n"
+        "assert str(g.GetFPID().GetLibItemName()) == item, \\\n"
+        "    'the library item name changed during injection'\n"
+        "print('INJECTED %s nicknameless' % ref)\n",
+        encoding="utf-8")
+    return subprocess.run([PY, str(script), str(src), str(dst), ref],
+                          cwd=str(REPO), capture_output=True, text=True, timeout=300)
 
 
 # --------------------------------------------------------------- exactness of the pad signature
@@ -111,56 +161,100 @@ def test_model_ref_expansion_uses_the_census_rules():
     assert "C /usr/share/kicad/3dmodels/X/y.step" in r.stdout, r.stdout
 
 
-# --------------------------------------------------------------- the real board
+# --------------------------------------------------------------- built fixtures, not board condition
+# The three tests below each BUILD their fixture in a temp dir rather than asserting against the shipped
+# board's current condition. That board is the input, not the expectation: it proves the audit can run on
+# real data, while the injected faults prove the audit can still FAIL.
 def test_audit_finds_ONLY_the_genuine_defects():
-    """On the real board: exactly the U4 nickname finding, and NO pad-idiom false positives.
+    """Inject the ONE genuine defect into a copy: exactly that finding, and NO pad-idiom false positives.
 
     Pins the corrected rules. If a future edit starts flagging thermal-via arrays, U.FL ground tabs or
     paste-only apertures again, this test says so.
+
+    The fixture is BUILT HERE, not read off the canonical board. The board HAD this defect (U4's
+    footprint ID was a bare `SX1280_QFN24`, no library nickname); commit 905b35272 repaired it, which
+    is correct, and a test asserting the finding against the LIVE file therefore tested one board's
+    condition rather than the audit's rule. Injecting it makes this test immune to the board being
+    repaired -- or broken -- again.
     """
-    r = _run(BOARD)
-    out = r.stdout
-    assert r.returncode == 1, f"expected findings on this board:\n{out[-600:]}"
+    tmp = pathlib.Path(tempfile.mkdtemp(prefix="pad-fpid-"))
+    try:
+        copy = tmp / BOARD.name
+        inj = _inject_nicknameless_fpid(BOARD, copy, FPID_HOST_REF)
+        assert inj.returncode == 0, (
+            f"the pcbnew injection failed (this is a TEST defect, not an audit one):\n"
+            f"{inj.stdout[-600:]}\n{inj.stderr[-800:]}")
+        assert "INJECTED" in inj.stdout, f"injection did not take:\n{inj.stdout}"
 
-    # Parse by LINE rather than by brittle quoted substrings: an ERROR line is any line whose first
-    # token is ERROR. Wording elsewhere in the report can then change without breaking this test.
-    errors = [ln for ln in out.splitlines() if ln.strip().startswith("ERROR")]
-    err_text = "\n".join(errors)
+        r = _run(copy, root=str(BOARD.parent))
+        out = r.stdout
+        assert r.returncode == 1, f"expected the injected finding to fail the audit:\n{out[-900:]}"
 
-    # the genuine finding must be an ERROR (not merely mentioned somewhere in the report)
-    assert "NO library nickname" in err_text, \
-        f"missing the genuine U4 nickname finding as an ERROR:\n{out[-900:]}"
-    assert re.search(r"U4.*NO library nickname", err_text), f"the finding is not attributed to U4:\n{err_text}"
+        # Parse by LINE rather than by brittle quoted substrings: an ERROR line is any line whose first
+        # token is ERROR. Wording elsewhere in the report can then change without breaking this test.
+        errors = [ln for ln in out.splitlines() if ln.strip().startswith("ERROR")]
+        err_text = "\n".join(errors)
 
-    # the correct KiCad idioms must NOT be reported as errors: pad number '41' (13x thermal-via array
-    # on GND) and pad number '2' (3x U.FL ground tabs on GND) are the standard multi-pad single-net
-    # convention. Only a NET DISAGREEMENT is a defect, and that is injected in its own test below.
-    for num in ("41", "2"):
-        pat = re.compile(r"pad number '" + num + r"'")
-        bad = [ln for ln in errors if pat.search(ln)]
-        assert not bad, (
-            f"a correct multi-pad idiom (pad number '{num}', one net) is being flagged as an ERROR:\n"
-            + "\n".join(bad))
+        # the genuine finding must be an ERROR (not merely mentioned somewhere in the report)
+        assert "NO library nickname" in err_text, \
+            f"missing the genuine nickname finding as an ERROR:\n{out[-900:]}"
+        assert re.search(FPID_HOST_REF + r".*NO library nickname", err_text), \
+            f"the finding is not attributed to {FPID_HOST_REF}:\n{err_text}"
 
-    assert "PASTE-ONLY" in out, "paste-only apertures should be reported as warnings with a reason"
+        # EXACTNESS: the injected nickname fault is the ONLY thing on this board that may be flagged.
+        # Any second ERROR means the audit invented one -- which is precisely the pass-1/pass-2 failure
+        # this file exists to prevent.
+        assert len(errors) == 1, (
+            f"the audit reported {len(errors)} findings on a board carrying ONE injected defect:\n"
+            + err_text)
+
+        # the correct KiCad idioms must NOT be reported as errors: pad number '41' (13x thermal-via array
+        # on GND) and pad number '2' (3x U.FL ground tabs on GND) are the standard multi-pad single-net
+        # convention. Only a NET DISAGREEMENT is a defect, and that is injected in its own test below.
+        for num in ("41", "2"):
+            pat = re.compile(r"pad number '" + num + r"'")
+            bad = [ln for ln in errors if pat.search(ln)]
+            assert not bad, (
+                f"a correct multi-pad idiom (pad number '{num}', one net) is being flagged as an ERROR:\n"
+                + "\n".join(bad))
+
+        # ... and no ERROR may describe a bogus coincident-pad/incoherent signature condition. The rule
+        # text for the removed pass-1 false positive is a DISTINCT-positions variant; keep it out.
+        assert not [ln for ln in errors if re.search(r"DISTINCT positions|DISTINCT", ln)], (
+            "a distinct-position/signature condition is being reported as an ERROR rather than as the "
+            "correct matching-pad idiom:\n" + err_text)
+
+        assert "PASTE-ONLY" in out, "paste-only apertures should be reported as warnings with a reason"
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
 
 
 def test_audit_PASSES_on_a_board_with_no_defects():
-    """Strip the one genuine defect from a copy and require a PASS.
+    """REGRESSION GUARD: the canonical board must stay clean, so the audit can distinguish.
 
-    This proves the audit is not simply 'always fails' -- the other half of the can-fail property.
+    A gate that flags nothing anywhere is as useless as one that flags everything, so this pins the
+    PASS half of the can-fail property. It audits a COPY of the live board (with --root pointed at the
+    real directory, so ${KIPRJMOD} resolves) and requires exit 0.
+
+    This used to string-replace U4's footprint ID to "create" a clean board. The board IS clean now --
+    that replacement no longer applies to anything, and inventing a defect-free fixture would make the
+    test stop guarding the shipped board. So it now guards the shipped board directly: if a later change
+    reintroduces a defect, this FAILS and prints the findings instead of reporting a confusing
+    assertion error about a string that was not replaced.
     """
     tmp = pathlib.Path(tempfile.mkdtemp(prefix="pad-pass-"))
     try:
-        text = BOARD.read_text(encoding="utf-8", errors="replace")
-        # give U4 the library nickname the netlist names, removing the single finding
-        fixed = text.replace('(footprint "SX1280_QFN24"', '(footprint "balloon_flight_v9:SX1280_QFN24"', 1)
-        assert fixed != text, "could not apply the fix; the U4 footprint text changed"
         copy = tmp / BOARD.name
-        copy.write_text(fixed, encoding="utf-8")
+        shutil.copy(BOARD, copy)
         r = _run(copy, root=str(BOARD.parent))
-        assert r.returncode == 0, (
-            f"a board with the defect removed should PASS, so the audit can distinguish:\n{r.stdout[-800:]}")
+        if r.returncode != 0:
+            findings = "\n".join(
+                ln for ln in r.stdout.splitlines()
+                if ln.strip().startswith("ERROR")) or "(no ERROR line found)"
+            pytest.fail(
+                f"REGRESSION: the canonical board should have NO pad-level findings, but the audit "
+                f"exited {r.returncode}.\n--- findings ---\n{findings}\n--- tail of report ---\n"
+                f"{r.stdout[-800:]}\n{r.stderr[-400:]}")
         assert "PASS" in r.stdout, r.stdout[-400:]
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
