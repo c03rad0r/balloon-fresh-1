@@ -1,0 +1,63 @@
+====================================================================================
+ADR-046 OPTION A vs OPTION B -- numeric trade study
+====================================================================================
+
+1. WING MASS AND INERTIA
+   substrate 0.6 x 25 x 176 mm FR4          4.88 g   [computed]
+   array + adhesive allowance               9.00 g   [assume]
+   total wing mass                         13.88 g
+   inertia about the joint (m L^2/3)    1.434e-04 kg m^2
+
+2. JOINT LOADS at the centre of mass (L/2 = 88 mm)
+   static                   force   0.136 N   moment  0.0120 N m
+   10 g landing shock       force   1.362 N   moment  0.1198 N m
+
+3. FILLET CAPACITY (conservative allowables, hand-soldered)
+   Option A  shear, 2 faces   area  14.400 mm^2   capacity   172.80 N
+   Option B  peel about 1 edge  area   0.424 mm^2   capacity     2.65 N   (after 4x peel knockdown)
+   ratio A/B capacity                      65.17 x
+
+4. MARGINS against the 10 g shock load (1.362 N over 4 lands)
+   per-land load                           0.340 N
+   Option A  margin                        507.7 x
+   Option B  margin                          7.8 x
+
+5. ALIGNMENT (the ADR's stated reason for Option A)
+   slot 0.9 mm - tab 0.6 mm                 0.30 mm nominal play
+   angular play inside the slot             2.86 deg
+   tip displacement, slot-keyed             8.79 mm
+   tip displacement, freehand [assume]      9.21 mm
+   improvement                               1.0 x
+   NOTE: the slot keys the angle only to the play above; at 2.86 deg the tab can
+         still rattle. The ADR's wording 'keys the 90 deg angle' overstates it -- the slot
+         bounds the error, it does not eliminate it.
+
+6. FABRICATION COST SHAPE (absolute prices NOT in the repo -- read the live quote)
+   Option A  adds: an internal ROUTED cut-out line item; lands must exist on >=2 layers
+             (the board currently has F.Cu only, so it needs a layer/copper change too)
+   Option B  adds: nothing. Current board already matches this option.
+   VERDICT ON COST: Option A is strictly more expensive; the delta is unknown and must be
+                    read from a JLCPCB quote (a routed cut-out is priced per line item).
+
+7. WHAT THE CONCLUSION HANGS ON (sensitivity)
+   assumption                                        value  flips if...
+   land width (mm)                                    1.20  either way: capacity scales linearly
+   insertion depth (mm)                               6.00  A scales with it; B does not use it
+   peel knockdown                                     4.00  below ~1.2x, Option B approaches Option A
+   freehand angular error (deg)                       3.00  below ~0.3 deg, the slot gains nothing on angle
+   landing shock (g)                                 10.00  above ~200 g, Option B's margin reaches 1.0x
+
+8. READING
+   * Option A's capacity advantage is about 65x on these assumptions, driven almost
+     entirely by LOAD DIRECTION (shear vs peel) and by using two faces.
+   * Option A's alignment advantage is 1.0x on tip displacement, but the
+     slot still permits 2.86 deg of play, so it BOUNDS the angle rather than fixing it.
+   * Option B's cost advantage is real and its capacity is still 8x the 10 g shock load -- comfortable, IF the
+     peel knockdown is not much worse than 4x. That single number is the crux.
+   * BOTH options fail the SAME way if the real risk is misalignment during HAND SOLDERING of
+     four wings at 90 deg: the fixture, not the joint, is the schedule risk.
+
+   NOT MEASURED HERE, and needed before a final call: the peel knockdown for THIS joint
+   geometry (a coupon test or a cited figure), the real JLCPCB cut-out delta, and the wing-side
+   land geometry (gap-analysis item W1 -- not yet frozen, which is why the operator held the
+   drawing).
