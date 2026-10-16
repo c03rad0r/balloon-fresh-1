@@ -52,6 +52,23 @@ GAS_HE_G = 4.17                   # helium for 20 g payload + 6 g free lift
 ATTACHMENTS_G = 2.20              # tape 1.0 + dipole wire 1.2 (measured)
 COMMUNITY_PACKAGE_CEILING_G = 85.0  # Ruthroff's "3 oz"
 
+# --- the jurisdiction question (docs/analysis/free-balloon-mass-threshold-DE.md)
+# There is NO balloon mass de-minimis anywhere in German law: LuftVO sec 20(1) no. 6
+# requires a permission for any unmanned free balloon, and SERA Anlage 2 no. 2.1
+# carries no mass qualifier. The "20 g" figure in the LuftVO belongs to MODEL
+# AIRCRAFT rocket propellant (sec 21f(3)), not balloons -- so the paste's answer
+# about a "20 g rule" describes a rule that does not exist for our launch.
+GERMAN_BALLOON_DE_MINIMIS_G: float | None = None
+# The ONE mass figure that does exist: a de-minimis for the ADDITIONALLY required ATC
+# clearance inside a control zone -- and it counts ENVELOPE + BALLAST, the inverse of
+# the paste's "envelope excluded" framing.
+GERMAN_ATC_DE_MINIMIS_G = 500.0
+ATC_THRESHOLD_COUNTS = "Ballonhuelle und Ballast (envelope + ballast)"
+GERMAN_ATC_INSTRUMENT = "LuftVO sec 21(1) no. 4 lit. b"
+
+PASTE_CITED_JURISDICTION = "US (FAA Part 101 / 14 CFR 101)"
+OUR_JURISDICTION = "DE (LuftVO + SERA)"
+
 # --- the paste's claims (verbatim, for the verdict table) --------------------
 PASTE_CLAIMS = (
     ("Envelope material should be metallized BoPET / Mylar / Cymylar",
@@ -178,6 +195,19 @@ def main() -> int:
     print()
     print("  TODO(unverified): every cost/altitude figure the paste gives. None is")
     print("  needed for the decision, because the decision does not depend on them.")
+
+    print()
+    print("-- 8. the second paste: the 20 g / jurisdiction question --------------")
+    print(f"  paste cited {PASTE_CITED_JURISDICTION}")
+    print(f"  our law    {OUR_JURISDICTION}")
+    print(f"  German balloon de-minimis: {GERMAN_BALLOON_DE_MINIMIS_G}  "
+          f"-> the '20 g rule' does not exist for our launch")
+    print(f"  the real figure: {GERMAN_ATC_DE_MINIMIS_G:.0f} g, {GERMAN_ATC_INSTRUMENT}")
+    print(f"  counts: {ATC_THRESHOLD_COUNTS}")
+    y_plus = y.mass_g + ATTACHMENTS_G
+    print(f"  -> the paste says the envelope is EXCLUDED; our law counts it. Our design")
+    print(f"     passes anyway ({y_plus:.1f} g of {GERMAN_ATC_DE_MINIMIS_G:.0f} g), but for a")
+    print(f"     different reason, under a different instrument, counting a different quantity.")
     return 0
 
 

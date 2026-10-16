@@ -126,14 +126,48 @@ correct model — is treated in the consultant pass; see §6.)*
 **~35 g over budget before any payload is added**, and the envelope alone is **2.43×** the entire
 allowance.
 
-**This makes lightweight film MORE attractive, not less** — and it is the one place the paste
-accidentally points somewhere useful. But the trade is: a lighter envelope (Chinese Clear 36″,
-38 g) saves **10.6 g** while taking the leak-rate and pinhole risk the paste itself warns about.
-That is a real trade with real numbers, and it belongs on the mass-threshold card, not in an
-envelope-material decision made from a cost comparison.
+**This makes lightweight film MORE attractive, not less** — but only under a reading that does
+not exist in our jurisdiction. A second paste (see §5b) answered this question directly, and the
+answer is a **trap**: it applies US law to a German launch.
 
-**Recorded as an open question, not a recommendation** — it depends on which threshold reading
-applies, which is the sibling task's subject.
+### 5b. The second paste — the "20 g excludes the envelope" answer is about the wrong country
+
+A follow-up paste asked whether the 20 g figure includes the envelope, and answered: **no, the
+20 g rule excludes the balloon envelope and applies only to the suspended electronics package**,
+citing **FAA Part 101** (6 lb single-package / 12 lb total limits) and stating those "explicitly
+exclude the balloon structure".
+
+**That is US law.** `docs/analysis/free-balloon-mass-threshold-DE.md` establishes, from primary
+sources (`gesetze-im-internet.de`, EUR-Lex), that for a launch **from Germany**:
+
+| | the paste's frame | our law |
+|---|---|---|
+| instrument | FAA Part 101 / 14 CFR 101 | **LuftVO § 20** + **SERA Anlage 2 Nr. 2.1** |
+| is there a 20 g de-minimis? | implied yes | **no de-minimis at all** |
+| the real mass figure | 6 lb / 12 lb | **500 g**, LuftVO § 21 Abs. 1 Nr. 4 lit. b |
+| which quantity does it count? | payload, envelope **excluded** | **"Gesamtmasse (Ballonhülle und Ballast)"** — envelope and ballast **included** |
+
+**Two things make this dangerous rather than merely irrelevant:**
+
+1. **It answers in the direction that makes a builder feel safe.** "Your envelope doesn't count"
+   is exactly the reassurance that leads to launching without the required permission. There is
+   **no** mass below which an unmanned free balloon needs no permission in German law.
+2. **Where a mass threshold does bite in our law, it bites on the OPPOSITE quantity.** The 500 g
+   de-minimis counts *Ballonhülle und Ballast* — envelope and ballast — the exact inverse of the
+   paste's framing. The envelope is the **dominant** term there, not an excluded one.
+
+Our design passes that figure easily (48.6 g envelope + ~2.2 g attachments ≪ 500 g) — **but for a
+different reason than the paste gives, under a different instrument, counting a different
+quantity.** A correct conclusion reached by a wrong argument is not a safe thing to fly on.
+
+**Consequence for the envelope decision: none.** The lighter-film trade in §5 evaporates here,
+because it only looked attractive under a threshold reading that does not apply to us. The
+envelope stays the Yokohama 32″.
+
+> `TODO(unverified)`: the German statutory claims above are carried from the sibling analysis,
+> which sourced them on **2026-10-07**. A consultant pass re-verifies § 20 Abs. 1 Nr. 6, § 21
+> Abs. 1 Nr. 4 lit. b and the SERA text against the live consolidated statutes; correct this
+> section if it disagrees.
 
 ## 6. Consultant passes
 
@@ -163,9 +197,8 @@ Reasons, in order of weight:
 3. **Its own rationale contradicts its own pick** (inelastic foil vs a stretchable laminate).
 4. **Its redundancy conclusion is correct and we already comply** (single envelope; the
    dead-weight arithmetic is quantified in §4).
-5. **The one real opening it exposes is a MASS question, not a material question** — a lighter
-   envelope buys 10.6 g under a total-mass threshold, at a leak-rate cost. That belongs on the
-   mass-threshold card.
+5. **The one real opening it exposes is closed by the second paste (§5b)** — the lighter-envelope
+   case rested on a threshold reading that does not exist in German law.
 
 ### What would change this
 
@@ -181,5 +214,9 @@ Reasons, in order of weight:
    the decision does not turn on them.
 2. "Cymylar" is not resolved as a product or brand name; it may be a misspelling of Mylar/Cymer.
    Only matters if this ever becomes a live option.
-3. The German threshold reading (payload vs total mass) decides whether a lighter envelope is worth
-   the leak risk — sibling task `docs/analysis/free-balloon-mass-threshold-DE.md`.
+3. ~~The German threshold reading decides whether a lighter envelope is worth the leak risk.~~
+   **Resolved as a non-question**: the paste's answer applies US law to a German launch (§5b). A
+   consultant pass re-verifies the German statutes.
+4. The §5b finding is a **safety-relevant** error mode in this paste series: both pastes answer
+   confidently in a jurisdiction that is not ours. Future pastes on this topic should be checked
+   for which country's rules they are actually describing before any number in them is used.

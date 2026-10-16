@@ -119,3 +119,34 @@ def test_cost_delta_between_yokohama_and_cheap_film_is_tens_of_dollars(m: Module
     c = m.cost_per_gram_of_envelope(_env(m, "Chinese Clear 36in"))
     assert y is not None and c is not None
     assert y > c
+
+# --- 5. the jurisdiction trap (second paste) --------------------------------
+def test_german_law_has_no_balloon_de_minimis(m: ModuleType) -> None:
+    """The 20 g figure is NOT a German balloon threshold -- the paste answered US law.
+
+    If this ever flips to True, the whole 'excludes the envelope' reassurance becomes
+    live for a German launch and the safety argument in the doc must be rewritten.
+    """
+    assert m.GERMAN_BALLOON_DE_MINIMIS_G is None
+
+
+def test_the_real_mass_threshold_counts_envelope_and_ballast(m: ModuleType) -> None:
+    """Where German law DOES use a mass figure, the envelope is INCLUDED, not excluded.
+
+    This is the inverse of the paste's framing, and it is the load-bearing claim.
+    """
+    assert m.GERMAN_ATC_DE_MINIMIS_G == 500.0
+    assert m.ATC_THRESHOLD_COUNTS == "Ballonhuelle und Ballast (envelope + ballast)"
+
+
+def test_our_design_passes_the_500g_figure(m: ModuleType) -> None:
+    """We pass -- but the point is WHY: envelope included, not excluded."""
+    y = next(e for e in m.OUR_ENVELOPES if e.name == YOKOHAMA)
+    envelope_plus_ballast = y.mass_g + m.ATTACHMENTS_G
+    assert envelope_plus_ballast < m.GERMAN_ATC_DE_MINIMIS_G
+    assert envelope_plus_ballast / m.GERMAN_ATC_DE_MINIMIS_G < 0.15
+
+
+def test_the_paste_cited_the_wrong_jurisdiction(m: ModuleType) -> None:
+    assert m.PASTE_CITED_JURISDICTION == "US (FAA Part 101 / 14 CFR 101)"
+    assert m.OUR_JURISDICTION == "DE (LuftVO + SERA)"
