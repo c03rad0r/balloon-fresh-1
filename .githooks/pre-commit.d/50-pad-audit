@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+# ---------------------------------------------------------------------------
+# PAD AUDIT as a pre-commit gate -- WARNING MODE, with a documented flip date
+# ---------------------------------------------------------------------------
+#
+# WHY WARNING MODE FIRST. pad_audit finds 8 REAL errors on the canonical board today (U1's 13x pad-41
+# collision and 9 unnamed pads, ANT1-ANT4's 3x pad-2 collision, U4's missing library nickname,
+# U_HUB_CVT's unnamed pad). A BLOCKING gate would refuse every commit the moment it landed, and the
+# lesson of this session is exactly what that produces: the committer learns to bypass the hook. Earlier
+# today I skipped an urgency classification that the dispatcher required, and the dispatcher parked the
+# card -- the correct guardrail, defeated by inconvenience.
+#
+# So the audit runs on EVERY commit and REPORTS, and it does not block until the 8 defects are fixed.
+# The flip is a one-line change, recorded here so it is not forgotten and is not guesswork.
+#
+# FLIP TO BLOCKING WHEN: `make pad-audit` exits 0 on the canonical board. At that point change
+# BLOCKING=0 to BLOCKING=1 below. That condition is self-verifying -- there is no judgement in it.
+#
+# WHY THIS GATE EXISTS AT ALL. test_netlist_integrity.py checks FOOTPRINT COUNTS and REFERENCE
+# DESIGNATORS, never PAD NUMBERS. A footprint with 62 pad objects where the part has 41 passes every
+# count-based check: it is present, its reference resolves, and its pads all carry a net or (none),
+# which nothing interrogates. This is the first check in the repo that looks at pads.
+
+BLOCKING=0     # 0 = report only; 1 = block the commit. See the flip condition above.
+
+# Only run when a board is actually part of this commit -- the audit is ~1s but there is no reason to
+# pay it for a docs-only change.
+BOARDS=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.kicad_pcb$' || true)
+if [ -z "$BOARDS" ]; then
+    exit 0
+fi
+
+# The interpreter is chosen by TESTING for pcbnew, never assumed. If none can run it, say so LOUDLY:
+# a gate that cannot run must not look green.
+PY=""
+for c in "$HOME/venvs/kicad/bin/python" /usr/bin/python3 python3; do
+    if command -v "$c" >/dev/null 2>&1 && "$c" -c "import pcbnew" >/dev/null 2>&1; then PY="$c"; break; fi
+done
+
+if [ -z "$PY" ]; then
+    echo "pad-audit: WARNING -- no interpreter with pcbnew; the pad audit DID NOT RUN."
+    echo "pad-audit:           This is NOT a pass. It is a check that could not be made."
+    exit 0
+fi
+
+# Audit the STAGED content, not the working tree -- a commit must be judged on what it commits.
+TMP=$(mktemp -d)
+trap 'rm -rf "$TMP"' EXIT
+RC=0
+for b in $BOARDS; do
+    mkdir -p "$TMP/$(dirname "$b")"
+    git show ":$b" > "$TMP/$b" 2>/dev/null || continue
+    if ! "$PY" tracker/hardware/pad_audit.py "$TMP/$b" > "$TMP/out.txt" 2>&1; then
+        # re-print with the REAL path so the finding is navigable
+        echo "pad-audit: findings in $b"
+        sed "s|$TMP/||" "$TMP/out.txt" | sed 's/^/    /' | head -30
+        RC=1
+    fi
+done
+
+if [ "$RC" = "1" ]; then
+    if [ "$BLOCKING" = "1" ]; then
+        echo "pad-audit: REFUSING THE COMMIT -- pad-level defects present."
+        echo "  To fix: see docs/fab/U1-FOOTPRINT-DIAGNOSIS.md"
+        exit 1
+    fi
+    echo "pad-audit: reported above (NOT blocking yet -- BLOCKING=0)."
+    echo "          Flip to blocking once 'make pad-audit' exits 0. See mk/pad-audit.mk."
+fi
+exit 0

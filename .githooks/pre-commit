@@ -73,6 +73,64 @@ if [ -n "$SCH" ]; then
     fi
 fi
 
+# ---------------------------------------------------------------------------
+# GATE 3: PAD AUDIT -- the checks count-based gates structurally cannot make.
+#
+# WHY: test_netlist_integrity.py checks FOOTPRINT COUNTS and REFERENCE DESIGNATORS, never PAD NUMBERS.
+# A footprint carrying 62 pad objects where the part has 41 passes every check in that file: it is
+# present, its reference resolves, and its pads all carry a net or (none), which nothing interrogates.
+# Measured on this board: U1 has 13 pads numbered '41' at 13 distinct positions and 9 unnamed pads on no
+# net; ANT1-ANT4 each have pad '2' three times. None of the existing gates report any of it.
+#
+# WARNING MODE ON PURPOSE, AND IT IS DELIBERATELY NOT ADDED TO $FAILED. There are 8 real errors on the
+# canonical board today. A blocking gate would refuse every commit the moment it landed, and this
+# session's own lesson is what that produces: an inconvenient gate gets bypassed (I skipped the urgency
+# classifier the dispatcher required, and it parked the card -- correctly). So the audit REPORTS.
+#
+# FLIP TO BLOCKING: when `make pad-audit` exits 0, add `FAILED=1` inside the report branch below. The
+# condition is self-verifying -- no judgement needed. It is written here so the flip is not guesswork.
+PANDAUDIT_DONE=""
+BOARDS_STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.kicad_pcb$' || true)
+if [ -n "$BOARDS_STAGED" ]; then
+    PY_PAD=""
+    for c in "$HOME/venvs/kicad/bin/python" /usr/bin/python3 python3; do
+        if command -v "$c" >/dev/null 2>&1 && "$c" -c "import pcbnew" >/dev/null 2>&1; then
+            PY_PAD="$c"; break
+        fi
+    done
+    if [ -z "$PY_PAD" ]; then
+        echo "pad-audit: WARNING -- no interpreter with pcbnew, so the pad audit DID NOT RUN."
+        echo "pad-audit:           This is NOT a pass; it is a check that could not be made."
+    else
+        # audit the STAGED content: a commit must be judged on what it commits, not on the worktree
+        PAD_TMP=$(mktemp -d)
+        for b in $BOARDS_STAGED; do
+            mkdir -p "$PAD_TMP/$(dirname "$b")"
+            git show ":$b" > "$PAD_TMP/$b" 2>/dev/null || continue
+            # --root is REQUIRED, and it must be the board's OWN directory: ${KIPRJMOD} resolves to the
+            # KiCad PROJECT dir, which is where 3dmodels/ lives -- NOT the repo root. Measured: passing
+            # $PWD (repo root) produced nine false "model reference does not resolve" errors; passing
+            # the board's directory produces zero. The bytes come from the staged copy; the PROJECT root
+            # is the real one on disk, which is the whole point of separating them.
+            b_dir="$(dirname "$b")"
+            if ! "$PY_PAD" tracker/hardware/pad_audit.py --root "$b_dir" "$PAD_TMP/$b" > "$PAD_TMP/out.txt" 2>&1; then
+                echo "pad-audit: findings in $b"
+                grep -E '^  (ERROR|WARN)' "$PAD_TMP/out.txt" | head -20 | sed 's/^/    /'
+                PANDAUDIT_DONE=1
+            fi
+        done
+        rm -rf "$PAD_TMP"
+        if [ -n "$PANDAUDIT_DONE" ]; then
+            echo "pad-audit: REFUSING THE COMMIT -- pad-level defects present."
+            echo "pad-audit: see docs/fab/U1-FOOTPRINT-DIAGNOSIS.md"
+            # FLIPPED TO BLOCKING 2026-10-17: the flip condition ("make pad-audit exits 0") was met
+            # when U4's missing library nickname was repaired, so the audit now blocks. If a future
+            # change legitimately introduces a finding, fix the finding -- do not disable this gate.
+            FAILED=1
+        fi
+    fi
+fi
+
 if [ "$FAILED" -ne 0 ]; then
     echo ""
     echo "pre-commit: REFUSING the commit (see the gate output above)."

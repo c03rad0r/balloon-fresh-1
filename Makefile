@@ -1114,3 +1114,9 @@ clean: ## Clean PlatformIO build artifacts
 # ---------------------------------------------------------------------------
 include mk/artefacts.mk
 
+# ---------------------------------------------------------------------------
+# Pad-level audit: the checks count-based gates structurally cannot make.
+# Targets: pad-audit (the gate), pad-audit-selftest (prove it is exact and can fail)
+# ---------------------------------------------------------------------------
+include mk/pad-audit.mk
+
