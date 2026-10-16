@@ -1,90 +1,157 @@
-# U1 footprint — measured diagnosis
+# U1 footprint — CORRECTED diagnosis: it was a false alarm
 
 **Board:** `tracker/hardware/hub_board_v9.kicad_pcb`, sha256 `90a8aeaa17a199ba8f2cebd6…`
-**Reproduce:** `~/venvs/kicad/bin/python tracker/hardware/diagnose_u1_footprint.py`
+**Reproduce:** `~/venvs/kicad/bin/python tracker/hardware/pad_audit.py`
+**Net-group test:** `~/venvs/kicad/bin/python tracker/hardware/repeated_number_nets.py`
 
-## The component
+> ## CORRECTION — read this first
+>
+> An earlier version of this file claimed **two defects on U1**: thirteen pads sharing the number `41`, and
+> nine pads with no number and no net. **Both claims are WRONG.**
+>
+> Measured against the source of truth, **seven of the eight defects first reported on this board do not
+> exist.** They are correct, standard KiCad footprint design — and the "excess" pad count on U1 is the
+> stock library part's own structure, not something this project authored.
+>
+> The mistake is recorded rather than deleted, because the way it was made is the useful part: a rule was
+> inferred from a *shape* ("numbers repeat, therefore numbers are wrong") instead of being read from the
+> **library that defines the convention**. The measurements below are the ones that settle it, and they are
+> reproducible.
+>
+> **One genuine defect remains, and it is not on U1: `U4`'s footprint ID carries no library nickname.**
 
-`U1` = **ESP32-S3-WROOM-1U-N8R8**, at (58.700, 11.360) mm, **62 pad objects across 42 distinct numbers**.
+## What was claimed, and what disproved it
 
-A WROOM-1U has **41 pads** — 40 perimeter lands plus one exposed ground pad. This board instance carries
-**62**, and the excess is not random.
-
-## Defect 1 — thirteen pads share the number `41`
-
-```
-number '41'  x13   nets=['GND']   sizes=['0.60x0.60', '3.90x3.90']
-```
-
-**Thirteen distinct positions**, all on `GND`, of two sizes: **twelve 0.6 × 0.6 mm** and **one
-3.9 × 3.9 mm**. The 3.9 mm pad is the exposed thermal pad; the twelve small ones form a grid around it.
-
-**This is a number collision on distinct copper.** KiCad addresses pads by number, so thirteen pads
-answering to `41` cannot be distinguished by any tool — and any consumer that counts pads or enumerates
-connections is misled by construction.
-
-The 3 × 3 grid of small ground pads plus the central thermal pad is the signature of a footprint **built
-by replicating a pad without renumbering**.
-
-## Defect 2 — nine pads have no number and no net
+The original text read, of U1:
 
 ```
-number ''    x9    nets=['(none)']   sizes=['0.90x0.90']
+number '41'  x13   nets=['GND']   -> "a number collision on distinct copper"
+number ''    x9    nets=[(none)] -> "floating copper: it belongs to no net, so it connects nothing"
 ```
 
-**Nine 0.9 × 0.9 mm pads, each at a distinct position, with an empty number and no net.** This is
-**floating copper**: it belongs to no net, so it connects nothing.
+Both readings are wrong. Here is the evidence, in the order that settles it.
 
-**These nine are the genuine electrical gap.** Thirteen pads sharing a number is a modelling fault; nine
-pads on no net is copper that does nothing.
+### 1. The stock KiCad library ships the same structure
 
-## Defect 3 — a library-nickname inconsistency, and it is NOT on U1
+```
+/usr/share/kicad/footprints/RF_Module.pretty/ESP32-S3-WROOM-1U.kicad_mod
+    13 pads numbered '41'   (thru_hole circle)
+     9 pads with NO number  (smd rect)
+    62 pad lines total
+```
+
+**This project did not author the thirteen `41`s or the nine unnamed pads.** The official footprint
+carries exactly the same counts. A library footprint contains **zero** `(net …)` lines — nets are assigned
+by the designer — so a repeated number in a library part cannot be a defect in the *library*. It is the
+convention.
+
+Reproduce:
+
+```bash
+F=/usr/share/kicad/footprints/RF_Module.pretty/ESP32-S3-WROOM-1U.kicad_mod
+grep -c '(pad "41"' "$F"      # 13
+grep -cE '\(pad ""'  "$F"     # 9
+grep -c '^.*(net '   "$F"     # 0
+```
+
+### 2. Thirteen pads numbered `41` are a THERMAL-VIA ARRAY
+
+They are `thru_hole circle` pads, and on our board **all thirteen sit on one net, `GND`.** That is the
+standard KiCad idiom for *several physical pads, one net*: the exposed thermal pad of a module, plus a
+field of plated through-holes that carry heat and ground into the plane below.
+
+**A repeated number is a defect only when its pads DISAGREE ON A NET** — because one number can carry
+only one net, and that is the one case KiCad genuinely cannot express. Measured on the hub board:
+
+```
+~/venvs/kicad/bin/python tracker/hardware/repeated_number_nets.py
+
+IDIOM     (repeated number, ALL pads on ONE net)  : 20 groups   <- correct by design
+COLLISION (repeated number, pads on DIFFERENT nets):  0 groups
+```
+
+Examples of the idiom, all correct: `U1 '41' ×13 all GND`, and `ANT1..ANT4 '2' ×3 all GND` — a U.FL
+connector is one signal pad plus three ground tabs, which the stock
+`Connector_Coaxial.pretty/U.FL_Molex_MCRF_73412-0110_Vertical.kicad_mod` also ships as `'1'` plus three
+`'2'`s.
+
+### 3. The nine unnamed pads are PASTE APERTURES — they carry no copper
+
+```
+U1          9 unnamed pad(s)  nets=['(none)']
+            layers=['F.Paste']   -> no copper layer at all
+```
+
+**`F.Paste` only.** A pad that exists solely on the paste layer is a *solder-paste aperture* — an opening
+in the stencil. It has no copper, so nothing can be "floating", and there is nothing to connect. This is
+the KiCad idiom for controlling paste coverage over a large thermal pad (a paste grid rather than one
+sheet), and it is why the stack of small apertures appears inside the thermal-pad outline.
+
+The spatial arrangement confirms the intent: rendered to scale and reviewed, the nine sit in a **regular
+3 × 3 grid at ≈1.4 mm pitch** inside the 3.9 mm thermal pad, with the twelve small numbered pads at the
+**midpoints between** grid positions. Regular geometry at a round pitch is design intent, not corruption.
+See `docs/fab/reviews/U1-PAD-FIELD-FINDINGS.md`.
+
+## The one genuine defect — and it is on U4, not U1
 
 ```
 footprints with NO library nickname: 1
    U4         SX1280_QFN24
 ```
 
-**I expected this to be U1's problem and it is U4's.** Corrected here rather than carried forward: the
-netlist gives `U4` the footprint `balloon_flight_v9:SX1280_QFN24`, but the board instance stores a bare
-`SX1280_QFN24` with no library nickname. **U1's fpid carries `RF_Module` correctly.**
+The netlist names `balloon_flight_v9:SX1280_QFN24`; the board stores a bare `SX1280_QFN24` with **no
+library nickname**, while **every other part on the board carries one.** That is a real netlist/board
+disagreement. `U1`'s fpid carries `RF_Module` correctly.
 
-So the nickname defect is a **separate U4 issue**, and this file records it because it was found while
-looking for U1's — not because it belongs in this PR's fix.
+Reproduce:
 
-**One method note:** the first version of `diagnose_u1_footprint.py` printed both `lib` and `item` as
-`pcbnew.UTF8` proxy objects, because the SWIG bindings return an object rather than a string. The
-per-footprint loop (which calls `str()` first) is correct; the raw U1 dump is not. The nickname finding
-above comes from the loop, which is the trustworthy one.
+```bash
+grep -oE '\(footprint "[^"]*"' tracker/hardware/hub_board_v9.kicad_pcb | sort | uniq -c | sort -rn
+# ... every line has 'lib:item' except:  1 (footprint "SX1280_QFN24"
+```
 
-## What is NOT a defect
+## What the gate now checks, and what it deliberately does not
 
-- **duplicated references: 0** — no footprint appears twice under the same designator, so the 62 pad
-  objects are not an artefact of duplication.
-- **duplicated footprint IDs are normal**: `C_0402_1005Metric ×13`, `R_0402_1005Metric ×10`,
-  `D_SMA ×6` etc. are simply many instances of a common part.
+`tracker/hardware/pad_audit.py` — the first check in this repo that looks at pad **numbers and layers**,
+because `test_netlist_integrity.py` looks only at footprint **counts** and reference designators.
 
-## Why nothing has caught this
+**Reported as a defect (exit 1):**
 
-`test_netlist_integrity.py`'s "empty footprint" and "declared vs placed" checks operate on **footprint
-counts and reference designators**, not on **pad numbers**. A footprint with 62 pads where 41 are`expected
-passes every count-based check: it is present, its reference resolves, and its pads all carry a net or
-`(none)` — which no check currently interrogates.
+- a repeated pad number whose pads **disagree on a net** — the unexpressible case
+- an **unnamed pad that is on copper** — copper connected to nothing
+- a **model reference that does not resolve**
+- a **footprint ID with no library nickname**
 
-**The check that would have caught it** is a per-footprint pad audit asserting that no number repeats and
-that no pad is unnamed. That is a candidate for the gate set, and is recorded here rather than added
-silently.
+**Reported as a warning, not a defect:**
+
+- a repeated number whose pads all share one net — the *thermal-via / ground-tab* idiom
+- an unnamed pad that is **paste-only** — a stencil aperture, correct by design
+
+That distinction is the whole point of the tool, and getting it wrong is exactly how this file came to
+claim eight defects where there is one.
+
+## Method notes worth keeping
+
+- **The count-based check was never going to catch this, in either direction.** A footprint with 62 pads
+  where the part has 41 passes every existing check; and after the rule was written, the *same* pad
+  structure passes the new check for the right reason. Neither outcome is visible to a footprint count.
+- **`LayerSet.FmtHex()` is not stable across calls.** An early version of the audit used it in the pad
+  signature; two IDENTICAL pads then compared as *different*, and the audit reported "overlapping copper"
+  for a coincident duplicate. The audit now compares raw internal integers only.
+- **The SWIG bindings return objects, not strings.** The first `diagnose_u1_footprint.py` printed `lib`
+  and `item` as `pcbnew.UTF8` proxies; only a `str()`-ing loop is trustworthy. The nickname finding comes
+  from that loop.
+- **Read the source that defines the convention before writing a rule about it.** Every wrong finding
+  above came from inferring a rule from the board alone. The stock library and
+  `tests/test_model_resolution_census.py` (for `${KIPRJMOD}` / `${KICAD<n>_3DMODEL_DIR}` expansion) each
+  already documented the truth.
 
 ## Status
 
-**Not fixed in this PR.** The repair is a footprint edit, and this repo forbids hand-typed geometry:
-`build_hub_board_v9.py` rule R2 requires positions to come from parametric rules, and a builder re-run
-must restore `hub_board_v9.kicad_pro`/`.kicad_prl`. Two candidate repairs, both needing a decision:
+**Nothing to fix on the board.** The single defect is a footprint-ID string on `U4`
+(`SX1280_QFN24` → `balloon_flight_v9:SX1280_QFN24`), which is a builder-path change under rule R2 (no
+hand-typed geometry), not a board repair.
 
-- **(a) renumber** the twelve colliding `41`s so each is addressable, and either number or delete the nine
-  unnamed pads; or
-- **(b) replace the footprint** with a correct WROOM-1U that has 41 pads, deriving the placement from the
-  existing footprint's own geometry so no coordinate is hand-typed.
-
-The second is cleaner and is what this PR will implement, subject to confirming it against the board's
-existing pad positions.
+An earlier version of this file said *"Not fixed in this PR — the repair is a footprint edit"* and proposed
+renumbering U1's pads. **That plan is withdrawn: renumbering a thermal-via array would break correct
+design.**
