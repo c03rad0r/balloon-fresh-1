@@ -1,4 +1,7 @@
 {
+  "_rationale": {
+    "min_through_hole_diameter": "0.2 mm (lowered from 0.3, operator-approved 2026-10-14). The ESP32-S3-WROOM-1U (RF_Module library, KiCad official) carries 13 thermal/heatsink through-vias at 0.2 mm (pad_prop_heatsink, zone_connect 2) -- 0.2 mm is ESPRESSIF'S OWN recommended land pattern and equals JLCPCB's mechanical drill floor, so it is manufacturable and intended, not a defect. The via/hole FLOORS in jlcpcb-s1-frozen.kicad_dru (via 0.60 / hole 0.30) are UNCHANGED: this is a decision with a rationale, NOT a fab-floor relaxation."
+  },
   "board": {
     "3dviewports": [],
     "design_settings": {
@@ -116,6 +119,7 @@
         "zones_intersect": "error"
       },
       "rules": {
+        "_comment_min_through_hole_diameter": "0.2mm (was 0.3mm), reduced 2026-10-14 by operator decision. The 0.3mm floor fired on the ESP32-S3-WROOM-1U module's thermal/heatsink vias, which are 0.2mm in Espressif's own land pattern, and 0.2mm equals JLCPCB's mechanical drill floor. The board rule was therefore STRICTER THAN THE FAB REQUIRES for this pad class. Via/hole floors in the frozen ruleset are UNCHANGED: this is a scoped reduction WITH a rationale, not a blanket relaxation. See docs/fab/hub-v9/RULE-SCOPE-APPLICATION.md.",
         "max_error": 0.005,
         "min_clearance": 0.0,
         "min_connection": 0.0,
@@ -134,8 +138,7 @@
         "min_via_annular_width": 0.1,
         "min_via_diameter": 0.5,
         "solder_mask_to_copper_clearance": 0.0,
-        "use_height_for_length_calcs": true,
-        "_comment_min_through_hole_diameter": "0.2mm (was 0.3mm), reduced 2026-10-14 by operator decision. The 0.3mm floor fired on the ESP32-S3-WROOM-1U module's thermal/heatsink vias, which are 0.2mm in Espressif's own land pattern, and 0.2mm equals JLCPCB's mechanical drill floor. The board rule was therefore STRICTER THAN THE FAB REQUIRES for this pad class. Via/hole floors in the frozen ruleset are UNCHANGED: this is a scoped reduction WITH a rationale, not a blanket relaxation. See docs/fab/hub-v9/RULE-SCOPE-APPLICATION.md."
+        "use_height_for_length_calcs": true
       },
       "teardrop_options": [
         {
@@ -231,7 +234,7 @@
     "pinned_symbol_libs": []
   },
   "meta": {
-    "filename": "hub_board_v9_seed.kicad_pro",
+    "filename": "hub_rf_done.kicad_pro",
     "version": 3
   },
   "net_settings": {
@@ -281,8 +284,5 @@
     "legacy_lib_list": []
   },
   "sheets": [],
-  "text_variables": {},
-  "_rationale": {
-    "min_through_hole_diameter": "0.2 mm (lowered from 0.3, operator-approved 2026-10-14). The ESP32-S3-WROOM-1U (RF_Module library, KiCad official) carries 13 thermal/heatsink through-vias at 0.2 mm (pad_prop_heatsink, zone_connect 2) -- 0.2 mm is ESPRESSIF'S OWN recommended land pattern and equals JLCPCB's mechanical drill floor, so it is manufacturable and intended, not a defect. The via/hole FLOORS in jlcpcb-s1-frozen.kicad_dru (via 0.60 / hole 0.30) are UNCHANGED: this is a decision with a rationale, NOT a fab-floor relaxation."
-  }
+  "text_variables": {}
 }
