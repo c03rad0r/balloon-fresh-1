@@ -20,7 +20,10 @@ WHAT THIS ASSERTS, all decidable without an LLM and in well under a second:
 Each is a FACT about the board, not a judgement, which is why it can run as a hook on every commit.
 
 EXIT: 0 = clean, 1 = findings, 2 = could not run (never a silent pass).
-Usage: pad_audit.py [board.kicad_pcb ...]      (default: the hub board)
+Usage: pad_audit.py [--root DIR] [board.kicad_pcb ...]
+  --root DIR  the KiCad PROJECT directory that ${KIPRJMOD} resolves against. Pass this when auditing a
+              staged copy in a temp dir, so model references still resolve against the real tree.
+              (default: the board's own directory; DEFAULT_BOARDS: the hub board)
 """
 from __future__ import annotations
 
@@ -58,8 +61,16 @@ def model_paths(fp):
         yield str(m.m_Filename)
 
 
-def audit_board(path: str) -> tuple[list[str], list[str]]:
-    """Return (findings, warnings). Findings are errors; warnings are cosmetic-but-reportable."""
+def audit_board(path: str, root: str | None = None) -> tuple[list[str], list[str]]:
+    """Return (findings, warnings). Findings are errors; warnings are cosmetic-but-reportable.
+
+    `root` is the directory ${KIPRJMOD} resolves against -- i.e. the KiCad PROJECT directory, normally
+    the repo-relative directory holding the board. It is separate from `path` because the pre-commit hook
+    audits a STAGED COPY in a temp dir: the bytes must come from the staged file, but ${KIPRJMOD} model
+    references must still resolve against the real project tree. Conflating the two made every
+    ${KIPRJMOD} reference look unresolvable when the hook ran -- nine false errors, measured. The same
+    mistake had already been made once in the fab-readiness guard, whose own notes record it.
+    """
     findings: list[str] = []
     warnings: list[str] = []
     if not os.path.exists(path):
@@ -69,7 +80,7 @@ def audit_board(path: str) -> tuple[list[str], list[str]]:
     if b is None:
         return [f"{path}: could not be read by pcbnew"], []
 
-    base = os.path.dirname(os.path.abspath(path))
+    base = os.path.abspath(root) if root else os.path.dirname(os.path.abspath(path))
 
     for fp in b.GetFootprints():
         ref = str(fp.GetReference())
@@ -130,11 +141,17 @@ def audit_board(path: str) -> tuple[list[str], list[str]]:
 
 
 def main(argv: list[str]) -> int:
-    boards = argv[1:] or DEFAULT_BOARDS
+    root = None
+    args = argv[1:]
+    if "--root" in args:
+        i = args.index("--root")
+        root = args[i + 1]
+        args = args[:i] + args[i + 2:]
+    boards = args or DEFAULT_BOARDS
     total = 0
     tot_warn = 0
     for b in boards:
-        f, w = audit_board(b)
+        f, w = audit_board(b, root=root)
         if f or w:
             if f:
                 print(f"--- {b}: {len(f)} finding(s) ---")

@@ -107,7 +107,13 @@ if [ -n "$BOARDS_STAGED" ]; then
         for b in $BOARDS_STAGED; do
             mkdir -p "$PAD_TMP/$(dirname "$b")"
             git show ":$b" > "$PAD_TMP/$b" 2>/dev/null || continue
-            if ! "$PY_PAD" tracker/hardware/pad_audit.py "$PAD_TMP/$b" > "$PAD_TMP/out.txt" 2>&1; then
+            # --root is REQUIRED, and it must be the board's OWN directory: ${KIPRJMOD} resolves to the
+            # KiCad PROJECT dir, which is where 3dmodels/ lives -- NOT the repo root. Measured: passing
+            # $PWD (repo root) produced nine false "model reference does not resolve" errors; passing
+            # the board's directory produces zero. The bytes come from the staged copy; the PROJECT root
+            # is the real one on disk, which is the whole point of separating them.
+            b_dir="$(dirname "$b")"
+            if ! "$PY_PAD" tracker/hardware/pad_audit.py --root "$b_dir" "$PAD_TMP/$b" > "$PAD_TMP/out.txt" 2>&1; then
                 echo "pad-audit: findings in $b"
                 grep -E '^  (ERROR|WARN)' "$PAD_TMP/out.txt" | head -20 | sed 's/^/    /'
                 PANDAUDIT_DONE=1

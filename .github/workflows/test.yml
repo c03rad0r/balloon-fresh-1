@@ -28,3 +28,51 @@ jobs:
 
       - name: Run all tests
         run: python -m pytest tests/ -v --tb=short
+
+      # ---------------------------------------------------------------------
+      # PAD AUDIT -- the checks count-based gates structurally cannot make.
+      #
+      # WHY: tests/test_netlist_integrity.py checks FOOTPRINT COUNTS and REFERENCE DESIGNATORS, never PAD
+      # NUMBERS. A footprint carrying 62 pad objects where the part has 41 passes every check in that
+      # file: it is present, its reference resolves, and its pads all carry a net or (none), which
+      # nothing interrogates. Measured on the hub board: U1 has 13 pads numbered '41' at 13 distinct
+      # positions and 9 unnamed pads on no net; ANT1-ANT4 each have pad '2' three times.
+      #
+      # NON-BLOCKING ON PURPOSE (continue-on-error): there are 8 real errors on the canonical board
+      # today. A blocking gate would go red on every run the moment it landed, and a check that is always
+      # red is a check people learn to ignore. It REPORTS here until the defects are fixed.
+      #
+      # FLIP TO BLOCKING: remove `continue-on-error` once \`make pad-audit\` exits 0. Self-verifying --
+      # no judgement in it.
+      #
+      # pcbnew is needed to read a board. Installed from kicad-cli's own python bindings if available;
+      # if it is not, the step reports that it could NOT RUN rather than passing silently.
+      - name: Install pcbnew (optional -- the pad audit skips cleanly without it)
+        run: |
+          sudo apt-get install -y kicad || echo "kicad not installable; the pad audit will report SKIPPED"
+        continue-on-error: true
+
+      - name: Pad audit (non-blocking)
+        continue-on-error: true
+        run: |
+          set -u
+          PY=""
+          for c in python3 /usr/bin/python3; do
+            if command -v "$c" >/dev/null 2>&1 && "$c" -c "import pcbnew" >/dev/null 2>&1; then PY="$c"; break; fi
+          done
+          if [ -z "$PY" ]; then
+            echo "pad-audit: SKIPPED -- no interpreter with pcbnew in this job."
+            echo "pad-audit:           This is NOT a pass; it is a check that could not be made."
+            echo "pad-audit:           The pre-commit hook runs it locally where pcbnew exists."
+            exit 0
+          fi
+          "$PY" tracker/hardware/pad_audit.py || {
+            echo ""
+            echo "pad-audit: findings above. NON-BLOCKING for now -- see the flip note in this workflow."
+            echo "pad-audit: fix list -- docs/fab/U1-FOOTPRINT-DIAGNOSIS.md"
+            exit 0
+          }
+
+      - name: Pad-audit self-test (proves the audit is exact and CAN fail)
+        continue-on-error: true
+        run: python -m pytest tests/test_pad_audit.py -v
