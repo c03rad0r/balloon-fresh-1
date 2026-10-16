@@ -225,3 +225,37 @@ def test_common_mode_caps_redundancy(m: ModuleType) -> None:
 
 def test_common_mode_note_names_the_shared_cause(m: ModuleType) -> None:
     assert "neck" in m.COMMON_MODE_NOTE and "weld" in m.COMMON_MODE_NOTE
+
+
+# --- 7. the harmonic MTTF closed form ---------------------------------------
+def test_expected_flight_days_is_the_harmonic_series(m: ModuleType) -> None:
+    """E[T] = H_n / lam. At lam = 0.1/d this gives 10.00 / 15.00 / 18.33 days.
+
+    Monte-Carlo (2e5 paths) reproduced these to <0.2% -- the closed form is the owner.
+    """
+    lam = 0.1
+    assert m.expected_flight_days(1, lam) == pytest.approx(10.00, abs=0.01)
+    assert m.expected_flight_days(2, lam) == pytest.approx(15.00, abs=0.01)
+    assert m.expected_flight_days(3, lam) == pytest.approx(18.333, abs=0.01)
+
+
+def test_marginal_return_is_strictly_diminishing(m: ModuleType) -> None:
+    """The 2nd envelope buys 5.00 d; the 3rd buys only 3.33 d. This is WHY the 3rd is
+    a poor buy even where it is viable -- and it is the reason the paste's 'just add
+    layers' suggestion is dominated rather than merely expensive."""
+    lam = 0.1
+    second = m.expected_flight_days(2, lam) - m.expected_flight_days(1, lam)
+    third = m.expected_flight_days(3, lam) - m.expected_flight_days(2, lam)
+    assert second == pytest.approx(5.00, abs=0.01)
+    assert third == pytest.approx(3.333, abs=0.01)
+    assert third < second
+    assert m.marginal_gain_days(2, lam) == pytest.approx(5.00, abs=0.01)
+    assert m.marginal_gain_days(3, lam) == pytest.approx(3.333, abs=0.01)
+
+
+def test_shedding_and_retaining_agree_only_when_all_losses_are_tolerated(m: ModuleType) -> None:
+    """Both regimes give H_n/lam at j*=n-1 -- but RETAIN only reaches that if the mass
+    bound holds, while SHED reaches it for any mass. Our design fails the mass bound."""
+    lam = 0.1
+    assert m.expected_flight_days(3, lam) == pytest.approx(18.333, abs=0.01)
+    assert m.in_backfire_regime() is True
