@@ -20,7 +20,7 @@ table drifts; this one cannot.
 
 - **hub v9** — flight hub: 4 wing sockets, SX1280 FLRC radio, GNSS, solar harvester
   - ⚠️ **2 net(s) unrouted**
-  - `tracker/hardware/hub_board_v9.kicad_pcb`  sha256 `2dd363764b2314e8…`
+  - `tracker/hardware/hub_board_v9.kicad_pcb`  sha256 `90a8aeaa17a199ba…`
 - **wing v9** — wing solar array + cut driver + hub tab
   - ⚠️ **2 net(s) unrouted**
   - `tracker/hardware/wing_board/wing_board_v9.kicad_pcb`  sha256 `4ed85e6d081aaf1c…`
