@@ -1106,3 +1106,9 @@ clean: ## Clean PlatformIO build artifacts
 	cd $(RP2040_DIR) && pio run -t clean
 	rm -rf .pytest_cache tests/__pycache__
 
+# ---------------------------------------------------------------------------
+# Pad-level audit: the checks count-based gates structurally cannot make.
+# Targets: pad-audit (the gate), pad-audit-selftest (prove it is exact and can fail)
+# ---------------------------------------------------------------------------
+include mk/pad-audit.mk
+
