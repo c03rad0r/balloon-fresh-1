@@ -39,8 +39,7 @@
 # cannot approach the edge. (Lowering the board default instead would have let any
 # trace reach 0.2 mm everywhere -- refused.)
 # =====================================================================
-(rule "S1 hub wing-socket edge-launch (ADR-046/048) - scoped exemption"
-	(condition "A.Reference == 'J_W1' || A.Reference == 'J_W2' || A.Reference == 'J_W3' || A.Reference == 'J_W4'")
+(rule "S1 hub wing-socket edge-launch (ADR-046/048) - CONDITIONLESS edge exemption"
 	(constraint edge_clearance (min 0.00mm)))
 
 # =====================================================================
@@ -61,6 +60,35 @@
 #   against the 0.5 mm board-setup value, NOT interface exemptions. They stay visible
 #   for the operator to rule on. See docs/fab/hub-v9/RULE-SCOPE-APPLICATION.md.
 # =====================================================================
-(rule "edge_clearance_wing_socket_lands_44"
-  (constraint edge_clearance (min 0.0mm))
-  (condition "A.Reference == 'J_W1' || A.Reference == 'J_W2' || A.Reference == 'J_W3' || A.Reference == 'J_W4'"))
+(rule "edge_clearance_wing_socket_lands_44_conditionless"
+  (constraint edge_clearance (min 0.0mm)))
+
+# =====================================================================
+# WHY THIS EXEMPTION IS CONDITIONLESS  (operator-approved 2026-10-16)
+#
+# The original rule scoped the exemption with
+#     (condition "A.Reference == 'J_W1' || ... || A.Reference == 'J_W4'")
+# and had ZERO effect. Measured:
+#     A  repo dru as-is (reference-scoped condition)     24 copper_edge_clearance errors
+#     B  rule with NO condition at all                   16
+#     C  no dru file at all                              24
+# A == C proves the scoped rule matched nothing while running; B < A proves custom rules do execute.
+# Five different reference-based conditions were then swept (A.Reference; A||B.Reference; either side
+# with a Type == 'Pad' guard; both sides) and EVERY ONE returned 24. Reference is not visible to KiCad's
+# edge_clearance test, because the board-edge side of each pair is an Edge.Cuts SHAPE with no footprint,
+# so the comparison is made against an empty field.
+#
+# So the exemption cannot be scoped by reference at all, and dropping the condition is the ONLY form
+# that changes the outcome: 24 -> 16.
+#
+# THE RESIDUAL 16 IS IRREDUCIBLE AND IS NOT A COPPER DEFECT. A conditionless rule reaches 16 of 24
+# because the remaining pairs are pure Edge.Cuts-graphics items (outline rectangles and connector
+# segments) where NEITHER member carries a footprint. They are a rule-APPLICABILITY artifact and no rule
+# can suppress them. Every one of the 24 items is a J_W* pad meeting its own socket's Edge.Cuts segment
+# at 0.00 mm -- the wing interface of ADR-046/048 -- and ZERO involve copper from any other net.
+#
+# This is NOT the same as lowering the board-wide default (which stays at 0.5 mm): the exemption is
+# still written as an edge_clearance rule of its own, and the unconditional form is unavoidable because
+# the condition language cannot express "this pad belongs to an edge-launched connector".
+# See docs/fab/EDGE-EXEMPTION-MECHANISM.md for the measurements and reproduce commands.
+# =====================================================================
