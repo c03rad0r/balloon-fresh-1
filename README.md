@@ -1,5 +1,86 @@
 # Pico-Balloon Tracker & E80 Range Test Bench
 
+**A pico-balloon relay system: balloons acting as a bent pipe between base stations.**
+
+![system diagram](docs/boards/system-diagram.png)
+
+A flight hub carries a 2.4 GHz FLRC radio, GNSS and a solar harvester, and carries four solar wings. Two
+ground base stations reach each other **only through the balloon** — there is no ground-to-ground path.
+Each base station has 4G/5G backhaul.
+
+**This README has two parts.** The relay system (below) is the current programme. The E80-STM32 range
+test bench further down is the bench instrumentation used to characterise the radio link.
+
+---
+
+## 🛰 The relay system
+
+### Board status
+
+**Generated** — `docs/boards/GALLERY.md` has renders and a measured table. Regenerate with
+`python3 tracker/hardware/make_board_gallery.py`.
+
+| board | footprints | nets routed | tracks | what it is |
+|---|---|---|---|---|
+| **hub v9** | 59 | **57 / 59** | 834 | flight hub: SX1280 FLRC, GNSS, solar harvester, 4 wing sockets |
+| **wing v9** | 15 | **4 / 6** | 20 | wing solar array + cut driver + hub tab |
+| **base station** | 44 | **0 / 44** | 0 | ground: SIM7600E-H 4G/5G, FLRC to the hub |
+
+Read the `nets routed` column, **not** the amount of copper in a render — a copper pour is not routing.
+
+### Start here by goal
+
+| I want to… | read |
+|---|---|
+| see the fabrication questions we are asking a fab | [`docs/fab/JLC-QUERY-DRAFT-MESSAGE.md`](docs/fab/JLC-QUERY-DRAFT-MESSAGE.md) |
+| see the fab-review reading order | [`docs/fab/README.md`](docs/fab/README.md) |
+| see where every gate stands | [`docs/fab/GATE-RESULTS.md`](docs/fab/GATE-RESULTS.md) |
+| see what is still missing | [`docs/fab/ASTRA-GAP-ANALYSIS.md`](docs/fab/ASTRA-GAP-ANALYSIS.md) |
+| see per-board renders + measured state | [`docs/boards/GALLERY.md`](docs/boards/GALLERY.md) |
+| read the wing interface decision record | [`docs/adr/046-wing-board-interface.md`](docs/adr/046-wing-board-interface.md) |
+
+### ⚠️ Honest state
+
+**Fit to show a fabricator for review. Not fit to order.** Open items:
+
+- **`U1.41`** — the radio's exposed ground pad **has no net** (pad-number mismatch)
+- **ERC: 20 errors** — incl. 12 floating `U_CUT1–4` pins; **parity passes**, so the board has not drifted
+- **DRC: 16 errors — all 16 are the intentional `J_W*` edge lands. Zero real electrical errors.** The 137
+  warnings are silkscreen or library metadata
+- **Wing joint geometry is OPEN** (ADR-046 §4.2.1) — so the interface drawing is **held**
+- **Base station: 0 of 44 nets routed**, no editable schematic
+
+### Generate the artefacts
+
+```bash
+python3 tracker/hardware/make_board_gallery.py      # renders + the measured table
+python3 tracker/hardware/make_system_diagram.py     # the diagram above
+bash    tracker/hardware/run_erc.sh                 # ERC + schematic-to-board parity
+bash    tracker/hardware/fab_grade.sh tracker/hardware/hub_board_v9.kicad_pcb tracker/hardware/output/fabgrade
+~/venvs/kicad/bin/python tracker/hardware/tests/test_netlist_integrity.py
+```
+
+All three gates are recorded in [`docs/fab/GATE-RESULTS.md`](docs/fab/GATE-RESULTS.md).
+
+### Visual review — how artefacts are checked here
+
+A visual consultant (`gpt-6-astra`) reviews every generated diagram before it is committed:
+
+```bash
+python3 tracker/hardware/ask_astra.py --review artefact.png --out review.md
+```
+
+**This is not decoration.** It has caught two architecture errors in the system diagram alone — a
+one-base-station topology that could not depict a relay, and a wiring path that drew the direct
+ground-to-ground link its own label denied. Both survived reading the generator code. See
+[`docs/fab/reviews/`](docs/fab/reviews/).
+
+**Regenerate before reviewing.** Reviewing a stale render is reviewing a file that no longer exists.
+
+---
+
+## 🧪 E80-STM32 range test bench
+
 Ultralight (<15 g) pico-balloon tracker (ESP32-C3 + Semtech LR2021) with a
 dedicated **E80-STM32 bench firmware** for distributed LoRa/FLRC range
 testing.  Two boards, two laptops, one `make` command each — that's all
