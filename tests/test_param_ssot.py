@@ -236,5 +236,5 @@ def test_real_registry_owners_are_cited_in_their_rows():
     assert "8 MB" in by_id["esp32s3_flash_size"]["canonical"]
     assert "bare LoRa2021" in by_id["v9_2g4_rx_radio"]["canonical"]
     assert "VERTICAL" in by_id["wing_plane_orientation"]["canonical"]
-    assert "103.0 × 103.0 mm" in by_id["hub_outline"]["canonical"]
+    assert "70.0 x 70.0 mm" in by_id["hub_outline"]["canonical"]
     assert "1.30 × 1.30 mm" in by_id["f33_castellation_land_size"]["canonical"]
