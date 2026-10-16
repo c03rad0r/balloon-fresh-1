@@ -21,9 +21,11 @@ V2 -- AFTER A VISUAL REVIEW FOUND SEVEN DEFECTS, one of them substantive:
 Output: docs/boards/system-diagram.svg (+ .png)
 Run:    python3 tracker/hardware/make_system_diagram.py
 """
+import argparse
 import os
 import shutil
 import subprocess
+import tempfile
 
 W, H = 1620, 960
 OUT = "docs/boards/system-diagram.svg"
@@ -134,16 +136,40 @@ def main():
              'docs/boards/GALLERY.md is the per-board table</text>')
     p.append('</svg>')
 
-    os.makedirs(os.path.dirname(OUT), exist_ok=True)
-    with open(OUT, "w") as fh:
-        fh.write("\n".join(p))
-    print(f"wrote {OUT}")
+    import sys as _sys
+    _sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "scripts"))
+    from artefact import DeterministicWriter
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--check", action="store_true",
+                    help="do not write; exit 1 if the committed artefacts differ from the generated")
+    a = ap.parse_args()
+
+    writer = DeterministicWriter(__file__)
+    svg_text = "\n".join(p)
+    writer.add(OUT, svg_text)
+
+    # The PNG is derived from the SVG. Render it into a temp file and register the BYTES, so the check
+    # compares the committed PNG rather than regenerating over it.
     png = OUT.replace(".svg", ".png")
     if shutil.which("rsvg-convert"):
-        subprocess.run(["rsvg-convert", "-w", "1800", OUT, "-o", png], capture_output=True, text=True)
-        if os.path.exists(png):
-            print(f"wrote {png} ({os.path.getsize(png)} bytes)")
-    return 0
+        fd, tmp_svg = tempfile.mkstemp(suffix=".svg")
+        os.close(fd)
+        with open(tmp_svg, "w") as fh:
+            fh.write(svg_text)
+        fd2, tmp_png = tempfile.mkstemp(suffix=".png")
+        os.close(fd2)
+        r = subprocess.run(["rsvg-convert", "-w", "1800", tmp_svg, "-o", tmp_png],
+                           capture_output=True, text=True)
+        if not os.path.exists(tmp_png) or os.path.getsize(tmp_png) == 0:
+            print(f"RENDER FAILED: rsvg-convert rc={r.returncode}")
+            print(f"  stderr: {(r.stderr or r.stdout or '(none)').strip()[:400]}")
+            return 1
+        writer.add_file(png, tmp_png)
+        os.unlink(tmp_svg)
+        os.unlink(tmp_png)
+    else:
+        print("WARNING: rsvg-convert not found -- SVG only, PNG not checked")
+    return writer.finish(check=a.check)
 
 
 if __name__ == "__main__":

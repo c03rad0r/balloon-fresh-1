@@ -19,6 +19,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 
 import pcbnew
 
@@ -136,7 +137,15 @@ def render(path, png, layers="F.Cu,Edge.Cuts"):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="docs/boards")
+    ap.add_argument("--check", action="store_true",
+                    help="do not write; exit 1 if the committed artefacts differ from the generated")
     a = ap.parse_args()
+    # Import the shared determinism helper from scripts/ (one implementation for every generator).
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "scripts"))
+    from artefact import DeterministicWriter
+    writer = DeterministicWriter(__file__)
+    # In --check mode, render into a temp dir so nothing on disk is touched.
+    _render_root = tempfile.mkdtemp(prefix="gallery-check-") if a.check else None
     os.makedirs(a.out, exist_ok=True)
 
     rows = []
@@ -144,11 +153,19 @@ def main():
         m = measure(path)
         slug = name.replace(" ", "-")
         png = os.path.join(a.out, f"{slug}.png")
+        if a.check:
+            # render into the temp root, but keep the artefact's committed name
+            png = os.path.join(_render_root, f"{slug}.png")
         if m.get("readable"):
             ok, err = render(path, png)
             m["rendered"] = ok
             if not ok:
                 m["render_error"] = err
+        if m.get("rendered"):
+            # Register the PNG as a generated artefact so determinism is checkable. In --check mode the
+            # render went to a temp dir; register it under its COMMITTED relative path so the comparison
+            # is against the committed file, not against the temp location.
+            writer.add_file(os.path.join(a.out, f"{slug}.png"), png)
         m.update(name=name, path=path, desc=desc, png=os.path.relpath(png, "."))
         rows.append(m)
         print(f"{name:14} " + (f"fp={m.get('footprints')} nets {m.get('nets_routed')}/"
@@ -197,10 +214,9 @@ def main():
               "  tracker/hardware/make_board_gallery.py`. The numbers are read at generation time, so a",
               "  stale gallery is possible if this is skipped.",
               ""]
-    with open(os.path.join(a.out, "GALLERY.md"), "w") as fh:
-        fh.write("\n".join(lines))
-    print(f"\nwrote {a.out}/GALLERY.md")
-    return 0
+    # The markdown is an artefact like any other: it must be reproducible byte-for-byte.
+    writer.add(os.path.join(a.out, "GALLERY.md"), "\n".join(lines))
+    return writer.finish(check=a.check)
 
 
 if __name__ == "__main__":

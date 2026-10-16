@@ -1106,3 +1106,11 @@ clean: ## Clean PlatformIO build artifacts
 	cd $(RP2040_DIR) && pio run -t clean
 	rm -rf .pytest_cache tests/__pycache__
 
+# ---------------------------------------------------------------------------
+# Artefact generation: deterministic plots, diagrams and renders.
+# Kept in mk/artefacts.mk rather than inline -- this Makefile is 1100 lines of
+# firmware/capture targets, and the artefact tooling is a separate concern.
+# Targets: artefacts, artefacts-check, artefacts-status, figures, determinism-check
+# ---------------------------------------------------------------------------
+include mk/artefacts.mk
+
