@@ -86,7 +86,13 @@ def main():
         return 2
     mode, board = args[0], args[1]
     root = repo_root()
-    rel = os.path.relpath(os.path.abspath(board), root)
+    # --key supplies the REAL repo-relative path to look up in the expectation file. The hook measures
+    # a temp copy (the staged content) but the expectation is keyed by the repo path, so without this
+    # the lookup always missed and the guard passed everything silently while appearing to run.
+    if "--key" in args:
+        rel = args[args.index("--key") + 1]
+    else:
+        rel = os.path.relpath(os.path.abspath(board), root)
     m = count(board)
     if m is None:
         print(f"fab-guard: could not measure {rel} (pcbnew unavailable) -- SKIPPING, not passing silently")

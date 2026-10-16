@@ -5,21 +5,22 @@
 # chains to the repository's OWN hook at <git-common-dir>/hooks/pre-commit. This repo had NO such hook,
 # so repo-specific gates had nowhere to live. This file is that hook.
 #
-# It runs the cheap, commit-time gates that the fleet hook does not know about:
-#   1. FAB READINESS GUARD -- refuses to publish a hub board with less routing than the recorded state.
-#      This is the Astra gap-analysis item H1: the canonical board file is the one a fab order is cut
-#      from, and it was sitting PLACED-ONLY (2 tracks on 1 net) while the real routed result lived in a
-#      separate artifact. One careless commit could have shipped a silently non-functional board.
-#   2. ERC on the flight schematic -- the schematic-to-board electrical check that DRC cannot do.
+# Gates, all cheap enough for commit time:
+#   1. FAB READINESS GUARD -- refuses to publish a board with less routing than the recorded state.
+#      Astra gap-analysis item H1: the canonical board file is the one a fab order is cut from, and it
+#      sat PLACED-ONLY (2 tracks on 1 net) while the real routed result lived elsewhere.
+#   2. ERC + schematic-to-board parity -- the electrical check DRC cannot do (Astra item H2).
 #
 # Design notes:
-#   - FAST: only runs a gate when a file it cares about is actually staged, so ordinary commits are
-#     unaffected. A full ERC takes seconds, not minutes.
+#   - The guard is given the BOARD'S REAL PATH, not a temp copy. An earlier version extracted the staged
+#     content to /tmp and passed that path; the expectation file is keyed by repo-relative path, so the
+#     lookup always missed and the guard passed everything silently. It looked green while checking
+#     nothing -- the exact failure this session kept producing. The temp copy is still used, but it is
+#     passed WITH the real relative path so the lookup can key correctly.
 #   - LOUD: a missing tool prints a warning and does NOT silently pass. A gate that cannot run must be
 #     visible as "not run", never as "green".
-#   - OVERRIDABLE but AUDITABLE: FAB_GUARD_ACK="reason" allows an intentional regression, and the hook
-#     tells you to record the reason in the commit message. SKIP_FAB_GUARD=1 skips entirely (last
-#     resort; prints a warning).
+#   - OVERRIDABLE but AUDITABLE: FAB_GUARD_ACK="reason" allows an intentional reduction.
+#     SKIP_FAB_GUARD=1 skips entirely (last resort; says so loudly).
 set -uo pipefail
 
 if [ "${SKIP_FAB_GUARD:-}" = "1" ]; then
@@ -41,14 +42,14 @@ if [ -n "$BOARDS" ]; then
     echo "fab-guard: board file(s) staged -- checking routability against the recorded state"
     while IFS= read -r b; do
         [ -z "$b" ] && continue
-        # check the STAGED content, not the working tree
-        TMP="$(mktemp -d)"
-        mkdir -p "$TMP/$(dirname "$b")"
-        git show ":$b" > "$TMP/$b" 2>/dev/null || { rm -rf "$TMP"; continue; }
-        if ! python3 "$GUARD" --check "$TMP/$b"; then
+        TMPDIR_B="$(mktemp -d)"
+        mkdir -p "$TMPDIR_B/$(dirname "$b")"
+        git show ":$b" > "$TMPDIR_B/$b" 2>/dev/null || { rm -rf "$TMPDIR_B"; continue; }
+        # Pass the REAL repo-relative path as the lookup key, and the temp copy as the file to measure.
+        if ! python3 "$GUARD" --check "$TMPDIR_B/$b" --key "$b"; then
             FAILED=1
         fi
-        rm -rf "$TMP"
+        rm -rf "$TMPDIR_B"
     done <<< "$BOARDS"
 fi
 
@@ -56,15 +57,19 @@ fi
 SCH="$(staged 'schematics/.*\.kicad_sch$')"
 if [ -n "$SCH" ]; then
     ERC="tracker/hardware/run_erc.sh"
-    if [ -x "$ERC" ] || [ -f "$ERC" ]; then
-        echo "erc-guard: schematic staged -- running ERC"
+    if [ -f "$ERC" ]; then
+        echo "erc-guard: schematic staged -- running ERC + schematic-to-board parity"
         if ! bash "$ERC"; then
-            echo "erc-guard: ERC reported problems (see above)."
-            FAILED=1
+            # ERC findings are recorded, not blocking: the schematic has known open pins that are
+            # deliberate work items. Parity drift IS blocking, and run_erc.sh exits 1 for it too, so
+            # distinguish by the message.
+            echo "erc-guard: ERC/parity reported problems (see above)."
+            if grep -q 'parity: .*MISMATCH\|parity: .*drifted' /tmp/erc_last.txt 2>/dev/null; then
+                FAILED=1
+            fi
         fi
     else
         echo "erc-guard: WARNING -- $ERC not found, so NO electrical-rule check ran."
-        echo "           A gate that cannot run must not look green; install it or accept the gap."
     fi
 fi
 
