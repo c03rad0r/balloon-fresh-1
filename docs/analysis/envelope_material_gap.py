@@ -66,6 +66,17 @@ GERMAN_ATC_DE_MINIMIS_G = 500.0
 ATC_THRESHOLD_COUNTS = "Ballonhuelle und Ballast (envelope + ballast)"
 GERMAN_ATC_INSTRUMENT = "LuftVO sec 21(1) no. 4 lit. b"
 
+# Verified against the primary instruments (analysis doc section 5c).
+# SERA Anlage 2 no. 1.1 classifies a "light" balloon as payload < 4 kg -- the lowest
+# category boundary is 4 kg, NOT 20 g. It is a CLASSIFICATION rule, not a de-minimis.
+SERA_LIGHT_PAYLOAD_MAX_G = 4000.0
+SERA_MEDIUM_PAYLOAD_MAX_G = 6000.0
+# LuftVZO sec 19(3) (NOT sec 18, which reads "(weggefallen)"): marking duty above 5 kg.
+MARKING_DUTY_THRESHOLD_G = 5000.0
+# The paste's unsourced "overall mass often exceeding 130 grams": the string "130"
+# appears in NO German instrument (corpus-wide grep).
+PASTE_UNSOURCED_MASS_G = 130.0
+
 PASTE_CITED_JURISDICTION = "US (FAA Part 101 / 14 CFR 101)"
 
 # --- reliability: the consultant's crossover, applied to OUR hardware --------

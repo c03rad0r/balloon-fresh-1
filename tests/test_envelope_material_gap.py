@@ -159,6 +159,35 @@ def test_the_paste_cited_the_wrong_jurisdiction(m: ModuleType) -> None:
     assert m.OUR_JURISDICTION == "DE (LuftVO + SERA)"
 
 
+def test_the_lowest_classification_boundary_is_4kg_not_20g(m: ModuleType) -> None:
+    """SERA Anlage 2 no. 1.1: a 'light' balloon is payload < 4 kg.
+
+    Even the CLASSIFICATION floor is 4 kg, 200x the mythical 20 g figure -- and it is a
+    classification rule, not a de-minimis. A second, independent route to the same verdict.
+    """
+    assert m.SERA_LIGHT_PAYLOAD_MAX_G == 4000.0
+    assert m.SERA_LIGHT_PAYLOAD_MAX_G / 20.0 == 200.0
+    assert m.SERA_MEDIUM_PAYLOAD_MAX_G == 6000.0
+
+
+def test_our_design_is_far_below_every_real_threshold(m: ModuleType) -> None:
+    """~51 g vs a 500 g ATC figure, a 4 kg class floor and a 5 kg marking duty."""
+    y = next(e for e in m.OUR_ENVELOPES if e.name == YOKOHAMA)
+    total = y.mass_g + m.ATTACHMENTS_G
+    for threshold in (m.GERMAN_ATC_DE_MINIMIS_G, m.SERA_LIGHT_PAYLOAD_MAX_G,
+                      m.MARKING_DUTY_THRESHOLD_G):
+        assert total < threshold
+
+
+def test_the_pastes_130g_figure_is_unsourced(m: ModuleType) -> None:
+    """The paste's 'overall mass often exceeding 130 grams' matches no instrument.
+
+    It must not be adopted as a design figure -- it is recorded only so the claim is
+    traceable, not because it means anything.
+    """
+    assert m.PASTE_UNSOURCED_MASS_G == 130.0
+
+
 # --- 6. the reliability crossover, applied to OUR hardware -------------------
 def test_our_hardware_is_in_the_backfire_regime(m: ModuleType) -> None:
     """m = 48.6 g > m* = (2B-P)/3 = 31.07 g.

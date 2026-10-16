@@ -227,11 +227,47 @@ quantity.** A correct conclusion reached by a wrong argument is not a safe thing
 because it only looked attractive under a threshold reading that does not apply to us. The
 envelope stays the Yokohama 32″.
 
-**Provenance:** these German statutory claims are carried from the sibling analysis, which
-sourced them from the consolidated statutes on `gesetze-im-internet.de` and the EU instruments on
-EUR-Lex on **2026-10-07**. A third consultant pass is re-verifying § 20 Abs. 1 Nr. 6, § 21 Abs. 1
-Nr. 4 lit. b and the SERA Anlage-2 text against the **live** consolidated statutes; this section
-is corrected if it disagrees, and is marked below until it reports.
+### 5c. The statutes verified against primary sources
+
+A third consultant pass re-verified every claim above against the **primary instruments** — the
+consolidated statute text on `gesetze-im-internet.de` (full-act HTML for LuftVG, LuftVO 2015,
+LuftVZO), the EU instrument on EUR-Lex (base act `CELEX:32012R0923` + German consolidated
+`CELEX:02012R0923-20220127`), and GPO CFR XML via govinfo for the US side. **No blogs, no forums,
+no secondary summaries.**
+
+**Verdict: our analysis is CONFIRMED on every point, not refuted.** The verbatim texts:
+
+| instrument | § | wording (verbatim) | what it means |
+|---|---|---|---|
+| LuftVG | § 1 Abs. 2 Nr. 6 | „Luftfahrzeuge sind … **6. Frei- und Fesselballone**" | free balloons **are** aircraft; no mass qualifier |
+| LuftVO | § 20 Abs. 1 Nr. 6 | „… der Betrieb von **unbemannten Freiballonen** nach Anlage 2 der Durchführungsverordnung (EU) Nr. 923/2012 im Hoheitsgebiet der Bundesrepublik Deutschland" | permission required — **no mass threshold, no de-minimis carve-out** |
+| LuftVO | § 21 Abs. 1 Nr. 4 lit. b | „b) **leicht, sofern der Aufstiegsort innerhalb von Flugplatzkontrollzonen liegt und die Gesamtmasse (Ballonhülle und Ballast) mehr als 500 Gramm beträgt**" | the 500 g figure counts **envelope AND ballast**; it triggers an **ATC clearance** for light balloons inside a control zone — **not** a permission exemption |
+| LuftVO | § 21f Abs. 3 Nr. 2 | „… mit Raketenantrieb, sofern **die Masse des Treibsatzes mehr als 20 Gramm** beträgt" | the **only** „20 Gramm" in the LuftVO — **model-aircraft rocket propellant** |
+| SERA Anlage 2 Nr. 2.1 | — | „**Ein unbemannter Freiballon darf nur mit der Genehmigung des Staates betrieben werden, in dem der Aufstieg erfolgt.**" | unconditional; no mass qualifier |
+| SERA Anlage 2 Nr. 1.1 | — | class *leicht* = payload „**weniger als 4 kg**" | the lowest category boundary is **4 kg**, not 20 g — and this is a *classification* rule, not a de-minimis |
+| LuftVZO | § 19 Abs. 3 | „… **Startmasse von mehr als 5 Kilogramm** … Namen und Anschrift … anzubringen" | a separate **marking** duty; not a permission threshold |
+
+**Corpus-wide negative checks** (regex over the complete fetched texts): „20 Gramm" occurs **once**
+in the whole LuftVO (the model-rocket rule) and **zero** times in LuftVG, LuftVZO and the
+consolidated German SERA. The string „130" — the paste's unsourced "overall mass often exceeding
+130 grams" — **never appears** in LuftVO, LuftVG or LuftVZO.
+
+**The paste is wrong on the US side too.** Its 6 lb / 12 lb figures are substantively right
+(14 CFR § 101.1(a)(4)(ii),(iii)), but they are **applicability** thresholds — which balloons the
+part regulates at all — not limits, and **no envelope-exclusion clause exists**: the envelope is
+regulated *directly*, by § 101.35(a)(2)–(3) ("terminating the flight of the **balloon envelope**";
+"the **balloon envelope** is equipped with a radar reflective device"). **There is no 20 g figure
+anywhere in part 101** — its only gram figures (125 g / 1,500 g) sit in Subpart C, **amateur
+rockets**. And § 101.1(a) scopes the whole part to operations "**in the United States**".
+
+**A correction to our own record, found by the pass:** the marking duty is LuftVZO **§ 19 Abs. 3**;
+**§ 18 LuftVZO reads only „(weggefallen)"** (repealed). Where the sibling analysis cites § 18, it is
+wrong and § 19 Abs. 3 is the provision that applies.
+
+> **Status:** verified — the `TODO(unverified)` on this section is cleared. The remaining
+> `TODO(unverified)` is narrow: **no German state aviation authority detail page was reachable**
+> (LBA/BMV URLs 404). That was marked rather than substituted with a secondary source, and **no
+> finding here depends on it** — every load-bearing statement comes from the statutes themselves.
 
 ## 6. Consultant passes — delivered
 
