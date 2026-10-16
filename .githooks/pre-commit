@@ -121,10 +121,12 @@ if [ -n "$BOARDS_STAGED" ]; then
         done
         rm -rf "$PAD_TMP"
         if [ -n "$PANDAUDIT_DONE" ]; then
-            echo "pad-audit: reported above; NOT blocking yet (see the flip note in this hook)."
-            echo "pad-audit: fix list -- docs/fab/U1-FOOTPRINT-DIAGNOSIS.md"
-            # FLIP TO BLOCKING: uncomment the next line once \`make pad-audit\` exits 0.
-            # FAILED=1
+            echo "pad-audit: REFUSING THE COMMIT -- pad-level defects present."
+            echo "pad-audit: see docs/fab/U1-FOOTPRINT-DIAGNOSIS.md"
+            # FLIPPED TO BLOCKING 2026-10-17: the flip condition ("make pad-audit exits 0") was met
+            # when U4's missing library nickname was repaired, so the audit now blocks. If a future
+            # change legitimately introduces a finding, fix the finding -- do not disable this gate.
+            FAILED=1
         fi
     fi
 fi

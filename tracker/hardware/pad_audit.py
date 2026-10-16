@@ -1,180 +1,224 @@
 #!/usr/bin/env python3
 """PAD-LEVEL board audit -- the checks that COUNT-BASED gates structurally cannot make.
 
-WHY THIS EXISTS. test_netlist_integrity.py checks FOOTPRINT COUNTS and REFERENCE DESIGNATORS. It never
-looks at PAD NUMBERS. So a footprint can carry 62 pad objects where the part has 41, with thirteen pads
-all numbered '41' and nine pads numbered '' on no net, and pass every check in that file -- because the
-footprint is present, its reference resolves, and every pad carries a net or (none), which nothing
-interrogates.
+WHY THIS EXISTS. test_netlist_integrity.py checks FOOTPRINT COUNTS and REFERENCE DESIGNATORS, never PAD
+NUMBERS and never PAD LAYERS. So a footprint can carry 62 pad objects where the part has 41 and pass
+every check in that file.
 
-MEASURED on hub_board_v9 (2026-10-16, board sha256 90a8aeaa17a199ba...): exactly that. U1 (the ESP32-S3
-module) carries 13 pads numbered '41' at 13 distinct positions, and 9 unnamed pads with no net. THE NINE
-UNNAMED PADS ARE FLOATING COPPER -- a real electrical gap that no existing gate reports.
+THE RULES HERE WERE WRONG ONCE, AND THIS FILE RECORDS HOW. A first version reported 8 "errors" on the hub
+board: 13 pads sharing number '41', 9 pads with no number, four U.FL connectors with pad '2' three times.
+The builder was about to be sent to "fix" them. Then the SOURCE OF TRUTH was read -- the stock KiCad
+libraries:
 
-WHAT THIS ASSERTS, all decidable without an LLM and in well under a second:
-  1. no pad number repeats within a footprint
-  2. no pad has an empty or whitespace number
-  3. every footprint's ID carries a library nickname (KiCad needs 'lib:footprint')
-  4. every (model ...) reference resolves to a file that exists
+  /usr/share/kicad/footprints/RF_Module.pretty/ESP32-S3-WROOM-1U.kicad_mod
+      13 pads numbered '41'  (thru_hole circle)  -- a thermal-via array
+       9 pads with NO number (smd rect) on F.Paste ONLY -- paste apertures, no copper at all
+  /usr/share/kicad/footprints/Connector_Coaxial.pretty/U.FL_Molex_MCRF_73412-0110_Vertical.kicad_mod
+      1 pad '1' + 3 pads '2'  -- one signal, three ground tabs
 
-Each is a FACT about the board, not a judgement, which is why it can run as a hook on every commit.
+A library footprint carries no nets, so the repeated numbers are the OFFICIAL CONVENTION for "several
+physical pads, one net". The corrected rules follow from that:
 
-EXIT: 0 = clean, 1 = findings, 2 = could not run (never a silent pass).
-Usage: pad_audit.py [--root DIR] [board.kicad_pcb ...]
-  --root DIR  the KiCad PROJECT directory that ${KIPRJMOD} resolves against. Pass this when auditing a
-              staged copy in a temp dir, so model references still resolve against the real tree.
-              (default: the board's own directory; DEFAULT_BOARDS: the hub board)
+  REPEATED NUMBER is NOT a defect. It is an error ONLY when the pads DISAGREE ON A NET, because one
+  number can carry only one net -- that is the case KiCad cannot express. Measured on the hub: 20
+  repeated-number groups all agree on one net, 0 disagree. So there were no collisions at all.
+
+  UNNAMED PAD is NOT a defect when it is PASTE-ONLY. Measured: all 10 unnamed pads on the hub are on
+  F.Paste with no copper layer. A pad that carries no copper connects nothing and cannot be floating.
+
+WHAT SURVIVES AS A REAL FINDING: a footprint ID with no library nickname. Measured: U4 reads
+`SX1280_QFN24` where the netlist says `balloon_flight_v9:SX1280_QFN24`, and every other part on the board
+carries a nickname. That is a genuine netlist/board disagreement.
+
+Run: ~/venvs/kicad/bin/python pad_audit.py [--root DIR] [board.kicad_pcb ...]
+  --root DIR  the KiCad PROJECT directory that ${KIPRJMOD} resolves against. Pass it when auditing a
+              staged copy in a temp dir, so model references resolve against the real tree.
+Exit: 0 clean, 1 findings, 2 could not run.
 """
 from __future__ import annotations
 
-import collections
 import os
 import sys
 
-# KiCad's python bindings are only importable under an interpreter that has pcbnew. Fail with a clear
-# message rather than an ImportError traceback, because a gate that cannot run must say so.
 try:
     import pcbnew
-except ImportError:  # pragma: no cover
-    print("PAD-AUDIT: SKIPPED -- this interpreter has no pcbnew.", file=sys.stderr)
-    print("  Run with ~/venvs/kicad/bin/python (or whatever `make artefacts-status` reports).",
-          file=sys.stderr)
-    sys.exit(2)
+except ImportError:  # reported loudly by main(); never silently passed
+    pcbnew = None
 
 DEFAULT_BOARDS = ["tracker/hardware/hub_board_v9.kicad_pcb"]
 
+# Copper layers, by KiCad name suffix. A pad with none of these cannot be electrically connected.
+COPPER_SUFFIXES = (".Cu",)
 
-def pad_sig(p):
-    """Exact identity of a pad, from RAW internal integers only.
+# 3D model variable expansion. THE RULES ARE NOT INVENTED HERE -- they are the ones
+# tests/test_model_resolution_census.py already established, and their docstring explains why:
+#
+#   ${KIPRJMOD}              -> the board's OWN directory
+#   ${KICAD<n>_3DMODEL_DIR}  -> the COMPILED-IN default (/usr/share/kicad/3dmodels), NOT the shell
+#                               environment: that variable is UNSET in this shell and the renderer does
+#                               not read it from there. Expanding from os.environ would report a part
+#                               missing that the renderer draws, or vice versa.
+#
+# Measured cost of getting this wrong: substituting only ${KIPRJMOD} made every stock-library part on the
+# hub board report "model reference does not resolve" -- 37 false findings in one run. The audit has now
+# been wrong in BOTH directions (8 false errors calling correct design a defect; 45 calling every stock
+# part broken), which is why this expansion is copied from the tool that had it right.
+KICAD_3DMODEL_PREFIX = "/usr/share/kicad/3dmodels"
 
-    No mm conversion, no float rounding, no formatted buffer -- anything whose string form could vary
-    between two calls must not appear here. That was the bug in the previous version.
+
+def expand_model_ref(ref: str, board_dir: str) -> str:
+    """Expand the two KiCad path variables a board may use, per the census rules above."""
+    import re
+    out = ref.replace("${KIPRJMOD}", board_dir)
+    out = re.sub(r"\$\{KICAD[0-9]+_3DMODEL_DIR\}", KICAD_3DMODEL_PREFIX, out)
+    return out
+
+
+def pad_layers(pad) -> list[str]:
+    """Layer names for a pad, from per-layer booleans (not FmtHex -- see the note in the tests)."""
+    ls = pad.GetLayerSet()
+    return [str(i) for i in range(64) if ls.Contains(i)]
+
+
+def has_copper(pad) -> bool:
+    """True if the pad sits on any copper layer, i.e. it can carry current."""
+    ls = pad.GetLayerSet()
+    for i in range(64):
+        if ls.Contains(i) and pcbnew.LayerName(i).endswith(COPPER_SUFFIXES):
+            return True
+    return False
+
+
+def pad_sig(pad):
+    """Exact identity, from RAW INTERNAL INTEGERS only.
+
+    An earlier version included GetLayerSet().FmtHex(), whose string form is NOT STABLE ACROSS CALLS: two
+    IDENTICAL pads compared as DIFFERENT and the audit reported "overlapping copper" for a coincident
+    duplicate. Nothing whose string form can vary between calls may appear here.
     """
-    c = p.GetPosition()
-    s = p.GetSize()
-    d = p.GetDrillSize()
-    return (c.x, c.y, s.x, s.y, d.x, d.y, int(p.GetShape()), str(p.GetNetname()))
+    c, s, d = pad.GetPosition(), pad.GetSize(), pad.GetDrillSize()
+    return (c.x, c.y, s.x, s.y, d.x, d.y, int(pad.GetShape()), str(pad.GetNetname()))
 
 
 def model_paths(fp):
-    for m in fp.Models():
-        yield str(m.m_Filename)
+    return [m.m_Filename for m in fp.Models()]
 
 
 def audit_board(path: str, root: str | None = None) -> tuple[list[str], list[str]]:
-    """Return (findings, warnings). Findings are errors; warnings are cosmetic-but-reportable.
-
-    `root` is the directory ${KIPRJMOD} resolves against -- i.e. the KiCad PROJECT directory, normally
-    the repo-relative directory holding the board. It is separate from `path` because the pre-commit hook
-    audits a STAGED COPY in a temp dir: the bytes must come from the staged file, but ${KIPRJMOD} model
-    references must still resolve against the real project tree. Conflating the two made every
-    ${KIPRJMOD} reference look unresolvable when the hook ran -- nine false errors, measured. The same
-    mistake had already been made once in the fab-readiness guard, whose own notes record it.
-    """
-    findings: list[str] = []
-    warnings: list[str] = []
+    """Return (findings, warnings). Findings are errors; warnings are cosmetic-but-reportable."""
     if not os.path.exists(path):
         return [f"{path}: ABSENT"], []
-
-    b = pcbnew.LoadBoard(path)
-    if b is None:
+    board = pcbnew.LoadBoard(path)
+    if board is None:
         return [f"{path}: could not be read by pcbnew"], []
 
     base = os.path.abspath(root) if root else os.path.dirname(os.path.abspath(path))
+    findings: list[str] = []
+    warnings: list[str] = []
 
-    for fp in b.GetFootprints():
-        ref = str(fp.GetReference())
+    for fp in board.GetFootprints():
+        ref = fp.GetReference()
         item = str(fp.GetFPID().GetLibItemName())
-        lib = str(fp.GetFPID().GetLibNickname())
 
-        # --- 1 & 2: pad numbers.
-        #
-        # COMPARE RAW INTEGERS, NEVER FORMATTED STRINGS. An earlier version of this audit used
-        # LayerSet.FmtHex() in the signature; that returns a buffer whose string form is not stable
-        # across calls, so two IDENTICAL pads compared as different and the audit reported
-        # "overlapping copper" for a coincident duplicate. Measured on J_W1..J_W4: raw comparison
-        # shows IDENTICAL integers, i.e. coincident duplicates, which are a COUNTING nuisance rather
-        # than an electrical fault. The two cases must not share a severity.
-        nums = collections.Counter(str(p.GetNumber()) for p in fp.Pads())
-        for num, count in sorted(nums.items()):
-            if num.strip() == "":
-                empties = [p for p in fp.Pads() if str(p.GetNumber()) == ""]
-                sigs = {pad_sig(p) for p in empties}
-                nets = sorted({str(p.GetNetname()) or "(none)" for p in empties})
-                findings.append(
-                    f"{ref} ({item}): {len(empties)} pad(s) with an EMPTY number at {len(sigs)} "
-                    f"distinct position(s), nets={nets} -- unnamed copper; if the net is (none) it "
-                    f"connects nothing")
+        # --- real finding 1: NO LIBRARY NICKNAME.
+        # Measured: U4 = 'SX1280_QFN24' while the netlist says 'balloon_flight_v9:SX1280_QFN24'. Every
+        # other part carries a nickname. This is a netlist/board disagreement, not a style question.
+        nick = str(fp.GetFPID().GetLibNickname())
+        if not nick.strip():
+            findings.append(
+                f"{ref} ({item}): footprint ID has NO library nickname -- every other part on the board "
+                f"has one, and the netlist names a library, so the two disagree")
+
+        # --- real finding 2: repeated number whose pads DISAGREE on a net.
+        # NOT a defect merely because it repeats: 13x'41' on GND and 3x'2' on GND are the standard
+        # multi-pad-single-net idiom (thermal vias, U.FL ground tabs). Only a net DISAGREEMENT is
+        # unexpressible in KiCad's model.
+        groups: dict[str, list] = {}
+        for pad in fp.Pads():
+            num = str(pad.GetNumber())
+            if num.strip():
+                groups.setdefault(num, []).append(pad)
+        for num, group in sorted(groups.items()):
+            if len(group) < 2:
                 continue
-            if count > 1:
-                group = [p for p in fp.Pads() if str(p.GetNumber()) == num]
-                sigs = {pad_sig(p) for p in group}
-                if len(sigs) == 1:
-                    warnings.append(
-                        f"{ref} ({item}): pad number {num!r} appears {count}x at the SAME position "
-                        f"with identical geometry -- coincident duplicate (cosmetic; inflates counts)")
-                else:
-                    findings.append(
-                        f"{ref} ({item}): pad number {num!r} appears {count}x at {len(sigs)} "
-                        f"DISTINCT positions -- KiCad cannot address them separately")
-
-        # --- 3: library nickname
-        if not lib:
-            findings.append(f"{ref} ({item}): footprint ID has NO library nickname "
-                            f"(KiCad expects 'lib:footprint')")
-
-        # --- 4: model references resolve
-        for mp in model_paths(fp):
-            if "${KIPRJMOD}" in mp:
-                rel = mp.split("}", 1)[-1].lstrip("/")
-                full = os.path.join(base, rel)
-            elif "${KICAD" in mp or "3DMODEL_DIR" in mp:
-                # system-library reference: resolve against the installed package if we can find it
-                kdir = os.environ.get("KICAD9_3DMODEL_DIR") or "/usr/share/kicad/3dmodels"
-                rel = mp.split("}", 1)[-1].lstrip("/")
-                full = os.path.join(kdir, rel)
+            nets = {str(p.GetNetname()) for p in group if str(p.GetNetname()).strip()}
+            if len(nets) > 1:
+                findings.append(
+                    f"{ref} ({item}): pad number {num!r} appears {len(group)}x with DIFFERENT nets "
+                    f"{sorted(nets)} -- one number can carry one net, so this is unexpressible")
             else:
-                full = mp
-            if not os.path.exists(full):
+                # correct idiom, or an unconnected group -- report the net for the record
+                net = next(iter(nets)) if nets else "(no net)"
+                warnings.append(
+                    f"{ref} ({item}): pad number {num!r} appears {len(group)}x, all on {net} "
+                    f"-- standard multi-pad single-net idiom")
+
+        # --- real finding 3: UNNAMED pad that is ON COPPER. A paste-only aperture is not an electrical
+        # pad and cannot be floating; an unnamed pad on copper is copper connected to nothing.
+        unnamed = [p for p in fp.Pads() if not str(p.GetNumber()).strip()]
+        if unnamed:
+            copper_ones = [p for p in unnamed if has_copper(p)]
+            if copper_ones:
+                nets = sorted({str(p.GetNetname()) or "(none)" for p in copper_ones})
+                findings.append(
+                    f"{ref} ({item}): {len(copper_ones)} UNNAMED pad(s) ON COPPER, nets={nets} -- "
+                    f"copper connected to nothing")
+            else:
+                warnings.append(
+                    f"{ref} ({item}): {len(unnamed)} unnamed pad(s), PASTE-ONLY (no copper layer) "
+                    f"-- paste apertures, correct by design; they carry no current")
+
+        # --- model references
+        for mp in model_paths(fp):
+            rel = expand_model_ref(mp, base)
+            if not os.path.exists(rel):
                 findings.append(f"{ref} ({item}): model reference does not resolve: {mp}")
+
     return findings, warnings
 
 
 def main(argv: list[str]) -> int:
+    if pcbnew is None:
+        print("PAD-AUDIT: CANNOT RUN -- pcbnew is not importable by this interpreter.", file=sys.stderr)
+        print(f"  interpreter: {sys.executable}", file=sys.stderr)
+        print("  This gate is NOT passing; it is not running.", file=sys.stderr)
+        return 2
+
     root = None
     args = argv[1:]
     if "--root" in args:
         i = args.index("--root")
+        if i + 1 >= len(args):
+            print("--root needs a directory", file=sys.stderr)
+            return 2
         root = args[i + 1]
         args = args[:i] + args[i + 2:]
     boards = args or DEFAULT_BOARDS
-    total = 0
-    tot_warn = 0
+
+    total = warns = 0
     for b in boards:
         f, w = audit_board(b, root=root)
-        if f or w:
-            if f:
-                print(f"--- {b}: {len(f)} finding(s) ---")
-                for line in f:
-                    print(f"  ERROR    {line}")
-                total += len(f)
-            if w:
-                print(f"--- {b}: {len(w)} warning(s) (cosmetic, not fatal) ---")
-                for line in w:
-                    print(f"  WARN     {line}")
-                tot_warn += len(w)
-        else:
-            if os.path.exists(b):
-                print(f"--- {b}: clean ---")
-    if tot_warn:
-        print(f"\n  {tot_warn} warning(s): coincident duplicates inflate pad counts but are not")
-        print("  electrical faults. Reported so a count-based check is not silently misled.")
+        if f:
+            print(f"--- {b}: {len(f)} finding(s) ---")
+            for line in f:
+                print(f"  ERROR    {line}")
+            total += len(f)
+        elif os.path.exists(b):
+            print(f"--- {b}: no findings ---")
+        if w:
+            print(f"  ({len(w)} warning(s) -- correct idioms, recorded for the count audit)")
+            for line in w[:6]:
+                print(f"  WARN     {line}")
+            if len(w) > 6:
+                print(f"  WARN     ... and {len(w) - 6} more of the same kind")
+            warns += len(w)
+
     if total:
-        print(f"\nPAD-AUDIT: FAIL -- {total} finding(s). These are decidable facts, not style.")
-        print("  A footprint with unaddressable or unnamed pads passes every count-based check, which is")
-        print("  why this exists. See docs/fab/U1-FOOTPRINT-DIAGNOSIS.md for the measured case.")
+        print(f"\nPAD-AUDIT: FAIL -- {total} finding(s), {warns} warning(s).")
+        print("  Findings are defects: an unnamed COPPER pad, a repeated number whose pads disagree on a")
+        print("  net, an unresolvable model, or a footprint ID with no library nickname.")
         return 1
-    print("\nPAD-AUDIT: PASS")
+    print(f"\nPAD-AUDIT: PASS -- 0 findings, {warns} warning(s).")
     return 0
 
 

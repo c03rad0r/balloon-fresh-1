@@ -13793,7 +13793,7 @@
 			)
 		)
 	)
-	(footprint "SX1280_QFN24"
+	(footprint "balloon_flight_v9:SX1280_QFN24"
 		(layer "F.Cu")
 		(uuid "e20c155c-9dba-459c-bbc7-c9d15eef10cd")
 		(at 52.75 26.75)
