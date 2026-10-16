@@ -1,5 +1,31 @@
 # HUB v9 — ORDER READINESS (measured 2026-10-15)
 
+> ## ⚠️ NUMBERS SUPERSEDED — 2026-10-16. The VERDICT still holds.
+>
+> This document reflects the board as measured on **2026-10-15**. Two things changed on 2026-10-16:
+>
+> 1. **The edge rule was amended to conditionless** (operator ruling), which took
+>    `copper_edge_clearance` from **24 → 16**.
+> 2. **The routed board was promoted to the canonical path**, and every DRC number in this file was
+>    measured on a **placed-only** board (2 tracks on 1 net) before that promotion. See the H1 item in
+>    `docs/fab/ASTRA-GAP-ANALYSIS.md`.
+>
+> **Current measured state** (`docs/fab/GATE-RESULTS.md`, board sha256
+> `2dd363764b2314e8c5f16db240fa979b4b20909afa521045df3eb0c857d8e4c5`):
+>
+> | | this document (2026-10-15) | now (2026-10-16) |
+> |---|---|---|
+> | unconnected | 10 | **4** |
+> | DRC errors | 29 | **16** |
+> | DRC warnings | 136 | **137** |
+> | netlist gate | 12 pass / 4 FAIL | **14 pass / 0 FAIL / 2 PENDING** |
+>
+> **The verdict is unchanged: NOT ORDERABLE**, now for a shorter and better-understood list of reasons.
+> All 16 remaining errors are the intentional `J_W*` edge lands; zero are real electrical violations.
+>
+> **Read `GATE-RESULTS.md` for current numbers.** This file is kept for its reasoning and its per-item
+> analysis, which remain useful; its counts are historical.
+
 **Board:** `tracker/hardware/hub_board_v9.kicad_pcb` (70.0 × 70.0 mm, 4-layer, 0.6 mm)
 **Method:** `tracker/hardware/fab_grade.sh` — route (STRICT frozen floor, escalation OFF)
 → stitch GND → **refill zones** → DRC against `jlcpcb-s1-frozen.kicad_dru`.
