@@ -101,3 +101,39 @@ authority here:
 2. `find_bad_model_ref.py` replaced it after a regex split on `\n  (footprint ` returned nonsense
    (`R_0402`, `U.FL`, `D_SMA`) — `(footprint` also appears **inside model paths and library names**.
    The working version uses **pcbnew**, i.e. KiCad's own parser, rather than pattern-matching text.
+
+---
+
+## After the fixes: 4 failures -> 1, and the survivor is PRE-EXISTING ON MASTER
+
+```
+1 failed, 781 passed, 43 skipped
+FAILED tests/test_3d_models_wing.py::test_board_still_carries_the_wings_12_references_and_the_cells
+  AssertionError: 0 segments
+  assert 0 == 20
+```
+
+**Measured attribution, not assumed:**
+
+| fact | value |
+|---|---|
+| `(segment ` lines on **master's** `wing_board_v9.kicad_pcb` | **0** |
+| `(segment ` lines on **ours** | **0** |
+| our branch's commits touching that board | **none** |
+| our branch's commits touching `tests/test_3d_models_wing.py` | **none** |
+
+**So the test and the board both come from master, unmodified by this branch.** The test asserts **20
+traces (10 F.Cu + 10 B.Cu)** on a wing board that carries **zero** — it was added by the wing/foam work
+(PRs #196-#201) and expects routing the board does not have. Its own comment explains the intent: *"20
+segments = 10 F.Cu + 10 B.Cu: the back series string is wired (ADR-065 addendum). Assert the PER-LAYER
+split, not just a total -- the total-only form of this check passed for a year while the back string was
+electrically isolated."* The intent is right; the board does not match it yet.
+
+**Not fixed here, deliberately.** Fixing it means either routing the wing board's series string (real
+work on a board this PR does not touch) or weakening an assertion that exists for a good reason. Both
+are outside this PR's scope, and the second would be the fabricated-green move this whole pass has been
+about avoiding.
+
+**Consequence for the merge:** PR #206 now fails CI on ONE test that is red on master too. `master` is
+already red for this reason, so merging does not introduce a regression -- but it also does not clear
+the check.
