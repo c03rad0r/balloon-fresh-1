@@ -112,6 +112,29 @@ COMMON_MODE_NOTE = (
 def system_reliability_common_mode(p_one: float, n: int, q: float) -> float:
     """Marshall-Olkin shared-kill: q = P(shared cause takes all layers)."""
     return (1.0 - q) * (1.0 - (1.0 - p_one) ** n)
+
+
+# --- expected flight duration: harmonic in the tolerated-failure count -------
+# Consultant closed form (Monte-Carlo reproduced it to <0.2%): with n identical
+# envelopes at per-envelope failure rate lam and j* = n-1 tolerated losses,
+#     E[T] = (1/lam) * sum_{i=0..j*} 1/(n-i) = (1/lam) * H_n
+# The marginal gain of the n-th envelope is 1/(n*lam) -- strictly diminishing,
+# which is why the 3rd envelope is a poor buy even where it is viable.
+def expected_flight_days(n: int, lam_per_day: float) -> float:
+    """E[T] = H_n / lam."""
+    if n < 1:
+        raise ValueError("n must be >= 1")
+    harmonic = sum(1.0 / k for k in range(1, n + 1))
+    return harmonic / lam_per_day
+
+
+def marginal_gain_days(n: int, lam_per_day: float) -> float:
+    """Duration bought by the n-th envelope: 1/(n*lam)."""
+    if n < 2:
+        return 0.0
+    return 1.0 / (n * lam_per_day)
+
+
 OUR_JURISDICTION = "DE (LuftVO + SERA)"
 
 # --- the paste's claims (verbatim, for the verdict table) --------------------

@@ -138,10 +138,23 @@ With a **shedding** mechanism the cost is linear and **redundancy never backfire
 
 ### 4c. Applied to OUR hardware — and it confirms our decision
 
-| | envelope dry `m` | gross lift `B` | boundary `m*` | in backfire regime? |
+| | envelope dry `m` | gross lift `B` | boundary `m* = (2B−P)/3` | in backfire regime? |
 |---|---|---|---|---|
 | **us (Yokohama 32″)** | **48.6 g** | **56.6 g** | **31.1 g** | **YES — m > m\*** |
 | the paste's hypothetical | 18 g | 110 g | 65 g | no — m ≪ m* |
+
+`B` is derived from the community's measured **8 g maximum free lift** for a 32″ Yokohama plus the
+mass the envelope must carry itself (`B = 8 + 48.6 = 56.6 g`).
+
+**Expected flight duration is harmonic in the tolerated-failure count.** With `n` identical
+envelopes at per-envelope failure rate `λ`, and each failure buying one tolerated loss:
+
+> **`E[T] = (1/λ)·Σ_{i=0..j*} 1/(n−i) = (1/λ)·H_n`**
+
+which for `λ = 0.1 d⁻¹` gives **10.00 → 15.00 → 18.33 days** for n = 1 → 2 → 3. Monte-Carlo over
+2×10⁵ paths reproduced the closed form to **<0.2 %**. Note the **strictly diminishing marginal
+return** — the third envelope buys only `H₃ − H₂ = 1/6·λ⁻¹ ≈ 3.33 d` against the second's
+`H₂ − H₁ = 1/2·λ⁻¹ ≈ 5.00 d`.
 
 **Our hardware genuinely IS in the backfire regime**, so a third envelope is net-harmful — and the
 consultant's formula arrives at that **independently of the mass-allowance argument in §4/§1**.
@@ -153,6 +166,10 @@ huge lift headroom* — the opposite situation. **The paste's own numbers are NO
 regime**, so its headline claim ("triple makes cheap film less reliable") is **false for the
 hardware it was describing**. Where a third layer genuinely fails there, the cause is
 **sizing** (`(B − m) ≤ m + P`) or **common mode** — neither of which is the mechanism it named.
+
+**A second, independent route to the same verdict for our design** (§5c): even the *classification*
+floor in SERA Anlage 2 no. 1.1 is a payload „**weniger als 4 kg**" — **200×** the mythical 20 g
+figure. Our ~51 g design does not approach the bottom rung of the regulatory ladder.
 
 Its sign is also backwards on its own argument: for **infant-mortality** film (Weibull β < 1) the
 redundancy payoff is **higher**, not lower (×2.09 at β = 0.7 vs ×1.83 at β = 1.0). A single
