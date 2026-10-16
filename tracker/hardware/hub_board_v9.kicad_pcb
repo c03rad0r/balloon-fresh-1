@@ -6091,11 +6091,11 @@
 	(footprint "Capacitor_SMD:C_0402_1005Metric"
 		(layer "F.Cu")
 		(uuid "47a69343-f48a-47b7-9861-867e5aa22d48")
-		(at 52.5 30.7)
+		(at 52.5 30.7 180)
 		(descr "Capacitor SMD 0402 (1005 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: IPC-SM-782 page 76, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf), generated with kicad-footprint-generator")
 		(tags "capacitor")
 		(property "Reference" "C0"
-			(at 0 -1.16 0)
+			(at 0 -1.16 180)
 			(layer "F.SilkS")
 			(uuid "059c92fe-dce4-4270-a95b-71c17a1b202c")
 			(effects
@@ -6106,7 +6106,7 @@
 			)
 		)
 		(property "Value" "0.8pF"
-			(at 0 1.16 0)
+			(at 0 1.16 180)
 			(layer "F.Fab")
 			(uuid "254b8a19-b414-4f49-9276-6372c8036075")
 			(effects
@@ -6117,7 +6117,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 0 0 0)
+			(at 0 0 180)
 			(layer "F.Fab")
 			(hide yes)
 			(uuid "a93ec0f2-f6f3-4c4d-b59d-ee552fe2080b")
@@ -6129,7 +6129,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 0 0 0)
+			(at 0 0 180)
 			(layer "F.Fab")
 			(hide yes)
 			(uuid "450d8f1f-7d0a-491b-aaa2-c66e20b65f3d")
@@ -6142,16 +6142,6 @@
 		)
 		(attr smd)
 		(fp_line
-			(start -0.107836 -0.36)
-			(end 0.107836 -0.36)
-			(stroke
-				(width 0.12)
-				(type solid)
-			)
-			(layer "F.SilkS")
-			(uuid "49459e2b-af2b-4d54-80ac-0d84ea1c5a84")
-		)
-		(fp_line
 			(start -0.107836 0.36)
 			(end 0.107836 0.36)
 			(stroke
@@ -6160,6 +6150,16 @@
 			)
 			(layer "F.SilkS")
 			(uuid "6f7626ff-7d9c-49fd-9c93-156a6d94ab5f")
+		)
+		(fp_line
+			(start -0.107836 -0.36)
+			(end 0.107836 -0.36)
+			(stroke
+				(width 0.12)
+				(type solid)
+			)
+			(layer "F.SilkS")
+			(uuid "49459e2b-af2b-4d54-80ac-0d84ea1c5a84")
 		)
 		(fp_rect
 			(start -0.91 -0.46)
@@ -6184,7 +6184,7 @@
 			(uuid "62e0cb67-629c-419e-a6c6-af6f205b41c2")
 		)
 		(fp_text user "${REFERENCE}"
-			(at 0 0 0)
+			(at 0 0 180)
 			(layer "F.Fab")
 			(uuid "8520b5d6-a104-49de-b994-2bd9f36e1d81")
 			(effects
@@ -6195,7 +6195,7 @@
 			)
 		)
 		(pad "1" smd roundrect
-			(at -0.48 0)
+			(at -0.48 0 180)
 			(size 0.56 0.62)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
@@ -6203,7 +6203,7 @@
 			(uuid "fabcfdcd-64b3-47e8-95fc-c2d1653d3bac")
 		)
 		(pad "2" smd roundrect
-			(at 0.48 0)
+			(at 0.48 0 180)
 			(size 0.56 0.62)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
