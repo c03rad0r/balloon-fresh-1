@@ -62,7 +62,7 @@
 <text x="360" y="664" font-size="14" fill="#333">opening ends BEFORE the routed edge; the pad itself is unmasked</text>
 <line x1="60" y1="706" x2="1500" y2="706" stroke="#eee" stroke-width="1"/>
 <text x="64" y="698" font-size="14" font-weight="bold">Surface finish</text>
-<text x="360" y="698" font-size="14" fill="#333">ENIG preferred (flat, solderable after assembly); HASBL/HASL acceptable</text>
+<text x="360" y="698" font-size="14" fill="#333">ENIG preferred (flat, solderable after assembly); HASL acceptable</text>
 <line x1="60" y1="740" x2="1500" y2="740" stroke="#eee" stroke-width="1"/>
 <text x="64" y="732" font-size="14" font-weight="bold">Copper to edge</text>
 <text x="360" y="732" font-size="14" fill="#333">0.00 mm — INTENTIONAL. This is the electrical contact surface.</text>

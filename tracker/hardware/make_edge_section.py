@@ -20,13 +20,18 @@ FIX: a proper TWO-VIEW sheet with hard-separated regions.
 
 Usage: make_edge_section.py [out.svg]
 """
+import argparse
 import os
 import shutil
 import subprocess
 import sys
+import tempfile
 
 W, H = 1560, 1180
-OUT_SVG = sys.argv[1] if len(sys.argv) > 1 else "docs/fab/jlc-query/edge-launch-cross-section.svg"
+DEFAULT_SVG = "docs/fab/jlc-query/edge-launch-cross-section.svg"
+# NOTE: this used to read sys.argv[1] directly, which meant `--check` was consumed as an OUTPUT PATH --
+# the run then reported "MISSING --check" and wrote nothing. Options are parsed by argparse in main().
+OUT_SVG = DEFAULT_SVG
 
 # ------------------------------------------------------------------ VIEW A geometry
 A_X0, A_X1 = 90, 470          # board body
@@ -212,17 +217,37 @@ def main():
              'interface per docs/adr/046-wing-board-interface.md</text>')
     p.append('</svg>')
 
-    os.makedirs(os.path.dirname(OUT_SVG) or ".", exist_ok=True)
-    with open(OUT_SVG, "w") as fh:
-        fh.write("\n".join(p))
-    print(f"wrote {OUT_SVG}")
+    import sys as _sys
+    _sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "scripts"))
+    from artefact import DeterministicWriter
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--out", default=DEFAULT_SVG, help=f"SVG output path (default {DEFAULT_SVG})")
+    ap.add_argument("--check", action="store_true",
+                    help="do not write; exit 1 if the committed artefacts differ from the generated")
+    a = ap.parse_args()
+    OUT_SVG = a.out
+
+    writer = DeterministicWriter(__file__)
+    svg_text = "\n".join(p)
+    writer.add(OUT_SVG, svg_text)
     png = OUT_SVG.replace(".svg", ".png")
     if shutil.which("rsvg-convert"):
-        subprocess.run(["rsvg-convert", "-w", "2000", OUT_SVG, "-o", png],
-                       capture_output=True, text=True)
-        if os.path.exists(png):
-            print(f"wrote {png} ({os.path.getsize(png)} bytes)")
-    return 0
+        fd, tmp_svg = tempfile.mkstemp(suffix=".svg")
+        os.close(fd)
+        with open(tmp_svg, "w") as fh:
+            fh.write(svg_text)
+        fd2, tmp_png = tempfile.mkstemp(suffix=".png")
+        os.close(fd2)
+        r = subprocess.run(["rsvg-convert", "-w", "2000", tmp_svg, "-o", tmp_png],
+                           capture_output=True, text=True)
+        if not os.path.exists(tmp_png) or os.path.getsize(tmp_png) == 0:
+            print(f"RENDER FAILED: rsvg-convert rc={r.returncode}")
+            print(f"  stderr: {(r.stderr or r.stdout or '(none)').strip()[:400]}")
+            return 1
+        writer.add_file(png, tmp_png)
+        os.unlink(tmp_svg)
+        os.unlink(tmp_png)
+    return writer.finish(check=a.check)
 
 
 if __name__ == "__main__":
