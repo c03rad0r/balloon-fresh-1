@@ -1,66 +1,195 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1720" height="1560" viewBox="0 0 1720 1560" font-family="DejaVu Sans, Helvetica, sans-serif">
-<rect width="1720" height="1560" fill="#ffffff"/>
-<defs><marker id="ar" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,1 L10,5 L0,9 z" fill="#b00020"/></marker><marker id="arU" markerWidth="10" markerHeight="10" refX="5" refY="8" orient="auto"><path d="M1,10 L5,0 L9,10 z" fill="#b00020"/></marker></defs>
-<text x="60" y="28" font-size="22" font-weight="bold">ADF-046 wing joint — peel coupon specimens</text>
-<text x="90" y="90" font-size="20" font-weight="bold">SPECIMEN B — PEEL  (Option B's failure mode)</text>
-<text x="90" y="116" font-size="14" fill="#444">0.6 mm FR4 coupon · ONE fillet along a single 1.2 mm edge · load at 2.0 mm from the root</text>
-<rect x="140" y="330" width="552.0" height="27.599999999999998" fill="#2f6b3a" stroke="#1d4425" stroke-width="1.5"/>
-<text x="140" y="379.6" font-size="13" fill="#2f6b3a">coupon substrate 0.6 mm FR4</text>
-<rect x="508.0" y="274.8" width="184.0" height="55.199999999999996" fill="#c8751a" stroke="#8a4d0c" stroke-width="1.2"/>
-<text x="502.0" y="266.8" font-size="13.5" fill="#8a4d0c" text-anchor="end">copper land</text>
-<path d="M 508.0 274.8 q -20 55.199999999999996 0 55.199999999999996" fill="#e0a53a" stroke="#c8751a" stroke-width="2"/>
-<text x="478.0" y="370" font-size="13" fill="#8a4d0c" text-anchor="end">fillet (1.2 mm long)</text>
-<line x1="508.0" y1="401.6" x2="692.0" y2="401.6" stroke="#111" stroke-width="1.3"/>
-<line x1="508.0" y1="394.6" x2="508.0" y2="408.6" stroke="#111" stroke-width="1.3"/>
-<line x1="692.0" y1="394.6" x2="692.0" y2="408.6" stroke="#111" stroke-width="1.3"/>
-<path d="M519.0,401.6 L508.0,397.1 L508.0,406.1 z" fill="#111"/>
-<path d="M681.0,401.6 L692.0,397.1 L692.0,406.1 z" fill="#111"/>
-<text x="600.0" y="390.6" font-size="14" fill="#111" text-anchor="middle">land 4.0 mm</text>
-<line x1="508.0" y1="453.6" x2="508.0" y2="453.6" stroke="#111" stroke-width="1.3"/>
-<line x1="508.0" y1="446.6" x2="508.0" y2="460.6" stroke="#111" stroke-width="1.3"/>
-<line x1="508.0" y1="446.6" x2="508.0" y2="460.6" stroke="#111" stroke-width="1.3"/>
-<path d="M519.0,453.6 L508.0,449.1 L508.0,458.1 z" fill="#111"/>
-<path d="M497.0,453.6 L508.0,449.1 L508.0,458.1 z" fill="#111"/>
-<text x="508.0" y="442.6" font-size="14" fill="#111" text-anchor="middle">load arm 2.0 mm</text>
-<line x1="600.0" y1="144.8" x2="600.0" y2="258.8" stroke="#b00020" stroke-width="3.5" marker-end="url(#arU)"/>
-<text x="614.0" y="150.8" font-size="15" font-weight="bold" fill="#b00020">F — pull AWAY from the substrate</text>
-<text x="614.0" y="172.8" font-size="13" fill="#b00020">perpendicular to the board plane</text>
-<text x="140" y="118.80000000000001" font-size="13" fill="#777">the fillet root is the pivot: the land sees a moment about one edge, so this tests PEEL, not pure tension.</text>
-<text x="90" y="700" font-size="20" font-weight="bold">SPECIMEN A — SHEAR  (Option A's failure mode)</text>
-<text x="90" y="726" font-size="14" fill="#444">0.6 mm tab soldered on BOTH faces into a 0.9 mm slot · pull along the insertion axis</text>
-<rect x="200" y="800" width="138.0" height="460.0" fill="#2f6b3a" stroke="#1d4425" stroke-width="1.5"/>
-<rect x="379.4" y="800" width="138.0" height="460.0" fill="#2f6b3a" stroke="#1d4425" stroke-width="1.5"/>
-<text x="200" y="1282.0" font-size="13" fill="#2f6b3a">hub wall · slot 0.9 mm</text>
-<rect x="344.9" y="800" width="27.599999999999998" height="276.0" fill="#dfe6ee" stroke="#33475b" stroke-width="2"/>
-<text x="358.7" y="1106.0" font-size="13.5" fill="#33475b" text-anchor="middle">tab 0.6 mm thick, seated in the slot</text>
-<path d="M 344.9 814 q -16 20 0 44" fill="#e0a53a" stroke="#c8751a" stroke-width="2"/>
-<path d="M 372.5 814 q 16 20 0 44" fill="#e0a53a" stroke="#c8751a" stroke-width="2"/>
-<line x1="314.9" y1="830" x2="336.9" y2="834" stroke="#8a4d0c" stroke-width="1"/>
-<text x="310.9" y="828" font-size="13" fill="#8a4d0c" text-anchor="end">fillet — face 1</text>
-<line x1="402.5" y1="830" x2="380.5" y2="834" stroke="#8a4d0c" stroke-width="1"/>
-<text x="406.5" y="828" font-size="13" fill="#8a4d0c">fillet — face 2</text>
-<line x1="200" y1="774" x2="344.9" y2="774" stroke="#111" stroke-width="1.3"/>
-<line x1="200" y1="767" x2="200" y2="781" stroke="#111" stroke-width="1.3"/>
-<line x1="344.9" y1="767" x2="344.9" y2="781" stroke="#111" stroke-width="1.3"/>
-<path d="M211,774 L200,769.5 L200,778.5 z" fill="#111"/>
-<path d="M333.9,774 L344.9,769.5 L344.9,778.5 z" fill="#111"/>
-<text x="272.45" y="763" font-size="14" fill="#111" text-anchor="middle">slot 0.9 mm</text>
-<line x1="358.7" y1="1172.0" x2="358.7" y2="1092.0" stroke="#b00020" stroke-width="3.5" marker-end="url(#arU)"/>
-<text x="372.7" y="1178.0" font-size="15" font-weight="bold" fill="#b00020">F — pull ALONG the insertion axis</text>
-<text x="372.7" y="1200.0" font-size="13" fill="#b00020">shear — BOTH fillets loaded in-plane</text>
-<text x="200" y="704" font-size="13" fill="#777">the slot prevents rotation about an edge: the fillet area carries the load in SHEAR, which is the whole reason Option A out-performs a face joint.</text>
-<text x="60" y="1290" font-size="17" font-weight="bold">What the two specimens decide</text>
-<text x="60" y="1316" font-size="14" font-weight="bold">measured</text>
-<text x="200" y="1316" font-size="14" fill="#333">peak force at failure, in N, per specimen</text>
-<text x="60" y="1342" font-size="14" font-weight="bold">samples</text>
-<text x="200" y="1342" font-size="14" fill="#333">n >= 5 per condition</text>
-<text x="60" y="1368" font-size="14" font-weight="bold">derived</text>
-<text x="200" y="1368" font-size="14" fill="#333">knockdown_B = (pure tensile strength of the same fillet) / (measured peel strength)</text>
-<text x="60" y="1394" font-size="14" font-weight="bold">then</text>
-<text x="200" y="1394" font-size="14" fill="#333">feed knockdown_B into trade_study_wing_joint.py's peel_knockdown input and re-run</text>
-<text x="60" y="1420" font-size="14" font-weight="bold">rule</text>
-<text x="200" y="1420" font-size="14" fill="#333">~4x -> Option B margin 7.8x (comfortable);  below 1.2x -> Option B approaches Option A</text>
-<text x="60" y="1446" font-size="14" font-weight="bold">variants</text>
-<text x="200" y="1446" font-size="14" fill="#333">as-soldered · cold-soak (wing sees -40 C) · a deliberately weak fillet · the build's own alloy</text>
-<text x="60" y="1546" font-size="12" fill="#777">dimensions from tracker/hardware/trade_study_wing_joint.py and peel_coupon_design.py (same constants) · generated by draw_peel_coupon.py</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="1900" viewBox="0 0 1320 1900" font-family="DejaVu Sans, Helvetica, sans-serif">
+<rect width="1320" height="1900" fill="#ffffff"/>
+<text x="60" y="36" font-size="22" font-weight="bold">ADF-046 wing joint — peel coupon specimens</text>
+<text x="60" y="62" font-size="12.5" fill="#666">Sheet scope: PEEL specimen B (B1/B2) and SHEAR specimen A; the pure-tension reference coupon is a separate work-order item (see PEEL-COUPON.md).</text>
+<text x="60" y="92" font-size="20" fill="#111" font-weight="bold">SPECIMEN B — PEEL  (Option B's failure mode)</text>
+<text x="60" y="116" font-size="13.5" fill="#444">0.6 mm FR4 coupon · ONE fillet along a single 1.2 mm edge · load applied 2.0 mm from the fillet root · two views (B1 plan, B2 section)</text>
+<rect x="42" y="150" width="606" height="470" fill="#f6f8f6" stroke="#cfd8cf"/>
+<text x="58" y="182" font-size="14" fill="#111" font-weight="bold">B1 — PLAN (view down onto the coupon's top face)</text>
+<text x="58" y="214" font-size="13" fill="#8a4d0c">1  COPPER LAND — 4.0 × 1.2 mm, the loaded member</text>
+<text x="58" y="240" font-size="13" fill="#8a4d0c">2  FILLET (solder) — the peel root, along this 1.2 mm edge</text>
+<text x="58" y="266" font-size="13" fill="#b00020">3  LOAD ⊙ — F is out of the page, 2.0 mm from the fillet root</text>
+<text x="58" y="292" font-size="13" fill="#8a4d0c">11  the coupon's own solderable pad — the stationary member (see B2)</text>
+<text x="58" y="318" font-size="12.5" fill="#2f6b3a">coupon = the stationary member; the fixture holds its left end</text>
+<rect x="190" y="420" width="368.0" height="92.0" fill="#2f6b3a" stroke="#1d4425" stroke-width="1.5"/>
+<rect x="254.0" y="438.4" width="120" height="55.199999999999996" fill="#c8751a" stroke="#8a4d0c" stroke-width="1"/>
+<rect x="374.0" y="438.4" width="184.0" height="55.199999999999996" fill="#c8751a" stroke="#8a4d0c" stroke-width="1.2"/>
+<rect x="361.0" y="438.4" width="13" height="55.199999999999996" fill="#e0a53a" stroke="#8a4d0c" stroke-width="1.2"/>
+<circle cx="466.0" cy="466.0" r="14" fill="#fff" stroke="#b00020" stroke-width="2.5"/>
+<circle cx="466.0" cy="466.0" r="4.2" fill="#b00020"/>
+<line x1="190" y1="512.0" x2="179" y2="523.0" stroke="#111" stroke-width="1"/>
+<line x1="206" y1="512.0" x2="195" y2="523.0" stroke="#111" stroke-width="1"/>
+<line x1="222" y1="512.0" x2="211" y2="523.0" stroke="#111" stroke-width="1"/>
+<line x1="238" y1="512.0" x2="227" y2="523.0" stroke="#111" stroke-width="1"/>
+<line x1="254" y1="512.0" x2="243" y2="523.0" stroke="#111" stroke-width="1"/>
+<line x1="270" y1="512.0" x2="259" y2="523.0" stroke="#111" stroke-width="1"/>
+<line x1="190" y1="512.0" x2="280" y2="512.0" stroke="#111" stroke-width="1.6"/>
+<circle cx="408.0" cy="466.0" r="10" fill="#ffffff" stroke="#111" stroke-width="1.2"/>
+<text x="408.0" y="470.5" font-size="13" fill="#111" font-weight="bold" text-anchor="middle">1</text>
+<circle cx="340.0" cy="466.0" r="10" fill="#ffffff" stroke="#111" stroke-width="1.2"/>
+<text x="340.0" y="470.5" font-size="13" fill="#111" font-weight="bold" text-anchor="middle">2</text>
+<line x1="350.0" y1="466.0" x2="366.0" y2="466.0" stroke="#111" stroke-width="1"/>
+<circle cx="512.0" cy="466.0" r="10" fill="#ffffff" stroke="#111" stroke-width="1.2"/>
+<text x="512.0" y="470.5" font-size="13" fill="#111" font-weight="bold" text-anchor="middle">3</text>
+<line x1="502.0" y1="466.0" x2="482.0" y2="466.0" stroke="#111" stroke-width="1"/>
+<circle cx="300.0" cy="466.0" r="9" fill="#ffffff" stroke="#111" stroke-width="1.2"/>
+<text x="300.0" y="470.5" font-size="13" fill="#111" font-weight="bold" text-anchor="middle">11</text>
+<line x1="300.0" y1="475.0" x2="300.0" y2="491.59999999999997" stroke="#111" stroke-width="1"/>
+<line x1="374.0" y1="497.59999999999997" x2="374.0" y2="569" stroke="#111" stroke-width="1"/>
+<line x1="558.0" y1="497.59999999999997" x2="558.0" y2="569" stroke="#111" stroke-width="1"/>
+<line x1="374.0" y1="560" x2="558.0" y2="560" stroke="#111" stroke-width="1.2"/>
+<path d="M374.0,560 L387.0,555 L387.0,565 z" fill="#111"/>
+<path d="M558.0,560 L545.0,555 L545.0,565 z" fill="#111"/>
+<text x="466.0" y="552" font-size="13" fill="#111" text-anchor="middle">land 4.0 mm</text>
+<line x1="135" y1="438.4" x2="186" y2="438.4" stroke="#111" stroke-width="1"/>
+<line x1="135" y1="493.59999999999997" x2="186" y2="493.59999999999997" stroke="#111" stroke-width="1"/>
+<line x1="144" y1="438.4" x2="144" y2="493.59999999999997" stroke="#111" stroke-width="1.2"/>
+<path d="M144,438.4 L139,451.4 L149,451.4 z" fill="#111"/>
+<path d="M144,493.59999999999997 L139,480.59999999999997 L149,480.59999999999997 z" fill="#111"/>
+<text x="128" y="470.0" font-size="13" fill="#111" text-anchor="end">land 1.2 mm</text>
+<text x="58" y="596" font-size="12.5" fill="#666">coupon offcut — FR4, 0.6 mm thick. The land's 4.0 mm runs along the</text>
+<text x="58" y="614" font-size="12.5" fill="#666">insertion axis; the fillet edge and the load line both run across its 1.2 mm</text>
+<rect x="672" y="150" width="606" height="470" fill="#fdf7f0" stroke="#e6d6c4"/>
+<text x="688" y="182" font-size="14" fill="#111" font-weight="bold">B2 — SECTION along the insertion axis, through the load line</text>
+<text x="688" y="214" font-size="13" fill="#b00020" font-weight="bold">F — pull AWAY from the substrate, perpendicular to the board</text>
+<text x="688" y="240" font-size="13" fill="#b00020">applied 2.0 mm from the fillet root, 0.340 N per land at the coupon's 10 g shock</text>
+<text x="688" y="268" font-size="13" fill="#8a4d0c">4  COPPER LAND in section (thickness drawn exaggerated)</text>
+<text x="688" y="294" font-size="13" fill="#8a4d0c">5  FILLET (solder) — the peel root, the pivot</text>
+<text x="688" y="320" font-size="13" fill="#2f6b3a">6  COUPON SUBSTRATE — FR4, 0.6 mm, held fixed at its left end.</text>
+<text x="688" y="344" font-size="13" fill="#2f6b3a">     The land is held along one 1.2 mm edge only, so it sees a</text>
+<text x="688" y="366" font-size="13" fill="#2f6b3a">     MOMENT about that edge: PEEL, not pure tension.</text>
+<text x="688" y="392" font-size="13" fill="#8a4d0c">11  the coupon's own solderable pad — the stationary</text>
+<text x="688" y="412" font-size="13" fill="#8a4d0c">      mating member the root fillet wets. The land is</text>
+<text x="688" y="432" font-size="13" fill="#8a4d0c">      bonded along THIS edge only.</text>
+<rect x="880" y="500" width="368.0" height="27.599999999999998" fill="#2f6b3a" stroke="#1d4425" stroke-width="1.5"/>
+<rect x="1064.0" y="480" width="184.0" height="20" fill="#c8751a" stroke="#8a4d0c" stroke-width="1.2"/>
+<rect x="944.0" y="494" width="140" height="6" fill="#c8751a" stroke="#8a4d0c" stroke-width="0.8"/>
+<path d="M1064.0,480 L1042.0,500 L1064.0,500 z" fill="#e0a53a" stroke="#8a4d0c" stroke-width="1.2"/>
+<line x1="880" y1="527.6" x2="869" y2="538.6" stroke="#111" stroke-width="1"/>
+<line x1="896" y1="527.6" x2="885" y2="538.6" stroke="#111" stroke-width="1"/>
+<line x1="912" y1="527.6" x2="901" y2="538.6" stroke="#111" stroke-width="1"/>
+<line x1="928" y1="527.6" x2="917" y2="538.6" stroke="#111" stroke-width="1"/>
+<line x1="944" y1="527.6" x2="933" y2="538.6" stroke="#111" stroke-width="1"/>
+<line x1="960" y1="527.6" x2="949" y2="538.6" stroke="#111" stroke-width="1"/>
+<line x1="976" y1="527.6" x2="965" y2="538.6" stroke="#111" stroke-width="1"/>
+<line x1="992" y1="527.6" x2="981" y2="538.6" stroke="#111" stroke-width="1"/>
+<line x1="880" y1="527.6" x2="1000" y2="527.6" stroke="#111" stroke-width="1.6"/>
+<line x1="1156.0" y1="478" x2="1156.0" y2="347" stroke="#b00020" stroke-width="3.5"/>
+<path d="M1156.0,330 L1148.5,348 L1163.5,348 z" fill="#b00020"/>
+<circle cx="1144.0" cy="490.0" r="9" fill="#ffffff" stroke="#111" stroke-width="1.2"/>
+<text x="1144.0" y="494.5" font-size="13" fill="#111" font-weight="bold" text-anchor="middle">4</text>
+<circle cx="914.0" cy="454" r="9" fill="#ffffff" stroke="#111" stroke-width="1.2"/>
+<text x="914.0" y="458.5" font-size="13" fill="#111" font-weight="bold" text-anchor="middle">11</text>
+<line x1="923.0" y1="456" x2="1004.0" y2="496" stroke="#111" stroke-width="1"/>
+<circle cx="1018.0" cy="484" r="9" fill="#ffffff" stroke="#111" stroke-width="1.2"/>
+<text x="1018.0" y="488.5" font-size="13" fill="#111" font-weight="bold" text-anchor="middle">5</text>
+<line x1="1027.0" y1="488" x2="1048.0" y2="494" stroke="#111" stroke-width="1"/>
+<circle cx="1020" cy="531.6" r="9" fill="#ffffff" stroke="#111" stroke-width="1.2"/>
+<text x="1020" y="536.1" font-size="13" fill="#111" font-weight="bold" text-anchor="middle">6</text>
+<line x1="1011" y1="529.6" x2="976" y2="518.6" stroke="#111" stroke-width="1"/>
+<line x1="1064.0" y1="484" x2="1064.0" y2="569" stroke="#111" stroke-width="1"/>
+<line x1="1156.0" y1="484" x2="1156.0" y2="569" stroke="#111" stroke-width="1"/>
+<line x1="1064.0" y1="560" x2="1156.0" y2="560" stroke="#111" stroke-width="1.2"/>
+<path d="M1064.0,560 L1077.0,555 L1077.0,565 z" fill="#111"/>
+<path d="M1156.0,560 L1143.0,555 L1143.0,565 z" fill="#111"/>
+<text x="1044.0" y="565" font-size="13" fill="#111" text-anchor="end">load arm 2.0 mm</text>
+<line x1="799" y1="500" x2="876" y2="500" stroke="#111" stroke-width="1"/>
+<line x1="799" y1="527.6" x2="876" y2="527.6" stroke="#111" stroke-width="1"/>
+<line x1="808" y1="484" x2="808" y2="543.6" stroke="#111" stroke-width="1.2"/>
+<path d="M808,500 L803,486 L813,486 z" fill="#111"/>
+<path d="M808,527.6 L803,541.6 L813,541.6 z" fill="#111"/>
+<text x="792" y="517.8" font-size="13" fill="#111" text-anchor="end">substrate 0.6 mm</text>
+<rect x="42" y="676" width="1236" height="944" fill="#f6f8f6" stroke="#cfd8cf"/>
+<text x="60" y="706" font-size="20" fill="#111" font-weight="bold">SPECIMEN A — SHEAR  (Option A's failure mode)</text>
+<text x="60" y="730" font-size="13.5" fill="#444">0.6 mm tab soldered on BOTH faces into a 0.9 mm slot · pull along the insertion axis · SECTION, ~1.6:1</text>
+<text x="58" y="772" font-size="13" fill="#8a4d0c">7  FILLET — face 1: solder in the 0.15 mm gap, 6.0 mm long</text>
+<text x="58" y="798" font-size="13" fill="#8a4d0c">8  FILLET — face 2: the same on the tab's other face</text>
+<text x="58" y="824" font-size="13" fill="#33475b">9  TAB — 0.6 mm thick, seated 6.0 mm into the slot</text>
+<text x="58" y="850" font-size="13" fill="#2f6b3a">10  HUB MATERIAL — the slot's walls (lateral extent not to scale)</text>
+<text x="58" y="880" font-size="12.5" fill="#666">the slot's walls resist rotation about an edge, so both fillets load</text>
+<text x="58" y="898" font-size="12.5" fill="#666">mainly in SHEAR — the loading this coupon is meant to confirm, and the</text>
+<text x="58" y="916" font-size="12.5" fill="#666">reason Option A is expected to out-perform a face joint. The hub is the fixed</text>
+<text x="58" y="934" font-size="12.5" fill="#666">member (hatched); only the tab is pulled.</text>
+<text x="700" y="758" font-size="15" fill="#b00020" font-weight="bold">F — pull ALONG the insertion axis</text>
+<text x="700" y="782" font-size="13" fill="#b00020">out of the slot; shear — BOTH fillets loaded in-plane</text>
+<rect x="381.25" y="1100" width="225.0" height="510.0" fill="#2f6b3a" stroke="#1d4425" stroke-width="1.5"/>
+<rect x="673.75" y="1100" width="225.0" height="510.0" fill="#2f6b3a" stroke="#1d4425" stroke-width="1.5"/>
+<rect x="606.25" y="1100" width="11.25" height="450.0" fill="#e0a53a" stroke="#8a4d0c" stroke-width="0.6"/>
+<rect x="662.5" y="1100" width="11.25" height="450.0" fill="#e0a53a" stroke="#8a4d0c" stroke-width="0.6"/>
+<rect x="617.5" y="1055.0" width="45.0" height="495.0" fill="#dfe6ee" stroke="#33475b" stroke-width="1.6"/>
+<line x1="381" y1="1610.0" x2="370" y2="1621.0" stroke="#111" stroke-width="1"/>
+<line x1="397" y1="1610.0" x2="386" y2="1621.0" stroke="#111" stroke-width="1"/>
+<line x1="413" y1="1610.0" x2="402" y2="1621.0" stroke="#111" stroke-width="1"/>
+<line x1="429" y1="1610.0" x2="418" y2="1621.0" stroke="#111" stroke-width="1"/>
+<line x1="445" y1="1610.0" x2="434" y2="1621.0" stroke="#111" stroke-width="1"/>
+<line x1="461" y1="1610.0" x2="450" y2="1621.0" stroke="#111" stroke-width="1"/>
+<line x1="477" y1="1610.0" x2="466" y2="1621.0" stroke="#111" stroke-width="1"/>
+<line x1="493" y1="1610.0" x2="482" y2="1621.0" stroke="#111" stroke-width="1"/>
+<line x1="509" y1="1610.0" x2="498" y2="1621.0" stroke="#111" stroke-width="1"/>
+<line x1="525" y1="1610.0" x2="514" y2="1621.0" stroke="#111" stroke-width="1"/>
+<line x1="541" y1="1610.0" x2="530" y2="1621.0" stroke="#111" stroke-width="1"/>
+<line x1="557" y1="1610.0" x2="546" y2="1621.0" stroke="#111" stroke-width="1"/>
+<line x1="573" y1="1610.0" x2="562" y2="1621.0" stroke="#111" stroke-width="1"/>
+<line x1="589" y1="1610.0" x2="578" y2="1621.0" stroke="#111" stroke-width="1"/>
+<line x1="605" y1="1610.0" x2="594" y2="1621.0" stroke="#111" stroke-width="1"/>
+<line x1="381.25" y1="1610.0" x2="606.25" y2="1610.0" stroke="#111" stroke-width="1.6"/>
+<line x1="673" y1="1610.0" x2="662" y2="1621.0" stroke="#111" stroke-width="1"/>
+<line x1="689" y1="1610.0" x2="678" y2="1621.0" stroke="#111" stroke-width="1"/>
+<line x1="705" y1="1610.0" x2="694" y2="1621.0" stroke="#111" stroke-width="1"/>
+<line x1="721" y1="1610.0" x2="710" y2="1621.0" stroke="#111" stroke-width="1"/>
+<line x1="737" y1="1610.0" x2="726" y2="1621.0" stroke="#111" stroke-width="1"/>
+<line x1="753" y1="1610.0" x2="742" y2="1621.0" stroke="#111" stroke-width="1"/>
+<line x1="769" y1="1610.0" x2="758" y2="1621.0" stroke="#111" stroke-width="1"/>
+<line x1="785" y1="1610.0" x2="774" y2="1621.0" stroke="#111" stroke-width="1"/>
+<line x1="801" y1="1610.0" x2="790" y2="1621.0" stroke="#111" stroke-width="1"/>
+<line x1="817" y1="1610.0" x2="806" y2="1621.0" stroke="#111" stroke-width="1"/>
+<line x1="833" y1="1610.0" x2="822" y2="1621.0" stroke="#111" stroke-width="1"/>
+<line x1="849" y1="1610.0" x2="838" y2="1621.0" stroke="#111" stroke-width="1"/>
+<line x1="865" y1="1610.0" x2="854" y2="1621.0" stroke="#111" stroke-width="1"/>
+<line x1="881" y1="1610.0" x2="870" y2="1621.0" stroke="#111" stroke-width="1"/>
+<line x1="897" y1="1610.0" x2="886" y2="1621.0" stroke="#111" stroke-width="1"/>
+<line x1="673.75" y1="1610.0" x2="898.75" y2="1610.0" stroke="#111" stroke-width="1.6"/>
+<line x1="640" y1="1055.0" x2="640" y2="962.0" stroke="#b00020" stroke-width="3.5"/>
+<path d="M640,945.0 L632.5,963.0 L647.5,963.0 z" fill="#b00020"/>
+<line x1="361.25" y1="1100" x2="1048.75" y2="1100" stroke="#111" stroke-width="0.9" stroke-dasharray="12 5 3 5"/>
+<circle cx="571.875" cy="1400" r="9" fill="#ffffff" stroke="#111" stroke-width="1.2"/>
+<text x="571.875" y="1404.5" font-size="13" fill="#111" font-weight="bold" text-anchor="middle">7</text>
+<line x1="580.875" y1="1400" x2="612.875" y2="1400" stroke="#111" stroke-width="1"/>
+<circle cx="708.125" cy="1400" r="9" fill="#ffffff" stroke="#111" stroke-width="1.2"/>
+<text x="708.125" y="1404.5" font-size="13" fill="#111" font-weight="bold" text-anchor="middle">8</text>
+<line x1="699.125" y1="1400" x2="667.125" y2="1400" stroke="#111" stroke-width="1"/>
+<circle cx="640" cy="1424.0" r="10" fill="#ffffff" stroke="#111" stroke-width="1.2"/>
+<text x="640" y="1428.5" font-size="13" fill="#111" font-weight="bold" text-anchor="middle">9</text>
+<circle cx="421.25" cy="1220" r="10" fill="#ffffff" stroke="#111" stroke-width="1.2"/>
+<text x="421.25" y="1224.5" font-size="13" fill="#111" font-weight="bold" text-anchor="middle">10</text>
+<line x1="606.25" y1="896.0" x2="606.25" y2="1096" stroke="#111" stroke-width="1"/>
+<line x1="673.75" y1="896.0" x2="673.75" y2="1096" stroke="#111" stroke-width="1"/>
+<line x1="606.25" y1="905.0" x2="673.75" y2="905.0" stroke="#111" stroke-width="1.2"/>
+<path d="M606.25,905.0 L619.25,900.0 L619.25,910.0 z" fill="#111"/>
+<path d="M673.75,905.0 L660.75,900.0 L660.75,910.0 z" fill="#111"/>
+<text x="687.75" y="910.0" font-size="13" fill="#111">slot 0.9 mm (±0.10) — tab 0.6 mm centred, 0.15 mm per side</text>
+<line x1="902.75" y1="1100" x2="967.75" y2="1100" stroke="#111" stroke-width="1"/>
+<line x1="902.75" y1="1550.0" x2="967.75" y2="1550.0" stroke="#111" stroke-width="1"/>
+<line x1="958.75" y1="1100" x2="958.75" y2="1550.0" stroke="#111" stroke-width="1.2"/>
+<path d="M958.75,1100 L953.75,1113 L963.75,1113 z" fill="#111"/>
+<path d="M958.75,1550.0 L953.75,1537.0 L963.75,1537.0 z" fill="#111"/>
+<text x="970.75" y="1329.0" font-size="13" fill="#111">insertion depth 6.0 mm</text>
+<text x="60" y="1660" font-size="17" fill="#111" font-weight="bold">What the two specimens decide</text>
+<text x="60" y="1688" font-size="14" fill="#111" font-weight="bold">measured</text>
+<text x="200" y="1688" font-size="14" fill="#333">peak force at failure, in N, per specimen</text>
+<text x="60" y="1714" font-size="14" fill="#111" font-weight="bold">samples</text>
+<text x="200" y="1714" font-size="14" fill="#333">n &gt;= 5 per condition</text>
+<text x="60" y="1740" font-size="14" fill="#111" font-weight="bold">derived</text>
+<text x="200" y="1740" font-size="14" fill="#333">knockdown_B = (strength of the same fillet in pure tension) / (measured peel strength)</text>
+<text x="60" y="1766" font-size="14" fill="#111" font-weight="bold">reference</text>
+<text x="200" y="1766" font-size="14" fill="#333">knockdown_B's numerator is a THIRD coupon, defined in PEEL-COUPON.md and not drawn on this sheet</text>
+<text x="60" y="1792" font-size="14" fill="#111" font-weight="bold">then</text>
+<text x="200" y="1792" font-size="14" fill="#333">feed knockdown_B into trade_study_wing_joint.py's peel_knockdown input and re-run</text>
+<text x="60" y="1818" font-size="14" fill="#111" font-weight="bold">rule</text>
+<text x="200" y="1818" font-size="14" fill="#333">~4x -&gt; Option B margin 7.8x (comfortable);  below 1.2x -&gt; Option B approaches Option A</text>
+<text x="60" y="1844" font-size="14" fill="#111" font-weight="bold">variants</text>
+<text x="200" y="1844" font-size="14" fill="#333">as-soldered · cold-soak (the wing sees −40 °C) · deliberately weak fillet · the build's alloy</text>
+<text x="60" y="1870" font-size="14" fill="#111" font-weight="bold">fillet size</text>
+<text x="200" y="1870" font-size="14" fill="#333">NOT specified here: fillet leg length is the technique variable the coupon measures — record each specimen's fillet profile</text>
+<text x="60" y="1886" font-size="12" fill="#666">dimensions from tracker/hardware/trade_study_wing_joint.py and peel_coupon_design.py (same constants) · drawn by draw_peel_coupon.py</text>
 </svg>
