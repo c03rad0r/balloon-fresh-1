@@ -566,8 +566,29 @@ def run_krt(seed_path: str, lap_path: str) -> int:
 
     Returns 0 only when the placer RAN and succeeded. A missing placer is a FAILURE, not a note --
     see the KRT_DIR comment above for why that distinction cost us a stale published board.
+
+    SIDE EFFECT GUARD (added 2026-10-15). The placer also WRITES `<lap>.kicad_pro`, and its own
+    output says so: "DRC settings: wrote 1 value(s) ... to match the routed floors". Measured damage:
+    running the builder rewrote `hub_board_v9.kicad_pro` and silently reverted
+    `min_through_hole_diameter` 0.2 -> 0.3, DELETING the comment that records the operator's
+    2026-10-14 decision (0.3 mm fired on the ESP32-S3-WROOM-1U module's 0.2 mm thermal vias, and
+    0.2 mm equals JLCPCB's mechanical drill floor -- the board rule was STRICTER THAN THE FAB
+    REQUIRES for that pad class). A generator must not silently undo a ratified decision: the
+    human work is not reproducible from the generator's own inputs.
+
+    So every side file the placer may touch is snapshotted before the lap and RESTORED afterwards
+    unless it is byte-identical. The board itself is left alone -- that is the placer's job.
     """
     import subprocess
+
+    # Snapshot the project files the placer is known to write, so a revert cannot survive.
+    side = [lap_path[:-len(".kicad_pcb")] + ext for ext in (".kicad_pro", ".kicad_prl")]
+    saved = {}
+    for f in side:
+        if os.path.exists(f):
+            with open(f, "rb") as fh:
+                saved[f] = fh.read()
+
     placer = os.path.join(KRT_DIR, "py_placer", "place_optimize.py")
     if not os.path.exists(placer):
         print(f"KRT PLACER MISSING at {placer}")
@@ -584,6 +605,22 @@ def run_krt(seed_path: str, lap_path: str) -> int:
             print("krt:", line[-400:])
     if r.returncode != 0:
         print(f"KRT failed rc={r.returncode}: {(r.stderr or '')[-500:]}")
+
+    # RESTORE the side files the placer rewrote. Measured 2026-10-15: without this, running the
+    # builder silently reverted the operator's `min_through_hole_diameter` 0.2 -> 0.3 (and deleted
+    # the comment recording the decision). Report every restore so a revert can never be silent.
+    for f, before in saved.items():
+        try:
+            with open(f, "rb") as fh:
+                after = fh.read()
+        except OSError:
+            after = None
+        if after != before:
+            with open(f, "wb") as fh:
+                fh.write(before)
+            print(f"krt side-effect REVERTED by this builder, RESTORED: {os.path.relpath(f, REPO)}")
+            print("  (the placer rewrote it; the committed version records an operator decision and")
+            print("   is not reproducible from the generator's inputs, so the committed one wins)")
     return r.returncode
 
 

@@ -1,0 +1,79 @@
+**VERDICT: CHANGES_REQUESTED**
+
+### A. Is the dispersion a real problem?
+
+**Yes. The measured placement is unsuitable for a conventional compact SX1280 matching network.** C0 and L1 should not remain on opposite edges of this board and then be connected to RFIO with approximately 67 mm of ordinary routing.
+
+Two qualifications matter:
+
+- **“1 nH/mm” is a warning heuristic, not a valid lumped model for this entire route.** At 2.4 GHz, 67 mm is electrically long; transmission-line impedance, phase, branches, and return paths matter. It would be misleading to calculate this as simply “67 nH added to 3 nH.”
+- **Three pads sharing a net does not establish the entire matching topology.** Check the other terminals of C0 and L1 against the reference schematic. Their shared RFIO node should be compact; their other connections determine how to arrange them. Do not assume a sequential `RFIO → C0 → L1` chain from that net membership alone.
+
+There is no existing routed line to preserve or compensate here. This is a placement problem to resolve before routing.
+
+**Falsifiable assumption:** These are ordinary lumped matching components, not part of an intentionally synthesized distributed network. A documented transmission-line design with measured or simulated RF performance could falsify that assumption.
+
+### B. Best fix order
+
+**First establish the RF topology, reference plane, and antenna/feed destination; then place the complete RF cluster. Provisionally keep U4 where it is and bring C0/L1 to its RFIO pin.**
+
+Recommended order:
+
+1. **Verify the schematic against the appropriate Semtech reference circuit**, including both terminals of C0/L1 and the antenna-side connection.
+2. **Inspect the actual reference-ground layer and stackup**, not just the red copper visible in this image.
+3. **Reserve a compact matching pocket immediately outside U4.pad22**, with a suitable onward RF-feed corridor.
+4. **Move and orient C0/L1 into that pocket**, preserving reference-layout connectivity and minimizing the shared RFIO-node extent.
+5. **Move or rotate U4 with its RF support components only if that pocket cannot be made suitable.**
+6. Route, then validate/tune the assembled RF implementation.
+
+Moving C0/L1 close is therefore **the right provisional fix, but not sufficient by itself**. Moving U4 first is not justified by this image alone.
+
+**Falsifiable assumption:** U4’s present RFIO side can accommodate the matching footprints and a continuous reference plane. CAD clearance measurements and inspection of all copper layers can disprove this; if they do, relocate the RF cluster rather than forcing the match into a compromised pocket.
+
+### C. Where should the match sit?
+
+Assuming the board’s upper-left corner is approximately `(0,0)` and positive Y runs downward, the image scale is consistent with your supplied RFIO coordinate.
+
+**The first region to investigate is approximately:**
+
+> **X = 50–56 mm, Y = 29–33 mm, immediately below U4, anchored at RFIO `(52.50, 29.15)`.**
+
+This is a **search/reservation region, not an approved placement rectangle**. Put the RFIO-connected component terminals immediately adjacent to the pin, with short connections on the scale of the reference layout—not spread across the whole rectangle. The image suggests neighboring features near this pocket, so footprint-level inspection is required.
+
+For orientation, the annotated boxes appear approximately at:
+
+| Part | Approximate annotated region |
+|---|---|
+| U4 | X 50–56, Y 24–30 mm |
+| U1 | X 49–69, Y 1–22 mm |
+| C_CAP2 | X 49–60, Y 42–53 mm |
+
+**I cannot certify any exact location as having uninterrupted ground from this image.** It does not expose the four-layer connectivity, antipads, or plane openings.
+
+Also, **“full ground under RF” does not mean a blanket ban on vias**. Ground stitching and ground-pad vias can be appropriate. The concern is reference-plane interruptions—especially non-ground via antipads, slots, or routed clearances that disrupt the RF return path. Avoid unnecessary RF signal-layer transitions as well.
+
+**Falsifiable assumption:** The proposed pocket has an uninterrupted ground reference underneath it. Inspecting the reference-layer copper and drill/antipad geometry can directly falsify this.
+
+### D. What else must move?
+
+**The only definite moves supported by the supplied evidence are C0 and L1.** I cannot honestly identify additional mandatory moves from this raster.
+
+| Part | Recommendation |
+|---|---|
+| **C0** | Move from the far-right edge into the compact RFIO matching pocket. |
+| **L1** | Move from the far-left edge into the same matching pocket. |
+| **U4** | Retain provisionally; move/rotate with its supporting RF circuitry if the local pocket or feed route fails inspection. |
+| **U1** | No demonstrated need to move. It is above U4, whereas the initial candidate pocket is below RFIO. |
+| **C_CAP2** | No demonstrated need to move for the initial pocket. Its through-hole pads matter if an alternative RF route passes near their plane clearances. |
+
+There are other nearby footprints, but **their reference labels are not readable here**. Naming them would be fabrication. A close-up with references enabled and a reference-ground-layer view would allow a specific collision/move list.
+
+**Falsifiable assumption for retaining U1 and C_CAP2:** Their actual courtyards, pad clearances, and reference-plane disturbances do not overlap the proposed RF pocket or onward feed. A CAD overlay can disprove that.
+
+### E. Final validation recommendation
+
+After correcting placement, use the stackup to design the appropriate RF interconnect geometry and verify the assembled network against the intended impedance and radio performance. **Do not automatically apply a 50 Ω geometry to every internal matching connection**; follow the reference implementation there, and use the specified impedance for the antenna-side feed.
+
+**Falsifiable assumption:** The reference component values remain suitable with the chosen packages, stackup, antenna/load, and compact layout. De-embedded RF measurements at an appropriate reference plane, together with transmit/receive testing, can falsify it.
+
+**Bottom line:** The dispersion is demonstrably wrong for the stated lumped match. Bring the matching node to RFIO first *if the local ground and clearance checks pass*. The image does not establish that U4, U1, or C_CAP2 must move, nor does it establish a ground-safe exact placement.

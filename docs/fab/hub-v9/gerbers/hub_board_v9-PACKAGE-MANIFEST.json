@@ -1,0 +1,23 @@
+{
+  "source_board": "/home/c08r4d0r/worktrees/u4-rewire/tracker/hardware/hub_board_v9.kicad_pcb",
+  "source_sha256": "2dd363764b2314e8c5f16db240fa979b4b20909afa521045df3eb0c857d8e4c5",
+  "packaged_board": "hub_v9.kicad_pcb",
+  "footprints": 59,
+  "bom_rows": 58,
+  "cpl_rows": 58,
+  "layers": [
+    "F.Cu",
+    "In1.Cu",
+    "In2.Cu",
+    "B.Cu",
+    "F.Paste",
+    "B.Paste",
+    "F.Silkscreen",
+    "B.Silkscreen",
+    "F.Mask",
+    "B.Mask",
+    "Edge.Cuts"
+  ],
+  "generated_by": "tracker/hardware/regen_fab_package.py",
+  "regenerate_with": "python3 tracker/hardware/regen_fab_package.py --board tracker/hardware/hub_board_v9.kicad_pcb --out docs/fab/hub-v9/gerbers"
+}

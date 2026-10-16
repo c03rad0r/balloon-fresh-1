@@ -26,7 +26,7 @@
     "OPEN-\\d+",
     "TODO\\(unverified\\)",
     "\\(was",
-    "→|->",
+    "\u2192|->",
     "\\brather than\\b",
     "\\binstead of\\b"
   ],
@@ -37,7 +37,7 @@
     "single source of truth",
     "hub-outline-authority",
     "\\bINHERITED\\b",
-    "RESOLVED —"
+    "RESOLVED \u2014"
   ],
   "parameters": [
     {
@@ -46,9 +46,18 @@
       "owner": "docs/adr/029-dual-band-flight-board.md",
       "canonical": "8 MB (ESP32-S3-WROOM-1U-N8R8; in Espressif part numbering N8 = 8 MB flash, R8 = 8 MB PSRAM)",
       "anchors": [
-        {"file": "docs/adr/029-dual-band-flight-board.md", "regex": "8\\s*MB"},
-        {"file": "tracker/firmware/sdkconfig.defaults.esp32s3", "regex": "CONFIG_ESPTOOLPY_FLASHSIZE_8MB=y"},
-        {"file": "tracker/firmware/sdkconfig", "regex": "CONFIG_ESPTOOLPY_FLASHSIZE=\"8MB\""}
+        {
+          "file": "docs/adr/029-dual-band-flight-board.md",
+          "regex": "8\\s*MB"
+        },
+        {
+          "file": "tracker/firmware/sdkconfig.defaults.esp32s3",
+          "regex": "CONFIG_ESPTOOLPY_FLASHSIZE_8MB=y"
+        },
+        {
+          "file": "tracker/firmware/sdkconfig",
+          "regex": "CONFIG_ESPTOOLPY_FLASHSIZE=\"8MB\""
+        }
       ],
       "who_else_asserted": "tracker/firmware/sdkconfig.defaults.esp32s3 (header comment) AND the tracked, generated tracker/firmware/sdkconfig AND ADR-029 D1 item 5 all said '16 MB flash' until 2026-10-07 (commit e4d0569). docs/adr/061-onboard-storage.md and docs/analysis/onboard-storage.md carried the correction. A 16 MB flash-size setting on an 8 MB part misplaces the bootloader/application offsets, so this was a live build defect, not a comment.",
       "scan": [
@@ -62,7 +71,7 @@
       "exempt": [
         {
           "glob": "docs/analysis/onboard-storage.md",
-          "reason": "The ADR-061 storage audit that FOUND and documented the '16 MB flash' defect (its §Context). It states the corrected 8 MB value itself; it is the finding record, not a live assertion."
+          "reason": "The ADR-061 storage audit that FOUND and documented the '16 MB flash' defect (its \u00a7Context). It states the corrected 8 MB value itself; it is the finding record, not a live assertion."
         }
       ],
       "forbid": [
@@ -89,10 +98,16 @@
       "owner": "docs/adr/034-radio-band-split-433-tx-2g4-rx.md",
       "canonical": "2.4 GHz RX on the bare LoRa2021 (crystal-only); 433 MHz TX on the LoRa2021F33-2G4 (internal 0.5 ppm TCXO)",
       "anchors": [
-        {"file": "docs/adr/034-radio-band-split-433-tx-2g4-rx.md", "regex": "\\|\\s*RX\\s*\\|\\s*bare"},
-        {"file": "docs/V9-RADIO-SITE-MATRIX.md", "regex": "one LP on 433 TX, one LP on 2\\.4 RX"}
+        {
+          "file": "docs/adr/034-radio-band-split-433-tx-2g4-rx.md",
+          "regex": "\\|\\s*RX\\s*\\|\\s*bare"
+        },
+        {
+          "file": "docs/V9-RADIO-SITE-MATRIX.md",
+          "regex": "one LP on 433 TX, one LP on 2\\.4 RX"
+        }
       ],
-      "who_else_asserted": "docs/analysis/external-clock-and-ocxo.md §C1 said the 2.4 GHz path is 'RX on the F33, whose internal 0.5 ppm TCXO gives 1.2 kHz' and concluded 'TCXO-referenced either way'. It was corrected in place on 2026-10-07 by an appended block ('CORRECTION (2026-10-07, appended by ADR-057) — the 2.4 GHz path is NOT F33-referenced'), citing ADR-034 D4 and V9-RADIO-SITE-MATRIX. ADR-034 D1/D4 and the site matrix are the owners.",
+      "who_else_asserted": "docs/analysis/external-clock-and-ocxo.md \u00a7C1 said the 2.4 GHz path is 'RX on the F33, whose internal 0.5 ppm TCXO gives 1.2 kHz' and concluded 'TCXO-referenced either way'. It was corrected in place on 2026-10-07 by an appended block ('CORRECTION (2026-10-07, appended by ADR-057) \u2014 the 2.4 GHz path is NOT F33-referenced'), citing ADR-034 D4 and V9-RADIO-SITE-MATRIX. ADR-034 D1/D4 and the site matrix are the owners.",
       "scan": [
         "docs/analysis/external-clock-and-ocxo.md",
         "docs/adr/034-*.md",
@@ -112,12 +127,18 @@
       "id": "wing_plane_orientation",
       "name": "Wing plane orientation at the hub (the ADR-049 wing architecture)",
       "owner": "docs/adr/049-wing-architecture.md",
-      "canonical": "VERTICAL wing plane (a blade): long axis radial in the hub plane and pointing outward, 25 mm width vertical. Long axis horizontal/radial — NOT the wing plane horizontal.",
+      "canonical": "VERTICAL wing plane (a blade): long axis radial in the hub plane and pointing outward, 25 mm width vertical. Long axis horizontal/radial \u2014 NOT the wing plane horizontal.",
       "anchors": [
-        {"file": "docs/adr/049-wing-architecture.md", "regex": "Wing plane orientation is VERTICAL"},
-        {"file": "docs/adr/046-wing-board-interface.md", "regex": "wing plane normal to the hub plane"}
+        {
+          "file": "docs/adr/049-wing-architecture.md",
+          "regex": "Wing plane orientation is VERTICAL"
+        },
+        {
+          "file": "docs/adr/046-wing-board-interface.md",
+          "regex": "wing plane normal to the hub plane"
+        }
       ],
-      "who_else_asserted": "docs/WING-TO-HUB-SOCKET-SPEC.md §1 says 'Wings 1–2 horizontal, 3–4 inclined ≈30° below the hub plane' and, two sentences earlier, 'the wing's long axis is perpendicular to the hub plane' — self-contradictory within one paragraph. Its derivative carry is docs/adr/048-*.md §5 item 6 / v9 sheet item OPEN-23 ('The footprint therefore asserts no rotation'). The ultimate origin of the 'horizontal' reading is docs/hardware-design.md §3D-Assembly (2026-05-20, v1-era), where 'Wing 1 … horizontal' was an ANTENNA-coverage statement for a wing that carried a Yagi — and ADR-046 §2.4 makes the wing antenna V2-only and absent on v9. ADR-049 §5 item 6 resolves it to VERTICAL by the tab/slot arithmetic (a 9.0 mm tab cannot fit a 6.0 mm in-plane slot; a 0.6 mm tab cannot enter a 0.9 mm in-plane slit), and ADR-046 §4.1 ('90° to the hub plane, wing plane normal to the hub plane'), ADR-051 §1.4 and ADR-055 §1 agree.",
+      "who_else_asserted": "docs/WING-TO-HUB-SOCKET-SPEC.md \u00a71 says 'Wings 1\u20132 horizontal, 3\u20134 inclined \u224830\u00b0 below the hub plane' and, two sentences earlier, 'the wing's long axis is perpendicular to the hub plane' \u2014 self-contradictory within one paragraph. Its derivative carry is docs/adr/048-*.md \u00a75 item 6 / v9 sheet item OPEN-23 ('The footprint therefore asserts no rotation'). The ultimate origin of the 'horizontal' reading is docs/hardware-design.md \u00a73D-Assembly (2026-05-20, v1-era), where 'Wing 1 \u2026 horizontal' was an ANTENNA-coverage statement for a wing that carried a Yagi \u2014 and ADR-046 \u00a72.4 makes the wing antenna V2-only and absent on v9. ADR-049 \u00a75 item 6 resolves it to VERTICAL by the tab/slot arithmetic (a 9.0 mm tab cannot fit a 6.0 mm in-plane slot; a 0.6 mm tab cannot enter a 0.9 mm in-plane slit), and ADR-046 \u00a74.1 ('90\u00b0 to the hub plane, wing plane normal to the hub plane'), ADR-051 \u00a71.4 and ADR-055 \u00a71 agree.",
       "scan": [
         "docs/WING-TO-HUB-SOCKET-SPEC.md",
         "docs/adr/046-*.md",
@@ -130,8 +151,8 @@
       "forbid": [
         {
           "id": "W12-H",
-          "regex": "wings?\\s*1\\s*[–\\-]\\s*2[\\s\\S]{0,40}?horizontal",
-          "note": "says wings 1–2 are horizontal (in the hub plane), i.e. the wing plane is coplanar with the hub — excludes the ADR-049 vertical blade"
+          "regex": "wings?\\s*1\\s*[\u2013\\-]\\s*2[\\s\\S]{0,40}?horizontal",
+          "note": "says wings 1\u20132 are horizontal (in the hub plane), i.e. the wing plane is coplanar with the hub \u2014 excludes the ADR-049 vertical blade"
         },
         {
           "id": "LONG-PERP",
@@ -143,13 +164,27 @@
     {
       "id": "hub_outline",
       "name": "v9 hub board outline",
-      "owner": "tracker/hardware/placement-source-of-truth.json",
-      "canonical": "103.0 × 103.0 mm (the first v9 hub PCB, tracker/hardware/hub_board_v9.kicad_pcb, S0 placement — a placement-stage floorplan, not yet a frozen fab outline)",
+      "owner": "docs/adr/068-hub-v9-outline-60x60.md",
+      "canonical": "70.0 x 70.0 mm (the v9 hub board, tracker/hardware/hub_board_v9.kicad_pcb). REVISED 2026-10-14 by measurement from the 60 x 60 mm this ADR first chose; the 60 mm figure came from aggregate courtyard arithmetic, which cannot see that a single 39.65 x 22.30 mm body (U2, LoRa2021F33-2G4) wastes more area than its own footprint implies. Measured with tracker/hardware/seat_probe.py: 60 x 60 overflows U2; 65 x 65 overflows U5 instead (a trap -- it moves the problem); 70 x 70 seats all 39 parts with no overflow and routes 48/48 nets, zero open. See docs/fab/hub-v9/SEAT-PROBE-RESULT.md. The TRUE 103.0 x 103.0 mm S0 placement-stage floorplan -- the array-plane square of ADR-051 2.3 / ADR-055 D5 -- is SUPERSEDED as a board outline: it was never a frozen fab outline.",
       "anchors": [
-        {"file": "tracker/hardware/placement-source-of-truth.json", "regex": "103\\.0 x 103\\.0 mm"},
-        {"file": "tracker/hardware/hub_board_v9.kicad_pcb", "regex": "\\(end\\s+103\\s+103\\)"}
+        {
+          "file": "tracker/hardware/hub_board_v9.kicad_pcb",
+          "regex": "\\(end\\s+70\\s+70\\)"
+        },
+        {
+          "file": "tracker/hardware/build_hub_board_v9.py",
+          "regex": "DEFAULT_W,\\s*DEFAULT_H\\s*=\\s*70\\.0,\\s*70\\.0"
+        },
+        {
+          "file": "docs/adr/068-hub-v9-outline-60x60.md",
+          "regex": "70\\s*(?:x|\\u00d7)\\s*70"
+        },
+        {
+          "file": "docs/fab/hub-v9/SEAT-PROBE-RESULT.md",
+          "regex": "70\\s*\\u00d7\\s*70"
+        }
       ],
-      "who_else_asserted": "docs/hardware-design.md:13,21 says '22mm x 22mm' (v1-era, committed 2026-05-20 — the ONLY source of that figure in the whole repo; no generated artifact ever encoded it). docs/adr/055-*.md §3 resolved the inherited outline to 55 × 45 mm on 2026-10-07 (the v8h rectangle). The S0 v9 hub placement then MEASURED and REJECTED 55 × 45 mm (39 footprinted components need 2582 mm² of courtyard against a 2475 mm² board) and set 103.0 × 103.0 mm. docs/adr/040-*.md still says 'the 55 × 45 mm v9 board'. ADR-051 §2.3 and ADR-055 D5 derive the ≈103 mm square as the array area's implied square.",
+      "who_else_asserted": "docs/hardware-design.md:13,21 says '22mm x 22mm' (v1-era, committed 2026-05-20 \u2014 the ONLY source of that figure in the whole repo; no generated artifact ever encoded it). docs/adr/055-*.md \u00a73 resolved the inherited outline to 55 \u00d7 45 mm on 2026-10-07 (the v8h rectangle). The S0 v9 hub placement then MEASURED and REJECTED 55 \u00d7 45 mm (39 footprinted components need 2582 mm\u00b2 of courtyard against a 2475 mm\u00b2 board) and set 103.0 \u00d7 103.0 mm. docs/adr/040-*.md still says 'the 55 \u00d7 45 mm v9 board'. ADR-051 \u00a72.3 and ADR-055 D5 derive the \u2248103 mm square as the array area's implied square. || 2026-10-16: the 103.0 x 103.0 mm figure was still the CANONICAL value in this registry while NINE documents and the built board said 70 x 70 mm, and grep found no record that had decided 70 x 70 until ADR-068 was located. The registry was the stale party: ADR-068 (revised 2026-10-14 by measurement, docs/fab/hub-v9/SEAT-PROBE-RESULT.md) is the owner. Found by the test_param_ssot anchor check failing in CI on PR #206.",
       "scan": [
         "docs/hardware-design.md",
         "docs/WING-TO-HUB-SOCKET-SPEC.md",
@@ -166,13 +201,18 @@
       "forbid": [
         {
           "id": "HUB-22",
-          "regex": "22(?:\\s*mm)?\\s*[x×]\\s*22",
-          "note": "asserts the hub is 22 × 22 mm (v1-era inherited prose; the current v9 hub is 103 × 103 mm)"
+          "regex": "22(?:\\s*mm)?\\s*[x\u00d7]\\s*22",
+          "note": "asserts the hub is 22 \u00d7 22 mm (v1-era inherited prose; the current v9 hub is 103 \u00d7 103 mm)"
         },
         {
           "id": "HUB-55-V9",
-          "regex": "55(?:\\.15)?\\s*[x×]\\s*45(?:\\.15)?[\\s\\S]{0,60}?v9|v9[\\s\\S]{0,60}?55(?:\\.15)?\\s*[x×]\\s*45",
-          "note": "asserts the v9 hub board is 55 × 45 mm (the inherited v8h outline, measured and rejected for the v9 hub)"
+          "regex": "55(?:\\.15)?\\s*[x\u00d7]\\s*45(?:\\.15)?[\\s\\S]{0,60}?v9|v9[\\s\\S]{0,60}?55(?:\\.15)?\\s*[x\u00d7]\\s*45",
+          "note": "asserts the v9 hub board is 55 \u00d7 45 mm (the inherited v8h outline, measured and rejected for the v9 hub)"
+        },
+        {
+          "id": "HUB-103",
+          "regex": "103(?:\\.0)?\\s*(?:x|\u00d7)\\s*103",
+          "note": "asserts the hub board outline is 103 x 103 mm -- that was the S0 placement-stage floorplan (the array-plane square), SUPERSEDED as an outline by ADR-068 as revised 2026-10-14. The board is 70 x 70 mm."
         }
       ]
     },
@@ -180,11 +220,14 @@
       "id": "f33_castellation_land_size",
       "name": "F33 (LoRa2021F33-2G4) castellated pad land size",
       "owner": "scripts/gen_f33_landpattern.py",
-      "canonical": "1.30 × 1.30 mm (castellation hole diameter D = 0.80 ± 0.10 mm grown by a uniform 0.25 mm solder-fillet margin on every side: D + 2 × 0.25)",
+      "canonical": "1.30 \u00d7 1.30 mm (castellation hole diameter D = 0.80 \u00b1 0.10 mm grown by a uniform 0.25 mm solder-fillet margin on every side: D + 2 \u00d7 0.25)",
       "anchors": [
-        {"file": "scripts/gen_f33_landpattern.py", "regex": "D \\+ 2\\s*\\*\\s*0\\.25 = 0\\.80 \\+ 0\\.50 = 1\\.30"}
+        {
+          "file": "scripts/gen_f33_landpattern.py",
+          "regex": "D \\+ 2\\s*\\*\\s*0\\.25 = 0\\.80 \\+ 0\\.50 = 1\\.30"
+        }
       ],
-      "who_else_asserted": "The pre-2026-10-07 declared guess was 2.0 × 1.0 mm (2.5 × D) — a TODO(unverified) that would have been unsolderable, carried in the four committed footprint copies and docs/adr/045-*.md. Commit f89c3fa derives the 1.30 mm land from the operator-supplied 0.80 mm castellation datum (datasheet §9 'Mechanism Dimension' p8). The derivation, with the before/after table, is recorded in docs/f33-module/F33-LANDPATTERN-VERIFICATION.md §11.",
+      "who_else_asserted": "The pre-2026-10-07 declared guess was 2.0 \u00d7 1.0 mm (2.5 \u00d7 D) \u2014 a TODO(unverified) that would have been unsolderable, carried in the four committed footprint copies and docs/adr/045-*.md. Commit f89c3fa derives the 1.30 mm land from the operator-supplied 0.80 mm castellation datum (datasheet \u00a79 'Mechanism Dimension' p8). The derivation, with the before/after table, is recorded in docs/f33-module/F33-LANDPATTERN-VERIFICATION.md \u00a711.",
       "scan": [
         "scripts/gen_f33_landpattern.py",
         "tracker/hardware/footprints/nicerf-lora2021f33-2g4.json",
@@ -195,14 +238,14 @@
       "exempt": [
         {
           "glob": "docs/f33-module/F33-LANDPATTERN-VERIFICATION.md",
-          "reason": "The land-pattern AUDIT record that documents the before/after ('before 2.0 × 1.0 mm' → 'after 1.30 × 1.30 mm', §11). It is the finding record; its '2.0 × 1.0' rows are the historical tables it exists to record."
+          "reason": "The land-pattern AUDIT record that documents the before/after ('before 2.0 \u00d7 1.0 mm' \u2192 'after 1.30 \u00d7 1.30 mm', \u00a711). It is the finding record; its '2.0 \u00d7 1.0' rows are the historical tables it exists to record."
         }
       ],
       "forbid": [
         {
           "id": "F33-LAND-OLD",
-          "regex": "2\\.0\\s*[x×]\\s*1\\.0",
-          "note": "asserts the F33 land is 2.0 × 1.0 mm (the old declared guess; now 1.30 × 1.30 mm derived from D)"
+          "regex": "2\\.0\\s*[x\u00d7]\\s*1\\.0",
+          "note": "asserts the F33 land is 2.0 \u00d7 1.0 mm (the old declared guess; now 1.30 \u00d7 1.30 mm derived from D)"
         }
       ]
     }

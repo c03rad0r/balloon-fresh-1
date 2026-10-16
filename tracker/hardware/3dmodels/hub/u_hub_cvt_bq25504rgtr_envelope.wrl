@@ -1,0 +1,65 @@
+#VRML V2.0 utf8
+# balloon-fresh -- parametric 3D model (plain-text VRML 2.0)
+# generator  : scripts/gen_3d_models_hub.py  (regenerate: python3 scripts/gen_3d_models_hub.py)
+# part       : U_HUB_CVT -- BQ25504RGTR (solar harvester, VQFN-16) -- ENVELOPE, height unverified
+# dims_mm    : 4.29 x 4.29 x 0.9(nominal) mm -- X/Y from the F.CrtYd courtyard, Z a flagged placeholder
+# frame      : X = footprint-local +x, Y = -(footprint-local +y), Z = up, Z=0 at the board TOP face
+# units      : 1 VRML unit = 2.54 mm (0.1 in) -- KiCad VRML convention; assign with (scale (xyz 1 1 1))
+# source     : tracker/hardware/hub_board_v9.kicad_pcb footprint "balloon_flight_v9:VQFN-16-1EP_3x3mm_P0.5mm_EP1.1x1.1mm" (Reference U_HUB_CVT, Value "BQ25504RGTR"): this library footprint ships NO F.Fab outline, so the envelope is its F.CrtYd courtyard 4.29 x 4.29 mm.  Reproduce with `/usr/bin/python3.14 scripts/footprint_envelope_probe.py tracker/hardware/hub_board_v9.kicad_pcb`.
+# note       : This part previously carried a SYSTEM-library reference that does not resolve: the installed kicad-packages3d has no VQFN-16-1EP_3x3mm_P0.5mm part, only a 4 x 4 mm 0.65 mm-pitch Texas_RSA variant. A wrong-sized model is worse than an envelope, so the reference is replaced by this in-repo envelope.
+# note       : the 4.29 x 4.29 courtyard is the PLACEMENT envelope: the measured 3.70 x 3.70 mm pad-inclusive extent plus the library's clearance ring, NOT the chip body.
+# note       : 0.9 mm is a nominal VQFN body height, NOT a sourced figure for this part number. The repo cites no height for BQ25504RGTR.
+# note       : TODO(unverified): the 0.9 mm height is TODO(unverified) -- a nominal VQFN placeholder, NOT a sourced figure; the body is drawn translucent at transparency 0.35 so a render cannot read it as measured
+# note       : TODO(unverified): the BQ25504RGTR body height and the thermal-pad geometry beneath it
+DEF u_hub_cvt_bq25504rgtr_envelope Transform {
+  children [
+    Shape {
+      appearance Appearance {
+        material DEF u_hub_cvt_bq25504rgtr_envelope_mat Material {
+          diffuseColor 0.14 0.15 0.17
+          emissiveColor 0 0 0
+          specularColor 0.15 0.15 0.15
+          ambientIntensity 0.4
+          transparency 0.35
+          shininess 0.1
+        }
+      }
+      geometry IndexedFaceSet {
+        coord Coordinate { point [
+          -0.844488 -0.844488 0.354331,
+          0.844488 -0.844488 0.354331,
+          0.844488 0.844488 0.354331,
+          -0.844488 0.844488 0.354331,
+          -0.844488 0.844488 0.000000,
+          0.844488 0.844488 0.000000,
+          0.844488 -0.844488 0.000000,
+          -0.844488 -0.844488 0.000000,
+          -0.844488 0.844488 0.000000,
+          -0.844488 0.844488 0.354331,
+          0.844488 0.844488 0.354331,
+          0.844488 0.844488 0.000000,
+          0.844488 -0.844488 0.000000,
+          0.844488 -0.844488 0.354331,
+          -0.844488 -0.844488 0.354331,
+          -0.844488 -0.844488 0.000000,
+          0.844488 0.844488 0.000000,
+          0.844488 0.844488 0.354331,
+          0.844488 -0.844488 0.354331,
+          0.844488 -0.844488 0.000000,
+          -0.844488 -0.844488 0.000000,
+          -0.844488 -0.844488 0.354331,
+          -0.844488 0.844488 0.354331,
+          -0.844488 0.844488 0.000000
+        ] }
+        coordIndex [
+          0, 1, 2, 3, -1,
+          4, 5, 6, 7, -1,
+          8, 9, 10, 11, -1,
+          12, 13, 14, 15, -1,
+          16, 17, 18, 19, -1,
+          20, 21, 22, 23, -1,
+        ]
+      }
+    }
+  ]
+}

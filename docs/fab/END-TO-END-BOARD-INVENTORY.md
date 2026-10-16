@@ -1,3 +1,27 @@
+> ## ⚠️ PARTIALLY SUPERSEDED — 2026-10-16
+>
+> **Two factual claims in this document are FALSE**, found by measuring the tree on 2026-10-16:
+>
+> 1. *"The ground end does not exist as a board."* — **It does.** There are 3 ground/base-station
+>    `.kicad_pcb` files and a `base_station_v1.net` netlist. What is missing is a **schematic** and a
+>    **route**, which is a different and more useful statement.
+> 2. *"no assembled STEP for any board"* — **There are.** `docs/fab/hub-v9/3d/hub_v9.step` and
+>    `wing_v9.step` both exist.
+>
+> The document is dated 2026-10-14 and the repo moved. **Its structural gap analysis is still worth
+> reading** — the ordering of what must be done, and the base station being the largest risk, both hold.
+> Read the *claims* against the tree.
+>
+> **Superseded by, in order of authority:**
+> - `docs/boards/GALLERY.md` — **generated** per-board state; cannot drift
+> - `docs/fab/GATE-RESULTS.md` — the three gates with reproduce commands
+> - `docs/fab/ASTRA-GAP-ANALYSIS.md` — a current, dependency-ordered gap list
+>
+> **Why this is archived rather than deleted:** the failure was not that the document was useless, it was
+> that two claims were asserted without a check. Deleting it would erase the evidence that a
+> hand-maintained inventory drifts; keeping it with this header makes the drift legible, which is the
+> point. The same failure mode produced `ADR-046 §4.2.1`, recorded there the same way.
+
 # END-TO-END BOARD INVENTORY — what the goal requires vs what exists
 
 **Date:** 2026-10-14 · **Purpose:** the goal names *"3d models, schematics, board designs and

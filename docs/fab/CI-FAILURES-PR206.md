@@ -1,0 +1,139 @@
+# CI failures on PR #206 — diagnosis and fixes (2026-10-16)
+
+`test` job: **4 failed, 771 passed, 43 skipped**. Each failure classified by measurement, not guessed.
+
+## 1. `test_param_ssot.py::test_real_repo_is_clean` — FIXED
+
+```
+FAIL [hub_outline] ANCHOR LOST: hub_board_v9.kicad_pcb no longer matches /(end\s+103\s+103)/
+```
+
+**The SSoT registry was stale, and so was its test.**
+
+`docs/ssot/parameters.json` owned `hub_outline` as **103.0 × 103.0 mm**, citing
+`placement-source-of-truth.json` — and its own note described that figure as *"the S0 placement — a
+placement-stage floorplan, **not yet a frozen fab outline**"*.
+
+**ADR-068 (REVISED 2026-10-14 by measurement, `docs/fab/hub-v9/SEAT-PROBE-RESULT.md`) owns the outline
+at 70.0 × 70.0 mm**, on two independent grounds:
+
+- **Component floor** (measured, `seat_probe.py`): 60 × 60 overflows `U2`; **65 × 65 overflows `U5`
+  instead (a trap)**; **70 × 70 seats all 39 parts with no overflow and routes 48/48 nets, zero open.**
+- **Cost + mass** (ADR-068 §1.2/§1.3): the **cheap-tier cliff is measured at 103 mm 4-layer = $31.60
+  vs 102 mm = $8.00**; 70 × 70 is 49.0 cm² = **6.26 g** at 0.6 mm, still inside the cheap tier.
+- **Panels mount off the board**: ADR-068 executes **ADR-063** ("Hub board area and array area are
+  DECOUPLED: panels may overhang"), recording the operator's ruling: *"I'm fine with panels
+  overhang[ing] the board. No need to waste board space."* Evidence:
+  `docs/analysis/PANEL-MOUNTING-OFF-BOARD.md`.
+
+**The test asserted the stale value too** (`assert "103.0 × 103.0 mm" in by_id["hub_outline"]["canonical"]`),
+so test and registry agreed with each other and **both were stale** — a self-consistent pair pointing at
+a superseded figure. Fixed both: the registry now cites ADR-068 with 70 × 70 and four anchors
+(the board's `(end 70 70)`, the builder's `DEFAULT_W, DEFAULT_H = 70.0, 70.0`, ADR-068, and
+SEAT-PROBE-RESULT); the test still pins the value, now to the correct one.
+
+A `HUB-103` **forbid** rule was added, so a future document asserting 103 × 103 mm as the outline is
+caught rather than repeated.
+
+## 2. `test_model_resolution_census.py::test_every_hub_part_the_review_must_see_resolves` — FIXED
+
+```
+AssertionError: no model block: ['U4']
+```
+
+**A real regression, mine.** Measured against master: master's board has **44/44** footprints with a
+model; ours had **58/59**, missing `U4`.
+
+**Root cause: the H1 promotion.** That fix made the **routed** board canonical by copying it from
+`docs/fab/handoff/`. The routed board comes from the router + stitcher chain, which manipulates **copper
+only** and never runs the builder's model-attachment step. So the promoted artefact lost `U4`'s model
+block.
+
+**The mapping was never the problem.** Verified: `scripts/gen_3d_models_hub.py` has
+`"U4": "hub/u4_sx1280_qfn24_envelope.wrl"`, the builder's own `_load_hub_part_models()` returns
+**14 entries including U4**, and the `.wrl` exists on disk (3342 bytes). It was simply never applied.
+
+**Fixed by `tracker/hardware/fix_missing_models.py`** — narrow and additive: it reads the **builder's
+own** mapping (`_load_hub_part_models()` and `MODEL_REF_PREFIX`) so it cannot drift, attaches only the
+**missing** blocks, refuses to write if any reference is unresolvable (so the board cannot end up
+half-repaired), and verifies by reloading. It touches no geometry, net, or coordinate — which keeps it
+clear of builder rule R2.
+
+**Why not simply re-run the builder:** it re-publishes the **placed** board, discarding the routing this
+branch worked to promote.
+
+## 3. `test_the_gate_is_identical_on_a_host_without_kicad_packages3d` — expected to clear with #2
+
+That test is the regression guard for host-dependence (it points the package dir at a nonexistent path
+and asserts the repo-controlled verdict does not move). It failed downstream of the same board state.
+
+## 4. `test_hub_package_references_are_counted_not_ignored` — PRE-EXISTING, not this branch
+
+```
+unresolved_package: 1
+  ${KICAD9_3DMODEL_DIR}/Package_DFN_QFN.3dshapes/VQFN-16-1EP_3x3mm_P0.5mm_EP1.1x1.1mm.step
+  -> /usr/share/kicad/3dmodels/Package_DFN_QFN.3dshapes/VQFN-16-1EP_3x3mm_P0.5mm_EP1.1x1.1mm.step
+     exists: False
+```
+
+**Located with `find_bad_model_ref.py`: `U_HUB_CVT`, the `BQ25504RGTR` solar harvester**, on footprint
+`VQFN-16-1EP_3x3mm_P0.5mm_EP1.1x1.1mm`. The installed KiCad library ships
+`Texas_RSA_VQFN-16-1EP_4x4mm_P0.65mm_EP2.7x2.7mm.step` — **a different package (4 × 4 mm, 0.65 mm
+pitch)**, so this is not a near-miss name.
+
+**Measured pre-existing:** `origin/master`'s board carries the identical reference (`1` occurrence) and
+the same `U_HUB_CVT`. It surfaced only now because this is the first run with the package library
+present in that CI job.
+
+**Not fixed here**, and deliberately: the correct repair is an **in-repo envelope model** for this part
+in the style the project already uses for `U2`/`U4`/`U5` (generated by
+`scripts/gen_3d_models_hub.py` and attached by the builder), **not** a retarget at a system-library part
+that is a different size. Repointing the reference at the 4 × 4 mm Texas part would make the test green
+and put **a wrong-sized model into every 3D review** — a fabricated-green fix. It is recorded as an open
+defect and belongs with the followup work on `U1`'s footprint.
+
+## Instrument errors of my own, found by having the real tools on hand
+
+Two of my diagnostics were wrong and the module was right, which is why the census module is the
+authority here:
+
+1. `which_model_is_unresolved.py` reported **0** unresolved while the census reported **1**.
+2. `find_bad_model_ref.py` replaced it after a regex split on `\n  (footprint ` returned nonsense
+   (`R_0402`, `U.FL`, `D_SMA`) — `(footprint` also appears **inside model paths and library names**.
+   The working version uses **pcbnew**, i.e. KiCad's own parser, rather than pattern-matching text.
+
+---
+
+## After the fixes: 4 failures -> 1, and the survivor is PRE-EXISTING ON MASTER
+
+```
+1 failed, 781 passed, 43 skipped
+FAILED tests/test_3d_models_wing.py::test_board_still_carries_the_wings_12_references_and_the_cells
+  AssertionError: 0 segments
+  assert 0 == 20
+```
+
+**Measured attribution, not assumed:**
+
+| fact | value |
+|---|---|
+| `(segment ` lines on **master's** `wing_board_v9.kicad_pcb` | **0** |
+| `(segment ` lines on **ours** | **0** |
+| our branch's commits touching that board | **none** |
+| our branch's commits touching `tests/test_3d_models_wing.py` | **none** |
+
+**So the test and the board both come from master, unmodified by this branch.** The test asserts **20
+traces (10 F.Cu + 10 B.Cu)** on a wing board that carries **zero** — it was added by the wing/foam work
+(PRs #196-#201) and expects routing the board does not have. Its own comment explains the intent: *"20
+segments = 10 F.Cu + 10 B.Cu: the back series string is wired (ADR-065 addendum). Assert the PER-LAYER
+split, not just a total -- the total-only form of this check passed for a year while the back string was
+electrically isolated."* The intent is right; the board does not match it yet.
+
+**Not fixed here, deliberately.** Fixing it means either routing the wing board's series string (real
+work on a board this PR does not touch) or weakening an assertion that exists for a good reason. Both
+are outside this PR's scope, and the second would be the fabricated-green move this whole pass has been
+about avoiding.
+
+**Consequence for the merge:** PR #206 now fails CI on ONE test that is red on master too. `master` is
+already red for this reason, so merging does not introduce a regression -- but it also does not clear
+the check.

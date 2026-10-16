@@ -220,6 +220,39 @@ def sx1280_model() -> str:
     )
 
 
+def hub_cvt_model() -> str:
+    """U_HUB_CVT -- BQ25504RGTR solar harvester. Its footprint referenced a KiCad model that does not exist.
+
+    The footprint (VQFN-16-1EP_3x3mm_P0.5mm_EP1.1x1.1mm) pointed at
+        ${KICAD9_3DMODEL_DIR}/Package_DFN_QFN.3dshapes/VQFN-16-1EP_3x3mm_P0.5mm_EP1.1x1.1mm.step
+    which the installed kicad-packages3d does NOT ship. The nearest installed neighbour is a
+    Texas_RSA_VQFN-16-1EP_4x4mm_P0.65mm_EP2.7x2.7mm.step -- a DIFFERENT package (4 x 4 mm body,
+    0.65 mm pitch), so repointing at it would have put a wrongly-sized model into every 3D review to
+    make a test pass. An in-repo envelope is the project's established answer for this class (U2, U4, U5).
+    """
+    return _envelope(
+        "u_hub_cvt_bq25504rgtr_envelope", 4.29, 4.29, 0.9,
+        _hdr(
+            "U_HUB_CVT -- BQ25504RGTR (solar harvester, VQFN-16) -- ENVELOPE, height unverified",
+            "4.29 x 4.29 x 0.9(nominal) mm -- X/Y from the F.CrtYd courtyard, Z a flagged placeholder",
+            _crtydsrc("U_HUB_CVT", "balloon_flight_v9:VQFN-16-1EP_3x3mm_P0.5mm_EP1.1x1.1mm",
+                      "BQ25504RGTR", (4.29, 4.29)),
+            extra=[
+                "This part previously carried a SYSTEM-library reference that does not resolve: the "
+                "installed kicad-packages3d has no VQFN-16-1EP_3x3mm_P0.5mm part, only a 4 x 4 mm "
+                "0.65 mm-pitch Texas_RSA variant. A wrong-sized model is worse than an envelope, so "
+                "the reference is replaced by this in-repo envelope.",
+                "the 4.29 x 4.29 courtyard is the PLACEMENT envelope: the measured 3.70 x 3.70 mm "
+                "pad-inclusive extent plus the library's clearance ring, NOT the chip body.",
+                "0.9 mm is a nominal VQFN body height, NOT a sourced figure for this part number. "
+                "The repo cites no height for BQ25504RGTR.",
+            ] + _todo(_nominal_z_note(0.9, "VQFN"),
+                      "the BQ25504RGTR body height and the thermal-pad geometry beneath it"),
+        ),
+        (0.14, 0.15, 0.17),
+    )
+
+
 def esp32_model() -> str:
     """U1 -- ESP32-S3-WROOM-1U-N8R8, the flight computer."""
     return _envelope(
@@ -356,6 +389,7 @@ MODELS = {
     "hub/u2_lora2021f33_2g4_envelope.wrl": f33_model(),
     "hub/u3_lora2021_castellated_envelope.wrl": lora2021_model(),
     "hub/u4_sx1280_qfn24_envelope.wrl": sx1280_model(),
+    "hub/u_hub_cvt_bq25504rgtr_envelope.wrl": hub_cvt_model(),
     "hub/u1_esp32s3_wroom1u_envelope.wrl": esp32_model(),
     "hub/u5_ublox_max_m10s_envelope.wrl": gnss_model(),
     "hub/ant_ufl_mcrf_envelope.wrl": ufl_model(),
@@ -370,6 +404,7 @@ PART_MODELS = {
     "U2": "hub/u2_lora2021f33_2g4_envelope.wrl",
     "U3": "hub/u3_lora2021_castellated_envelope.wrl",
     "U4": "hub/u4_sx1280_qfn24_envelope.wrl",
+    "U_HUB_CVT": "hub/u_hub_cvt_bq25504rgtr_envelope.wrl",
     "U5": "hub/u5_ublox_max_m10s_envelope.wrl",
     "ANT1": "hub/ant_ufl_mcrf_envelope.wrl",
     "ANT2": "hub/ant_ufl_mcrf_envelope.wrl",

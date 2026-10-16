@@ -297,6 +297,100 @@ hand-aligning four 176 mm wings with no mechanical key is the higher risk in a
 one-shot prototype build, and because the slot also fixes the insertion depth. Option B
 remains a valid cost-down for a later volume run once the assembly fixture exists.
 
+> ### 4.2.1 RECONCILIATION (added 2026-10-16) — the board does NOT implement this recommendation
+>
+> **Measured state.** `hub_board_v9.kicad_pcb` (sha256 `2dd363764b2314e8…`) carries **one** Edge.Cuts
+> contour — the 70 × 70 mm outline. There is **no routed slot**. `J_W1`–`J_W4` have their pads on
+> **`F.Cu` only**, 8 pad objects per connector (each pad present twice at identical coordinates — a
+> separate, cosmetic duplicate-footprint issue). Measured with
+> `tracker/hardware/introspect_edge_interface.py`.
+>
+> **So as built, the board is Option B**, while the recommendation above is Option A. Nothing in the
+> repo recorded this disagreement; it was found by asking the board directly, after a visual review
+> (`gpt-6-astra`) observed that a drawing of the interface showed *"two boards end-to-end with a solder
+> bridge, not the claimed seated tab-and-slot interface."* **The drawing was accurate to the board and
+> in disagreement with this ADR.**
+>
+> **This is not an operator decision and this ADR does not make one.** The operator's instruction on
+> 2026-10-16 was to record the current state and hold the geometry until the wing-side interface is
+> frozen (open item W1), because the hub-side lands and the wing-side lands must be designed together.
+>
+> **Trade study, `tracker/hardware/trade_study_wing_joint.py` (run it; the numbers below are its
+> output).** Inputs read from the repo are marked; the rest are explicit assumptions.
+>
+> | quantity | Option A (slot) | Option B (face pads) |
+> |---|---|---|
+> | fillet load direction | **shear**, 2 faces | **tension/peel**, 1 edge |
+> | wetted area | 14.400 mm² | 0.424 mm² |
+> | capacity (conservative allowables) | **172.8 N** | **2.65 N** (after 4× peel knockdown) |
+> | margin vs a 10 g landing shock, per land | 508× | **7.8×** |
+> | adds a fab line item | yes — internal routed cut-out | no |
+> | lands must exist on ≥2 layers | yes (board currently `F.Cu` only) | no |
+>
+> **Load case.** Wing mass 13.88 g (4.88 g computed FR4 at 1.85 g/cm³, plus a 9.00 g array/adhesive
+> allowance). Static joint load 0.136 N, moment 0.0120 N·m; at a 10 g landing shock 1.362 N,
+> 0.1198 N·m, i.e. 0.340 N per land.
+>
+> **The recommendation's stated reason does not survive the numbers.** §4.2 justifies Option A with *"the
+> slot **keys** the 90° angle and the insertion depth."* The slot keys the angle only through the play it
+> allows: a 0.30 mm nominal gap (0.9 mm slot − 0.6 mm tab) over a 6.0 mm insertion permits **2.86°** of
+> play, which at a 176 mm wing is **8.79 mm** of tip displacement — against **9.21 mm** for a 3° freehand
+> error. **That is 1.0× improvement: on alignment through this interface, the slot buys essentially
+> nothing.** It bounds the angle, it does not fix it. The wording above overstates the mechanism and is
+> left in place, unedited, so the correction is visible.
+>
+> **What the decision actually turns on** (sensitivity from the same script):
+> - **peel knockdown** — the 4× figure is an explicit, deliberately harsh *assumption*, not a
+>   measurement. Below ~1.2×, Option B approaches Option A on capacity. **This single number decides
+>   the joint question.**
+> - freehand angular error — below ~0.3°, the slot gains nothing even in principle.
+> - landing shock — above **~200 g**, Option B's margin reaches 1.0×.
+> - both options fail identically if the dominant risk is **hand-soldering four 176 mm wings at 90°**:
+>   then the fixture, not the joint, is the schedule risk. **That argument for Option A survives; the
+>   angle-keying argument does not.**
+>
+**Status: RESOLVED TOWARD OPTION A by ADR-048 (2026-10-07), which this branch merged on 2026-10-16.**
+Held pending (i) the wing-side land geometry (W1), (ii) a peel figure for this joint geometry, (iii) the
+JLCPCB cut-out delta read from a live quote. Until then the board stays as built (Option B) and **no
+drawing of this interface is to be issued to a fabricator**, because any such drawing would depict a
+geometry that is not decided.
+
+> ### 4.2.2 RECONCILIATION AGAINST ADR-048 (added 2026-10-16, after merging master)
+>
+> **ADR-048 is a LATER record than this one and it decides the question §4.2.1 left open.** It states:
+>
+> > "the land IS the interface; that one edge is where copper intentionally reaches the outline, on the
+> > **slot's centre line**"
+>
+> with the slot at **0.9 mm × 6.0 mm ±0.10**, a **keep-out of the slot outline + 1.0 mm**, and the
+> keep-outs realised as the footprint's `F.CrtYd` rectangle plus a dashed `Dwgs.User` slot rectangle.
+> **So Option A is the committed geometry**, and §4.2.1's OPEN status above is superseded on the
+> *direction*: the interface is a **routed slot**, not a plain-pad joint.
+>
+> **What this means for §4.2.1's other findings — they survive, and they matter more now, not less:**
+>
+> 1. **§4.2's stated reason for Option A is still falsified.** §4.2 said the slot *"keys the 90° angle"*.
+>    Measured (`tracker/hardware/trade_study_wing_joint.py`): the 0.30 mm nominal play over a 6.0 mm
+>    insertion permits **2.86°**, i.e. **8.79 mm** of wing-tip movement at 176 mm, against **9.21 mm**
+>    for a 3° freehand error — **1.0×. The slot does not key the angle to any useful tolerance.**
+>    **ADR-048 does not repeat that claim**, so this is not a contradiction with ADR-048 — it is a
+>    correction to *this* record that stands.
+> 2. **The anchor for Option A is the JOINT, and that is sound.** Fillet loaded in **shear** on two
+>    faces (wetted area 14.400 mm², capacity **172.8 N**) against **peel** on one edge (0.424 mm²,
+>    **2.65 N** after a 4× knockdown) — a **65×** difference. **ADR-048's keep-out and land-row
+>    representation is what makes the shear joint buildable**, so the decision is coherent on those
+>    grounds.
+> 3. **The alignment consequence remains an OPEN ENGINEERING RISK for whoever assembles it.** Option A
+>    is committed; the 2.86° of play is now a *fixturing* requirement on the four hand-soldered 176 mm
+>    wings, not an argument against the slot. **That belongs in the assembly procedure, not in this ADR.**
+>
+> **Not resolved here, and recorded rather than merged over:** ADR-048 dates **2026-10-07** and cites
+> ADR-046 §4.1's **22 × 22 mm** hub outline, while `hub_board_v9` is **70 × 70 mm** — the outline grew
+> afterwards. **ADR-048's interface numbers are current; its outline citation is historical.**
+>
+> **Still required before any interface drawing is issued:** the wing-side land geometry (**W1**), the
+> peel figure for this joint geometry, and the JLCPCB routed-cut-out cost delta.
+
 `TODO(unverified)`: the **JLCPCB line-item cost delta of the milled slot** is not derivable
 from any in-repo source — JLCPCB prices routed cut-outs by a routing line item and the
 operator must read the live quote. This ADR records the *shape* of the cost (a fab step and
@@ -413,7 +507,20 @@ unconnected items**.
 
 ## 8. Status of this text
 
-**Proposed.** The *design direction* (4-pin tab, hub-side series stack, V2-only wing RF,
-long-thin wing, two designs on one order) is an engineering consequence of the cited ADRs.
-**The text has not been accepted by a human.** Nothing in this ADR is to be read as an
-operator decision beyond what ADR-006/ADR-034/ADR-040 already record.
+**Proposed, with one section explicitly OPEN (§4.2.1).** The *design direction* (4-pin tab,
+hub-side series stack, V2-only wing RF, long-thin wing, two designs on one order) is an
+engineering consequence of the cited ADRs. **The text has not been accepted by a human.**
+Nothing in this ADR is to be read as an operator decision beyond what
+ADR-006/ADR-034/ADR-040 already record.
+
+**Amended 2026-10-16 — §4.2.1 added.** Measured against the built board, **the
+recommendation in §4.2 is not what exists**: `hub_board_v9` has no routed slot and its
+`J_W*` lands are `F.Cu`-only, i.e. it is Option B, while §4.2 recommends Option A. The
+numeric trade study in §4.2.1 also shows that the **stated justification for Option A —
+that the slot keys the 90° angle — does not hold**: the slot permits 2.86° of play
+(8.79 mm of wing-tip movement) against 9.21 mm freehand, a 1.0× improvement. The
+capacity argument (65× on conservative allowables) does hold, and the hand-assembly
+fixture argument survives. **The mechanical interface is therefore OPEN**, pending the
+wing-side land geometry (W1), a peel figure for this joint geometry, and the JLCPCB
+cut-out cost delta. Until it closes, **the board stays as built and no interface drawing
+is to be issued to a fabricator.**

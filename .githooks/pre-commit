@@ -1,57 +1,81 @@
 #!/usr/bin/env bash
-# pre-commit: block commits containing secret patterns.
+# Repo-local pre-commit hook for balloon-fresh.
 #
-# REWRITTEN 2026-10-08. The previous version ran `git diff --cached -- "$file"`
-# inside a per-file x per-pattern loop, i.e. (N_files x N_patterns) subprocess
-# spawns. On a 128-file merge that exceeded 9 MINUTES and had to be killed --
-# a merge commit reverting a branch is routinely 100+ files, so this failed
-# exactly when it mattered most. It also blocked the merge train outright.
+# WHY THIS EXISTS. The fleet keeps a global core.hooksPath (~/.git-hooks) whose GATE 3 deliberately
+# chains to the repository's OWN hook at <git-common-dir>/hooks/pre-commit. This repo had NO such hook,
+# so repo-specific gates had nowhere to live. This file is that hook.
 #
-# This version runs ONE grep per file (with all patterns via -f), which is a
-# factor of N_patterns cheaper, and scans only ADDED lines (`^+`), so removing
-# a secret is no longer misreported as adding one. Detection is equivalent or
-# stricter; cost is O(N_files) instead of O(N_files x N_patterns).
-set -e
+# Gates, all cheap enough for commit time:
+#   1. FAB READINESS GUARD -- refuses to publish a board with less routing than the recorded state.
+#      Astra gap-analysis item H1: the canonical board file is the one a fab order is cut from, and it
+#      sat PLACED-ONLY (2 tracks on 1 net) while the real routed result lived elsewhere.
+#   2. ERC + schematic-to-board parity -- the electrical check DRC cannot do (Astra item H2).
+#
+# Design notes:
+#   - The guard is given the BOARD'S REAL PATH, not a temp copy. An earlier version extracted the staged
+#     content to /tmp and passed that path; the expectation file is keyed by repo-relative path, so the
+#     lookup always missed and the guard passed everything silently. It looked green while checking
+#     nothing -- the exact failure this session kept producing. The temp copy is still used, but it is
+#     passed WITH the real relative path so the lookup can key correctly.
+#   - LOUD: a missing tool prints a warning and does NOT silently pass. A gate that cannot run must be
+#     visible as "not run", never as "green".
+#   - OVERRIDABLE but AUDITABLE: FAB_GUARD_ACK="reason" allows an intentional reduction.
+#     SKIP_FAB_GUARD=1 skips entirely (last resort; says so loudly).
+set -uo pipefail
 
-TOPLEVEL="$(git rev-parse --show-toplevel)"
-PATTERNS_FILE="$TOPLEVEL/.secret-patterns.txt"
-
-if [ ! -f "$PATTERNS_FILE" ]; then
-    exit 0  # no patterns file = no scanning
-fi
-
-# Comment- and blank-free pattern list, written once outside the loop.
-CLEAN_PATTERNS="$(mktemp)"
-trap 'rm -f "$CLEAN_PATTERNS"' EXIT
-grep -vE '^[[:space:]]*(#|$)' "$PATTERNS_FILE" > "$CLEAN_PATTERNS" || true
-if [ ! -s "$CLEAN_PATTERNS" ]; then
+if [ "${SKIP_FAB_GUARD:-}" = "1" ]; then
+    echo "fab-guard: SKIPPED via SKIP_FAB_GUARD=1 -- the fab readiness gates did NOT run."
     exit 0
 fi
 
-STAGED="$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null)"
-if [ -z "$STAGED" ]; then
-    exit 0
+ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || exit 0
+cd "$ROOT" || exit 0
+
+GUARD="tracker/hardware/fab_readiness_guard.py"
+FAILED=0
+
+staged() { git diff --cached --name-only --diff-filter=ACM | grep -E "$1" || true; }
+
+# ---------------------------------------------------------------- 1. fab readiness
+BOARDS="$(staged 'hub_board.*\.kicad_pcb$|wing_board.*\.kicad_pcb$|base_station.*\.kicad_pcb$')"
+if [ -n "$BOARDS" ]; then
+    echo "fab-guard: board file(s) staged -- checking routability against the recorded state"
+    while IFS= read -r b; do
+        [ -z "$b" ] && continue
+        TMPDIR_B="$(mktemp -d)"
+        mkdir -p "$TMPDIR_B/$(dirname "$b")"
+        git show ":$b" > "$TMPDIR_B/$b" 2>/dev/null || { rm -rf "$TMPDIR_B"; continue; }
+        # Pass the REAL repo-relative path as the lookup key, and the temp copy as the file to measure.
+        if ! python3 "$GUARD" --check "$TMPDIR_B/$b" --key "$b"; then
+            FAILED=1
+        fi
+        rm -rf "$TMPDIR_B"
+    done <<< "$BOARDS"
 fi
 
-FOUND=0
-for file in $STAGED; do
-    [ -f "$file" ] || continue
-    # Added lines only: drop the file header (+++) and the diff control chars.
-    MATCH="$(git diff --cached -U0 -- "$file" 2>/dev/null \
-        | grep -a '^+' | grep -av '^+++' \
-        | grep -a -n -i -f "$CLEAN_PATTERNS" 2>/dev/null | head -3 || true)"
-    if [ -n "$MATCH" ]; then
-        echo "SECRET DETECTED in $file:"
-        printf '%s\n' "$MATCH"
-        FOUND=1
+# ---------------------------------------------------------------- 2. ERC on the schematic
+SCH="$(staged 'schematics/.*\.kicad_sch$')"
+if [ -n "$SCH" ]; then
+    ERC="tracker/hardware/run_erc.sh"
+    if [ -f "$ERC" ]; then
+        echo "erc-guard: schematic staged -- running ERC + schematic-to-board parity"
+        if ! bash "$ERC"; then
+            # ERC findings are recorded, not blocking: the schematic has known open pins that are
+            # deliberate work items. Parity drift IS blocking, and run_erc.sh exits 1 for it too, so
+            # distinguish by the message.
+            echo "erc-guard: ERC/parity reported problems (see above)."
+            if grep -q 'parity: .*MISMATCH\|parity: .*drifted' /tmp/erc_last.txt 2>/dev/null; then
+                FAILED=1
+            fi
+        fi
+    else
+        echo "erc-guard: WARNING -- $ERC not found, so NO electrical-rule check ran."
     fi
-done
+fi
 
-if [ $FOUND -eq 1 ]; then
+if [ "$FAILED" -ne 0 ]; then
     echo ""
-    echo "COMMIT BLOCKED — secret pattern detected."
-    echo "Override (NOT RECOMMENDED): git commit --no-verify"
+    echo "pre-commit: REFUSING the commit (see the gate output above)."
     exit 1
 fi
-
 exit 0

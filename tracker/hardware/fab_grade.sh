@@ -27,8 +27,43 @@ BOARD="${1:?usage: fab_grade.sh <board.kicad_pcb> [outdir]}"
 OUT="${2:-$HERE/output/fabgrade}"
 KRT="${KRT:-$HOME/tools/KiCadRoutingTools}"
 if [ ! -d "$KRT/py_router" ]; then KRT="$HOME/repos/KiCadRoutingTools"; fi
-PY="$KRT/.venv/bin/python"
-[ -x "$PY" ] || PY=python3
+# Some hosts keep the router outside $HOME (this machine: /data/repos/KiCadRoutingTools). Search
+# before giving up -- but do NOT silently accept a path that does not exist.
+if [ ! -d "$KRT/py_router" ]; then
+    for c in /data/repos/KiCadRoutingTools /opt/KiCadRoutingTools /srv/KiCadRoutingTools; do
+        [ -d "$c/py_router" ] && { KRT="$c"; break; }
+    done
+fi
+
+# FAIL LOUDLY if the router is not where we think it is. The previous version assigned the fallback
+# path without checking it existed, then fell through to a bare `python3` -- so a MISSING ROUTER
+# surfaced as "ROUTE FAILED", which reads like a routing problem and is not. Same defect class as commit
+# 80723f90 ("a path that does not exist; publish now REFUSES instead of silently no-oping"), which
+# fixed this for the builder but not for this script.
+if [ ! -d "$KRT/py_router" ]; then
+    echo "PREFLIGHT FAIL: no KiCadRoutingTools found." >&2
+    echo "  looked in: \$KRT($KRT), \$HOME/tools, \$HOME/repos, /data/repos, /opt, /srv" >&2
+    echo "  expected a 'py_router/' directory. Set KRT=/path/to/KiCadRoutingTools." >&2
+    echo "  NOT falling through to a bare python3: that turns a missing tool into a fake routing" >&2
+    echo "  failure. Install or point KRT at the router, then re-run." >&2
+    exit 2
+fi
+
+# Pick an interpreter that actually CAN run the router. KRT venvs vary: on this host the .venv has a
+# working numpy/scipy but NO pcbnew, while the system python3 has pcbnew. Verify by importing, and
+# check the system one first because the router needs pcbnew to read a board at all.
+PY=""
+for cand in "$KRT/.venv/bin/python" python3; do
+    command -v "$cand" >/dev/null 2>&1 || [ -x "$cand" ] || continue
+    if "$cand" -c "import pcbnew" >/dev/null 2>&1; then PY="$cand"; break; fi
+done
+if [ -z "$PY" ]; then
+    echo "PREFLIGHT FAIL: no interpreter with pcbnew could be found." >&2
+    echo "  tried: $KRT/.venv/bin/python, python3. The router cannot read a board without pcbnew." >&2
+    exit 2
+fi
+echo "    KRT   : $KRT"
+echo "    PY    : $PY"
 
 # The FROZEN ruleset, and the project the board must be graded against.
 RULES="$HERE/jlcpcb-s1-frozen.kicad_dru"

@@ -1,6 +1,9 @@
 # U4 (SX1280) WIRING REWORK — task brief
 
-**Repo:** `balloon-fresh`, worktree `/home/c08r4d0r/worktrees/v9-route`
+**Repo:** `balloon-fresh`, worktree `/home/c08r4d0r/worktrees/u4-rewire`, branch `pr/u4-rewire`
+**CORRECTED 2026-10-15:** the brief said worktree `v9-route` on branch `v9-route`. Both were WRONG — the
+manager tree was on `feat/v9-hub-route`, and the worker's own clone is `u4-rewire` on `pr/u4-rewire`
+(`wt/*` renamed because AGENTS.md D-135 requires the `pr/` prefix and the pre-push hook enforces it).
 **Branch:** `v9-route` (push to `github` → `master`, and `ngit` → `main`)
 **File:** `tracker/hardware/schematics/flight_board/v9_flight.kicad_sch`
 **Authority:** `docs/fab/SX1280-WIRING-SPEC.json` (+ `.md`) — every connection, already decided.
@@ -90,11 +93,13 @@ definitions.**
 | `R15` | 0 Ω | `C17168` | `VBAT` ↔ `VBAT_IO` |
 | `L4` | 15 µH | `C2826623` | `DCC_SW` ↔ `V_DCC` |
 | `C9` | 470 nF | `C47339` | `V_DCC` ↔ GND |
-| `Q1` | 52 MHz | `C7502106` | `XTA`/`XTB` + 2× GND (4-pad) |
+| `Q1` | 52 MHz | `C7502106` | **`Device:Crystal_GND24`**: pin **1→`XTA`**, pin **3→`XTB`**, pins **2 & 4→GND**. CORRECTED 2026-10-15 — the original brief said `p1→XTA, p2→XTB, p3→GND, p4→GND`, which is WRONG; pads 1 and 3 are the electrodes and 2 and 4 are ground (refuted by two independent readings: bounding-box geometry of the KiCad footprint AND a zoomed read of vendor Figure 15-1). |
 
 **RF network** (7 parts, values now known — `docs/fab/SX1280-RF-SECTION.md`):
-`C0` 0.8 pF, `C1`/`C2` 1.2 pF, `C3` 100 pF, `C4` 0.5 pF, `L1` 3.0 nH, `L2` 2.5 nH
-Topology: `RFIO → C0↓ → L1 → C1↓ → (L2 ∥ C4) → C2↓ → C3 → ANT5 (U.FL)`
+`C0` 0.8 pF, `C1`/`C2` 1.2 pF, `C3` 100 pF, `C7` 0.5 pF, `L1` 3.0 nH, `L2` 2.5 nH
+**CORRECTED 2026-10-15: the vendor's `C4` is added as `C7`.** This board ALREADY has a `C4` (a GNSS decoupling cap), so reusing the designator collides — gate D would fail and one part would be silently lost. Vendor-designator map: `C0→C0, C1→C1, C2→C2, C3→C3, C4→C7, L1→L1, L2→L2`.
+Topology: `RFIO → C0↓ → L1 → C1↓ → (L2 ∥ C7) → C2↓ → C3 → /ANT2_2G4_RANGE`
+**CORRECTED 2026-10-15: there is NO `ANT5` part.** `ANT2_2G4_RANGE` is the existing antenna net and ADR-108 R1 already re-points ANT2 at the SX1280 RFIO, so the RF chain terminates on the EXISTING `ANT2` `U.FL` connector. Do not invent a connector.
 
 ## THREE TRAPS — do not walk into these
 
