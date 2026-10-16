@@ -35,7 +35,7 @@ The paste argues on the axis **cost-per-balloon**. Our problem is not that axis.
 |---|---|---|
 | flights | "blowing through five budget balloons" | **one flight, one envelope** |
 | deciding variables | unit price, replacement rate | **dry mass** and **leak rate** |
-| cost delta | $25 vs ~$2 = "Yokohama hurts" | $23 total, i.e. **$0.47 per gram of envelope** |
+| cost delta | $25 vs ~$2 = "Yokohama hurts" | **$10 total** — and the paste's $25 is ~2× too high (see §3) |
 
 The envelope is **88 %** of our non-payload mass:
 
@@ -48,9 +48,11 @@ The envelope is **88 %** of our non-payload mass:
 
 *(non-payload = envelope + 4.17 g helium + 2.20 g attachments, for a 20 g payload at 6 g free lift.)*
 
-**So a $23 delta buys the single largest term in the budget.** At `$25 / 48.6 g` the Yokohama costs
-**$0.51 per gram of envelope** — and the alternative saves **$0.47 per gram**. That is not a
-trade-off; it is rounding error against the risk of losing the entire flight.
+**So a ~$10 delta buys the single largest term in the budget.** At the manufacturer's live price of
+**$12.00 per balloon** (see §3) the Yokohama costs **$0.25 per gram of envelope**. That is not a
+trade-off; it is rounding error against the risk of losing the entire flight — and the paste's
+$25 figure overstated the price by roughly **2×**, in the direction that made our already-correct
+choice look expensive.
 
 ## 2. The paste's own rationale contradicts its own recommendation
 
@@ -75,32 +77,100 @@ not: SBS-13 is a superpressure film, the Yokohama 32″ is a party/scientific sp
 Every "our" figure is already sourced in this repo. Every "unverified" is a paste figure we did
 not need, and say so rather than absorbing it.
 
-| paste claim | verdict |
-|---|---|
-| Material should be metallized BoPET / Mylar / Cymylar | structural — holds for a *superpressure* design, not for ours |
-| Film must be inelastic, ~1/1000 in | structural — **contradicts** its own Yokohama pick |
-| Yokohama dry weight ~48.6 g | **REAL** — matches our measured community value |
-| Yokohama costs ~$25 / $250 per 10-pack | UNVERIFIED |
-| Yokohama volume ~0.27–0.50 m³ | **INFLATED** — ours is 240–270 L = **0.24–0.27 m³** |
-| Yokohama floats 40,000–45,000 ft | UNVERIFIED |
-| Clear Cymylar floats 35,000–38,000 ft | UNVERIFIED |
-| Clear Cymylar costs $1.50–2.00 | UNVERIFIED |
-| Clear Cymylar weighs 15–25 g | UNVERIFIED |
-| Yokohama leak ~1/6 of cheap film, "SBS-13 class" | UNVERIFIED |
-| SBS-13 costs ~$165 | UNVERIFIED |
-| "36-inch to 60-inch" Yokohama-class foil envelopes exist | **FABRICATED** — the manufacturer's range is **7/10/14/20/24/32 inch**; **there is no 36″ Yokohama** |
-| Three layers make cheap film less reliable | modelling claim — see §4 |
+Every row below was checked against a **source that was actually fetched** (manufacturer
+`products.json`, product JSON-LD, Amazon brand store, EOSSP-2 flight logs, QRP Labs PDFs,
+Wayback CDX). Search engines were bot-walled; Marginalia + direct fetches were used instead.
 
-**The one claim it got right is the measured mass** (48.6 g). Everything numeric it adds is either
-unverified or wrong, and the one structural error (a 36″ Yokohama) is the kind that would mis-size
-a design.
+| paste claim | verdict | the fetched figure |
+|---|---|---|
+| Material should be metallized BoPET / Mylar / Cymylar | structural — holds for a *superpressure* design, **not ours** | — |
+| Film must be inelastic, ~1/1000 in | structural — **contradicts** its own Yokohama pick | Yokohama page: "Made from film that has superior **stretchability**" |
+| Yokohama dry weight ~48.6 g | **REAL** — matches our measured community value | KevWal/Balloon-Info |
+| Yokohama costs ~$25 ea / ~$250 per 10-pack | **FABRICATED, ~2× high** | live `products.json`, JSON-LD: `"price":120.0` per **10-pack** → **$12.00/balloon** (with valve $130) |
+| Yokohama volume ~0.27–0.50 m³ | **INFLATED** | ours: 240–270 L = **0.24–0.27 m³** |
+| Yokohama floats 40,000–45,000 ft, "44,000+" | REAL, **community report only — not a spec** | KevWal: 7 g payload → 13.5 km (≈44,300 ft) |
+| Clear Cymylar floats 35,000–38,000 ft, "days to weeks" | **REFUTED BY A REAL FLIGHT** | EOSSP-2: 60″ Cymylar → **45,000 ft**, last report 46,522 ft **after 299 days aloft**, 19 circumnavigations |
+| Clear Cymylar costs $1.50–2.00 | UNVERIFIABLE-WITHOUT-PROBE | no source ties that price to a pico-size envelope |
+| Clear Cymylar weighs 15–25 g | **FABRICATED** | EOSS: 60″ = **70.75 g**; Chinese-clear 36″ = **38 g** |
+| Yokohama leak ~1/6 of cheap film, "SBS-13 class" | UNVERIFIABLE — no leak datum exists | Yokohama claims only generic "high-barrier materials" for a *different* line |
+| SBS-13 costs ~$165 | **FABRICATED — and SBS-13 is not a film** | it is **Scientific Balloon Solutions' finished super-pressure balloon** ("machine seamed … 43k–45k ft … 1mil"). Wayback: **$139** (2016) → **$189** (2017-02) → **$129** (2017-11/2018); today quote-only. **$165 in no snapshot.** |
+| "Cymylar" is a misspelling | **WRONG — it is a live brand** | Amazon brand store `CYMYLAR` (175 results); sells metallized party foil |
+| "36-inch to 60-inch" Yokohama envelopes | **FABRICATED** | manufacturer range is **7/10/14/20/24/32 inch**; there is **no 36″ Yokohama** |
+| "38,000–43,000 ft" (its own 1st answer) | internally inconsistent | matches neither EOSS (45 k) nor KevWal (13.5 km) |
+| Three layers make cheap film less reliable | **FALSE for its own stated hardware** | see §4 — it is a *sizing* or *common-mode* effect, not cheapness |
 
-## 4. "Three layers" — the paste is right, and we already comply
+**What survives contact:** the measured mass (48.6 g) and the stretched volume (~0.17 m³, QRP
+Labs' own measuring rig). **Everything else numeric is wrong, unverifiable, or a category error**
+— and two of them (the 36″ Yokohama, "SBS-13 film") would mis-size a design or send a purchase
+to a product that does not exist in that class.
 
-The paste's substantive contribution: **a second/third envelope does not behave as parallel
-redundancy, because a failed envelope keeps its dry mass** rather than shedding it.
+## 4. "Three layers" — the paste got the mechanism wrong, and the conclusion wrong
 
-**Our arithmetic agrees, and quantifies it:**
+The paste's substantive claim: **a second/third envelope does not behave as parallel redundancy,
+because a failed envelope keeps its dry mass**, so "adding a third layer makes cheap film *less*
+reliable".
+
+A consultant pass modelled this rigorously (NIST/SEMATECH e-Handbook §8.1 + Monte-Carlo to
+<0.2 %). The verdict is that the paste **reaches a real effect by a wrong route, then states it
+for hardware where it does not hold**.
+
+### 4a. Its formalism is mislabelled
+
+- **The state space is fine.** `{n … 0}` *is* a legitimate absorbing chain. Nothing about counting
+  envelopes is illegitimate.
+- **The Markov *property* lives in the holding times, not the state labels.** With non-exponential
+  per-envelope life the process is **not a CTMC** — the correct name is a **semi-Markov process**
+  (Markovian only at the failure epochs). Fix: **phase-type / Coxian expansion**, folding age into
+  extra pseudo-states, which recovers an honest CTMC on an expanded state space.
+- **"Markov chains assume exponential failure rates" is right for continuous-time, false for
+  discrete-time chains**, and misapplied here: the objection is about holding-time distributions.
+- **The dead-weight point is a REWARD/drift claim** (`Λ(k) = k·B − W_tot`), a separate layer from
+  the Markov property. The paste stacks the two as if one followed from the other. It does not.
+
+### 4b. The correct deciding condition
+
+With a failed envelope **retaining** its mass (the paste's premise), the lift needed to buy
+redundancy grows **quadratically**, and a third envelope is net-harmful past
+
+> **`m* = (2B − P) / 3`**  — equivalently, required total lift `n²m + nP` (retained) vs `n(m+P)` (shed).
+
+With a **shedding** mechanism the cost is linear and **redundancy never backfires**.
+
+### 4c. Applied to OUR hardware — and it confirms our decision
+
+| | envelope dry `m` | gross lift `B` | boundary `m*` | in backfire regime? |
+|---|---|---|---|---|
+| **us (Yokohama 32″)** | **48.6 g** | **56.6 g** | **31.1 g** | **YES — m > m\*** |
+| the paste's hypothetical | 18 g | 110 g | 65 g | no — m ≪ m* |
+
+**Our hardware genuinely IS in the backfire regime**, so a third envelope is net-harmful — and the
+consultant's formula arrives at that **independently of the mass-allowance argument in §4/§1**.
+Two different calculations, same conclusion.
+
+**But note why:** our envelope is a heavy high-barrier sphere giving only **8 g of maximum free
+lift**. There is almost no margin for a second skin. The paste's hypothetical was *light film with
+huge lift headroom* — the opposite situation. **The paste's own numbers are NOT in the backfire
+regime**, so its headline claim ("triple makes cheap film less reliable") is **false for the
+hardware it was describing**. Where a third layer genuinely fails there, the cause is
+**sizing** (`(B − m) ≤ m + P`) or **common mode** — neither of which is the mechanism it named.
+
+Its sign is also backwards on its own argument: for **infant-mortality** film (Weibull β < 1) the
+redundancy payoff is **higher**, not lower (×2.09 at β = 0.7 vs ×1.83 at β = 1.0). A single
+2-parameter Weibull **cannot** produce a bathtub at all — that needs a mixture of a weak (β<sub>1</sub> < 1)
+and a healthy (β<sub>2</sub> > 1) subpopulation.
+
+### 4d. The caveat the paste MISSED — and it is the strong one
+
+**Common mode.** Three layers sharing one **neck, weld, valve or tether** have **one point of
+failure**. Marshall–Olkin / beta-factor: `R_sys = (1−q)·[1 − (1−p)^N]`. Even at `q = 0.9` the
+ordering S1 < S2 < S3 holds but the **absolute gain collapses**.
+
+> **Redundancy cannot fix a shared cause — and for a pico balloon the neck and weld ARE shared
+> causes.** That is the legitimate reason not to stack envelopes. It is not the reason the paste
+> gave.
+
+Our arithmetic agrees and is simpler: each extra envelope adds **48.6 g of dry mass** against a
+**6 g free-lift allowance** — **8.1× the allowance itself**.
 
 | n | envelope dry | non-payload | extra lift needed | verdict |
 |---|---|---|---|---|
@@ -108,16 +178,9 @@ redundancy, because a failed envelope keeps its dry mass** rather than shedding 
 | 2 | 97.2 g | 103.57 g | 48.6 g | exceeds the 85 g community ceiling |
 | 3 | 145.8 g | 152.17 g | 97.2 g | exceeds it further |
 
-A second envelope costs **48.6 g against a 6 g free-lift allowance** — **8.1× the allowance
-itself**. In the usual parallel-reliability formula redundancy is cheap because a failed unit drops
-out; here it cannot, because the plastic stays attached. So the paste is correct on the
-mathematics — and we fly a **single** envelope, so the conclusion changes nothing.
-
-Note this is also consistent with our own measurement: the community's free-lift band is 5–7 g and
-a Yokohama gives ~8 g max free lift. There is no margin to carry a spare skin.
-
-*(The formalism behind this — whether "number of sealed envelopes" is a Markov state, and the
-correct model — is treated in the consultant pass; see §6.)*
+**Bottom line on redundancy:** the paste's *conclusion* (do not stack) is right for us, its
+*mechanism* is mislabelled, and its *stated reason* is false for its own numbers. Ours is right on
+both the conclusion and the grounds.
 
 ## 5. What the paste CANNOT see: our legal constraint
 
@@ -164,24 +227,32 @@ quantity.** A correct conclusion reached by a wrong argument is not a safe thing
 because it only looked attractive under a threshold reading that does not apply to us. The
 envelope stays the Yokohama 32″.
 
-> `TODO(unverified)`: the German statutory claims above are carried from the sibling analysis,
-> which sourced them on **2026-10-07**. A consultant pass re-verifies § 20 Abs. 1 Nr. 6, § 21
-> Abs. 1 Nr. 4 lit. b and the SERA text against the live consolidated statutes; correct this
-> section if it disagrees.
+**Provenance:** these German statutory claims are carried from the sibling analysis, which
+sourced them from the consolidated statutes on `gesetze-im-internet.de` and the EU instruments on
+EUR-Lex on **2026-10-07**. A third consultant pass is re-verifying § 20 Abs. 1 Nr. 6, § 21 Abs. 1
+Nr. 4 lit. b and the SERA Anlage-2 text against the **live** consolidated statutes; this section
+is corrected if it disagrees, and is marked below until it reports.
 
-## 6. Consultant passes
+## 6. Consultant passes — delivered
 
-Two independent passes were dispatched, each with pinned toolsets (`terminal`, `web`) and the
-requirement to cite a fetched URL per load-bearing claim:
+Two independent passes, each with pinned toolsets (`terminal`, `web`) and a requirement to cite a
+**fetched** URL per load-bearing claim. Both completed and both **corrected this document**:
 
-1. **Claim verification** — the cost / altitude / volume / leak-rate figures above.
-2. **Reliability mathematics** — whether the paste's Markov-chain framing is statistically sound
-   (is "number of sealed envelopes" even a Markov state?), whether the bathtub/Weibull reasoning
-   is correct, and whether the dead-weight conclusion follows from a correct model.
+| pass | covered | outcome |
+|---|---|---|
+| claim verification | cost / altitude / volume / leak / material identity | **corrected us** on the Yokohama price (we carried the paste's $25; the live manufacturer figure is **$12**) and on "Cymylar" (a **real brand**, not a misspelling). **Refuted the paste** on budget-film altitude (EOSSP-2: 299 days to 46,522 ft), on SBS-13 (not a film; $165 in no snapshot), and on the 15–25 g weight. |
+| reliability mathematics | is the Markov framing sound; does the dead-weight conclusion follow | **Corrected our framing** (semi-Markov, not "the chain is wrong") and **refuted the paste's conclusion** for its own hardware, while **independently confirming ours** (§4c). Supplied the strongest caveat — **common mode** (§4d). |
 
-Their verdicts are folded in below when they land. **Where they disagree with this document, the
-consultant verdict wins and this document is corrected** — the point of the pass is to catch our
-own error, not to confirm it.
+Provenance note: the claim pass fetched the manufacturer's live `products.json` and product
+JSON-LD directly (IPv4 forced — several hosts resolved IPv6-only), used **Marginalia** plus direct
+vendor/PDF fetches because every major search engine was bot-walled, and used **Wayback CDX** for
+the SBS-13 price history. The reliability pass used the **NIST/SEMATECH e-Handbook §8.1** for the
+bathtub/Weibull/semi-Markov formalism, with every number reproduced by Monte-Carlo against closed
+forms.
+
+**Where they disagreed with this document, they won and the document was corrected** — which is
+the point of the pass. The one place we held our ground: the mass-allowance argument in §1/§4,
+which the reliability pass did not cover and which reaches the same conclusion independently.
 
 ## 7. Recommendation
 
@@ -191,9 +262,11 @@ own error, not to confirm it.
 Reasons, in order of weight:
 
 1. **The decision does not depend on any number the paste supplies.** Our envelope choice is
-   already the paste's top recommendation; the paste's numeric additions are unverified or wrong.
-2. **Its cost framing is off-axis for us.** We fly one envelope once; the envelope is 88 % of
-   non-payload mass, and $23 is $0.47/g.
+   already the paste's top recommendation, and of its numeric additions only the measured mass and
+   the stretched volume survive verification — the rest are wrong or category errors (§3).
+2. **Its cost framing is off-axis for us, and its price was wrong.** We fly one envelope once; the
+   envelope is 88 % of non-payload mass, and at the manufacturer's real price the Yokohama is
+   **$12, i.e. $0.25 per gram** — the paste's $25 overstated it ~2× (§1, §3).
 3. **Its own rationale contradicts its own pick** (inelastic foil vs a stretchable laminate).
 4. **Its redundancy conclusion is correct and we already comply** (single envelope; the
    dead-weight arithmetic is quantified in §4).
@@ -207,13 +280,18 @@ Reasons, in order of weight:
 - A **measured** pinhole/infant-mortality rate on the Yokohama lot we own.
 - A resolution of the German threshold reading that makes total mass binding — then the 10.6 g
   envelope-mass saving becomes worth pricing against the leak risk.
+- Evidence that the **neck/weld** is *not* the dominant failure mode. If it is (and it is the
+  standard pico-balloon failure), then stacking cannot help by construction (§4d), and effort
+  belongs on the single envelope's seal, not on its count.
 
 ## 8. Open items
 
 1. Every paste cost/altitude figure is `TODO(unverified)` — deliberately not absorbed, because
    the decision does not turn on them.
-2. "Cymylar" is not resolved as a product or brand name; it may be a misspelling of Mylar/Cymer.
-   Only matters if this ever becomes a live option.
+2. ~~"Cymylar" is not resolved as a product or brand name.~~ **Resolved: it is a live brand**
+   (Amazon brand store `CYMYLAR`, 175 results, metallized party foil). And a 60″ Cymylar flew
+   **299 days / 19 circumnavigations to 46,522 ft** (EOSSP-2) — a *better* documented record than
+   the paste credited it with. Worth pricing only if the mass-threshold question ever reopens.
 3. ~~The German threshold reading decides whether a lighter envelope is worth the leak risk.~~
    **Resolved as a non-question**: the paste's answer applies US law to a German launch (§5b). A
    consultant pass re-verifies the German statutes.

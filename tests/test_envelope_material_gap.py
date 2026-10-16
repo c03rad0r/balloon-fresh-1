@@ -62,9 +62,16 @@ def test_non_payload_total_matches_the_repo_table(m: ModuleType) -> None:
 
 
 def test_cost_per_gram_is_small_relative_to_flight_value(m: ModuleType) -> None:
-    """$25 for 48.6 g -> under $1/g. The paste's $25-vs-$2 framing is a rounding error."""
+    """$12 for 48.6 g -> ~$0.25/g. The paste's $25 framing overstated it ~2x."""
     cpg = m.cost_per_gram_of_envelope(_env(m, YOKOHAMA))
-    assert cpg is not None and cpg < 1.0
+    assert cpg is not None and cpg < 0.5
+
+
+def test_yokohama_price_is_the_manufacturer_figure_not_the_pastes(m: ModuleType) -> None:
+    """Live products.json: $120 per 10-pack = $12/balloon. The paste said ~$25."""
+    y = _env(m, YOKOHAMA)
+    assert y.cost_usd == pytest.approx(12.0)
+    assert y.cost_usd < 25.0, "the paste's $25 was ~2x too high, in our favour"
 
 
 # --- 2. the redundancy arithmetic -------------------------------------------
@@ -150,3 +157,42 @@ def test_our_design_passes_the_500g_figure(m: ModuleType) -> None:
 def test_the_paste_cited_the_wrong_jurisdiction(m: ModuleType) -> None:
     assert m.PASTE_CITED_JURISDICTION == "US (FAA Part 101 / 14 CFR 101)"
     assert m.OUR_JURISDICTION == "DE (LuftVO + SERA)"
+
+
+# --- 6. the reliability crossover, applied to OUR hardware -------------------
+def test_our_hardware_is_in_the_backfire_regime(m: ModuleType) -> None:
+    """m = 48.6 g > m* = (2B-P)/3 = 31.07 g.
+
+    This independently confirms the n=2/n=3 infeasibility on grounds that do not
+    depend on the mass-allowance argument in section 1.
+    """
+    assert m.in_backfire_regime() is True
+    assert m.backfire_boundary_g() == pytest.approx(31.07, abs=0.05)
+
+
+def test_the_pastes_own_hypothetical_is_NOT_in_the_backfire_regime(m: ModuleType) -> None:
+    """m=18 g, B=110 g -> m*=65 g. So the paste's 'triple backfires' claim is
+    FALSE for the hardware it describes -- it is a sizing failure, not cheapness."""
+    m_star = (2 * 110.0 - 25.0) / 3.0
+    assert m_star == pytest.approx(65.0, abs=0.05)
+    assert 18.0 < m_star, "the paste's m is far below its own boundary"
+
+
+def test_backfire_boundary_rises_with_gross_lift(m: ModuleType) -> None:
+    """Sanity: a stronger envelope tolerates heavier redundancy."""
+    assert m.backfire_boundary_g(B=200.0) > m.backfire_boundary_g(B=60.0)
+
+
+def test_common_mode_caps_redundancy(m: ModuleType) -> None:
+    """Marshall-Olkin: a shared cause caps the gain; it cannot be fixed by count."""
+    p_one = 0.9
+    indep = 1 - (1 - p_one) ** 3
+    capped = m.system_reliability_common_mode(p_one, 3, q=0.1)
+    assert capped < indep
+    assert capped == pytest.approx(0.9 * indep, abs=1e-9)
+    # even a strong shared cause leaves the ordering intact but collapses the gain
+    assert m.system_reliability_common_mode(p_one, 3, 0.9) > m.system_reliability_common_mode(p_one, 2, 0.9)
+
+
+def test_common_mode_note_names_the_shared_cause(m: ModuleType) -> None:
+    assert "neck" in m.COMMON_MODE_NOTE and "weld" in m.COMMON_MODE_NOTE

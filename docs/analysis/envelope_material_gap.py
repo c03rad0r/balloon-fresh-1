@@ -31,10 +31,10 @@ class Envelope(NamedTuple):
 
 # --- OUR sourced figures (docs/analysis/pico-balloon-envelope-mass.md) --------
 OUR_ENVELOPES = (
-    Envelope("Yokohama 32in new (valveless)", 48.6, 270.0, 25.0,
-             "COMMUNITY scale value, KevWal/Balloon-Info (measured)"),
-    Envelope("Yokohama 32in old (valved)", 41.0, 270.0, 25.0,
-             "same source, README row 'Yoko 32 Old'"),
+    Envelope("Yokohama 32in new (valveless)", 48.6, 270.0, 12.0,
+             "MFR live products.json $120/10-pack; mass COMMUNITY-measured"),
+    Envelope("Yokohama 32in old (valved)", 41.0, 270.0, 13.0,
+             "MFR live products.json $130/10-pack with valve"),
     Envelope("Qualatex Silver 36in", 37.0, 120.0, None,
              "COMMUNITY table, 2016/2018-08"),
     Envelope("Qualatex Silver 36in (2017-04)", 33.0, 120.0, None,
@@ -67,6 +67,40 @@ ATC_THRESHOLD_COUNTS = "Ballonhuelle und Ballast (envelope + ballast)"
 GERMAN_ATC_INSTRUMENT = "LuftVO sec 21(1) no. 4 lit. b"
 
 PASTE_CITED_JURISDICTION = "US (FAA Part 101 / 14 CFR 101)"
+
+# --- reliability: the consultant's crossover, applied to OUR hardware --------
+# Consultant verdict (NIST e-Handbook + Monte-Carlo): with a FAILED envelope
+# RETAINING its dry mass (the paste's own premise), the lift needed to buy
+# redundancy grows ~n^2, and a 3rd envelope is net-harmful past the boundary
+#     m* = (2B - P)/3
+# where B is one envelope's gross lift, P the payload, m the envelope dry mass.
+M_YOKOHAMA_G = 48.6
+P_PAYLOAD_G = 20.0
+MAX_FREE_LIFT_G = 8.0          # community datum for a Yoko 32in
+B_GROSS_G = MAX_FREE_LIFT_G + M_YOKOHAMA_G   # free lift + carrying its own mass
+
+
+def backfire_boundary_g(B: float = B_GROSS_G, P: float = P_PAYLOAD_G) -> float:
+    """Envelope mass above which a third envelope is net-harmful (weight retained)."""
+    return (2.0 * B - P) / 3.0
+
+
+def in_backfire_regime(m: float = M_YOKOHAMA_G) -> bool:
+    return m > backfire_boundary_g()
+
+
+# --- common mode (the caveat the paste MISSED) ------------------------------
+# R_sys = (1-q) * [1 - (1-p)^N], Marshall-Olkin / beta-factor. A shared neck, weld,
+# valve or tether defeats every layer at once; redundancy cannot fix it.
+COMMON_MODE_NOTE = (
+    "a shared neck/weld/valve/tether is ONE point of failure; three layers cannot "
+    "survive it, which is the legitimate reason not to stack -- not cheapness"
+)
+
+
+def system_reliability_common_mode(p_one: float, n: int, q: float) -> float:
+    """Marshall-Olkin shared-kill: q = P(shared cause takes all layers)."""
+    return (1.0 - q) * (1.0 - (1.0 - p_one) ** n)
 OUR_JURISDICTION = "DE (LuftVO + SERA)"
 
 # --- the paste's claims (verbatim, for the verdict table) --------------------
@@ -205,6 +239,27 @@ def main() -> int:
     print(f"  the real figure: {GERMAN_ATC_DE_MINIMIS_G:.0f} g, {GERMAN_ATC_INSTRUMENT}")
     print(f"  counts: {ATC_THRESHOLD_COUNTS}")
     y_plus = y.mass_g + ATTACHMENTS_G
+    print()
+    print("-- 9. the reliability verdict (consultant, NIST + Monte-Carlo) ---------")
+    print("  the paste's Markov framing: state space {n..0} is a legitimate absorbing")
+    print("  chain, but the HOLDING TIMES are non-exponential -> correct name is a")
+    print("  SEMI-MARKOV process. Fix = phase-type/Coxian expansion (age -> states).")
+    print("  'Markov chains assume exponential' is right for CTMC, FALSE for discrete-time.")
+    print("  The dead-weight point is a REWARD/drift claim, not a Markov claim.")
+    print()
+    print(f"  backfire boundary m* = (2B-P)/3 with OUR hardware:")
+    print(f"    B (gross lift) = {B_GROSS_G:.1f} g   m = {M_YOKOHAMA_G:.1f} g   "
+          f"m* = {backfire_boundary_g():.2f} g")
+    print(f"    in backfire regime: {in_backfire_regime()}  "
+          f"({'m > m* -- a 3rd envelope IS net-harmful' if in_backfire_regime() else 'm < m*'})")
+    print("  -> the consultant's formula CONFIRMS our n=2/n=3 infeasibility, for OUR")
+    print("     hardware, on grounds independent of the mass-allowance argument.")
+    print()
+    print("  the paste's own hypothetical (m=18 g, B=110 g -> m*=65 g) is NOT in the")
+    print("  backfire regime, so its 'triple makes cheap film less reliable' claim is")
+    print(f"  FALSE for its own numbers. Its real cause would be SIZING or COMMON MODE:")
+    print(f"    {COMMON_MODE_NOTE}")
+    print()
     print(f"  -> the paste says the envelope is EXCLUDED; our law counts it. Our design")
     print(f"     passes anyway ({y_plus:.1f} g of {GERMAN_ATC_DE_MINIMIS_G:.0f} g), but for a")
     print(f"     different reason, under a different instrument, counting a different quantity.")
