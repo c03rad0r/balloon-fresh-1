@@ -18,7 +18,11 @@
 > | unconnected | 10 | **4** |
 > | DRC errors | 29 | **16** |
 > | DRC warnings | 136 | **137** |
-> | netlist gate | 12 pass / 4 FAIL | **14 pass / 0 FAIL / 2 PENDING** |
+> | netlist gate | 12 pass / 4 FAIL | **14 pass / 0 FAIL / 2 WAIVED** |
+>
+> **The 2 WAIVED items are the base-station F-class route checks** — absent artifacts, waived with a
+> reason that prints from `tracker/hardware/base_station/FR-CHECK-WAIVER.md`. A waiver is not a pass;
+> see `WAIVED-SUMMARY` in `GATE-RESULTS.md` and `BASE-STATION-F-CHECKS.md` (2026-10-17).
 >
 > **The verdict is unchanged: NOT ORDERABLE**, now for a shorter and better-understood list of reasons.
 > All 16 remaining errors are the intentional `J_W*` edge lands; zero are real electrical violations.

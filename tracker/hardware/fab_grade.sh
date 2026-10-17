@@ -130,7 +130,22 @@ print(f"  violations  : {len(v)}   {dict(sev)}")
 for t, n in typ.most_common():
     print(f"      {t:26} {n}")
 print()
-print("  VERDICT:", "CLEAN" if not v and not u else "NOT ORDERABLE")
+bad = bool(v) or bool(u)
+print("  VERDICT:", "NOT ORDERABLE" if bad else "CLEAN")
+# EXIT NON-ZERO ON A BAD VERDICT. Measured defect, 2026-10-17: the script printed "NOT ORDERABLE"
+# and exited 0, because the verdict was only PRINTED and the script returned the status of its last
+# command. That is the failure mode the standing rule names -- "a gate that can't run must not look
+# green" -- inverted: the gate ran, found the design not orderable, and reported SUCCESS. Any CI job,
+# pre-commit hook or wrapper keying on the exit code would have read this as a pass. The exit code is
+# the only machine-readable part of a gate's result, so it must carry the verdict.
+sys.exit(1 if bad else 0)
 PY
+RC=$?
 echo
 echo "chain artifacts in $OUT"
+if [ "$RC" -ne 0 ]; then
+    echo
+    echo "fab_grade: FAILED -- the board is NOT ORDERABLE (see the verdict above)."
+    echo "           Exit code is non-zero so a wrapper cannot mistake this for a pass."
+fi
+exit "$RC"

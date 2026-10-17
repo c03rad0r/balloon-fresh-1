@@ -19,7 +19,14 @@ THE CLASSES GUARDED (all real, all measured 2026-10-14):
   D. DUPLICATE DESIGNATORS      -- two parts on one ref silently lose one.
   E. TODO ON A POPULATED ROW    -- 'TODO(unverified)' is a legal VALUE, never a legal PART.
   F. DRC FLOOR RELAXATION       -- a router that rewrites the project's floors grades its own work
-                                   against the lowered bar and always passes.
+                                   against the lowered bar and always passes. The two base-station
+                                   F-checks reference route artifacts that DO NOT EXIST, because
+                                   `tracker/hardware/base_station/output/` is gitignored and the
+                                   base station has no editable schematic yet. They are WAIVED, with
+                                   the reason PRINTED at run time from a committed record
+                                   (`base_station/FR-CHECK-WAIVER.md`). If that record is missing or
+                                   stops covering a check, the check FAILS -- an absent artifact must
+                                   never be able to fall silently out of the run.
 """
 import os
 import re
@@ -48,18 +55,66 @@ def ck(name, ok, detail=""):
 def ck_pending(name, detail=""):
     """A check that CANNOT run is neither a pass nor a failure -- but it must be VISIBLE.
 
-    Why this exists: the base-station route artifacts this gate compares are OUTPUTS of work the Astra
-    gap analysis places at items B2-B9 (no editable schematic exists yet; the netlist alone is not proof
-    of a correct circuit). Producing them now would mean routing a 44-net board twice on an unverified
-    schematic. Deleting the check would hide a real gap; failing forever would train the reader to
-    ignore it. PENDING prints the reason, keeps the item in the list, and does not fail the gate.
-    A skipped check that prints NOTHING is the failure mode this whole file exists to catch.
+    Kept as a primitive for a check whose reason is short and self-contained. The base-station F
+    checks no longer use it: their reason is long, has to stay reproducible, and must not be able to
+    vanish, so it is loaded from a committed record at run time -- see ck_waived() below.
     """
     PENDING.append(name)
     print(f"  PENDING  {name}")
     for line in str(detail).split("\n"):
         if line:
             print(f"          {line}")
+
+
+# A WAIVER is stronger than a PENDING and is the shape the two base-station F checks use.
+#
+# WHY THIS IS NOT JUST A HARDCODED STRING: the reason a reader sees in the suite output must be the
+# reason committed in the repo. If the two are separate copies they drift, and the output ends up
+# citing a rationale that is no longer the recorded one. So the text lives ONCE, in
+# `base_station/FR-CHECK-WAIVER.md`, and this module reads it at run time.
+#
+# THE FAIL-CLOSED PROPERTY (the whole point): if the artifact is absent AND the record has no entry
+# for it -- record deleted, renamed, truncated, or an entry removed -- the check FAILS. A silent
+# `PENDING` fallback would mean that deleting one markdown file quietly turns two real gaps into a
+# green run, which is exactly the failure mode this file exists to catch.
+WAIVED = []
+WAIVER_RECORD = os.path.join(HW, "base_station", "FR-CHECK-WAIVER.md")
+
+
+def _waiver_blocks(path=WAIVER_RECORD):
+    """Parse `WAIVER: <artifact-basename>` blocks from the committed waiver record.
+
+    Returns {basename: [reason lines]}. An empty dict means "no waiver on record" -- which is a FAIL
+    at the call site, never a pass. Text after the last entry, and a block cut short by `---`, are
+    dropped rather than half-read.
+    """
+    try:
+        text = open(path, encoding="utf-8").read()
+    except OSError:
+        return {}
+    out, cur = {}, None
+    for line in text.splitlines():
+        s = line.strip()
+        if s.startswith("WAIVER:"):
+            cur = s.split(":", 1)[1].strip()
+            out[cur] = []
+        elif s.startswith("---"):
+            cur = None
+        elif cur is not None and s:
+            out[cur].append(s)
+    return {k: v for k, v in out.items() if v}
+
+
+def ck_waived(name, reason_lines):
+    """PRINT the waiver loudly, keep it COUNTED, and never call it a pass."""
+    WAIVED.append(name)
+    print(f"  WAIVED   {name}")
+    print(f"          the artifact is ABSENT and NOT produced. Reason, from "
+          f"{os.path.relpath(WAIVER_RECORD, REPO)}:")
+    for line in reason_lines:
+        print(f"          {line}")
+    print(f"          A WAIVER IS NOT A PASS. It is a stated gap that stays countable and is never"
+          f" deleted.")
 
 
 def comps_of(net_path):
@@ -302,19 +357,22 @@ ROUTED = [
      os.path.join(HW, "base_station", "output", "bs_v1_routed_strict.kicad_pcb"), True),
 ]
 JLC = dict(track=0.10, via_dia=0.45, via_drill=0.20)
+_WAIVERS = _waiver_blocks()
+print(f"    waiver record: {os.path.relpath(WAIVER_RECORD, REPO)} "
+      f"({'present, %d entr%s' % (len(_WAIVERS), 'y' if len(_WAIVERS) == 1 else 'ies') if _WAIVERS else 'ABSENT -- an absent artifact will FAIL, not be waived'})")
 for label, brd, expect_clean in ROUTED:
     if not os.path.exists(brd):
-        ck_pending(
-            f"F. {label}: board present",
-            f"{brd} does not exist. These artifacts are OUTPUTS of base-station routing, and the Astra\n"
-            f"gap analysis places that work at items B2-B9: the base station has a NETLIST but no editable\n"
-            f"SCHEMATIC, and 'a netlist is a useful baseline, not proof of a correct circuit'. Routing it\n"
-            f"now would freeze unverified assumptions and produce two artifacts whose only purpose is to\n"
-            f"assert a floor the design has not earned.\n"
-            f"TO CLEAR THIS: complete B2 (reconstruct the schematic) and B5-B6 (re-place and route), then\n"
-            f"commit a deliberately-loose route as bs_v1_routed.kicad_pcb (must violate 0.10/0.45/0.20) and\n"
-            f"a strict one as bs_v1_routed_strict.kicad_pcb (must meet them). See docs/fab/RALPH-LOOP-PROMPT.md.\n"
-            f"NOT DELETED ON PURPOSE: the gap stays visible rather than silently removed.")
+        _why = _WAIVERS.get(os.path.basename(brd))
+        if _why:
+            ck_waived(f"F. {label}: board present", _why)
+        else:
+            ck(
+                f"F. {label}: board present", False,
+                f"{brd} does not exist AND there is no WAIVER entry for "
+                f"{os.path.basename(brd)} in {os.path.relpath(WAIVER_RECORD, REPO)}.\n"
+                f"An absent artifact with no recorded waiver is a FAIL. This branch exists so the gap\n"
+                f"cannot be made to disappear by deleting the waiver record: a check whose reason can be\n"
+                f"edited away is a check that can be silently retired.")
         continue
     code = (
         "import sys;sys.path.insert(0,'/usr/lib/python3/dist-packages');import pcbnew;"
@@ -391,17 +449,32 @@ ck("G. no exemption relies on Reference matching (measured INERT for edge_cleara
 
 # =============================================================================================
 print("\n" + "=" * 76)
-print(f"RESULT: {len(PASS)} pass, {len(FAIL)} FAIL, {len(PENDING)} PENDING")
+print(f"RESULT: {len(PASS)} pass, {len(FAIL)} FAIL, {len(WAIVED)} WAIVED, {len(PENDING)} PENDING")
 if PENDING:
     print()
     print("  PENDING -- cannot run yet, reason recorded, NOT deleted:")
     for nm in PENDING:
         print(f"    - {nm}")
     print("  A pending check is NOT a pass. It is a gap that has been stated instead of hidden.")
+if WAIVED:
+    print()
+    print("  WAIVED -- artifact absent, reason PRINTED above from the committed record:")
+    for nm in WAIVED:
+        print(f"    - {nm}")
+    print("  A waiver is NOT a pass. It is a gap that is stated, countable, and never deleted.")
+    print("  Re-run with --strict-waivers to make any waiver fail the run (for a release gate).")
 for f in FAIL:
     print(f"  FAIL  {f}")
 print("=" * 74)
 print()
 print("NOTE: section A/B/C/D failures ARE the order blockers. Do not order while any")
 print("      'declared vs placed' or 'empty footprint' check fails.")
-sys.exit(1 if FAIL else 0)
+# A waiver is the honest state of a gap, but it must not be able to masquerade as a finished suite
+# forever: --strict-waivers turns every waiver into a failure, so a release gate can require that the
+# base-station artifacts actually exist rather than being waived. Default remains non-failing so a
+# normal run reports the gap (loudly) without blocking work that is unrelated to the base station.
+_STRICT = "--strict-waivers" in sys.argv
+if _STRICT and WAIVED:
+    print()
+    print(f"STRICT MODE: {len(WAIVED)} waiver(s) present -- failing the run by request.")
+sys.exit(1 if (FAIL or (_STRICT and WAIVED)) else 0)

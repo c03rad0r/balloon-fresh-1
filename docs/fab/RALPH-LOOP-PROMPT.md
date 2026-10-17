@@ -79,11 +79,19 @@ Run `tracker/hardware/regen_fab_package.py` (already written). It refuses to ove
 fewer footprints than the package. Verify the packaged board is now 59/59, then confirm
 `test_netlist_integrity.py` check C2 passes.
 
-### 2. Resolve the F checks (base-station route artifacts)
+### 2. Resolve the F checks (base-station route artifacts) — **RESOLVED 2026-10-17: both WAIVED**
 `test_netlist_integrity.py` expects `base_station/output/bs_v1_routed.kicad_pcb` (must measure DIRTY) and
-`bs_v1_strict.kicad_pcb` (must measure CLEAN). Both are **absent** because `tracker/hardware/output/` is
-gitignored. Either (a) produce and commit them to a tracked path, or (b) amend the check to skip with a
-printed reason and record the waiver in `docs/fab/`. Do not silently delete the check.
+`base_station/output/bs_v1_routed_strict.kicad_pcb` (must measure CLEAN). Both are **absent** because
+`tracker/hardware/base_station/output/` is **gitignored** — and they have never existed in ANY ref
+(`git log --all` finds nothing; `find /` finds no such file on this host).
+
+**Done (branch `pr/hub-milestone`):** both checks are **WAIVED**, with the reason **printed when the
+suite runs**, read at run time from the committed record
+`tracker/hardware/base_station/FR-CHECK-WAIVER.md`. The gate **fails closed** — an absent artifact with
+no `WAIVER:` entry is reported **FAIL**, so deleting the record cannot make the gap green — and
+`--strict-waivers` turns every waiver into a failure for a release gate. No board was produced and the
+check was not deleted. Full reasoning and the evidence: `docs/fab/BASE-STATION-F-CHECKS.md`,
+`docs/fab/GATE-RESULTS.md` (`WAIVED-SUMMARY`).
 
 ### 3. Fix the edge-launch drawing — it has a TECHNICAL error, not just layout
 `docs/fab/jlc-query/edge-launch-cross-section.svg` (generator: `tracker/hardware/make_edge_section.py`).
