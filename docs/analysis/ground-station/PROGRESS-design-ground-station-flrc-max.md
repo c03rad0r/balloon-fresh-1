@@ -78,7 +78,7 @@ real parts, deliver a cited doc + ADR + consultant verdict.
   lambda/10 there) and the 2.8 mm option to 11 GHz (= 1.03 x lambda/10) -> the vendor
   corroborates the rule at its own limit; at 433 MHz the mesh is 11.5x finer than needed.
 - F33 balloon cost: +2.8 g module (4.0 g vs 1.2 g bare), 5.50 W @ 5.0 V (6.15 W @ 5.5 V),
-  contradicts docs/PAYLOAD-WEIGHT-ESTIMATES.md D ("ground station only") -- flagged.
+  contradicts docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md D ("ground station only") -- flagged.
 - Sourced dishes: RFH FPD 1M0/1M2/1M5/1M9 in stock (EUR 342.43/387.20/499.73/901.45);
   FPD 2M4 and 3M0 OUT OF STOCK; 4.5 m production ceased 2024.
 - Positioners: SPID BIG-RAS EUR 1,775 (2,712 N.m brake, 318 kg vertical, 22 kg);

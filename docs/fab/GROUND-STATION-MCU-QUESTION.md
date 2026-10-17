@@ -37,8 +37,8 @@ was correct, because transcribing a frozen design is not a new design decision.
 |---|---|
 | **Hub board** | `ESP32-S3-WROOM-1U-N8R8` — a **S3** |
 | `docs/analysis/ground-station-level-control-design.md:244` | *"ADC/MCU: **RP2040 or ESP32-S3**"* — the analysis presents **both**, deliberately |
-| `docs/DISCOVERY-SYNC-2026-08-07-batch2.md:36` | *"FIPS dev continues on **ESP32-S3** dev boards"* |
-| `docs/DISCOVERY-SYNC-2026-08-07.md:17` | *"Current FIPS development (fips_radio_bridge, mesh_adapter, fips_transport) continues on **ESP32-S3** dev boards"* |
+| `docs/discovery/DISCOVERY-SYNC-2026-08-07-batch2.md:36` | *"FIPS dev continues on **ESP32-S3** dev boards"* |
+| `docs/discovery/DISCOVERY-SYNC-2026-08-07.md:17` | *"Current FIPS development (fips_radio_bridge, mesh_adapter, fips_transport) continues on **ESP32-S3** dev boards"* |
 | `docs/adr/038-wifi-bt-disabled.md:59` | cites **ESP32-S3 Series Datasheet v2.2** as the reference MCU |
 
 **So: the hub is S3, FIPS development is S3, and the level-control analysis lists both.** The

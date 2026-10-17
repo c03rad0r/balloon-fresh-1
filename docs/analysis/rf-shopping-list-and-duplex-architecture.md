@@ -343,7 +343,7 @@ the LR2021.
 | **Waveform / IF generator** (GMSK baseband experiments) | ✅ | feeds an upconverter; useful for bench work |
 | **Spectrum monitor** | ✅ but only **≤ 62.5 MHz** | cannot see 433/2.4 GHz |
 | **LO source** | ⚠️ only **≤ 62.5 MHz** | DAC range honest limit — not 433/2450 MHz |
-| **Logic analyser** (SPI/IRQ on the LR2021) | ✅ | already used this way in the repo (`docs/lr2021-dual-track-master-plan-2026-07-17.md`) |
+| **Logic analyser** (SPI/IRQ on the LR2021) | ✅ | already used this way in the repo (`docs/lr2021/lr2021-dual-track-master-plan-2026-07-17.md`) |
 | **Direct 2.4 GHz FLRC transmitter** | ❌ | DC–60 MHz DAC + proprietary PHY |
 | **Direct 433/2.4 GHz VNA** | ❌ | DC–60 MHz input |
 

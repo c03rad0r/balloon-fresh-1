@@ -572,16 +572,16 @@ At 868 MHz: subtract 9 dB less path loss than 2440 MHz at same distance.
 |------|----------|------------------|
 | SPI Protocol Reference | `docs/lr2021-spi-protocol-reference.md` | Full init sequence, all opcodes |
 | SPI Command Reference | `docs/lr2021-spi-command-reference.md` | Opcode cross-ref, bug analysis |
-| LoRa Mod Params Encoding | `docs/lr2021-lora-modulation-params-encoding.md` | Byte-level LoRa config |
-| SPI Bottleneck Analysis | `docs/lr2021-spi-bottleneck-analysis-2026-07-16.md` | Why acceleration failed |
-| Complete Learnings | `docs/lr2021-complete-learnings-2026-07-23.md` | All consolidated knowledge |
-| RSSI Fix Plan | `docs/RSSI-FIX-PLAN.md` | RSSI bug root cause + fix |
-| Bitrate Sweep Results | `docs/flrc-bitrate-sweep-results-2026-07-23.md` | 4-bitrate FLRC data |
-| Sustained Throughput | `docs/sustained-throughput-results-2026-07-23.md` | 50K-packet sustained data |
+| LoRa Mod Params Encoding | `docs/lr2021/lr2021-lora-modulation-params-encoding.md` | Byte-level LoRa config |
+| SPI Bottleneck Analysis | `docs/lr2021/lr2021-spi-bottleneck-analysis-2026-07-16.md` | Why acceleration failed |
+| Complete Learnings | `docs/lr2021/lr2021-complete-learnings-2026-07-23.md` | All consolidated knowledge |
+| RSSI Fix Plan | `docs/bench/RSSI-FIX-PLAN.md` | RSSI bug root cause + fix |
+| Bitrate Sweep Results | `docs/flrc/flrc-bitrate-sweep-results-2026-07-23.md` | 4-bitrate FLRC data |
+| Sustained Throughput | `docs/bench/sustained-throughput-results-2026-07-23.md` | 50K-packet sustained data |
 | Power Sweep Results | `docs/power-sweep-results-2026-07-24.md` | PA binary behavior data |
-| Multi-Radio Sweep Results | `docs/SWEEP-RESULTS.md` | All 10-phase dual-band data |
+| Multi-Radio Sweep Results | `docs/bench/SWEEP-RESULTS.md` | All 10-phase dual-band data |
 | Power Sweep v2 | `tests/power-sweep-v2-results.md` | 6-level power sweep data |
-| Outdoor Test Procedure | `docs/OUTDOOR-TEST-PROCEDURE.md` | Step-by-step outdoor guide |
+| Outdoor Test Procedure | `docs/range/OUTDOOR-TEST-PROCEDURE.md` | Step-by-step outdoor guide |
 | Board Mutex Plan | `docs/coordination/BOARD-MUTEX-ENFORCEMENT-PLAN.md` | Lock system architecture |
 | Dual Radio Sweep TX | `firmware/rp2040/src/dual_radio_sweep_tx.cpp` | Range-tests sweep TX |
 | Dual Radio Sweep RX | `firmware/rp2040/src/dual_radio_sweep_rx.cpp` | Range-tests sweep RX |

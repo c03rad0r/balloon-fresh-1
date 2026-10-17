@@ -59,7 +59,7 @@ All of the following is established with arithmetic in
 2. **The bare LoRa2021 — which is the DEFAULT flight radio at both v9 sites — has a crystal, no TCXO
    and no NTC** (`docs/V9-RADIO-SITE-MATRIX.md` §2, §6; open item O2). This is the real drift gap.
 3. **The SX1280's reference is a 52 MHz module-fitted TCXO on the E80 kit but a bare 52 MHz crystal
-   on the custom standalone boards** (`docs/FLRC-RANGE-DUAL-PLATFORM-ACTION-PLAN.md` lines 29, 58,
+   on the custom standalone boards** (`docs/flrc/FLRC-RANGE-DUAL-PLATFORM-ACTION-PLAN.md` lines 29, 58,
    103; `firmware/rp2040/src/bench_radio_sx1280.cpp:59`).
 4. **A MAX-M10S is on the board with its 1PPS routed** (`docs/adr/108-f33-sx1280-pin-plan.md:38`,
    `GNSS_PPS`), and four accepted ADRs already make GPS UTC the timing authority (ADR-017/019/021/023).
@@ -243,7 +243,7 @@ Recorded as required pre-flight tests (design work only; nothing is run or order
 5. Whether the plain NiceRF LoRa2021 breaks out pin 3 / NTC, and the SX1280 module's TCXO control pin.
 6. The `docs/assets/lr2021/README.md` "onboard 0.5 ppm TCXO / VTCXO pin 13" claim vs the
    LESSONS/DUAL-VARIANT census — conflicting; unresolved.
-7. `docs/SDR-HANDOVER.md:60`'s "LR2021 uses a 52 MHz XTAL" vs the datasheet's 32 MHz — probable
+7. `docs/sdr/SDR-HANDOVER.md:60`'s "LR2021 uses a 52 MHz XTAL" vs the datasheet's 32 MHz — probable
    cross-radio conflation; unresolved.
 8. Cold (−60 °C) capacitance and ESR of the fitted bank (ADR-036/ADR-047 open item) — bench test 3.
 9. Cell/array thermal conductance for a heater-cost estimate — not in the repo; D5 does not quantify it.

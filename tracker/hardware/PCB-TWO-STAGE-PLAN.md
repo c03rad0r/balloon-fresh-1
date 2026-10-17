@@ -605,7 +605,7 @@ This plan succeeds when ALL of the following are true:
 - **Model for all spatial work:** kimi-k2.7-code (local ollama, free, unlimited)
   - Replaces the original GLM-5.2-generates + Kimi-K2.7-verifies split from §1.2.
   - Local Kimi K2.7 now handles BOTH generation AND verification — see Lesson 11
-    in `docs/PCB-LESSONS-LEARNED-2026-08-05.md`.
+    in `docs/pcb/PCB-LESSONS-LEARNED-2026-08-05.md`.
   - **No cloud credit is being consumed for PCB spatial work.**
 - **Board:** 55×45mm, 4-layer (F.Cu / In1.GND / In2.3V3 / B.Cu), 0.6mm thickness.
   - Original plan called for 50×40mm @ 1.6mm. Expanded to 55×45mm after 35×30mm

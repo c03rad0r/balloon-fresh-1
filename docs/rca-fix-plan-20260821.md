@@ -72,7 +72,7 @@ the BUG 2 / BUG 3 hardware-verification columns are still PENDING.
 | Card | Deliverable | Reality |
 |------|-------------|---------|
 | FIX-T5 (t_4e225809) | build + SWD flash both boards | `done` only because the fleet offload marked it so; the thread records a blocked pre-flight and **no flash happened** |
-| FIX-T6 (t_c5d28b3f) | FLRC BR sweep + LEN boundary bisect CSVs | **no data.** Its single run is a blocked pre-flight (no TX probe on the fleet; the reconciled head did not exist) — verdict + runbook on branch `fix/t6-sweep-preflight` (9b8966d), `docs/FIX-T6-preflight-verdict-20260916.md` (not merged to `main`) |
+| FIX-T6 (t_c5d28b3f) | FLRC BR sweep + LEN boundary bisect CSVs | **no data.** Its single run is a blocked pre-flight (no TX probe on the fleet; the reconciled head did not exist) — verdict + runbook on branch `fix/t6-sweep-preflight` (9b8966d), `docs/bench/FIX-T6-preflight-verdict-20260916.md` (not merged to `main`) |
 | FIX-T7 (t_f04ee0b6) | LoRa LEN sweep + negative test CSVs | **zero runs recorded**; `fleet-writeback` set it `done` with no summary, no artifacts, no CSVs |
 | FIX-R2 (t_52ede356) | build + flash the RECONCILED head, verify `ID?` SHA | still `todo` — no reconciled head exists on any remote yet |
 
@@ -146,7 +146,7 @@ boundary anomaly still needs the on-hardware LEN bisect 254/255/256/300
 
 ## FIX-T6 pre-flight (2026-09-16) — HOLD, tool gate added
 
-**Read `docs/FIX-T6-preflight-verdict-20260916.md` before running FIX-T6.** It
+**Read `docs/bench/FIX-T6-preflight-verdict-20260916.md` before running FIX-T6.** It
 records, with hardware evidence, that FIX-T5 never flashed (the card is `done`
 only via the fleet write-back), that only ONE E80 board (RX probe
 `203584200D2D0D42`, fw=`5fa7912`) is attached to the fleet and that the TX board

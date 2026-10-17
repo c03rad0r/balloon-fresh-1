@@ -44,7 +44,10 @@ Read the `nets routed` column, **not** the amount of copper in a render — a co
 
 **Fit to show a fabricator for review. Not fit to order.** Open items:
 
-- **`U1.41`** — the radio's exposed ground pad **has no net** (pad-number mismatch)
+- **`U1.41`** — the radio's exposed ground pad ~~**has no net** (pad-number mismatch)~~ — **CORRECTED
+  2026-10-17:** measured, `U1`'s 13 pads numbered `41` are **all on `GND`** (thermal-via array, correct
+  by design) and its 9 unnamed pads are `F.Paste`-only stencil apertures. Not a defect. Owning record:
+  [`docs/fab/U1-FOOTPRINT-DIAGNOSIS.md`](docs/fab/U1-FOOTPRINT-DIAGNOSIS.md)
 - **ERC: 20 errors** — incl. 12 floating `U_CUT1–4` pins; **parity passes**, so the board has not drifted
 - **DRC: 16 errors — all 16 are the intentional `J_W*` edge lands. Zero real electrical errors.** The 137
   warnings are silkscreen or library metadata
@@ -326,9 +329,9 @@ balloon-fresh/
 
 | Document | Description |
 |----------|-------------|
-| **[Harmonized Cross-Board Bench Package](docs/HARMONIZED-BENCH-PACKAGE.md)** | Entry point for cross-board (E80 / ESP32 / RP2040) bench work — real repo URLs and branches, build/flash per family, running a session, handing data back |
-| [Harmonized Results](docs/HARMONIZED-RESULTS.md) | Results summary by board-pair × band × LEN × BR, with raw CSV links; 868 MHz baseline vs 2.4 GHz semantics |
-| [Harmonized Run Report Template](docs/HARMONIZED-RUN-REPORT-TEMPLATE.md) | Fill-in template for one harmonized run (identity, provenance, matrix, acceptance, results, anomalies) |
+| **[Harmonized Cross-Board Bench Package](docs/harmonized/HARMONIZED-BENCH-PACKAGE.md)** | Entry point for cross-board (E80 / ESP32 / RP2040) bench work — real repo URLs and branches, build/flash per family, running a session, handing data back |
+| [Harmonized Results](docs/harmonized/HARMONIZED-RESULTS.md) | Results summary by board-pair × band × LEN × BR, with raw CSV links; 868 MHz baseline vs 2.4 GHz semantics |
+| [Harmonized Run Report Template](docs/harmonized/HARMONIZED-RUN-REPORT-TEMPLATE.md) | Fill-in template for one harmonized run (identity, provenance, matrix, acceptance, results, anomalies) |
 | [Bench Console Spec](docs/BENCH-CONSOLE-SPEC.md) | Normative cross-board console protocol (`ID?/SET/N/PKT/STAT?`, framing, bands) |
 | **[E80 Range Test Guide](firmware/e80-stm32-bench/docs/RANGE-TEST-GUIDE.md)** | Complete self-contained operator guide — hardware setup, flashing, TX/RX, merge, GPS, troubleshooting |
 | [E80 Flashing Guide](firmware/e80-stm32-bench/FLASHING.md) | Detailed flashing procedures (SWD, stm32flash) |
@@ -424,7 +427,7 @@ for licensing details. Third-party drivers retain their original licenses
 ## Cross-Board Bench — dieser Branch (`range-tests`)
 Dieser Branch ist die Range-Test-Spur der harmonisierten Cross-Board-Messungen
 (E80 STM32+LR2021 / ESP32-C3+LR2021 / RP2040+LR2021). Einstiegspunkt für alles
-Weitere ist `docs/HARMONIZED-BENCH-PACKAGE.md` im Branch **`main`** desselben
+Weitere ist `docs/harmonized/HARMONIZED-BENCH-PACKAGE.md` im Branch **`main`** desselben
 Repos (`https://github.com/felixfelix-bot/balloon-fresh.git`).
 > **Wichtig — die Bench-Console liegt NICHT auf diesem Branch.**
 > `tools/balloon_sweep.py` und `docs/BENCH-CONSOLE-SPEC.md` gibt es nur auf
@@ -448,7 +451,7 @@ python3 tools/capture_sweep.py        # alternativ: Sweep-Capture
 BALLOON_TRACK=range-tests python3 ~/repos/balloon-fresh/tools/balloon-board-lock.py release board-a
 Die Ergebnisse und die bekannten Fallstricke dieses Ansatzes (Timing-Drift
 zwischen zwei freilaufenden RP2040, Slot-Weiten, IRQ-/RSSI-Opcode-Bugs) stehen in
-`docs/SWEEP-RESULTS.md`. Datenübergabe-Konvention dieses Branches:
+`docs/bench/SWEEP-RESULTS.md`. Datenübergabe-Konvention dieses Branches:
 `docs/data-handover/DATA-HANDOVER-2026-08-17.md`.
 ### Harmonisierte Session (nur auf `main`)
 git checkout main     # Console liegt dort

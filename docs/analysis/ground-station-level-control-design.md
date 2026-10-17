@@ -16,7 +16,7 @@
 | Lens | Level control (receive AGC + transmit range→attenuation) and the base-station board checklist. **Not** re-deriving the link budget, the positioner, the antenna sizing or the cost metric — those live on sibling branches (see *Read first*). |
 | Repro | `python3 docs/analysis/level_control_model.py` (every numeric table below) and `/opt/miniconda/bin/python3 docs/analysis/render_level_control_figures.py` (both figures) |
 | Figures | `docs/analysis/assets/level-control/receive-agc-chain.{png,svg}`, `…/dynamic-range-budget.{png,svg}` |
-| Checklist | `docs/BASE-STATION-BOARD-CHECKLIST.md` |
+| Checklist | `docs/base-station/BASE-STATION-BOARD-CHECKLIST.md` |
 | Access date | **2026-10-08** for every URL |
 
 **Read first (sibling work this analysis consumes and does not re-derive):**
@@ -521,7 +521,7 @@ the BPF does. This is stated so the AGC is not credited with a job it cannot do.
   the verbatim answer are recorded in §9 and in `docs/analysis/assets/level-control/consult-verdict.txt`.
 
 **This analysis orders nothing and buys nothing. It extends `design/rf-shopping-list`'s list in
-`docs/BASE-STATION-BOARD-CHECKLIST.md` rather than duplicating it.**
+`docs/base-station/BASE-STATION-BOARD-CHECKLIST.md` rather than duplicating it.**
 
 ---
 

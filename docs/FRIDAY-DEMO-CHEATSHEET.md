@@ -2,7 +2,7 @@
 
 > Repo: `~/repos/balloon-e80bench` (branch `main`, fw `5fa7912`).
 > RX = base (Board B, probe `203584200D2D0D42`) · TX = field (Board A, probe `148757200D2D1425`).
-> Full context: `docs/RANGE-TEST-FUNCHAL.md`, `docs/RANGE-TEST-PLAN-MINIMAL.md`.
+> Full context: `docs/range/RANGE-TEST-FUNCHAL.md`, `docs/range/RANGE-TEST-PLAN-MINIMAL.md`.
 
 ## A. Pre-departure checklist
 

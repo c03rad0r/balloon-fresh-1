@@ -23,7 +23,7 @@ table drifts; this one cannot.
   - `tracker/hardware/hub_board_v9.kicad_pcb`  sha256 `e55a294628fd38a7…`
 - **wing v9** — wing solar array + cut driver + hub tab
   - ⚠️ **2 net(s) unrouted**
-  - `tracker/hardware/wing_board/wing_board_v9.kicad_pcb`  sha256 `4ed85e6d081aaf1c…`
+  - `tracker/hardware/wing_board/wing_board_v9.kicad_pcb`  sha256 `34f103774bfba921…`
 - **base station** — ground station: LTE Cat 4 via SIM7600E-H (no 5G), FLRC link to the hub
   - ⚠️ **44 net(s) unrouted**
   - `tracker/hardware/base_station/base_station_v1_placed_v2.kicad_pcb`  sha256 `095d0278410465f2…`

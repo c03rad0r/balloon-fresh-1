@@ -691,7 +691,7 @@ so that label is corrected here.
 | BMP384 / BMP388 / BMP581 | 300–1100 hPa | **same ~300 mbar floor — ground only** |
 | **MS5611-01BA03** | **10–1200 mbar** | **flight — full altitude to ~30 km** |
 
-The requirement is not new. `docs/PRESSURE-TEST-PLAN.md` §2.1 already states it:
+The requirement is not new. `docs/prestretch/PRESSURE-TEST-PLAN.md` §2.1 already states it:
 *"MS5611 covers 10-1200 mbar (full balloon altitude to ~30km), BMP280 covers
 300-1100 mbar (ground testing only)."* A Bosch BMP part reaches ~300 mbar ≈ 9 km;
 this mission's ceiling is far above that, so a BMP part reads nothing where it
@@ -719,7 +719,7 @@ the same reasoning is not repeated.
 
 **Supporting evidence.**
 - v8h was already routed with **"I2C MS5611 stubs"**
-  (`docs/PLAN-DRC-CLEANUP-JLCPCB-ORDER.md`, DRC signal list) — the board
+  (`docs/plans/PLAN-DRC-CLEANUP-JLCPCB-ORDER.md`, DRC signal list) — the board
   anticipated MS5611 even though the schematic text said BMP280.
 - Firmware exists: `tools/balloon_pressure_test/` auto-detects BMP280 then MS5611
   (I2C 0x76, PROM read) — no new driver is needed.
@@ -774,7 +774,7 @@ to change.
    four S3 strapping pins (IO0, IO3, IO45, IO46) unassigned and calls out the
    accepted native-JTAG trade-off on IO39–42.
 8. The multi-SX1280 throughput question is analysed in
-   `docs/SX1280-ARRAY-FEASIBILITY.md` — **analysis only, no board authorised.**
+   `docs/sx1280/SX1280-ARRAY-FEASIBILITY.md` — **analysis only, no board authorised.**
 
 ---
 

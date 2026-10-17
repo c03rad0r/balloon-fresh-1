@@ -77,7 +77,7 @@ by that factor, which is why the self-contained per-wing 6 V idea buys nothing.
 | Outline convention | `width = rows·cell_w + (rows−1)·6 + 8`; `length = cols·cell_l + (cols−1)·6 + 8` | CITED wing-electrical §3(a) margin convention (3 mm each side, 6 mm land gap, 4 mm end margin) |
 | FR4 carrier | 0.6 mm FR4 = 127.6 mg/cm² | CITED ADR-049 §rejected-options table |
 | Large-cell current | 1.2 A (area-scaled) | `TODO(unverified)` — the 0.54 W listing implies 1.08 A; never reconciled by measurement (wing-electrical §0.2). Every large-cell number scales linearly with this |
-| Cell masses | 1.50 g / 0.50 g | `TODO(unverified)` — `docs/component-guide.md` figures, not weighed (wing-electrical §3a) |
+| Cell masses | 1.50 g / 0.50 g | `TODO(unverified)` — `docs/hardware-reference/component-guide.md` figures, not weighed (wing-electrical §3a) |
 
 ### 1.2 What "each wing provides 6 V" requires
 
@@ -651,6 +651,6 @@ accept a reduced TX duty after a loss."**
   ampacity §6.
 - `docs/POWER-BUDGET-V9-D2BE.md` §2 — the load table, the **0.388 W** representative daylight
   average and the **1 % TX duty**; §4 — board 55.15 × 45.15 × 0.6 mm and the mass table.
-- `docs/component-guide.md` — per-cell masses, cell options.
+- `docs/hardware-reference/component-guide.md` — per-cell masses, cell options.
 - In flight (cited, not duplicated): `analysis/wing-jettison` (`5365dac`), `analysis/wing-insolation`,
   `analysis/wing-omni`, `analysis/wing-ngon`, `analysis/wing-ladder`, `docs/analysis/wing-insolation-geometry.md`.

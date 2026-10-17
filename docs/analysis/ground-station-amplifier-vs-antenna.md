@@ -93,7 +93,7 @@ for the same link** because it buys the narrow beam and must then buy the tracke
 
 Source: `docs/adr/034-radio-band-split-433-tx-2g4-rx.md` D1 ("TX = 433 MHz … RX = 2.4 GHz"),
 and `docs/LINK-BUDGET-LICENCE-EXEMPT.md` §1/§2 (which direction is transmit and which is
-receive). Design slant range **300 km** (`docs/link-budget.md`); the repo's 650 km extreme
+receive). Design slant range **300 km** (`docs/link/link-budget.md`); the repo's 650 km extreme
 (`docs/adr/067-…`) is used as the stress point.
 
 ### 1.2 Receiver limits — Semtech LR2021 (balloon side)

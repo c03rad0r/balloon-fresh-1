@@ -19,7 +19,7 @@ This split exists for performance reasons. SPI throughput in the RX pipeline was
 | RP2040 (Pico SDK, batched SPI) | 1377 kbps | 54% | 1000/1000 packets verified |
 | ESP32-C3 (ESP-IDF, raw SPI) | 838 kbps | 33% | 1000/1000 packets verified |
 
-RP2040 is **64% faster** at the radio layer. Source: `docs/lr2021-bottleneck-analysis-2026-07-29.md`
+RP2040 is **64% faster** at the radio layer. Source: `docs/lr2021/lr2021-bottleneck-analysis-2026-07-29.md`
 
 ## Why RP2040 Is Faster
 
@@ -186,7 +186,7 @@ RP2040 radio daemon MUST use 2 Mbps UART. ESP-IDF supports this on ESP32-C3 (SPI
 
 ## Data Sources
 
-- `docs/lr2021-bottleneck-analysis-2026-07-29.md` — RP2040 vs ESP32-C3 SPI throughput
+- `docs/lr2021/lr2021-bottleneck-analysis-2026-07-29.md` — RP2040 vs ESP32-C3 SPI throughput
 - `firmware/esp32-c3-flrc/main/main.cpp` — proven ESP32-C3 direct SPI (838 kbps)
 - `firmware/rp2040/src/flrc_raw_tx.cpp` — proven RP2040 batched SPI (1377 kbps)
 - `docs/lr2021-spi-protocol-reference.md` — 2-byte opcode protocol

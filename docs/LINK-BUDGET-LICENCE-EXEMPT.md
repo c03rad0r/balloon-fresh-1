@@ -15,8 +15,8 @@ splits them and shows which direction actually binds.
 
 | Input | Value | Source |
 |---|---|---|
-| Design slant range | 300 km | ADR-037 / `docs/link-budget.md` (established design point) |
-| 433.05–434.79 MHz licence-exempt ERP cap | **10 mW ERP** (integral antenna) | `docs/SOLAR-PIN-REGULATORY.md` §3.2 (branch `docs/solar-pin-regulatory`, tip `bc50dacd`), citing Wikipedia LPD433 → ERC Recommendation 70-03 (CEPT), Annex 1. Re-verified 2026-10-07 by fetching the LPD433 article (200 OK, text confirms "10 mW … integral and non-removable antenna"). |
+| Design slant range | 300 km | ADR-037 / `docs/link/link-budget.md` (established design point) |
+| 433.05–434.79 MHz licence-exempt ERP cap | **10 mW ERP** (integral antenna) | `docs/link/SOLAR-PIN-REGULATORY.md` §3.2 (branch `docs/solar-pin-regulatory`, tip `bc50dacd`), citing Wikipedia LPD433 → ERC Recommendation 70-03 (CEPT), Annex 1. Re-verified 2026-10-07 by fetching the LPD433 article (200 OK, text confirms "10 mW … integral and non-removable antenna"). |
 | 2400–2483.5 MHz licence-exempt EIRP cap | **100 mW EIRP** (20 dBm) | Brief 10 (`/home/c03rad0r/reports/balloon-adr/ADR-BRIEF-10-licence-exempt-design-point.md`); general CEPT/EU SRD rule (ERC Rec 70-03 Annex 1, ETSI EN 300 328). **TODO(unverified): exact Annex 1 table row / duty-cycle or LBT/AFA condition for wideband-data in 2.4 GHz** — would be settled by reading the current ERC Rec 70-03 Annex 1 table directly at https://docdb.cept.org (the licence-exempt design-point doc on branch `docs/licence-exempt-design-point` had **not yet landed** as of this commit — its tip `144c8191` is identical to `adr/mcu-s3-no-fem`; this table therefore uses the brief's 100 mW EIRP figure and flags the annex row as unverified). |
 | FSPL @ 433 MHz, 300 km | 134.7 dB | COMPUTED — `python3 tools/link_budget.py --freq 433 … --dist 300` (tool output quoted in §2) |
 | FSPL @ 2400 MHz, 300 km | 149.6 dB | COMPUTED — `python3 tools/link_budget.py --freq 2400 … --dist 300` (tool output quoted in §1/§3) |
@@ -28,7 +28,7 @@ splits them and shows which direction actually binds.
 | `tools/link_budget.py` LoRa sensitivity table, SF12/BW125 | −137 dBm | SOURCED — `tools/link_budget.py` `LORA_SENSITIVITY[(12,125)] = -137` |
 | SKY66112-11 LNA gain / NF | +14 dB / 1.8 dB | SOURCED — `docs/adr/005-sky66112-fem.md` (ADR-005) |
 | Ground-station 433 Yagi gain | 10–15 dBi | Brief 10 / ADR-034 D1 item 2 ("ground station can afford amplification and a large antenna") — **TODO(unverified): a named 433 Yagi part datasheet would pin the exact dBi and pattern** |
-| Balloon 2.4 GHz RX antenna gain | 6–10 dBi (PCB Yagi) | `docs/link-budget.md` ("PCB Yagi ~6 dBi"); ADR-037 scenario used 10 dBi — range shown |
+| Balloon 2.4 GHz RX antenna gain | 6–10 dBi (PCB Yagi) | `docs/link/link-budget.md` ("PCB Yagi ~6 dBi"); ADR-037 scenario used 10 dBi — range shown |
 | Balloon 433 TX antenna gain | 0 dBi (small monopole/wire) to 2.15 dBi (½-wave dipole) | TODO(unverified): the actual balloon 433 antenna is not specified in a committed datasheet; 0 dBi is the conservative assumption, 2.15 dBi the dipole-equivalent |
 
 > **ERP vs EIRP.** The 433 cap is stated in **ERP** (relative to a half-wave dipole,
@@ -89,7 +89,7 @@ Margins against the **module** sensitivities:
 | **With LNA in circuit** (F33 DIO5 HIGH / bare LR2021 −137) | −136 / −137 dBm | **+16.4 / +17.4 dB** | CLOSES, comfortable |
 | **Without LNA** (F33 DIO5 bypass, LOW) | −124 dBm | **+4.4 dB** | CLOSES, but **thin** (4 dB) |
 
-### 1c — Same, balloon RX antenna = 6 dBi (PCB Yagi, `docs/link-budget.md` figure)
+### 1c — Same, balloon RX antenna = 6 dBi (PCB Yagi, `docs/link/link-budget.md` figure)
 
 ```
   RX Power:       -123.6 dBm
@@ -228,7 +228,7 @@ The 433 downlink is never binding under these assumptions — ground-side gain c
   `docs/licence-exempt-design-point`) had not landed as of this commit.
 - **TODO(unverified): exact SRD duty-cycle ceiling** in ERC Rec 70-03 Annex 1 for
   433.05–434.79 MHz (some non-specific SRD categories are < 1 %). Carried from
-  `docs/SOLAR-PIN-REGULATORY.md` §3.2 UNVERIFIED item 2. Affects average throughput,
+  `docs/link/SOLAR-PIN-REGULATORY.md` §3.2 UNVERIFIED item 2. Affects average throughput,
   not the per-burst margin computed here.
 - **TODO(unverified): named 433 Yagi part** — the 12 dBi / 15 dBi ground antenna gains
   are design assumptions (Brief 10, ADR-034), not a cited part datasheet. A named Yagi

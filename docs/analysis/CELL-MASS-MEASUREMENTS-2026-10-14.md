@@ -57,7 +57,7 @@ rather than corroborating it. See `docs/analysis/MEASURED-MASSES.md`.
 
 ## This kills the "~2 g per cell" pessimistic spec
 
-`docs/PAYLOAD-WEIGHT-ESTIMATES.md` carries two contradictory assumptions — *"~2 g per cell"* called
+`docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` carries two contradictory assumptions — *"~2 g per cell"* called
 "heavy for pico balloon use" versus a *"~0.4 g/cell"* thin-film hope. **The measurements sit at
 the low end:**
 

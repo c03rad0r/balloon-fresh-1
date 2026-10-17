@@ -74,10 +74,17 @@ VERDICT: NOT ORDERABLE
 **Zero real electrical DRC errors.** Every error-class item is the documented edge interface. All 137
 warnings are silkscreen or library metadata.
 
-**`U1.41` — the exposed QFN pad with no net — is confirmed on the board.** It appears **12 times** in the
-stitcher's unresolved-pad list (`U1.41` ×12). This is an open defect from
-`SX1280_QFN24.kicad_mod`, whose pads are numbered 1..24 plus a bare `25`; the symbol's exposed pad is
-`41`. The pad-number mismatch means the RF ground pad is **not connected to GND**.
+**`U1.41` — CORRECTED 2026-10-17.** The original text here claimed an open defect: a pad-number
+mismatch in `SX1280_QFN24.kicad_mod` (pads `1..24` plus a bare `25`, symbol exposed pad `41`) leaving
+the RF ground pad **not connected to GND**. **That claim is withdrawn — it is wrong.** Measured on the
+board (`tracker/hardware/hub_board_v9.kicad_pcb`, footprint `RF_Module:ESP32-S3-WROOM-1U`): `U1` carries
+**13 pads numbered `41`, all on net `GND`** (twelve 0.6×0.6 mm vias plus one 3.9×3.9 mm heatsink pad
+flagged `pad_prop_heatsink`) — the standard *several pads, one net* thermal-via idiom, correct by design.
+The stitcher's twelve `U1.41` UNRESOLVABLE entries are pads already on the plane, not an open net. `U1`
+also carries **9 unnamed pads, all `F.Paste`-only** — stencil apertures with no copper, so nothing is
+floating. The one genuine footprint defect in this area is on **`U4`** (a footprint ID with no library
+nickname), not `U1`. Owning record: `docs/fab/U1-FOOTPRINT-DIAGNOSIS.md` (measured); see also
+`docs/fab/ERC-AND-U1-CLASSIFICATION.md`.
 
 **Preflight fixed this session.** Gate 3 initially reported *"ROUTE FAILED"* — which was **not** a
 routing failure. `fab_grade.sh` searched `$HOME/tools` and `$HOME/repos`, neither of which exists here
@@ -104,7 +111,10 @@ have rewritten. A permanent red would train the reader to ignore it; deletion wo
 
 ## WHAT IS NOT ORDERABLE, AND WHY
 
-1. **The `U1.41` exposed RF pad has no net** — an electrical defect in the radio's ground return.
+1. ~~**The `U1.41` exposed RF pad has no net** — an electrical defect in the radio's ground return.~~
+   **WITHDRAWN 2026-10-17 — this is not an open item.** Measured on the board, `U1`'s 13 pads numbered
+   `41` are **all on `GND`** (thermal-via array, correct by design) and its 9 unnamed pads are
+   `F.Paste`-only stencil apertures (no copper). Owning record: `docs/fab/U1-FOOTPRINT-DIAGNOSIS.md`.
 2. **20 schematic ERC errors** — including 12 floating cut-driver pins and the radio's two power pins.
 3. **16 edge-clearance items need a fabricator's written acceptance** — they are intentional, but the
    disposition is JLCPCB's to give, not ours to assume. See `JLC-QUERY-DRAFT-MESSAGE.md`.

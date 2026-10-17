@@ -6,5 +6,5 @@ E80-900MBL-02 eval kit reference materials (purchased 2026-08-15).
 - ebyte-doc-id1373.pdf — EBYTE corporate brochure (no technical value, kept for provenance)
 - E80-900MBL-02_CAPABILITY_REPORT.md — consultant capability extraction (chip, PA tables, pin map, UART command protocol, gaps)
 
-Live plan: docs/PLAN-E80-LR2021-EVAL-2026-08-15.md
+Live plan: docs/plans/PLAN-E80-LR2021-EVAL-2026-08-15.md
 Ports on desk box: /dev/ttyUSB3, /dev/ttyUSB4 (CH340, 115200 8N1)
