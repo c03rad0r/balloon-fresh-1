@@ -49,6 +49,22 @@ DEFECTS THE FIRST CLEAN RENDER STILL CARRIED, and what changed (review cycle r1,
   * the tab's 0.6 mm is the SUBSTRATE thickness (ADR-046 s4.1), so the FINISHED tab is thicker and the
     finished solder gap differs from the 0.30 mm nominal. Stated, with the dependency named.
 
+DEFECTS THE r4 REVIEW FOUND IN THE THREE-MECHANICAL SET, and what changed (review cycle r5):
+  * View B drew the tab-face copper as a CONTINUOUS strip across the tab's full width. Fabricated literally
+    that connects W1_SOLAR_P, GND, W1_RF and W1_SOLAR_N -- four nets shorted. The copper is now FOUR
+    SEPARATE CONDUCTORS per face, one per land, with bare substrate drawn in the 0.6 mm gap between them.
+  * View B's 0.6 mm dimension attached to the tab's outside copper surfaces, contradicting note 5 and the
+    tab-stack-up row, which assign 0.6 mm to the FR4 substrate alone. The tab's copper is now drawn on the
+    substrate's OUTER faces, so the extension lines attach to the substrate's own boundaries and the span
+    excludes both copper layers; the label is now "FR4 substrate 0.6 mm".
+  * View B callout 10 sat inside the hub material with nothing connecting it to the tab it names. It now
+    carries a leader to the tab.
+  Because the tab's copper is drawn OUTSIDE the substrate, the DRAWN fillet lane is the FINISHED gap, which
+  is narrower than ADR-046 s4.1's 0.30 mm nominal (computed on bare substrate). Legends 4 and 8 say so.
+  Two r4 defects are NOT drawing problems and are left as stated "UNVERIFIED -- under query": the slot-face
+  copper CONSTRUCTION (asked of JLCPCB as Q6 / section 2A of the query message) and the mating-fit SPEC
+  (finished tab thickness, slot tolerances, tip relief -- design decisions no record fixes).
+
 HOW THE LAYOUT GUARD WORKS, AND WHY IT IS TRUSTWORTHY HERE. rsvg-convert lays text out through Pango, and
 PIL's ImageFont.getlength() with /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf reproduces rsvg's
 rendered ink extent. MEASURED ON THIS HOST before relying on it (/tmp/verify_font_metric.py): for
@@ -101,8 +117,14 @@ TAB_WID_MM = 9.0              # [repo] ADR-046 s2.1/s4.1: 9.0 mm tab = 4 x 1.2 +
 GAP_TOTAL_MM = SLOT_W_MM - TAB_T_MM      # 0.30 mm nominal, derived (ADR-046 s4.1)
 GAP_PER_FACE_MM = GAP_TOTAL_MM / 2.0     # 0.15 mm nominal per face
 
-# View A scale: 60 units/mm. 0.15 mm = 9 units -- thin, so the fillet lane is ANNOTATED (balloon 4) rather
-# than dimensioned, and the reviewer is told the copper is exaggerated.
+# Drawn thickness of a copper layer in these sections. The real figure is 35 um (1 oz); 0.05 mm is
+# thickened just enough to read. It is drawn on the OUTER face of the substrate -- OUTSIDE the 0.6 mm
+# span -- so the substrate's own boundaries stay clean and the FR4 dimension excludes the copper
+# (review r4 defect 1). Drawing the copper INSIDE the 0.6 mm span made the dimension bracket the copper.
+CU_DRAWN_MM = 0.05
+
+# View A scale: 60 units/mm. The finished fillet lane is 0.10 mm = 6 units -- thin, so the fillet is
+# ANNOTATED (balloon 4) rather than dimensioned.
 S_A = 60.0
 A_XE = 330                    # the interface edge (the plane the outline lies in) in View A
 A_YC = 470                    # the joint's centre line in View A
@@ -373,6 +395,8 @@ def dim_v(c, y1, y2, x, label, feat_x=None, color=INK, size=13, side="left"):
         c.path(f"M{x:g},{lo:g} L{x-5:g},{lo+13:g} L{x+5:g},{lo+13:g} z", fill=color)
         c.path(f"M{x:g},{hi:g} L{x-5:g},{hi-13:g} L{x+5:g},{hi-13:g} z", fill=color)
     ly = (lo + hi) / 2 + 4
+    if not label:                     # an empty label is legal: the caller may place the text itself
+        return
     if side == "left":
         c.text(x - 9, ly, label, size=size, anchor="end", fill=color, tag="dim_v")
     else:
@@ -440,16 +464,20 @@ A_LEGEND = [
         "faces) does not establish a finish on copper newly exposed by routing. Asked as Q1; NOT answered "
         "on this sheet"),
     (3, "the lands on the slot's faces — 4 per face, 4.0 mm along the insertion axis, 1.2 mm across at "
-        "1.8 mm pitch (ADR-048 §2.2). Copper thickness is EXAGGERATED here: it is 35 µm (1 oz) on a 0.6 mm "
-        "board. NO construction that produces broad copper on an internal routed face is established by "
-        "any record we hold — the lands are drawn UNVERIFIED; asked as Q6"),
-    (4, "the solder fillets — 0.30 mm NOMINAL total = slot 0.9 − tab 0.6 (ADR-046 §4.1), so 0.15 mm per "
-        "face, wetting the 4.0 mm land on each face. Loaded in SHEAR on both faces, which is why Option A's "
-        "capacity is the joint's anchor (ADR-046 §4.2.2)"),
+        "1.8 mm pitch (ADR-048 §2.2). Copper is drawn a little thicker than scale (it is 35 µm, 1 oz, on a "
+        "0.6 mm board) so the section reads. NO construction that produces broad copper on an internal "
+        "routed face is established by any record we hold — the lands are drawn UNVERIFIED; asked as Q6"),
+    (4, "the solder fillets — the gap between a slot face and the tab's copper on that face. ADR-046 §4.1's "
+        "0.30 mm total (slot 0.9 − tab 0.6) is NOMINAL, computed on BARE substrate; the tab's copper on "
+        "each face narrows the FINISHED gap, and the finished gap is what is DRAWN here. Loaded in SHEAR "
+        "on both faces, which is why Option A's capacity is the joint's anchor (ADR-046 §4.2.2)"),
     (5, "the wing tab — 0.6 mm FR4 SUBSTRATE (ADR-046 §4.1), 8.0 mm long, seated 6.0 mm into the slot so "
         "2.0 mm stays outside. Its tip is relieved to match the slot's routed end, so it seats to the full "
-        "6.0 mm. The tab carries COPPER on each face (35 µm, 1 oz), drawn here; the tab's FINISH is not "
-        "fixed by a record we hold (Q1). The FINISHED tab is thicker than 0.6 mm — see the tab-stack-up row"),
+        "6.0 mm — but that relief and the slot's end radius are NOT fixed by any record we hold, and the "
+        "semicircle drawn here is an ILLUSTRATION, not a specification: the full 6.0 mm seating is a "
+        "REQUIREMENT, not a verified fit. Asked as Q7. The tab carries COPPER on each face (35 µm, 1 oz), "
+        "drawn on the substrate's OUTER faces here; the tab's FINISH is not fixed by a record we hold (Q1). "
+        "The FINISHED tab is thicker than 0.6 mm — see the tab-stack-up row"),
     (6, "the slot's mouth reaches the outline ON THE SLOT'S CENTRE LINE (ADR-048 §2.5: \"the land IS the "
         "interface\"). The land copper runs 1.0 … 5.0 mm inboard of that edge (ADR-048 D-1). The slot's "
         "inner end is ROUNDED — a cutter radius, not a square end; see Q7"),
@@ -466,7 +494,7 @@ def view_a(c):
     r = sw / 2.0                                      # 27.0 -- the drawn cutter radius at the slot's end
     tx0 = xe - (TAB_LEN_MM - SLOT_DEPTH_MM) * S_A     # 210 -- the tab's outer end (2.0 mm proud)
     lx0, lx1 = xe + LAND_EDGE_MM * S_A, xe + (LAND_EDGE_MM + LAND_LEN_MM) * S_A   # 390, 630
-    cu = 9                                            # drawn copper/land thickness (exaggerated)
+    cu = CU_DRAWN_MM * S_A                            # 3.0 -- drawn copper thickness (see CU_DRAWN_MM)
     hub_top, hub_bot = wall_u - A_BLOCK, wall_l + A_BLOCK
 
     c.text(A_PANEL_X0 + 16, 200, "VIEW A — section ALONG the insertion axis, through the joint",
@@ -498,25 +526,27 @@ def view_a(c):
            f"L{tx0:g},{face_l:g} Z")
     c.path(tab, tag="tab", fill=STEEL, stroke=STEEL_DK, stroke_width="1.6",
            collide_box=(tx0, face_u, sx_end, face_l))
-    # the tab's own copper, one layer per face (35 um, 1 oz), drawn under the four land patches below
-    c.rect(tx0, face_u, (sx_end - r) - tx0, cu, tag="tab copper upper", fill=COPPER,
+    # the tab's own copper, one layer per face (35 um, 1 oz), drawn on the substrate's OUTER face --
+    # OUTSIDE the 0.6 mm span -- so the substrate boundaries stay clean (review r4 defect 1)
+    c.rect(tx0, face_u - cu, (sx_end - r) - tx0, cu, tag="tab copper upper", fill=COPPER,
            stroke=COPPER_DK, stroke_width="0.6", opacity="0.5")
-    c.rect(tx0, face_l - cu, (sx_end - r) - tx0, cu, tag="tab copper lower", fill=COPPER,
+    c.rect(tx0, face_l, (sx_end - r) - tx0, cu, tag="tab copper lower", fill=COPPER,
            stroke=COPPER_DK, stroke_width="0.6", opacity="0.5")
 
-    # lands: on the slot's faces (hub side) and on the tab's two faces
+    # lands: on the slot's faces (hub side -- part of the hub's own stack-up) and on the tab's two faces
+    # (a patch of the tab's own copper, drawn over it)
     c.rect(lx0, wall_u - cu, lx1 - lx0, cu, tag="hub land upper", fill=COPPER, stroke=COPPER_DK,
            stroke_width="1")
     c.rect(lx0, wall_l, lx1 - lx0, cu, tag="hub land lower", fill=COPPER, stroke=COPPER_DK,
            stroke_width="1")
-    c.rect(lx0, face_u, lx1 - lx0, cu, tag="tab land upper", fill=COPPER, stroke=COPPER_DK,
+    c.rect(lx0, face_u - cu, lx1 - lx0, cu, tag="tab land upper", fill=COPPER, stroke=COPPER_DK,
            stroke_width="1")
-    c.rect(lx0, face_l - cu, lx1 - lx0, cu, tag="tab land lower", fill=COPPER, stroke=COPPER_DK,
+    c.rect(lx0, face_l, lx1 - lx0, cu, tag="tab land lower", fill=COPPER, stroke=COPPER_DK,
            stroke_width="1")
-    # the fillets fill the two 0.15 mm lanes, over the lands' length
-    c.rect(lx0, wall_u, lx1 - lx0, face_u - wall_u, tag="fillet shear face 1", fill=GOLD,
+    # the fillets fill the lane between a slot face and the tab's copper on that face
+    c.rect(lx0, wall_u, lx1 - lx0, (face_u - cu) - wall_u, tag="fillet shear face 1", fill=GOLD,
            stroke=COPPER_DK, stroke_width="0.7")
-    c.rect(lx0, face_l, lx1 - lx0, wall_l - face_l, tag="fillet shear face 2", fill=GOLD,
+    c.rect(lx0, face_l + cu, lx1 - lx0, wall_l - (face_l + cu), tag="fillet shear face 2", fill=GOLD,
            stroke=COPPER_DK, stroke_width="0.7")
 
     # the interface edge: the plane the board outline lies in
@@ -562,11 +592,13 @@ def view_a(c):
 # ---------------------------------------------------------------------------------------------------
 B_LEGEND = [
     (7, "the four lands, seen END-ON: 1.2 mm across at 1.8 mm pitch, 0.6 mm clear between lands. Their "
-        "4.0 mm extent runs NORMAL to this view — dimensioned in View A"),
+        "4.0 mm extent runs NORMAL to this view — dimensioned in View A. Each is a SEPARATE conductor: the "
+        "tab-face copper is broken at every 0.6 mm gap, so W1_SOLAR_P, GND, W1_RF and W1_SOLAR_N are NOT "
+        "connected to one another on either face"),
     (8, "one fillet per land per face, wetting that land's 4.0 mm. The 4.0 mm runs along the insertion "
-        "axis, i.e. NORMAL to this view; here the fillet is the nominal 0.15 mm per-face lane computed on "
-        "BARE SUBSTRATE thickness. The FINISHED gap is narrower, since the finished tab is thicker than "
-        "0.6 mm — see the tab-stack-up row"),
+        "axis, i.e. NORMAL to this view. The lane DRAWN is the FINISHED gap: slot 0.9 − (0.6 mm substrate "
+        "+ a copper layer on each face). ADR-046 §4.1's 0.15 mm per face is NOMINAL on bare substrate and "
+        "is wider — see the tab-stack-up row"),
     (9, "the hub material either side of the slot. Its extent is SCHEMATIC — no record we hold fixes how "
         "far the slot runs along the hub edge, only its 0.9 mm width and 6.0 mm depth"),
     (10, "the 9.0 mm tab: 4 × 1.2 mm lands + 3 × 0.6 mm gaps + 2 × 1.2 mm of tab beyond the outer lands "
@@ -586,7 +618,7 @@ def view_b(c):
     tx0, tx1 = B_TAB_X0, B_TAB_X0 + tabw
     lx_l, lx_r = tx0 - B_BLOCK, tx1 + B_BLOCK
     wall_top, wall_bot = wall_u - B_SLOT_MARGIN, wall_l + B_SLOT_MARGIN
-    cu = 8
+    cu = CU_DRAWN_MM * S_B                              # 2.2 -- drawn copper thickness (see CU_DRAWN_MM)
 
     c.text(B_PANEL_X0 + 16, 200, "VIEW B — section ACROSS the tab, normal to the insertion axis",
            size=18, weight="bold")
@@ -601,14 +633,10 @@ def view_b(c):
     # the cut faces of the slot
     c.rect(lx_l, wall_u, lx_r - lx_l, 6, tag="cut face upper", fill=CUT, stroke="none")
     c.rect(lx_l, wall_l - 6, lx_r - lx_l, 6, tag="cut face lower", fill=CUT, stroke="none")
-    # the tab, end-on
+    # the tab, end-on. Its own copper is drawn per land, below, as FOUR SEPARATE CONDUCTORS on each face:
+    # there is NO continuous strip across the tab. A single strip would connect W1_SOLAR_P, GND, W1_RF and
+    # W1_SOLAR_N -- i.e. depict four nets shorted (review r4 defect 3).
     c.rect(tx0, face_u, tabw, tw, tag="tab end-on", fill=STEEL, stroke=STEEL_DK, stroke_width="1.6")
-
-    # the tab's own copper, one layer per face, over the tab's FULL width -- the same pattern View A draws
-    c.rect(tx0, face_u, tabw, cu, tag="tab copper upper", fill=COPPER, stroke=COPPER_DK,
-           stroke_width="0.6", opacity="0.5")
-    c.rect(tx0, face_l - cu, tabw, cu, tag="tab copper lower", fill=COPPER, stroke=COPPER_DK,
-           stroke_width="0.6", opacity="0.5")
 
     # the four lands in one row across the tab: 1.2 mm land, 0.6 mm gap, 1.2 mm tab margin at each end
     land_w = LAND_WID_MM * S_B                          # 52.8
@@ -623,13 +651,15 @@ def view_b(c):
                stroke_width="0.9")
         c.rect(x0, wall_l, x1 - x0, cu, tag=f"hub land {k+1}b", fill=COPPER, stroke=COPPER_DK,
                stroke_width="0.9")
-        c.rect(x0, face_u, x1 - x0, cu, tag=f"tab land {k+1}", fill=COPPER, stroke=COPPER_DK,
-               stroke_width="0.9")
-        c.rect(x0, face_l - cu, x1 - x0, cu, tag=f"tab land {k+1}b", fill=COPPER, stroke=COPPER_DK,
-               stroke_width="0.9")
-        c.rect(x0, wall_u, x1 - x0, face_u - wall_u, tag=f"fillet {k+1} f1", fill=GOLD,
+        # ONE CONDUCTOR PER NET on each face, on the substrate's OUTER face, with bare substrate in the
+        # 0.6 mm gap between conductors -- the insulating gap is drawn, not implied
+        c.rect(x0, face_u - cu, x1 - x0, cu, tag=f"tab conductor {k+1}", fill=COPPER,
+               stroke=COPPER_DK, stroke_width="0.9")
+        c.rect(x0, face_l, x1 - x0, cu, tag=f"tab conductor {k+1}b", fill=COPPER,
+               stroke=COPPER_DK, stroke_width="0.9")
+        c.rect(x0, wall_u, x1 - x0, (face_u - cu) - wall_u, tag=f"fillet {k+1} f1", fill=GOLD,
                stroke=COPPER_DK, stroke_width="0.6")
-        c.rect(x0, face_l, x1 - x0, wall_l - face_l, tag=f"fillet {k+1} f2", fill=GOLD,
+        c.rect(x0, face_l + cu, x1 - x0, wall_l - (face_l + cu), tag=f"fillet {k+1} f2", fill=GOLD,
                stroke=COPPER_DK, stroke_width="0.6")
         c.text((x0 + x1) / 2, wall_bot + 34, B_LABELS[k], size=12.5, anchor="middle", fill=COPPER_DK)
 
@@ -642,7 +672,18 @@ def view_b(c):
           feat_y=wall_u - cu, label_dx=92.4)
     dim_h(c, tx0, tx1, wall_bot + 74, f"tab {TAB_WID_MM:.1f} mm wide", feat_y=wall_bot, above=False)
     dim_v(c, wall_u, wall_l, lx_r + 40, f"slot {SLOT_W_MM:.1f} mm", feat_x=lx_r, side="right")
-    dim_v(c, face_u, face_l, lx_l - 40, f"tab {TAB_T_MM:.1f} mm", feat_x=tx0, side="left")
+
+    # THE TAB-THICKNESS DIMENSION, corrected (review r4 defect 1). Its extension lines attach to the FR4
+    # substrate's own boundaries at face_u / face_l -- the tab's copper is drawn OUTSIDE them, so the span
+    # excludes both copper layers -- and it is labelled for the SUBSTRATE, not for the tab. The phrase is
+    # wider than the margin available at the dimension line, so a short leader carries it into the free
+    # area left of the hub block, stacked on two lines.
+    mid_b = (face_u + face_l) / 2.0
+    tx_dim_x = lx_l - 40
+    dim_v(c, face_u, face_l, tx_dim_x, "", feat_x=tx0, side="left")
+    c.line(tx_dim_x, face_l + 16, tx_dim_x, mid_b + 42, stroke=INK, stroke_width="1")
+    c.text(lx_l - 36, mid_b + 56, "FR4 substrate", size=13, anchor="end")
+    c.text(lx_l - 36, mid_b + 72, "0.6 mm", size=13, anchor="end")
 
     # balloons
     balloon(c, land_xs[3][1], wall_top - 24, 7)
@@ -650,7 +691,10 @@ def view_b(c):
     balloon(c, lx_l - 34, wall_top + 30, 8)
     stub(c, lx_l - 34, wall_top + 39, land_xs[0][0] + 12, (wall_u + face_u) / 2)
     balloon(c, lx_r - 26, wall_bot - 26, 9)
+    # balloon 10 names the tab, so it carries a LEADER to the tab (review r4 defect 2): without one it sat
+    # in the hub material with nothing connecting it to what it names.
     balloon(c, tx0 + 40, wall_bot - 26, 10)
+    stub(c, tx0 + 40, wall_bot - 26 - 11, tx0 + 40, face_l - 4)
 
 
 # ---------------------------------------------------------------------------------------------------
@@ -658,10 +702,11 @@ def view_b(c):
 # ---------------------------------------------------------------------------------------------------
 TABLE_ROWS = [
     ("Sheet scope",
-     "This sheet depicts the COMMITTED hub-side interface geometry for fabrication review. It does NOT "
-     "fix the hub's outline, thickness or layer count, the component keep-out at the slot, the slot's "
-     "extent along the hub edge, or any price — none of those is fixed by a record we hold, and none is "
-     "asserted here."),
+     "This sheet depicts the COMMITTED hub-side interface geometry for fabrication review. It is TWO "
+     "SECTIONS: nothing outside them is drawn — no solder-mask geometry, no plan view, no keep-out "
+     "outline. It does NOT fix the hub's outline, thickness or layer count, the component keep-out at the "
+     "slot, the slot's extent along the hub edge, or any price — none of those is fixed by a record we "
+     "hold, and none is asserted here."),
     ("Committed geometry",
      "Routed slot 0.9 x 6.0 mm in the hub edge, 0.6 mm tab seated 6.0 mm into it, the four lands on the "
      "slot's faces, the fillet loaded in SHEAR on BOTH faces. This is ADR-048 §2.2 / ADR-046 §4.2.2 — the "
@@ -681,10 +726,10 @@ TABLE_ROWS = [
      "NOT established by the pad-face finish. Copper newly exposed by routing the slot is on a CUT face, "
      "which the pad's mask opening and finish do not cover. We are asking, not asserting — QUESTION Q1."),
     ("Solder mask",
-     "The four lands are drawn as bare copper. Solder-mask GEOMETRY is NOT drawn on this sheet: whether "
-     "a mask opening is required on the routed faces is part of the same open question as their finish "
-     "(Q1), and the component keep-out (slot outline + 1.0 mm, ADR-048 §2.2) is a PLACEMENT constraint, "
-     "not interface geometry — see the sheet-scope row."),
+     "The four lands are drawn as bare copper, so NO solder-mask geometry is drawn on this sheet at all: "
+     "whether a mask opening is required on the routed faces is part of the same open question as their "
+     "finish (Q1), and the sheet does not assert a mask either way. The component keep-out is a PLACEMENT "
+     "constraint, not interface geometry, and is not drawn — see the sheet-scope row."),
     ("Copper at the interface",
      "The slot's MOUTH reaches the outline ON THE SLOT'S CENTRE LINE — ADR-048 §2.5: \"the land IS the "
      "interface\". The land copper runs 1.0 … 5.0 mm inboard of that edge (ADR-048 D-1, as in the "
@@ -695,16 +740,21 @@ TABLE_ROWS = [
      "the tab. Plain exposed copper on a plain routed cut."),
     ("Land construction — UNVERIFIED",
      "The four lands on the slot's faces are drawn as copper because ADR-048 §2.2 places them there, but "
-     "HOW they are produced is NOT established by any record we hold: ordinary outer-layer copper that "
-     "routing simply cuts past, or another operation. No plating is wanted. UNVERIFIED — do not treat the "
-     "drawn lands as a fabricable construction. QUESTION Q6."),
+     "HOW they are produced, and which copper layer they are part of, is NOT established by any record we "
+     "hold. No plating is wanted. UNVERIFIED — do not treat the drawn lands as a fabricable construction. "
+     "QUESTION Q6."),
     ("Tab stack-up",
-     "The 0.6 mm is the tab's FR4 SUBSTRATE thickness (ADR-046 §4.1). The tab also carries a copper "
-     "layer on each face — drawn on both sections at 35 µm (1 oz) per the board stack-up, of which the "
-     "four 4.0 × 1.2 mm lands are the solderable patches. The FINISHED tab is thicker by that copper and "
-     "its finish, so the finished solder gap is narrower than the 0.30 mm nominal. The tab's FINISH is "
-     "not fixed by a record we hold — the same class of question as the routed face, so it is included in "
-     "QUESTION Q1."),
+     "The 0.6 mm is the tab's FR4 SUBSTRATE thickness (ADR-046 §4.1) and it is what the View B dimension "
+     "measures — the tab's copper is drawn on the substrate's OUTER faces, outside that span. The tab "
+     "carries a copper layer on each face, drawn on both sections at 35 µm (1 oz) per the board stack-up, "
+     "of which the four 4.0 × 1.2 mm lands are the solderable patches. The FINISHED tab is thicker by that "
+     "copper and its finish, so the finished solder gap is narrower than the 0.30 mm nominal. The tab's "
+     "FINISH is not fixed by a record we hold — the same class of question as the routed face, so it is "
+     "included in QUESTION Q1."),
+    ("Mating fit — UNVERIFIED",
+     "The finished tab thickness, the slot's width and depth tolerances, the finished solder clearances, "
+     "the slot-end radius and the tab-tip relief are NOT fixed by any record we hold — they are design "
+     "decisions. They are shown UNVERIFIED — under query (Q7); no value for any of them is invented here."),
     ("Routed edge positional tolerance",
      "Routed edge and slot relative to copper — please advise your capability. QUESTION Q2."),
     ("Minimum routable slot",
@@ -720,9 +770,11 @@ TABLE_ROWS = [
      "Please advise mitigation if the cut produces them at the interface, and whether a finish on the cut "
      "face changes that."),
     ("Alignment caveat (design)",
-     "The slot BOUNDS the attach angle; it does NOT key it. 0.30 mm of play over a 6.0 mm insertion is "
-     "2.86°, i.e. 8.79 mm of wing-tip movement at 176 mm (ADR-046 §4.2.2). The 90° angle is a FIXTURING "
-     "requirement, and this sheet does not claim otherwise."),
+     "The slot BOUNDS the attach angle; it does NOT key it. ADR-046 §4.2.2's figure is BARE-SUBSTRATE: "
+     "0.30 mm of play over a 6.0 mm insertion is 2.86°, i.e. 8.79 mm of wing-tip movement at 176 mm. With "
+     "the tab's copper on each face the finished play is narrower — 0.30 − 2 × 0.035 ≈ 0.23 mm, ≈ 2.20° / "
+     "6.74 mm — and finish and tolerances narrow it further. The 90° angle is a FIXTURING requirement, and "
+     "this sheet does not claim otherwise."),
 ]
 
 QUESTION_ROWS = [
@@ -743,10 +795,11 @@ QUESTION_ROWS = [
     ("Q5  cost",
      "What is the additional cost of an internal routed cut-out on this order, as a line item?"),
     ("Q6  copper on the slot faces",
-     "Our lands sit on the two faces that bound the routed slot (F.Cu and B.Cu, 4.0 × 1.2 mm each). How do "
-     "you realise copper on the faces of a routed slot — is it the ordinary outer-layer copper that the "
-     "routing simply cuts past, or does it need another operation? We do NOT want a plated slot barrel. "
-     "Please tell us what to specify, and say if what we have drawn is not producible."),
+     "Our lands sit on the two OPPOSED INTERNAL ROUTED-SLOT FACES (4.0 × 1.2 mm per face). We are NOT "
+     "identifying them as outer-layer F.Cu / B.Cu — those are the hub's EXTERNAL copper layers, a different "
+     "surface. HOW that copper is produced and WHICH layer it connects to is UNRESOLVED by any record we "
+     "hold, so we assert no construction. We do NOT want a plated slot barrel. Please tell us what to "
+     "specify, and say if what we have drawn is not producible."),
     ("Q7  slot end radius",
      "A routed slot's inner end carries the cutter's radius. What radius will our 0.9 mm slot end have, and "
      "what relief or clearance must the mating tab's tip have to seat against it? We have drawn a "
