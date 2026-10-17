@@ -51,7 +51,7 @@ Dependency-ordered gap list across all three boards, from an independent visual/
 
 | item | state |
 |---|---|
-| **`U1.41` — the radio's exposed ground pad** | ~~**has no net** (pad-number mismatch); an electrical defect~~ **CORRECTED 2026-10-17:** measured, `U1`'s 13 pads numbered `41` are all on `GND` (thermal-via array) and its 9 unnamed pads are `F.Paste`-only stencil apertures. Not a defect. Owning record: `docs/fab/U1-FOOTPRINT-DIAGNOSIS.md` |
+| ~~`U1.41` — the radio's exposed ground pad has no net~~ | **DISPROVEN 2026-10-17 — not a defect.** The thirteen `41` pads are a thermal-via array **all on `GND`**; the nine unnamed pads are `F.Paste`-only stencil apertures with **no copper**. See `U1-FOOTPRINT-DIAGNOSIS.md` |
 | **Schematic ERC** | **20 errors** — 12 floating `U_CUT1–4` pins, `U4`'s two power pins undriven |
 | **Wing joint geometry** | **OPEN** — ADR-046 §4.2.1; the board is Option B, the ADR recommends Option A |
 | **Interface drawing** | **HELD** — no interface drawing goes to a fabricator while the geometry is undecided |
@@ -68,17 +68,10 @@ decided. Everything else above can proceed in parallel with your answers.
 - **ORDERABLE** — every gate passes and the artifacts match the design. Nothing here qualifies.
 - **fit to show, not to order** — the current target. Reviewable, with open items named.
 - **PENDING** — a check that cannot run yet. Not a pass; a stated gap.
-- **WAIVED** — a check whose artifact does not exist and is deliberately not fabricated, with a reason
-  that **prints at run time** from a committed record (`base_station/FR-CHECK-WAIVER.md`). Stronger than
-  PENDING: deleting the record does not make the gap green — an absent artifact with no `WAIVER:` entry
-  is reported **FAIL**. `--strict-waivers` turns every waiver into a failure for a release gate.
-  See `BASE-STATION-F-CHECKS.md`.
 - **measured** — read from the board or the tool, with the path and sha256 recorded.
 - **assumed** — an explicit assumption, flagged wherever it appears, never silently folded into a result.
 
 ## The rule this directory is built on
 
 **A gate that cannot run must not look green.** Every check here either passes, fails, or prints
-`PENDING`/`WAIVED` with its reason. A check that prints nothing is the failure mode the whole set exists
-to catch. A waiver is never a pass: it is countable, it prints, and it cannot be retired by deleting its
-record.
+`PENDING` with its reason. A check that prints nothing is the failure mode the whole set exists to catch.

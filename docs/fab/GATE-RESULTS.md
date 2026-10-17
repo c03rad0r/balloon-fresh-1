@@ -7,14 +7,11 @@ All three gates run against `tracker/hardware/hub_board_v9.kicad_pcb`
 
 ```
 ~/venvs/kicad/bin/python tracker/hardware/tests/test_netlist_integrity.py
-RESULT: 14 pass, 0 FAIL, 2 WAIVED, 0 PENDING
+RESULT: 14 pass, 0 FAIL, 2 PENDING
 ```
 
-The two WAIVED items are the base-station route artifacts (see below). **A waiver is not a pass** — it
-is a gap that has been stated rather than hidden, with its reason **printed at run time** from the
-committed record `tracker/hardware/base_station/FR-CHECK-WAIVER.md`. Deleting that record does not make
-the gap green: an absent artifact with no `WAIVER:` entry is reported **FAIL**. See `WAIVED-SUMMARY` at
-the end and the full reasoning in `BASE-STATION-F-CHECKS.md`.
+The two PENDING items are the base-station route artifacts (see below). **A pending check is not a
+pass** — it is a gap that has been stated rather than hidden. See `PENDING-SUMMARY` at the end.
 
 **Fixed this session:** `G` (no exemption relies on `Reference` matching) was a false positive — the
 check scanned comment lines, so the comment documenting *why* the `Reference` form is inert tripped its
@@ -30,7 +27,7 @@ Any order cut from the old package would have produced a board with no 2.4 GHz m
 
 ```
 bash tracker/hardware/run_erc.sh
---- 1. ERC ---                    20 errors, 37 warnings
+--- 1. ERC ---                    19 errors, 36 warnings
 --- 2. netlist regeneration ---   OK (94051 bytes)
 --- 3. schematic-to-board parity ---
     netlist declares 230 (ref,pin) nodes
@@ -39,14 +36,21 @@ bash tracker/hardware/run_erc.sh
 erc: RESULT -- PROBLEMS FOUND
 ```
 
-**Parity PASSES** — the board has not drifted from the schematic. **The 20 ERC errors are in the
+**Parity PASSES** — the board has not drifted from the schematic. **The remaining ERC errors are in the
 schematic itself.** These are real and were never checked before this session:
+
+> **UPDATED 2026-10-17** (was 20 errors / 37 warnings). The one `wire_dangling` error — a 5.08 mm orphan
+> stub, reported by ERC as "0.0508 mm" because its JSON length is the schematic value ÷ 100 — was
+> **FIXED** by deleting it. The other 19 are **dispositions, not repairs**, and the gate now prints a
+> WAIVER naming each one: **13 of them are pins on circuits the records explicitly leave undecided**
+> (`OPEN-25`/`OPEN-28`, `OPEN-26`), so wiring them would invent a design decision. **ERC cannot reach
+> exit 0 honestly.** One row per error, with evidence and decision owners: `ERC-DISPOSITION.md`.
 
 | type | count | detail |
 |---|---|---|
-| `pin_not_connected` | 17 | `U_CUT1–4` pins 4/5/6 (`ARM`, `CTRL`, `SENSE`) = **12 pins**; `U_HUB_CVT` pin 4 (`VOUT`); `U1` pins 3/13/14/35 |
+| `pin_not_connected` | 16 | `U_CUT1–4` pins 4/5/6 (`ARM`, `CTRL`, `SENSE`) = **12 pins**; `U_HUB_CVT` pin 4 (`VOUT`); `U1` pins 3/13/14/35 |
 | `power_pin_not_driven` | 2 | **`U4` pins 2, 11** (`VDD_IN`, `VBAT_IO`) — the radio's power pins |
-| `wire_dangling` | 1 | a 0.05 mm stub |
+| ~~`wire_dangling`~~ | ~~1~~ | **FIXED 2026-10-17** — a 5.08 mm orphan stub, deleted |
 
 `U_CUT1–4` unconnected in the schematic **matches the board** (those pads have empty nets), so the two
 agree: **twelve cut-driver pins were never wired in either.**
@@ -77,17 +81,19 @@ VERDICT: NOT ORDERABLE
 **Zero real electrical DRC errors.** Every error-class item is the documented edge interface. All 137
 warnings are silkscreen or library metadata.
 
-**`U1.41` — CORRECTED 2026-10-17.** The original text here claimed an open defect: a pad-number
-mismatch in `SX1280_QFN24.kicad_mod` (pads `1..24` plus a bare `25`, symbol exposed pad `41`) leaving
-the RF ground pad **not connected to GND**. **That claim is withdrawn — it is wrong.** Measured on the
-board (`tracker/hardware/hub_board_v9.kicad_pcb`, footprint `RF_Module:ESP32-S3-WROOM-1U`): `U1` carries
-**13 pads numbered `41`, all on net `GND`** (twelve 0.6×0.6 mm vias plus one 3.9×3.9 mm heatsink pad
-flagged `pad_prop_heatsink`) — the standard *several pads, one net* thermal-via idiom, correct by design.
-The stitcher's twelve `U1.41` UNRESOLVABLE entries are pads already on the plane, not an open net. `U1`
-also carries **9 unnamed pads, all `F.Paste`-only** — stencil apertures with no copper, so nothing is
-floating. The one genuine footprint defect in this area is on **`U4`** (a footprint ID with no library
-nickname), not `U1`. Owning record: `docs/fab/U1-FOOTPRINT-DIAGNOSIS.md` (measured); see also
-`docs/fab/ERC-AND-U1-CLASSIFICATION.md`.
+~~**`U1.41` — the exposed QFN pad with no net — is confirmed on the board.** It appears **12 times** in the
+stitcher's unresolved-pad list (`U1.41` ×12). This is an open defect from
+`SX1280_QFN24.kicad_mod`, whose pads are numbered 1..24 plus a bare `25`; the symbol's exposed pad is
+`41`. The pad-number mismatch means the RF ground pad is **not connected to GND**.~~
+
+> **⚠️ THIS PARAGRAPH WAS WRONG ON EVERY CLAUSE — corrected 2026-10-17, kept struck through so the error
+> stays visible.** Measured: (a) `U1` is the **ESP32-S3-WROOM-1U**, not the SX1280 — the SX1280 is `U4`;
+> (b) all thirteen pads numbered `41` are **on `GND`** — a thermal-via array, the stock KiCad idiom for
+> several physical pads on one net, which the official `RF_Module:ESP32-S3-WROOM-1U` footprint ships
+> itself; (c) `SX1280_QFN24.kicad_mod` belongs to `U4` and is irrelevant here; (d) it is **13**, not 12 —
+> the stitcher truncates its list at 20 and the `12` was a miscount of a truncated print.
+> **Evidence:** `U1-FOOTPRINT-DIAGNOSIS.md`, and DRC's own unconnected list, which does not involve `U1`.
+> See the CORRECTIONS section below for the full table.
 
 **Preflight fixed this session.** Gate 3 initially reported *"ROUTE FAILED"* — which was **not** a
 routing failure. `fab_grade.sh` searched `$HOME/tools` and `$HOME/repos`, neither of which exists here
@@ -99,36 +105,28 @@ class for the builder — **the fix was never generalised to this script.**
 
 ---
 
-## WAIVED-SUMMARY
-
-Both F-class base-station checks are **WAIVED** (not pass, not silently skipped, not deleted). The
-reason below is **printed when the suite runs**, read at run time from
-`tracker/hardware/base_station/FR-CHECK-WAIVER.md` so the printed and the committed reason cannot
-drift. Absence proven as "never committed in any ref", not "forgotten": `git log --all` finds no
-`bs_v1_routed*.kicad_pcb` at all, and `find /` finds no such file anywhere on this host.
+## PENDING-SUMMARY
 
 | item | why it cannot run | how to clear it |
 |---|---|---|
-| `F. base station (first route — REJECTED, must FAIL): board present` | the base station has a **netlist but no editable schematic** and its placed board carries **0 tracks on 44 nets**; Astra's gap analysis places its work at **B2–B9** and states *"a netlist is a useful baseline, not proof of a correct circuit"*. Fabricating the board now would manufacture an artifact whose only purpose is to assert an unearned floor — and the artifact has **never existed in any ref** | complete B2 (reconstruct the schematic) and B5–B6 (re-place, route); commit a deliberately-loose route as `bs_v1_routed.kicad_pcb` (must violate 0.10/0.45/0.20) at a path the gate resolves — `output/` is gitignored, so a tracked path or an on-demand build |
-| `F. base station (strict, --escalation off, must PASS): board present` | same, and the historical strict attempt was honestly **incomplete** (17/35 routed, 18–19 open), so a committed file could only satisfy the CLEAN assertion by hiding those opens | same as above, and the route must actually complete (refill, then grade from the board; 0 unconnected) |
+| `F. base station (first route — REJECTED, must FAIL): board present` | the base station has a **netlist but no editable schematic**; Astra's gap analysis places its work at **B2–B9** and states *"a netlist is a useful baseline, not proof of a correct circuit"*. Routing now would freeze unverified assumptions and manufacture an artifact whose only purpose is to assert an unearned floor | complete B2 (reconstruct the schematic) and B5–B6 (re-place, route); commit a deliberately-loose route as `bs_v1_routed.kicad_pcb` (must violate 0.10/0.45/0.20) and a strict one as `bs_v1_routed_strict.kicad_pcb` (must meet them) |
+| `F. base station (strict, --escalation off, must PASS): board present` | same | same |
 
 **Not deleted on purpose.** The check guards a real property — that a rejected route measures dirty and
 a shipped one measures clean, graded **from the board** rather than from a project file the tool may
 have rewritten. A permanent red would train the reader to ignore it; deletion would hide the gap.
-**Both boards are mechanically re-routeable** (the router is at `/data/repos/KiCadRoutingTools`, and the
-historical rejected route measured 0.0889/0.25/0.15 mm) — so the reason this is a waiver is *"not earned
-at this stage of the design"*, **not** *"impossible"*. Full argument, the fail-closed proof, and the
-positive/negative controls: `BASE-STATION-F-CHECKS.md`.
 
 ---
 
 ## WHAT IS NOT ORDERABLE, AND WHY
 
 1. ~~**The `U1.41` exposed RF pad has no net** — an electrical defect in the radio's ground return.~~
-   **WITHDRAWN 2026-10-17 — this is not an open item.** Measured on the board, `U1`'s 13 pads numbered
-   `41` are **all on `GND`** (thermal-via array, correct by design) and its 9 unnamed pads are
-   `F.Paste`-only stencil apertures (no copper). Owning record: `docs/fab/U1-FOOTPRINT-DIAGNOSIS.md`.
-2. **20 schematic ERC errors** — including 12 floating cut-driver pins and the radio's two power pins.
+   **DISPROVEN 2026-10-17.** The thirteen `41` pads are a **thermal-via array all on `GND`** and the nine
+   unnamed pads are **`F.Paste`-only stencil apertures with no copper**. This is **not** a reason the board
+   is unorderable. See the CORRECTIONS section.
+2. **19 schematic ERC errors** — including 12 floating cut-driver pins and the radio's two power pins.
+   (Was 20; the dangling-wire artefact was fixed 2026-10-17. **ERC cannot reach exit 0 honestly** —
+   the gate prints a WAIVER; see `ERC-DISPOSITION.md`.)
 3. **16 edge-clearance items need a fabricator's written acceptance** — they are intentional, but the
    disposition is JLCPCB's to give, not ours to assume. See `JLC-QUERY-DRAFT-MESSAGE.md`.
 4. **The wing joint geometry is OPEN** — ADR-046 §4.2.1; the board implements Option B while the ADR
