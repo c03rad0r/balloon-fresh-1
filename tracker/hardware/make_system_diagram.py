@@ -18,10 +18,40 @@ V2 -- AFTER A VISUAL REVIEW FOUND SEVEN DEFECTS, one of them substantive:
      the dashed connectors; the red radio-link line crossed its own annotation; the status panel
      overlapped the ground box; and space was unbalanced (empty flight box vs cramped labels).
 
+V3 -- AFTER THE r3 REVIEW'S FOUR FINDINGS WERE MEASURED INSTEAD OF EYEBALLED. r3
+(docs/fab/reviews/system-diagram-r3.md) reported: A's arrow "ends in a downward arrow TO THE RIGHT OF
+THE HUB CIRCLE, leaving a visible gap"; "the horizontal red line from the flight-segment box STOPS
+SHORT of the HUB circle"; "the 'HUB' label is cramped against and appears to touch/overlap the circle
+outline"; and the relay is "not yet visually unambiguous". It recorded NO terminal verdict and nobody
+acted on it, so the findings sat in the tree looking reviewed. Measured on the artefact r3 saw:
+
+  * A's arrow tip was 5.0 px INSIDE r=18 -- it landed, but the arrowhead is 33 x 30 user units and the
+    node is only 36 across, so the head COVERED the node: the connection read as ambiguous, which is
+    what "leaving a visible gap" was describing from the outside.
+  * the flight-segment line's tip was 3.93 px OUTSIDE r=18 -- a real gap, confirmed.
+  * the "HUB" label ink was 2.00 px from the node's stroke ring, on a label 27.8 units wide inside a
+    33.5-unit inner diameter -- cramped, confirmed.
+
+WHAT V3 CHANGES, all of it computed rather than placed by eye:
+  * the relay node is r=34 (was 18), so a fixed-size arrowhead is a detail on it instead of an object
+    that swallows it;
+  * the arrowhead marker is markerUnits="userSpaceOnUse" at a fixed 12 x 10 units, so its size no
+    longer scales with the stroke width (it used to be 11 x 3 = 33 units long by accident);
+  * every link endpoint is DERIVED from the node's centre and radius by attach()/leave(), which puts
+    each tip a stated penetration inside the ring and each departure exactly on it;
+  * the node's label sits OUTSIDE the circle ("BALLOON", 12 units clear of the ring) instead of being
+    squeezed inside it, and names the thing the diagram is about;
+  * the two hops are numbered ("hop 1 of 2" / "hop 2 of 2") so A -> balloon -> B reads as a sequence,
+    and they attach at the node's TOP and BOTTOM so they cannot be mistaken for one continuous path.
+
+scripts/check_system_diagram_geometry.py measures all of this from the SVG (and cross-checks the
+rendered PNG); tests/test_system_diagram_geometry.py runs it and proves it can fail.
+
 Output: docs/boards/system-diagram.svg (+ .png)
 Run:    python3 tracker/hardware/make_system_diagram.py
 """
 import argparse
+import math
 import os
 import shutil
 import subprocess
@@ -29,6 +59,47 @@ import tempfile
 
 W, H = 1620, 960
 OUT = "docs/boards/system-diagram.svg"
+
+# ---------------- relay-node geometry. ONE source of truth: every link endpoint is derived from these
+# numbers, never written as a literal. The previous version placed them by hand and got two of the
+# three wrong in a way no test could see.
+NODE = dict(cx=940.0, cy=330.0, r=34.0, sw=2.5)
+# The two ground stations share a column. Named because the link geometry is derived from it: the
+# free vertical channel between the flight box and the stations is where A's link runs.
+STATION_X, STATION_W = 1120.0, 430.0
+
+# The arrowhead is 12 x 10 USER units (markerUnits="userSpaceOnUse"), drawn with its tip at marker
+# x=12 and refX=10.5, so it extends 1.5 units past the path's last point.
+ARROW_TIP_OVERHANG = 1.5
+# How far the tip goes past the ring's centre-line, i.e. into the node. Enough that the head visibly
+# touches the ring and not so much that it buries the node.
+ARROW_TIP_PENETRATION = 3.0
+ARROW_VIEW_W, ARROW_VIEW_H = 12, 10
+
+
+def attach(node, direction):
+    """Endpoint and tip for an arrow ENTERING `node` along `direction` (a vector pointing at the
+    node's centre). The tip lands ARROW_TIP_PENETRATION inside the ring; the path stops
+    ARROW_TIP_OVERHANG short of the tip because the marker's own geometry extends past it."""
+    d = math.hypot(*direction)
+    ux, uy = direction[0] / d, direction[1] / d
+    ex, ey = node["cx"], node["cy"]
+    tip = (ex - ux * (node["r"] - ARROW_TIP_PENETRATION),
+           ey - uy * (node["r"] - ARROW_TIP_PENETRATION))
+    end = (tip[0] - ux * ARROW_TIP_OVERHANG, tip[1] - uy * ARROW_TIP_OVERHANG)
+    return end, tip
+
+
+def leave(node, direction):
+    """The point where a path DEPARTS the node's ring, along `direction` away from the centre."""
+    d = math.hypot(*direction)
+    ux, uy = direction[0] / d, direction[1] / d
+    return (node["cx"] + ux * node["r"], node["cy"] + uy * node["r"])
+
+
+def pt(p):
+    """SVG coordinates for a computed point, at a precision that does not depend on the platform."""
+    return f"{p[0]:.2f} {p[1]:.2f}"
 
 
 def box(x, y, w, h, title, lines, fill, stroke, tcol="#111", pad=18):
@@ -47,8 +118,14 @@ def main():
     p = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" '
          f'font-family="DejaVu Sans, Helvetica, sans-serif">',
          f'<rect width="{W}" height="{H}" fill="#ffffff"/>',
-         '<defs><marker id="ar" markerWidth="11" markerHeight="11" refX="9" refY="5.5" '
-         'orient="auto"><path d="M0,1 L11,5.5 L0,10 z" fill="#b00020"/></marker></defs>',
+         # The arrowhead is a FIXED-SIZE object in user units. Before, markerUnits defaulted to
+         # strokeWidth, so an 11-unit marker on a 3-unit stroke rendered 33 units long and 30 wide --
+         # wider than the node it was pointing at. Its size was an accident of the stroke width.
+         f'<defs><marker id="ar" markerUnits="userSpaceOnUse" markerWidth="{ARROW_VIEW_W}" '
+         f'markerHeight="{ARROW_VIEW_H}" refX="{ARROW_VIEW_W - ARROW_TIP_OVERHANG}" '
+         f'refY="{ARROW_VIEW_H / 2}" orient="auto">'
+         f'<path d="M0,1 L{ARROW_VIEW_W},{ARROW_VIEW_H / 2} L0,{ARROW_VIEW_H - 1} z" '
+         f'fill="#b00020"/></marker></defs>',
          '<text x="40" y="50" font-size="25" font-weight="bold">'
          'Pico-balloon relay: balloons as a bent pipe between base stations</text>',
          '<text x="40" y="78" font-size="14.5" fill="#444">'
@@ -79,14 +156,14 @@ def main():
              '4× wing socket: tab into a 0.9×6.0 mm slot — GEOMETRY OPEN (ADR-046 §4.2.1)</text>')
 
     # ---------------- TWO ground stations, with the balloon as the relay between them
-    p.append(box(1120, 150, 430, 170,
+    p.append(box(STATION_X, 150, STATION_W, 170,
                  "BASE STATION A — ground · 70×50 mm",
                  ["SIM7600E-H 4G/5G backhaul",
                   "FLRC link up to the balloon",
                   "placed only: 44 footprints, 44 nets, 0 tracks",
                   "no editable schematic yet (B2–B9)"],
                  "#fff4e8", "#b0742f"))
-    p.append(box(1120, 560, 430, 170,
+    p.append(box(STATION_X, 560, STATION_W, 170,
                  "BASE STATION B — ground · 70×50 mm",
                  ["same board design as A",
                   "reached ONLY via the balloon relay",
@@ -94,31 +171,79 @@ def main():
                   "no direct A–B path is assumed"],
                  "#fff4e8", "#b0742f"))
 
-    # A -> balloon -> B as TWO SEPARATE links. A visual review found that V2's elbow path joined A to B
-    # through a shared vertical segment -- i.e. it DREW the direct ground-to-ground link that the label
-    # says does not exist. Two links that both terminate on the hub, and never touch each other.
-    p.append('<circle cx="960" cy="270" r="18" fill="#e8f1ff" stroke="#b00020" stroke-width="2.5"/>')
-    p.append('<text x="960" y="275" font-size="11.5" font-weight="bold" fill="#b00020" '
-             'text-anchor="middle">HUB</text>')
+    # ---------------- the relay node: the balloon. A -> balloon -> B as TWO SEPARATE links.
+    # A visual review found that V2's elbow path joined A to B through a shared vertical segment -- i.e.
+    # it DREW the direct ground-to-ground link the label says does not exist. Both links terminate ON
+    # this node and never touch each other; the checker measures that closest approach.
+    p.append(f'<circle cx="{NODE["cx"]}" cy="{NODE["cy"]}" r="{NODE["r"]}" fill="#fdecef" '
+             f'stroke="#b00020" stroke-width="{NODE["sw"]}"/>')
+    # The label sits BESIDE the node, in the free channel between the flight box and the stations.
+    # Inside the circle, the ink of a legible label sits a couple of units off the ring -- which is
+    # exactly what r3 reported as "cramped against the circle outline". Beside it, the measured
+    # clearance is tens of units AND the label can be read at the size shown.
+    # The block starts BELOW A's bottom border (y=320), not level with it: at cy-10 the BALLOON ink
+    # began 7 units under the box and the reviewer read the group as crowding A's lower-left corner.
+    NODE_LABEL_X = NODE["cx"] + NODE["r"] + 16
+    NODE_LABEL_Y = 328.0
+    p.append(f'<text x="{NODE_LABEL_X}" y="{NODE_LABEL_Y}" font-size="16" '
+             f'font-weight="bold" fill="#b00020">BALLOON</text>')
+    p.append(f'<text x="{NODE_LABEL_X}" y="{NODE_LABEL_Y + 16}" font-size="12" fill="#b00020">'
+             f'relay node — the flight segment: hub v9 + 4 wings</text>')
+    p.append(f'<text x="{NODE_LABEL_X}" y="{NODE_LABEL_Y + 32}" font-size="12" fill="#b00020">'
+             f'this is the "hub" node in the FLIGHT SEGMENT box above</text>')
 
-    # A -> hub  (upper link). Ends ON the circle's boundary: the circle is (960,270) r=15, so the top of
-    # its boundary is y=255. The arrowhead must LAND there, not near it -- a review caught the previous
-    # arrow stopping short at y=262 with x=1000, i.e. 40 units to the right of the circle.
-    p.append('<path d="M 1120 200 L 960 200 L 960 251" stroke="#b00020" stroke-width="3" '
-             'fill="none" marker-end="url(#ar)"/>')
-    # hub -> B  (lower link, from the circle's underside straight down, then across to B's top edge).
-    # Circle boundary bottom = y=285.
-    p.append('<path d="M 960 285 L 960 500 L 1240 500 L 1240 556" stroke="#b00020" '
-             'stroke-width="3" fill="none" marker-end="url(#ar)"/>')
+    # A -> balloon: out of A's left edge, down the free channel, then ACROSS and DOWN onto the node's
+    # TOP. The tip lands ARROW_TIP_PENETRATION inside the ring; the endpoint stops short by the
+    # marker's overhang. Both numbers come from attach(), so moving the node cannot silently
+    # reintroduce the r3 gap.
+    # The path's LAST segment must be the one that points at the node, because the marker orients on
+    # it: an earlier version turned diagonally at the end and the arrowhead swung off the vertical by
+    # ~28 degrees, which measured as a 2.6-unit penetration instead of the intended 3.0.
+    # ONE elbow, not two. An earlier version left A at y=235 and jogged down to y=250 inside the
+    # channel, which a reviewer read as "an unnecessary-looking small step ... arbitrary compared with
+    # a simpler elbow route". Depart at the corridor's own y so the route is A -> corner -> node.
+    a_channel = STATION_X - 34.0     # the vertical channel, clear of both station boxes
+    corridor_y = 250.0
+    end_top = attach(NODE, (0.0, 1.0))[0]
+    p.append(f'<path d="M {STATION_X:.0f} {corridor_y:.0f} L {a_channel:.2f} {corridor_y:.0f} '
+             f'L {NODE["cx"]:.2f} {corridor_y:.0f} L {pt(end_top)}" stroke="#b00020" '
+             f'stroke-width="3" fill="none" marker-end="url(#ar)"/>')
 
-    p.append('<text x="1030" y="120" font-size="14" font-weight="bold" fill="#b00020">'
-             'FLRC 2.4 GHz: A to balloon, balloon to B</text>')
-    p.append('<text x="1030" y="140" font-size="12.5" fill="#b00020">'
-             'two separate hops, no ground-to-ground path</text>')
+    # balloon -> B: leaves the ring at the node's BOTTOM, goes down, across, then down onto B's top
+    # edge. The tip is placed at B's border by construction; the endpoint stops short by the marker's
+    # overhang so the arrowhead lands ON the border instead of crossing into the box.
+    dep_bot = leave(NODE, (0.0, 1.0))
+    b_top = 560.0
+    # The horizontal run must stay ABOVE B: routing it at y=615 would have driven it straight through
+    # B's interior (B spans y 560..730) and then pointed the arrowhead upward, away from the box.
+    p.append(f'<path d="M {pt(dep_bot)} L {NODE["cx"]:.2f} 500 L 1240 500 '
+             f'L 1240 {b_top - ARROW_TIP_OVERHANG:.2f}" '
+             f'stroke="#b00020" stroke-width="3" fill="none" marker-end="url(#ar)"/>')
 
-    # hub's own radio feed into the relay node: ends ON the circle's left boundary at x=945.
-    p.append('<path d="M 770 250 L 945 250" stroke="#b00020" stroke-width="3" fill="none" '
-             'marker-end="url(#ar)"/>')
+    # The two hops are LABELLED AS A SEQUENCE. r3's fourth finding was that the relay was
+    # "understandable, but not yet visually unambiguous"; two unlabelled red lines read as two lines,
+    # whereas "hop 1 of 2" / "hop 2 of 2" plus a caption stating the direction read as a chain.
+    hop_x = NODE["cx"] + NODE["r"] + 16
+    p.append(f'<text x="{hop_x}" y="{NODE["cy"] + 52}" font-size="13.5" font-weight="bold" '
+             f'fill="#b00020">hop 1 of 2: A → balloon</text>')
+    p.append(f'<text x="{hop_x}" y="{NODE["cy"] + 70}" font-size="12" fill="#b00020">'
+             f'A leaves its left edge, lands on the node\'s top</text>')
+    p.append(f'<text x="{hop_x}" y="{NODE["cy"] + 92}" font-size="13.5" font-weight="bold" '
+             f'fill="#b00020">hop 2 of 2: balloon → B</text>')
+    p.append(f'<text x="{hop_x}" y="{NODE["cy"] + 110}" font-size="12" fill="#b00020">'
+             f'from the node\'s bottom, onto B\'s top edge — no ground path</text>')
+
+    # the flight segment's own radio feed into the relay node: comes in horizontally and lands on the
+    # node's LEFT side. r3 measured this one 3.93 px SHORT of the ring; now it is derived by attach().
+    end_left, _ = attach(NODE, (1.0, 0.0))
+    p.append(f'<path d="M 770 {NODE["cy"]:.2f} L {pt(end_left)}" stroke="#b00020" '
+             f'stroke-width="3" fill="none" marker-end="url(#ar)"/>')
+    # Label ABOVE the arrow with measured clearance: at cy-2 the ink sat 0.25 px off the 3-wide
+    # stroke, i.e. touching -- a visual reviewer called it "cramped" and the checker then measured it.
+    p.append(f'<text x="{NODE["cx"] - NODE["r"] - 126:.2f}" y="{NODE["cy"] - 40:.2f}" '
+             f'font-size="12.5" fill="#b00020">on-board FLRC</text>')
+    p.append(f'<text x="{NODE["cx"] - NODE["r"] - 126:.2f}" y="{NODE["cy"] - 26:.2f}" '
+             f'font-size="12.5" fill="#b00020">2.4 GHz link</text>')
 
     # ---------------- status band, placed CLEAR of the ground boxes
     p.append(box(70, 710, 700, 210,
