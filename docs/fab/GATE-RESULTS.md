@@ -27,7 +27,7 @@ Any order cut from the old package would have produced a board with no 2.4 GHz m
 
 ```
 bash tracker/hardware/run_erc.sh
---- 1. ERC ---                    20 errors, 37 warnings
+--- 1. ERC ---                    19 errors, 36 warnings
 --- 2. netlist regeneration ---   OK (94051 bytes)
 --- 3. schematic-to-board parity ---
     netlist declares 230 (ref,pin) nodes
@@ -36,14 +36,21 @@ bash tracker/hardware/run_erc.sh
 erc: RESULT -- PROBLEMS FOUND
 ```
 
-**Parity PASSES** — the board has not drifted from the schematic. **The 20 ERC errors are in the
+**Parity PASSES** — the board has not drifted from the schematic. **The remaining ERC errors are in the
 schematic itself.** These are real and were never checked before this session:
+
+> **UPDATED 2026-10-17** (was 20 errors / 37 warnings). The one `wire_dangling` error — a 5.08 mm orphan
+> stub, reported by ERC as "0.0508 mm" because its JSON length is the schematic value ÷ 100 — was
+> **FIXED** by deleting it. The other 19 are **dispositions, not repairs**, and the gate now prints a
+> WAIVER naming each one: **13 of them are pins on circuits the records explicitly leave undecided**
+> (`OPEN-25`/`OPEN-28`, `OPEN-26`), so wiring them would invent a design decision. **ERC cannot reach
+> exit 0 honestly.** One row per error, with evidence and decision owners: `ERC-DISPOSITION.md`.
 
 | type | count | detail |
 |---|---|---|
-| `pin_not_connected` | 17 | `U_CUT1–4` pins 4/5/6 (`ARM`, `CTRL`, `SENSE`) = **12 pins**; `U_HUB_CVT` pin 4 (`VOUT`); `U1` pins 3/13/14/35 |
+| `pin_not_connected` | 16 | `U_CUT1–4` pins 4/5/6 (`ARM`, `CTRL`, `SENSE`) = **12 pins**; `U_HUB_CVT` pin 4 (`VOUT`); `U1` pins 3/13/14/35 |
 | `power_pin_not_driven` | 2 | **`U4` pins 2, 11** (`VDD_IN`, `VBAT_IO`) — the radio's power pins |
-| `wire_dangling` | 1 | a 0.05 mm stub |
+| ~~`wire_dangling`~~ | ~~1~~ | **FIXED 2026-10-17** — a 5.08 mm orphan stub, deleted |
 
 `U_CUT1–4` unconnected in the schematic **matches the board** (those pads have empty nets), so the two
 agree: **twelve cut-driver pins were never wired in either.**
@@ -117,7 +124,9 @@ have rewritten. A permanent red would train the reader to ignore it; deletion wo
    **DISPROVEN 2026-10-17.** The thirteen `41` pads are a **thermal-via array all on `GND`** and the nine
    unnamed pads are **`F.Paste`-only stencil apertures with no copper**. This is **not** a reason the board
    is unorderable. See the CORRECTIONS section.
-2. **20 schematic ERC errors** — including 12 floating cut-driver pins and the radio's two power pins.
+2. **19 schematic ERC errors** — including 12 floating cut-driver pins and the radio's two power pins.
+   (Was 20; the dangling-wire artefact was fixed 2026-10-17. **ERC cannot reach exit 0 honestly** —
+   the gate prints a WAIVER; see `ERC-DISPOSITION.md`.)
 3. **16 edge-clearance items need a fabricator's written acceptance** — they are intentional, but the
    disposition is JLCPCB's to give, not ours to assume. See `JLC-QUERY-DRAFT-MESSAGE.md`.
 4. **The wing joint geometry is OPEN** — ADR-046 §4.2.1; the board implements Option B while the ADR
