@@ -1,3 +1,10 @@
+> ## ARCHIVED — 2026-10-17 · superseded
+>
+> **Superseded by `docs/handover-adaptive-sweep-2026-08-22.md`**, which names this file as
+> *"Prior handover (2026-08-21, for reference)"*. This file also marks its own Dataset 3 as superseded
+> ("early 14-config sweep … Use Dataset 2 instead; kept for history").
+> Moved to `docs/archive/` on 2026-10-17. Kept for provenance.
+
 # E80 Bench — Data Handover for Collaborator
 2026-08-21 · Felix's E80/STM32 FLRC+LoRa bench · prepared by Hermes (balloon-hermes)
 

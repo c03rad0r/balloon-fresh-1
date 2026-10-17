@@ -19,7 +19,7 @@
 **Sources found and used** (paths verified in this worktree, not trusted from the brief):
 `docs/analysis/wing-mass-shape.md`, `docs/analysis/wing-insolation-geometry.md`,
 `docs/analysis/array-power-architecture.md`, `docs/analysis/wing-jettison.md`,
-`docs/analysis/wing-electrical.md`, `docs/PAYLOAD-WEIGHT-ESTIMATES.md`,
+`docs/analysis/wing-electrical.md`, `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md`,
 `docs/POWER-BUDGET-V9-D2BE.md`, `docs/SOLAR-PIN-REGULATORY.md`, `docs/hardware-design.md`,
 `docs/component-guide.md`, `docs/inventory.md`, `docs/V9-RADIO-SITE-MATRIX.md`,
 `docs/adr/006-supercapacitor-power.md` (**Accepted**), `docs/adr/009-antenna-strategy-v1-v2.md`,
@@ -107,7 +107,7 @@ Every figure below is `CITED` or `COMPUTED`; nothing is invented.
 
 | Constant | Value | Provenance |
 |---|---|---|
-| FR4 density | 1.85 g/cm³ | **CITED** `docs/PAYLOAD-WEIGHT-ESTIMATES.md` line 20 |
+| FR4 density | 1.85 g/cm³ | **CITED** `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` line 20 |
 | Finished-board uplift | × 1.15 (copper + mask + silk) | **CITED** same line 20 |
 | Silicon density | 2.33 g/cm³ | physical constant (crystalline Si 2.329) |
 | Cell thickness | 0.21 mm | **CITED** `docs/adr/049-wing-architecture.md` (operator caliper 0.20–0.21 mm) |
@@ -127,7 +127,7 @@ The brief asked to find and, if wrong, correct the repo's 0.6 mm FR4 figure. It 
 
 `docs/analysis/wing-mass-shape.md` §2.1 and `docs/adr/049-wing-architecture.md` both state
 **127.6 mg/cm²**, and both carry the same ×1.15 provenance from
-`docs/PAYLOAD-WEIGHT-ESTIMATES.md` line 20. The derived ratio against the 0.21 mm silicon cell
+`docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` line 20. The derived ratio against the 0.21 mm silicon cell
 (`127.65 / 48.93 = 2.61×`) also reproduces the repo's own "**2.61×**" headline. **No correction
 is required.** The one soft spot is *inside* that figure, not in its arithmetic: the ×1.15
 uniform uplift is a rule of thumb, and for the **as-built wing the real copper is far below
@@ -148,15 +148,15 @@ alternative is given in §3.2 because it is the single largest mass lever.
 | # | Item | Unit (g) | Qty | Subtotal (g) | Source | Verification |
 |---|---|---:|---:|---:|---|---|
 | A1 | Hub PCB, 55.15 × 45.15 × 0.6 mm FR4 | 2.76 | 1 | **2.76** | **CITED** `docs/POWER-BUDGET-V9-D2BE.md` §4 (computed there from `hub_board_v1_clean.kicad_pcb`) | CITED (bare-FR4; ×1.15 would give 3.18 g — see §3.3) |
-| A2 | `ESP32-S3-WROOM-1U-N8R8` | 2.5 | 1 | **2.5** | **ESTIMATE** by analogy to the repo's `ESP32-C3-Mini-1` line (2.5 g, 2–3 g) in `docs/PAYLOAD-WEIGHT-ESTIMATES.md` §3 | `TODO(unverified)` — **no S3 mass in repo** |
+| A2 | `ESP32-S3-WROOM-1U-N8R8` | 2.5 | 1 | **2.5** | **ESTIMATE** by analogy to the repo's `ESP32-C3-Mini-1` line (2.5 g, 2–3 g) in `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` §3 | `TODO(unverified)` — **no S3 mass in repo** |
 | A3 | `SX1280IMLTRT` + matching/passives | 0.2 | 1 | **0.2** | **ESTIMATE** (QFN-24 class + 0402 passives) | `TODO(unverified)` |
-| A4 | Bare `LoRa2021` castellated module (2.4 GHz RX) | 1.2 | 1 | **1.2** | **CITED** `docs/PAYLOAD-WEIGHT-ESTIMATES.md` §3 ("LR2021 bare, 1–2 g") | `TODO(unverified)` for the exact part (`V9-RADIO-SITE-MATRIX.md` §3.5) |
-| A5 | `LoRa2021F33-2G4` module (433 TX, 1 W PA) | 4.0 | 1 | **4.0** | **CITED** `docs/PAYLOAD-WEIGHT-ESTIMATES.md` §3 ("LR2021F33, 3–5 g") | `TODO(unverified)` for the exact part (`V9-RADIO-SITE-MATRIX.md` §3.5) |
-| A6 | GPS `MAX-M10S` (bare, direct-soldered) | 0.4 | 1 | **0.4** | **CITED** `docs/PAYLOAD-WEIGHT-ESTIMATES.md` §3 | CITED (bare; breakout is 1.0 g) |
+| A4 | Bare `LoRa2021` castellated module (2.4 GHz RX) | 1.2 | 1 | **1.2** | **CITED** `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` §3 ("LR2021 bare, 1–2 g") | `TODO(unverified)` for the exact part (`V9-RADIO-SITE-MATRIX.md` §3.5) |
+| A5 | `LoRa2021F33-2G4` module (433 TX, 1 W PA) | 4.0 | 1 | **4.0** | **CITED** `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` §3 ("LR2021F33, 3–5 g") | `TODO(unverified)` for the exact part (`V9-RADIO-SITE-MATRIX.md` §3.5) |
+| A6 | GPS `MAX-M10S` (bare, direct-soldered) | 0.4 | 1 | **0.4** | **CITED** `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` §3 | CITED (bare; breakout is 1.0 g) |
 | A7 | Voltage regulator `TPS7A02` (SOT-23-5) | 0.05 | 1 | **0.05** | **CITED** `docs/component-guide.md` §6 | CITED |
-| A8 | Pressure sensor `MS5611` (bare) | 0.03 | 1 | **0.03** | **CITED** `docs/PAYLOAD-WEIGHT-ESTIMATES.md` §3 | CITED (bare; breakout 0.3 g) |
+| A8 | Pressure sensor `MS5611` (bare) | 0.03 | 1 | **0.03** | **CITED** `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` §3 | CITED (bare; breakout 0.3 g) |
 | A9 | Supercap bank, 2 × AVX SCC 3.3 F 2.7 V | 1.5 | 2 | **3.0** | **CITED** `docs/adr/006-supercapacitor-power.md` ("2× 1.5 g = 3.0 g"); `docs/POWER-BUDGET-V9-D2BE.md` §4 | CITED (doubled 4-cell option = 6.0 g, ADR-047 §3.2) |
-| A10 | Antenna wire dipole (433 + 2.4 GHz) | 0.2 | 1 | **0.2** | **CITED** `docs/PAYLOAD-WEIGHT-ESTIMATES.md` §3 (868 MHz wire ~0.2 g) | `TODO(unverified)` for the v9 dual-band harness; U.FL pigtails add mass (see A16) |
+| A10 | Antenna wire dipole (433 + 2.4 GHz) | 0.2 | 1 | **0.2** | **CITED** `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` §3 (868 MHz wire ~0.2 g) | `TODO(unverified)` for the v9 dual-band harness; U.FL pigtails add mass (see A16) |
 | A11 | Wing PCB × 4 — **full carrier** 4472 mm², 0.6 mm | 5.709 | 4 | **22.84** | **CITED** `docs/analysis/wing-mass-shape.md` §1.4 / §2.2 | CITED (gerber Edge.Cuts, 184 × 25 mm) |
 | A12 | Wing solar cells × 4 — 3 LARGE in series (1.50 g each) | 4.50 | 4 | **18.00** | **CITED** `docs/analysis/wing-mass-shape.md` §1.2/§1.4; `array-power-architecture.md` §1.2 | `TODO(unverified)` — bare-Si computed 1.50 g vs the repo's "~2 g per 78×39 cell" listing (4× conflict; weigh a cell) |
 | A13 | Wing solder + 30 AWG interconnect | 0.090 | 4 | **0.36** | **CITED** `docs/analysis/wing-mass-shape.md` §1.3 | COMPUTED estimate in the source |

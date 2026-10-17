@@ -23,7 +23,7 @@ Mode matters far more than radio count. The SX1280 is not a LoRa-only part:
 
 The project has measured the LR2021 FLRC link at **1484.9 kbps sustained, 0.00 % PER**
 (`docs/sustained-throughput-results-2026-07-23.md`, BR2600, LEN 127 — it is TX-side
-limited). The older **1391 kbps** figure in `docs/PLAN-speed-optimization.md` is
+limited). The older **1391 kbps** figure in `docs/archive/PLAN-speed-optimization.md` is
 superseded RP2040 Arduino-SPI history.
 
 > **Settled 2026-10-06 (card `t_6b68897c`; numbers corrected 2026-10-06 rev 2).** The

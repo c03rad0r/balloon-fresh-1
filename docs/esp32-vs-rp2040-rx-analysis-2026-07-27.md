@@ -169,7 +169,7 @@ No FreeRTOS. No task yield. No 10ms delay. Tight `while(true)` with SPI poll.
 
 ### 3.4 Per-Packet Timing Breakdown (Real Hardware Data)
 
-Source: `docs/PLAN-speed-optimization.md` timing profiler on real boards
+Source: `docs/archive/PLAN-speed-optimization.md` timing profiler on real boards
 
 | Step | Time (µs) | SPI Bytes |
 |------|-----------|-----------|
@@ -303,7 +303,7 @@ esp_err_t spiGetResult(spi_transaction_t** out, ...);    // await completion
 
 ### BUT: Never Tested
 
-From `docs/PLAN-speed-optimization.md`:
+From `docs/archive/PLAN-speed-optimization.md`:
 > **Status: Built, NOT YET TESTED.** Firmware at `firmware/esp32-c3-flrc/main/main.cpp`.
 >
 > **Risk:** ESP32 DMA might have same BUSY timing issue as RP2040. But ESP32's SPI hardware is completely different (dedicated DMA controller, no shared peripheral).
@@ -351,6 +351,6 @@ The ESP32's GDMA controller is a separate hardware block from the SPI peripheral
 | RP2040 PIO RX header | `firmware/rp2040/src/pio_lr2021_rx.h` | 114 |
 | RP2040 PIO assembly | `firmware/rp2040/src/pio_lr2021_rx.pio` | 85 |
 | Platform analysis | `docs/flrc-platform-analysis-2026-07-16.md` | 229 |
-| Speed optimization plan | `docs/PLAN-speed-optimization.md` | 286 |
+| Speed optimization plan | `docs/archive/PLAN-speed-optimization.md` | 286 |
 | SPI sweep results | `docs/spi-frequency-sweep-results-2026-07-16.md` | 50 |
 | FLRC final summary | `docs/flrc-final-summary-2026-07-16.md` | — |

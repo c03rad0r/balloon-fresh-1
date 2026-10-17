@@ -152,7 +152,7 @@ All artifacts are on branch `feat/2g4-sweep`. Every path is shown as GitHub URL
 |----------|-----------|------------|
 | Adaptive sweep plan (the plan) | https://github.com/felixfelix-bot/balloon-fresh/tree/feat/2g4-sweep/docs/plans/adaptive-sweep-plan-20260822.md | `docs/plans/adaptive-sweep-plan-20260822.md` |
 | STOP verify results (ADAPT-0) | https://github.com/felixfelix-bot/balloon-fresh/tree/feat/2g4-sweep/docs/plans/stop-verify-results.md | `docs/plans/stop-verify-results.md` |
-| Prior handover (2026-08-21, for reference) | https://github.com/felixfelix-bot/balloon-fresh/tree/feat/2g4-sweep/docs/handover-data-collaborator-2026-08-21.md | `docs/handover-data-collaborator-2026-08-21.md` |
+| Prior handover (2026-08-21, for reference) | https://github.com/felixfelix-bot/balloon-fresh/tree/feat/2g4-sweep/docs/handover-data-collaborator-2026-08-21.md | `docs/archive/handover-data-collaborator-2026-08-21.md` |
 
 ### Dual-band sweep data (2026-08-22, session 2608222108, fw 0561b29, 113 configs)
 

@@ -275,7 +275,7 @@ These 3 are interactive with operator — do AFTER all software/tooling is ready
 
 ## Contact / Continuity
 
-- **Next session:** Read this doc + docs/HANDOVER-speed-tests-2026-07-23.md + docs/PLAN-pre-range-testing-2026-07-23.md
+- **Next session:** Read this doc + docs/archive/HANDOVER-speed-tests-2026-07-23.md + docs/PLAN-pre-range-testing-2026-07-23.md
 - **Mutex:** RELEASED. Both boards free.
 - **Session notes:** ~/.hermes/profiles/manager/state/session-notes.md updated.
 - **Memory:** Updated with final LoRa results. FLRC sweep results in docs/flrc-bitrate-sweep-results-2026-07-23.md.

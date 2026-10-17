@@ -294,7 +294,7 @@ c1c1811 — docs: power sweep + master JSON + range handover
 ## FILES INDEX
 
 - docs/SESSION-SUMMARY-2026-07-24.md — Full session summary
-- docs/HANDOVER-speed-tests-2026-07-23.md — Original handover
+- docs/archive/HANDOVER-speed-tests-2026-07-23.md — Original handover
 - docs/PLAN-pre-range-testing-2026-07-23.md — 18-task plan (all complete)
 - docs/flrc-bitrate-sweep-results-2026-07-23.md — FLRC results
 - docs/power-sweep-results-2026-07-24.md — Power results

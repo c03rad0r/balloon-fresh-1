@@ -494,7 +494,7 @@ If the worry is **descent rate after burst**: it is already ~0.447 m/s (walking 
 - `docs/analysis/wing-insolation-geometry.md` §1/§2b — 16.56° noon, series mismatch.
 - `docs/analysis/wing-fab-cost.md` §1 — joint count as the primary hand-build risk metric.
 - `docs/POWER-BUDGET-V9-D2BE.md` — mass table (mostly TODO), array/bank references.
-- `docs/PAYLOAD-WEIGHT-ESTIMATES.md` — per-cell and per-module mass estimates.
+- `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` — per-cell and per-module mass estimates.
 - `docs/balloon-flight-lessons.md` §Success Factor #5/#6, line 472 — free lift, payload band, descent.
 - `docs/balloon-test-results.md` line 253 — 0.5 g per cut-down channel precedent.
 - `analysis/wing-jettison` (commit `5365dac7`, **in-flight**) — single-cut whole-array study.

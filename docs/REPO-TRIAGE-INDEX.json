@@ -37,13 +37,12 @@
   "first": 1,
   "fix": 1,
   "flight": 2,
-  "flrc": 37,
+  "flrc": 36,
   "frequency": 1,
   "friday": 2,
   "gps": 1,
   "guard": 1,
-  "handoff": 1,
-  "handover": 15,
+  "handover": 12,
   "hardware": 2,
   "harmonization": 1,
   "harmonized": 4,
@@ -67,11 +66,11 @@
   "openrouter": 1,
   "outdoor": 1,
   "p4.1": 1,
-  "payload": 2,
+  "payload": 1,
   "pcb": 2,
   "per": 1,
   "phase1": 1,
-  "plan": 21,
+  "plan": 20,
   "plan.md": 1,
   "power": 3,
   "powerbank": 1,
@@ -86,6 +85,7 @@
   "rca": 1,
   "recon": 3,
   "regulatory": 1,
+  "repo": 1,
   "rfa": 1,
   "rfa1": 1,
   "rfa1b": 2,
@@ -574,25 +574,6 @@
    "title": "FLRC PIO TX v3 \u2014 Hardware Test Results & Progress"
   },
   {
-   "archive_markers": [
-    "superseded"
-   ],
-   "chars": 4205,
-   "cluster": "handoff",
-   "dates": [
-    "2026-08-16",
-    "2026-08-18"
-   ],
-   "dir": "docs",
-   "last_commit": "2026-08-18",
-   "lines": 109,
-   "links": [],
-   "loose": true,
-   "name": "HANDOFF-SWD-NEXT-STEPS.md",
-   "path": "docs/HANDOFF-SWD-NEXT-STEPS.md",
-   "title": "HANDOFF \u2014 E80 bench: next steps from here (2026-08-16)"
-  },
-  {
    "archive_markers": [],
    "chars": 11039,
    "cluster": "status",
@@ -654,6 +635,29 @@
    "name": "PLAN-three-tasks.md",
    "path": "docs/PLAN-three-tasks.md",
    "title": "PLAN: Four Tasks \u2014 Proto Tests, ESP-IDF Build, GS Client, Mesh Integration"
+  },
+  {
+   "archive_markers": [
+    "do not use",
+    "obsolete",
+    "superseded",
+    "withdrawn"
+   ],
+   "chars": 43975,
+   "cluster": "repo",
+   "dates": [
+    "2026-10-13",
+    "2026-10-14",
+    "2026-10-15"
+   ],
+   "dir": "docs",
+   "last_commit": "2026-10-17",
+   "lines": 445,
+   "links": [],
+   "loose": true,
+   "name": "REPO-TRIAGE-INDEX.md",
+   "path": "docs/REPO-TRIAGE-INDEX.md",
+   "title": "Repo triage index \u2014 what each doc IS, before anything moves"
   },
   {
    "archive_markers": [],
@@ -883,7 +887,7 @@
   },
   {
    "archive_markers": [],
-   "chars": 10091,
+   "chars": 10099,
    "cluster": "flrc",
    "dates": [
     "2026-07-16"
@@ -1314,29 +1318,6 @@
    "title": "LR2021 SPI Protocol \u2014 Authoritative Reference"
   },
   {
-   "archive_markers": [
-    "superseded"
-   ],
-   "chars": 18605,
-   "cluster": "flrc",
-   "dates": [
-    "2026-07-16"
-   ],
-   "dir": "docs",
-   "last_commit": "2026-07-16",
-   "lines": 478,
-   "links": [
-    "PLAN-speed-optimization.md",
-    "PLAN-range-tests.md",
-    "HANDOVER-speed-tests.md",
-    "HANDOVER-range-tests.md"
-   ],
-   "loose": true,
-   "name": "flrc-optimization-comprehensive-plan-2026-07-16.md",
-   "path": "docs/flrc-optimization-comprehensive-plan-2026-07-16.md",
-   "title": "FLRC Throughput Optimization \u2014 Comprehensive Plan"
-  },
-  {
    "archive_markers": [],
    "chars": 5021,
    "cluster": "misc",
@@ -1665,7 +1646,7 @@
   },
   {
    "archive_markers": [],
-   "chars": 11081,
+   "chars": 11089,
    "cluster": "handover",
    "dates": [
     "2026-07-23",
@@ -1682,7 +1663,7 @@
   },
   {
    "archive_markers": [],
-   "chars": 6157,
+   "chars": 6181,
    "cluster": "handover",
    "dates": [
     "2026-07-16"
@@ -1939,7 +1920,7 @@
   },
   {
    "archive_markers": [],
-   "chars": 4797,
+   "chars": 4805,
    "cluster": "handover",
    "dates": [
     "2026-07-16"
@@ -2120,7 +2101,7 @@
   },
   {
    "archive_markers": [],
-   "chars": 14483,
+   "chars": 14507,
    "cluster": "esp32",
    "dates": [
     "2026-07-16",
@@ -2303,7 +2284,7 @@
    "archive_markers": [
     "superseded"
    ],
-   "chars": 7629,
+   "chars": 7637,
    "cluster": "sx1280",
    "dates": [
     "2026-07-23",
@@ -2321,7 +2302,7 @@
   },
   {
    "archive_markers": [],
-   "chars": 11629,
+   "chars": 11637,
    "cluster": "session",
    "dates": [
     "2026-07-23"
@@ -2371,7 +2352,7 @@
   },
   {
    "archive_markers": [],
-   "chars": 9419,
+   "chars": 9427,
    "cluster": "plan",
    "dates": [
     "2026-07-16"
@@ -2382,7 +2363,7 @@
    "links": [
     "flrc-final-summary-2026-07-16.md",
     "flrc-platform-analysis-2026-07-16.md",
-    "PLAN-speed-optimization.md",
+    "archive/PLAN-speed-optimization.md",
     "flrc-timing-profile-2026-07-16.md",
     "../AGENTS.md"
    ],
@@ -2583,27 +2564,6 @@
    "title": "STATUS REPORT: balloon-pre-stretching"
   },
   {
-   "archive_markers": [
-    "obsolete",
-    "superseded"
-   ],
-   "chars": 11408,
-   "cluster": "payload",
-   "dates": [
-    "2026-07-30",
-    "2026-08-05",
-    "2026-10-14"
-   ],
-   "dir": "docs",
-   "last_commit": "2026-10-14",
-   "lines": 250,
-   "links": [],
-   "loose": true,
-   "name": "PAYLOAD-WEIGHT-ESTIMATES.md",
-   "path": "docs/PAYLOAD-WEIGHT-ESTIMATES.md",
-   "title": "Payload Weight Estimates"
-  },
-  {
    "archive_markers": [],
    "chars": 11042,
    "cluster": "frequency",
@@ -2735,24 +2695,6 @@
    "title": "Pre-Stretching \u2014 What Is Blocked on Your Hands, What I Can Do, and the Schedule"
   },
   {
-   "archive_markers": [
-    "do not use"
-   ],
-   "chars": 15213,
-   "cluster": "handover",
-   "dates": [
-    "2026-07-23"
-   ],
-   "dir": "docs",
-   "last_commit": "2026-07-26",
-   "lines": 314,
-   "links": [],
-   "loose": true,
-   "name": "HANDOVER-speed-tests-2026-07-23.md",
-   "path": "docs/HANDOVER-speed-tests-2026-07-23.md",
-   "title": "HANDOVER \u2014 Speed Tests (Verified Results + Bug Fixes)"
-  },
-  {
    "archive_markers": [],
    "chars": 27908,
    "cluster": "nip29",
@@ -2805,7 +2747,7 @@
    "archive_markers": [
     "do not use"
    ],
-   "chars": 15748,
+   "chars": 15756,
    "cluster": "flrc",
    "dates": [
     "2026-09-30",
@@ -3130,7 +3072,7 @@
   },
   {
    "archive_markers": [],
-   "chars": 34908,
+   "chars": 34924,
    "cluster": "plan",
    "dates": [
     "2026-07-17",
@@ -3340,7 +3282,7 @@
   },
   {
    "archive_markers": [],
-   "chars": 25989,
+   "chars": 25997,
    "cluster": "handover",
    "dates": [
     "2026-08-21",
@@ -3550,32 +3492,6 @@
    "title": "Discovery Sync \u2014 2026-08-08 Batch 3"
   },
   {
-   "archive_markers": [
-    "superseded"
-   ],
-   "chars": 13803,
-   "cluster": "plan",
-   "dates": [
-    "2026-07-16",
-    "2026-07-23",
-    "2026-10-06"
-   ],
-   "dir": "docs",
-   "last_commit": "2026-10-06",
-   "lines": 323,
-   "links": [
-    "flrc-timing-profile-2026-07-16.md",
-    "flrc-platform-analysis-2026-07-16.md",
-    "flrc-final-summary-2026-07-16.md",
-    "PLAN-range-tests.md",
-    "../AGENTS.md"
-   ],
-   "loose": true,
-   "name": "PLAN-speed-optimization.md",
-   "path": "docs/PLAN-speed-optimization.md",
-   "title": "FLRC Throughput Optimization Plan \u2014 payload size and pipelining"
-  },
-  {
    "archive_markers": [],
    "chars": 29182,
    "cluster": "harmonized",
@@ -3744,24 +3660,6 @@
    "name": "spi-frequency-sweep-results-2026-07-16.md",
    "path": "docs/spi-frequency-sweep-results-2026-07-16.md",
    "title": "SPI Frequency Sweep Results \u2014 2026-07-16"
-  },
-  {
-   "archive_markers": [
-    "superseded"
-   ],
-   "chars": 5305,
-   "cluster": "handover",
-   "dates": [
-    "2026-08-21"
-   ],
-   "dir": "docs",
-   "last_commit": "2026-08-21",
-   "lines": 113,
-   "links": [],
-   "loose": true,
-   "name": "handover-data-collaborator-2026-08-21.md",
-   "path": "docs/handover-data-collaborator-2026-08-21.md",
-   "title": "E80 Bench \u2014 Data Handover for Collaborator"
   },
   {
    "archive_markers": [],
@@ -4171,26 +4069,6 @@
    "name": "flrc-direct-spi-optimization-2026-07-16.md",
    "path": "docs/flrc-direct-spi-optimization-2026-07-16.md",
    "title": "FLRC Direct Hardware SPI Optimization \u2014 2026-07-16"
-  },
-  {
-   "archive_markers": [
-    "do not use"
-   ],
-   "chars": 23116,
-   "cluster": "handover",
-   "dates": [
-    "2026-07-16",
-    "2026-07-17",
-    "2026-07-23"
-   ],
-   "dir": "docs",
-   "last_commit": "2026-09-29",
-   "lines": 459,
-   "links": [],
-   "loose": true,
-   "name": "HANDOVER-sustained-throughput-2026-07-23.md",
-   "path": "docs/HANDOVER-sustained-throughput-2026-07-23.md",
-   "title": "HANDOVER \u2014 Sustained Throughput Testing for Speed Group"
   },
   {
    "archive_markers": [],
@@ -5020,7 +4898,7 @@
   },
   {
    "archive_markers": [],
-   "chars": 30441,
+   "chars": 30449,
    "cluster": "wing",
    "dates": [
     "2026-10-07"
@@ -5308,7 +5186,7 @@
    "archive_markers": [
     "withdrawn"
    ],
-   "chars": 6131,
+   "chars": 6139,
    "cluster": "measured",
    "dates": [
     "2026-10-14"
@@ -5324,7 +5202,7 @@
   },
   {
    "archive_markers": [],
-   "chars": 61948,
+   "chars": 62012,
    "cluster": "ground",
    "dates": [
     "2026-10-08",
@@ -5375,7 +5253,7 @@
    "archive_markers": [
     "superseded"
    ],
-   "chars": 8720,
+   "chars": 8728,
    "cluster": "cell",
    "dates": [
     "2026-10-14"
@@ -5423,7 +5301,7 @@
   },
   {
    "archive_markers": [],
-   "chars": 54688,
+   "chars": 54696,
    "cluster": "ground",
    "dates": [
     "2026-07-24",
@@ -5481,7 +5359,7 @@
   },
   {
    "archive_markers": [],
-   "chars": 33404,
+   "chars": 33412,
    "cluster": "hub",
    "dates": [
     "2026-10-07"
@@ -5497,7 +5375,7 @@
   },
   {
    "archive_markers": [],
-   "chars": 83447,
+   "chars": 83455,
    "cluster": "ground",
    "dates": [
     "2026-10-08"
@@ -5515,7 +5393,7 @@
    "archive_markers": [
     "superseded"
    ],
-   "chars": 35904,
+   "chars": 35944,
    "cluster": "wing",
    "dates": [
     "2026-10-07"
@@ -5950,7 +5828,7 @@
   },
   {
    "archive_markers": [],
-   "chars": 35620,
+   "chars": 35692,
    "cluster": "two",
    "dates": [
     "2026-10-07"
@@ -6146,7 +6024,7 @@
    "archive_markers": [
     "superseded"
    ],
-   "chars": 6350,
+   "chars": 6358,
    "cluster": "progress",
    "dates": [],
    "dir": "docs/analysis/ground-station",
@@ -6238,7 +6116,7 @@
    "archive_markers": [
     "superseded"
    ],
-   "chars": 10404,
+   "chars": 10412,
    "cluster": "report",
    "dates": [
     "2026-10-14"
@@ -7409,7 +7287,7 @@
   },
   {
    "archive_markers": [],
-   "chars": 178340,
+   "chars": 178348,
    "cluster": "discoveries.md",
    "dates": [
     "2026-08-08",
@@ -7620,7 +7498,7 @@
   },
   {
    "archive_markers": [],
-   "chars": 33790,
+   "chars": 33798,
    "cluster": "data",
    "dates": [
     "2026-07-24",
@@ -9427,7 +9305,7 @@
    "archive_markers": [
     "superseded"
    ],
-   "chars": 29313,
+   "chars": 29321,
    "cluster": "060",
    "dates": [
     "2026-10-04",
@@ -9581,7 +9459,7 @@
    "archive_markers": [
     "superseded"
    ],
-   "chars": 43942,
+   "chars": 43958,
    "cluster": "053",
    "dates": [
     "2026-10-07"
@@ -9968,7 +9846,7 @@
   },
   {
    "archive_markers": [],
-   "chars": 7578,
+   "chars": 7618,
    "cluster": "074",
    "dates": [
     "2026-10-08"
@@ -10210,7 +10088,7 @@
    "archive_markers": [
     "superseded"
    ],
-   "chars": 10937,
+   "chars": 10961,
    "cluster": "075",
    "dates": [
     "2026-10-08"
@@ -10903,7 +10781,7 @@
   },
   {
    "archive_markers": [],
-   "chars": 35623,
+   "chars": 35671,
    "cluster": "062",
    "dates": [
     "2026-10-07"
@@ -11142,6 +11020,183 @@
    "name": "README.md",
    "path": "docs/runs/README.md",
    "title": "Per-run reports"
+  },
+  {
+   "archive_markers": [
+    "superseded"
+   ],
+   "chars": 4609,
+   "cluster": "handoff",
+   "dates": [
+    "2026-08-16",
+    "2026-08-18",
+    "2026-10-17"
+   ],
+   "dir": "docs/archive",
+   "last_commit": "",
+   "lines": 116,
+   "links": [],
+   "loose": false,
+   "name": "HANDOFF-SWD-NEXT-STEPS.md",
+   "path": "docs/archive/HANDOFF-SWD-NEXT-STEPS.md",
+   "title": "HANDOFF \u2014 E80 bench: next steps from here (2026-08-16)"
+  },
+  {
+   "archive_markers": [
+    "do not use",
+    "obsolete",
+    "retracted",
+    "superseded",
+    "withdrawn"
+   ],
+   "chars": 4132,
+   "cluster": "readme.md",
+   "dates": [
+    "2026-10-06",
+    "2026-10-14",
+    "2026-10-17"
+   ],
+   "dir": "docs/archive",
+   "last_commit": "",
+   "lines": 56,
+   "links": [],
+   "loose": false,
+   "name": "README.md",
+   "path": "docs/archive/README.md",
+   "title": "`docs/archive/` \u2014 superseded documents"
+  },
+  {
+   "archive_markers": [
+    "superseded"
+   ],
+   "chars": 19056,
+   "cluster": "flrc",
+   "dates": [
+    "2026-07-16",
+    "2026-10-17"
+   ],
+   "dir": "docs/archive",
+   "last_commit": "",
+   "lines": 485,
+   "links": [
+    "PLAN-speed-optimization.md",
+    "../PLAN-range-tests.md",
+    "../HANDOVER-speed-tests.md",
+    "../HANDOVER-range-tests.md"
+   ],
+   "loose": false,
+   "name": "flrc-optimization-comprehensive-plan-2026-07-16.md",
+   "path": "docs/archive/flrc-optimization-comprehensive-plan-2026-07-16.md",
+   "title": "FLRC Throughput Optimization \u2014 Comprehensive Plan"
+  },
+  {
+   "archive_markers": [
+    "obsolete",
+    "superseded"
+   ],
+   "chars": 12017,
+   "cluster": "payload",
+   "dates": [
+    "2026-08-05",
+    "2026-10-14",
+    "2026-10-17"
+   ],
+   "dir": "docs/archive",
+   "last_commit": "",
+   "lines": 260,
+   "links": [],
+   "loose": false,
+   "name": "PAYLOAD-WEIGHT-ESTIMATES.md",
+   "path": "docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md",
+   "title": "Payload Weight Estimates"
+  },
+  {
+   "archive_markers": [
+    "do not use",
+    "superseded"
+   ],
+   "chars": 15574,
+   "cluster": "handover",
+   "dates": [
+    "2026-07-23",
+    "2026-07-24",
+    "2026-10-17"
+   ],
+   "dir": "docs/archive",
+   "last_commit": "",
+   "lines": 321,
+   "links": [],
+   "loose": false,
+   "name": "HANDOVER-speed-tests-2026-07-23.md",
+   "path": "docs/archive/HANDOVER-speed-tests-2026-07-23.md",
+   "title": "HANDOVER \u2014 Speed Tests (Verified Results + Bug Fixes)"
+  },
+  {
+   "archive_markers": [
+    "superseded"
+   ],
+   "chars": 14350,
+   "cluster": "plan",
+   "dates": [
+    "2026-07-23",
+    "2026-10-06",
+    "2026-10-17"
+   ],
+   "dir": "docs/archive",
+   "last_commit": "",
+   "lines": 331,
+   "links": [
+    "../flrc-timing-profile-2026-07-16.md",
+    "../flrc-platform-analysis-2026-07-16.md",
+    "../flrc-final-summary-2026-07-16.md",
+    "../PLAN-range-tests.md",
+    "../../AGENTS.md"
+   ],
+   "loose": false,
+   "name": "PLAN-speed-optimization.md",
+   "path": "docs/archive/PLAN-speed-optimization.md",
+   "title": "FLRC Throughput Optimization Plan \u2014 payload size and pipelining"
+  },
+  {
+   "archive_markers": [
+    "superseded"
+   ],
+   "chars": 5676,
+   "cluster": "handover",
+   "dates": [
+    "2026-08-21",
+    "2026-08-22",
+    "2026-10-17"
+   ],
+   "dir": "docs/archive",
+   "last_commit": "",
+   "lines": 120,
+   "links": [],
+   "loose": false,
+   "name": "handover-data-collaborator-2026-08-21.md",
+   "path": "docs/archive/handover-data-collaborator-2026-08-21.md",
+   "title": "E80 Bench \u2014 Data Handover for Collaborator"
+  },
+  {
+   "archive_markers": [
+    "do not use",
+    "superseded"
+   ],
+   "chars": 23504,
+   "cluster": "handover",
+   "dates": [
+    "2026-07-23",
+    "2026-07-24",
+    "2026-10-17"
+   ],
+   "dir": "docs/archive",
+   "last_commit": "",
+   "lines": 466,
+   "links": [],
+   "loose": false,
+   "name": "HANDOVER-sustained-throughput-2026-07-23.md",
+   "path": "docs/archive/HANDOVER-sustained-throughput-2026-07-23.md",
+   "title": "HANDOVER \u2014 Sustained Throughput Testing for Speed Group"
   },
   {
    "archive_markers": [
@@ -11457,7 +11512,6 @@
   "friday": "",
   "gps": "",
   "guard": "",
-  "handoff": "handoff",
   "handover": "data-handover",
   "hardware": "hardware",
   "harmonization": "",
@@ -11501,6 +11555,7 @@
   "rca": "",
   "recon": "",
   "regulatory": "",
+  "repo": "",
   "rfa": "",
   "rfa1": "",
   "rfa1b": "",

@@ -1,3 +1,13 @@
+> ## ARCHIVED — 2026-10-17 · superseded
+>
+> **Superseded by measurement:** `docs/analysis/MEASURED-MASSES.md` and
+> `docs/analysis/CELL-MASS-MEASUREMENTS-2026-10-14.md`, which record the scale readings this file could
+> only estimate. This file marks its own content superseded:
+> *"Original V1 board (dual-MCU: C3+RP2040) is OBSOLETE"* (2026-08-05), *"Config C (mesh V1, dual-MCU
+> with RP2040) is OBSOLETE — single-MCU only"*, and *"⚠ SUPERSEDED 2026-10-14: the cells ARE 0.440 g each
+> when measured"*.
+> Moved to `docs/archive/` on 2026-10-17. Kept for provenance — do not cite the estimates as current.
+
 # Payload Weight Estimates
 
 **Date:** 2026-07-30

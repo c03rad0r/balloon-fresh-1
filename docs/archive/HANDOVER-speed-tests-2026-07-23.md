@@ -1,3 +1,10 @@
+> ## ARCHIVED — 2026-10-17 · superseded in practice
+>
+> **Superseded by `docs/HANDOVER-COMPLETE-2026-07-24.md`** (dated 2026-07-24), which names this file as
+> the *"Original handover"*. No record states the supersession in the word "superseded"; the succession is
+> dated and by content.
+> Moved to `docs/archive/` on 2026-10-17. Kept for provenance.
+
 # HANDOVER — Speed Tests (Verified Results + Bug Fixes)
 
 > **For:** Any LLM context window continuing the balloon-speed-tests track.
@@ -305,7 +312,7 @@ See **`docs/PLAN-pre-range-testing-2026-07-23.md`** for the full task breakdown.
 | Document | Purpose |
 |---|---|
 | `docs/PLAN-pre-range-testing-2026-07-23.md` | Task plan for remaining pre-range work |
-| `docs/HANDOVER-sustained-throughput-2026-07-23.md` | Earlier handover (sustained throughput methodology) |
+| `docs/archive/HANDOVER-sustained-throughput-2026-07-23.md` | Earlier handover (sustained throughput methodology) |
 | `docs/sustained-throughput-results-2026-07-23.md` | Raw sustained throughput test data |
 | `docs/lora-sweep-progress-2026-07-23.md` | LoRa SF sweep progress notes |
 | `docs/lr2021-spi-command-reference.md` | Full LR2021 opcode reference |

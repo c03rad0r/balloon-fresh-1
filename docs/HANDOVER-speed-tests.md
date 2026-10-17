@@ -10,7 +10,7 @@ You are an AI assistant (Hermes Agent) continuing work on the **balloon-fresh** 
 
 **WORKTREE:** `~/worktrees/balloon-speed-tests/` (branch: `speed-optimization`)
 **All work goes in this worktree. Do NOT touch ~/repos/balloon-fresh/ — that's the main branch, another agent owns it.**
-**Start here:** Read `docs/HANDOVER-speed-tests.md` and `docs/PLAN-speed-optimization.md` inside the worktree.
+**Start here:** Read `docs/HANDOVER-speed-tests.md` and `docs/archive/PLAN-speed-optimization.md` inside the worktree.
 
 ---
 
@@ -53,7 +53,7 @@ Find a way to send SPI data to the LR2021 faster:
 3. **PIO fix** — after LA shows us what's wrong
 4. **Minor optimizations** — command batching, preamble reduction
 
-Full decision tree: `docs/PLAN-speed-optimization.md` Section 7.
+Full decision tree: `docs/archive/PLAN-speed-optimization.md` Section 7.
 
 ---
 
@@ -171,7 +171,7 @@ If speed track produces faster firmware, notify range track to re-test range at 
 
 | Document | Purpose |
 |----------|---------|
-| `docs/PLAN-speed-optimization.md` | **YOUR PRIMARY PLAN** — approaches, decision tree, expected results |
+| `docs/archive/PLAN-speed-optimization.md` | **YOUR PRIMARY PLAN** — approaches, decision tree, expected results |
 | `docs/PLAN-range-tests.md` | What the other track is doing |
 | `docs/flrc-timing-profile-2026-07-16.md` | Real timing data from hardware |
 | `docs/flrc-platform-analysis-2026-07-16.md` | Why approaches failed, bottleneck analysis |

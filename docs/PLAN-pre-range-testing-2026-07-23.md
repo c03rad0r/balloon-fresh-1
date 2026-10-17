@@ -4,7 +4,7 @@
 > **Worktree:** `~/worktrees/balloon-speed-tests/`
 > **Branch:** `speed-sustained-sweep`
 > **Date:** 2026-07-23
-> **Context:** Read `docs/HANDOVER-speed-tests-2026-07-23.md` first for verified results, bug fixes, and hardware setup.
+> **Context:** Read `docs/archive/HANDOVER-speed-tests-2026-07-23.md` first for verified results, bug fixes, and hardware setup.
 
 ---
 
@@ -23,7 +23,7 @@ Each task below is **self-contained** — a worker can pick up any task whose de
 ### Global Prerequisites (All Tasks)
 
 Before starting ANY task:
-1. Read `docs/HANDOVER-speed-tests-2026-07-23.md` for the bug fixes and verified results.
+1. Read `docs/archive/HANDOVER-speed-tests-2026-07-23.md` for the bug fixes and verified results.
 2. Acquire the board mutex:
    ```bash
    BALLOON_TRACK=speed-tests python3 ~/repos/balloon-fresh/tools/balloon-board-lock.py acquire

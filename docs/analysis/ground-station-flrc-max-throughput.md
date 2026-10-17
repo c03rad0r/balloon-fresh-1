@@ -60,9 +60,9 @@ must be stated, not glossed:**
   433 downlink an **amateur-band link, by design and on purpose**, not an ISM one.
 * **Mass / repo classification:** the repo's own weight study classes the V2 F33 board as
   **"Heavy-Lift Reference … Ground Station Only … not a pico balloon target"** (~20.6 g
-  with solar) — `docs/PAYLOAD-WEIGHT-ESTIMATES.md` lines 168–182/195. The honest delta is
+  with solar) — `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` lines 168–182/195. The honest delta is
   narrower than that label suggests: the **F33 module itself is 4.0 g vs 1.2 g for the bare
-  LR2021 module → +2.8 g** (`docs/PAYLOAD-WEIGHT-ESTIMATES.md` lines 62/119/177). The
+  LR2021 module → +2.8 g** (`docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` lines 62/119/177). The
   operator's binding limit is mass, so this +2.8 g is the number that decides it — the
   "20 g board" figure is the whole-board reference, not the radio swap.
 
@@ -220,11 +220,11 @@ the model in §4. "Rotator class" is against the SPID BIG-RAS holding torque of
 | F33 TX supply current | **1100 mA @ 5.0 V** | `docs/adr/047-v9-power-provisioning.md:67`, `docs/v9-BOM.md:93` |
 | F33 DC power, 5.0 V row | **5.50 W** (5.0 × 1.100) | computed |
 | F33 DC power, max row (5.5 V / 1118 mA / +33.3 dBm) | **6.15 W** | `docs/adr/047-v9-power-provisioning.md` §1.1–1.2 |
-| F33 module mass | **4.0 g** (39 × 21 mm) | `docs/PAYLOAD-WEIGHT-ESTIMATES.md:62,177` |
-| Bare LR2021 module mass | **1.2 g** | `docs/PAYLOAD-WEIGHT-ESTIMATES.md:119` |
+| F33 module mass | **4.0 g** (39 × 21 mm) | `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md:62,177` |
+| Bare LR2021 module mass | **1.2 g** | `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md:119` |
 | **Module mass delta (F33 − bare)** | **+2.8 g** | computed from the two above |
-| Full V2/F33 board reference mass | **~20.6 g** with 4 thin-film cells | `docs/PAYLOAD-WEIGHT-ESTIMATES.md:195` |
-| Full V2/F33 board classification | **"Ground Station Only … not a pico balloon target"** | `docs/PAYLOAD-WEIGHT-ESTIMATES.md:168–170` |
+| Full V2/F33 board reference mass | **~20.6 g** with 4 thin-film cells | `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md:195` |
+| Full V2/F33 board classification | **"Ground Station Only … not a pico balloon target"** | `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md:168–170` |
 | Solar array peak | **4 wings × 3 cells = 12 series = 6.0 V @ 1.2 A = 7.2 W** | `docs/v9-BOM.md:101`; `docs/adr/051-hub-array-and-cut-topology.md:75` |
 | Solar array nominal (the rail ADR-047 sizes against) | **6.0 V @ 400 mA = 2.4 W** | `docs/adr/044-v9-power-rails.md:46,118`; ADR-006 |
 | ADR-047's own margin statement | 6.15 W ÷ 2.4 W = **2.56×** → *"the array alone can never key the PA; the bank is the source"* | `docs/adr/047-v9-power-provisioning.md` §1.4 |
@@ -248,7 +248,7 @@ bank — not the array — supply the TX slot.** That is the whole balloon bill.
 >   (a) the amateur-licence gate** (the entire +13…+33 dBm class exceeds the licence-exempt
 >   **+12.15 dBm EIRP** cap of ADR-039/041), **and (b) the honest contradiction with the
 >   repo's own "F33 = ground station only" classification** in
->   `docs/PAYLOAD-WEIGHT-ESTIMATES.md` §D — which is a *whole-board* statement (~20.6 g),
+>   `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` §D — which is a *whole-board* statement (~20.6 g),
 >   not a *module-swap* statement (+2.8 g). **If the operator's mass budget can carry
 >   +2.8 g and their licence covers 433 MHz amateur operation, the F33 is the correct call
 >   and this whole document's §2 collapses to a 0.74 m dish.** If it cannot, then
@@ -633,7 +633,7 @@ a 1.24 m dish + the 650 kbps rate at 650 km** (648 km closure at +22 dBm / 650 k
    EIRP** cap (ADR-039 / ADR-041). Recommending the F33 makes the 433 downlink an
    **amateur-band** link; the DE amateur licence and the airborne-SRD grey area (ADR-039 open
    item (a)) must be settled first. **This, not mass, is the binding constraint on REC-1.**
-2. **The repo's own classification.** `docs/PAYLOAD-WEIGHT-ESTIMATES.md` §D says the F33
+2. **The repo's own classification.** `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` §D says the F33
    board is *"Ground Station Only … not a pico balloon target"*. REC-1 **contradicts that
    record** for the *module swap* case (+2.8 g versus the ~20.6 g whole-board reference).
    Either the operator accepts the +2.8 g module on the balloon (and that record is

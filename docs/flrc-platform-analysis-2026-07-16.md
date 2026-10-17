@@ -225,5 +225,5 @@ FPGA verdict:       Theoretically reaches ~2500 kbps, practically unnecessary
 
 ---
 
-*See `docs/flrc-optimization-comprehensive-plan-2026-07-16.md` for the
+*See `docs/archive/flrc-optimization-comprehensive-plan-2026-07-16.md` for the
 actionable plan to pursue the remaining optimization paths.*

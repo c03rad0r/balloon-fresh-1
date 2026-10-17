@@ -125,7 +125,7 @@ If speed track produces faster firmware, they'll notify this track to re-run ran
 | Document | Purpose |
 |----------|---------|
 | `docs/PLAN-range-tests.md` | **YOUR PRIMARY PLAN** — test matrix, procedure, decision criteria |
-| `docs/PLAN-speed-optimization.md` | What the other track is doing |
+| `docs/archive/PLAN-speed-optimization.md` | What the other track is doing |
 | `docs/flrc-final-summary-2026-07-16.md` | Overall progress summary |
 | `docs/flrc-timing-profile-2026-07-16.md` | Timing data from profiler |
 | `AGENTS.md` | Full project context, pin maps, inventory |

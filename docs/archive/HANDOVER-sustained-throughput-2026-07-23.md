@@ -1,3 +1,10 @@
+> ## ARCHIVED — 2026-10-17 · superseded in practice
+>
+> **Superseded through the same chain:** `docs/archive/HANDOVER-speed-tests-2026-07-23.md` names this file as
+> *"Earlier handover (sustained throughput methodology)"*, and the current handover for that track is
+> `docs/HANDOVER-COMPLETE-2026-07-24.md`.
+> Moved to `docs/archive/` on 2026-10-17. Kept for provenance.
+
 # HANDOVER — Sustained Throughput Testing for Speed Group
 
 > **Paste this into the speed-testing Signal group as the opening prompt.**
@@ -10,7 +17,7 @@ You are an AI assistant (Hermes Agent) continuing work on the **balloon-fresh** 
 
 **Repo:** `~/repos/balloon-fresh` (branch: `range-tests` has latest firmware)
 **Worktree:** Create `~/worktrees/balloon-speed-tests/` from `range-tests` branch
-**Start here:** Read this document, then `docs/PLAN-speed-optimization.md`, `docs/RANGE-THROUGHPUT-PLAN.md`, and `docs/range-test-comprehensive-plan-2026-07-17.md`
+**Start here:** Read this document, then `docs/archive/PLAN-speed-optimization.md`, `docs/RANGE-THROUGHPUT-PLAN.md`, and `docs/range-test-comprehensive-plan-2026-07-17.md`
 
 ---
 
@@ -408,7 +415,7 @@ See: `docs/lr2021-spi-protocol-reference.md` and `docs/lr2021-spi-command-refere
 
 | Document | Purpose |
 |---|---|
-| `docs/PLAN-speed-optimization.md` | TX optimization plan (your existing work) |
+| `docs/archive/PLAN-speed-optimization.md` | TX optimization plan (your existing work) |
 | `docs/RANGE-THROUGHPUT-PLAN.md` | Range+throughput plan with modulation comparison |
 | `docs/range-test-comprehensive-plan-2026-07-17.md` | Full 9-axis sweep plan (Axis 4 = modulation) |
 | `docs/lr2021-spi-protocol-reference.md` | SPI protocol reference (init sequences per modulation) |

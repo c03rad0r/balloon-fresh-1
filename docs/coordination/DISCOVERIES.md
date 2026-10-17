@@ -621,7 +621,7 @@ Each discovery is tagged with relevance categories so tracks know if it applies 
 
 ### [balloon-pre-stretching] docs: discovery sync batch 3 — V1-FAST/V2-ADC replace V1, payload weights update (2026-08-05) | tags: GENERAL
 - **Commit:** `d65fd70` by Felix
-- **Files:** docs/PAYLOAD-WEIGHT-ESTIMATES.md, docs/STATUS-balloon-pre-stretching.md
+- **Files:** docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md, docs/STATUS-balloon-pre-stretching.md
 - **Full message:** docs: discovery sync batch 3 — V1-FAST/V2-ADC replace V1, payload weights updated for single-MCU
 - **Relevance:** GENERAL
 

@@ -316,6 +316,6 @@ If speed tests produce a faster firmware, range tests can re-run with the new fi
 
 - [FLRC Final Summary](flrc-final-summary-2026-07-16.md)
 - [Platform Analysis](flrc-platform-analysis-2026-07-16.md)
-- [Speed Optimization Plan](PLAN-speed-optimization.md)
+- [Speed Optimization Plan](archive/PLAN-speed-optimization.md)
 - [Timing Profile Data](flrc-timing-profile-2026-07-16.md)
 - [AGENTS.md](../AGENTS.md) — full pin maps, build commands, inventory

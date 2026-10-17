@@ -181,7 +181,7 @@ FLRC)"*. Confirmed:
 | File | Change |
 |---|---|
 | `docs/FLRC-512B-THROUGHPUT-AUDIT-2026-10-06.md` | this file, rev 2 (§2 corrected to three models incl. CR 3/4; §8 correction log) |
-| `docs/PLAN-speed-optimization.md` | §1.1 table: the "2550 / 2569 kbps driver model" row replaced with the CR-3/4 ceilings (1871 / 1910 kbps) |
+| `docs/archive/PLAN-speed-optimization.md` | §1.1 table: the "2550 / 2569 kbps driver model" row replaced with the CR-3/4 ceilings (1871 / 1910 kbps) |
 | `docs/frequency-plan-868.md` | FLRC 2600 row annotated: these are *airtime* rows, 2600 kbps is the air rate; ceiling with the shipped CR 3/4 is ~1910 kbps |
 | `tools/plot_full_characterization.py` | `phase_defs` label `"2600k"` → `"2600k(air)"` for the four HF/LF-FLRC-2600 phases |
 | `tools/flrc_512b_throughput_audit.py`, `tests/test_flrc_512b_throughput_audit.py` | CR-3/4 model added, mislabelled model renamed, 4 capability probes (incl. the CR itself) |

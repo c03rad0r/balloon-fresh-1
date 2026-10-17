@@ -1,3 +1,11 @@
+> ## ARCHIVED — 2026-10-17 · superseded in part
+>
+> **The superseded part is this plan's title figure.** Live numbers live in
+> `docs/FLRC-512B-THROUGHPUT-AUDIT-2026-10-06.md` §1.1 (which §1.1 of this file already points at) and in
+> `docs/sustained-throughput-results-2026-07-23.md` (1484.9 kbps sustained, 0.00 % PER).
+> This file's own status line reads *"SUPERSEDED IN PART — the 1391 kbps baseline below is history"*.
+> Moved to `docs/archive/` on 2026-10-17; the §1.1 status update and the historical 1391 kbps row are kept.
+
 # FLRC Throughput Optimization Plan — payload size and pipelining
 
 **Date:** 2026-07-16 · **Status update 2026-10-06 (see §1.1 below)**
@@ -315,8 +323,8 @@ This track focuses on **throughput** (kbps). The range test track focuses on **c
 
 ## 11. Links
 
-- [Timing Profile Data](flrc-timing-profile-2026-07-16.md)
-- [Platform Analysis](flrc-platform-analysis-2026-07-16.md)
-- [FLRC Final Summary](flrc-final-summary-2026-07-16.md)
-- [Range Test Plan](PLAN-range-tests.md)
-- [AGENTS.md](../AGENTS.md) — full pin maps, build commands, inventory
+- [Timing Profile Data](../flrc-timing-profile-2026-07-16.md)
+- [Platform Analysis](../flrc-platform-analysis-2026-07-16.md)
+- [FLRC Final Summary](../flrc-final-summary-2026-07-16.md)
+- [Range Test Plan](../PLAN-range-tests.md)
+- [AGENTS.md](../../AGENTS.md) — full pin maps, build commands, inventory

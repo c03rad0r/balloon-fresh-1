@@ -24,7 +24,7 @@
   8 MB flash, no external part), ADR-108 (F33 + SX1280 pin plan).
 - Related artefacts: `docs/analysis/two-variant-mass-budget.md` (the existing B budget this
   record re-derives), `docs/POWER-BUDGET-V9-D2BE.md`, `docs/V9-RADIO-SITE-MATRIX.md`,
-  `docs/analysis/wing-insolation-geometry.md`, `docs/inventory.md`, `docs/PAYLOAD-WEIGHT-ESTIMATES.md`.
+  `docs/analysis/wing-insolation-geometry.md`, `docs/inventory.md`, `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md`.
 
 ---
 
@@ -71,7 +71,7 @@ The `LoRa2021F33-2G4` is the module B deletes. It is:
   the PA's source (ADR-047 §1);
 - **the burst-energy driver** — A's buffer is sized to that 6 W PA: ~1 mF for an FLRC burst,
   **0.47 F** for a LoRa SF12 burst (`docs/POWER-BUDGET-V9-D2BE.md` §3, ADR-036);
-- **~4.0 g** of mass (CITED, `docs/PAYLOAD-WEIGHT-ESTIMATES.md` §3 "LR2021F33, 3–5 g");
+- **~4.0 g** of mass (CITED, `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` §3 "LR2021F33, 3–5 g");
 - **illegal in the licence-exempt regime the operator selected for flight** — the 2 W PA is
   "dead weight at ≤ 10 mW ERP" (`docs/V9-RADIO-SITE-MATRIX.md` §4; ADR-039).
 
@@ -131,7 +131,7 @@ it is frozen (ADR-055 D4, Open item 3) and is **not** done here.
 
 | Constant | Value | Provenance |
 |---|---|---|
-| FR4 density × uplift | 1.85 g/cm³ × 1.15 | **CITED** `docs/PAYLOAD-WEIGHT-ESTIMATES.md` line 20 |
+| FR4 density × uplift | 1.85 g/cm³ × 1.15 | **CITED** `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` line 20 |
 | 0.6 mm FR4 areal mass | **127.65 mg/cm²** | **COMPUTED** 0.060 × 1.85 × 1.15 |
 | 0.4 mm FR4 areal mass | **85.10 mg/cm²** | **COMPUTED** 0.040 × 1.85 × 1.15 |
 | 0.21 mm bare-Si areal mass | **48.93 mg/cm²** | **COMPUTED** 0.021 × 2.33 |
@@ -144,9 +144,9 @@ it is frozen (ADR-055 D4, Open item 3) and is **not** done here.
 | # | Item | Unit (g) | Qty | Subtotal (g) | Source / class |
 |---|---|---:|---:|---:|---|
 | B1 | **B's own hub PCB, ≈ 61.2 cm² FR4, 0.4 mm** | 5.21 | 1 | **5.21** | **COMPUTED** 61.2 cm² × 85.10 mg/cm² — B's own outline (§5), the array carrier ARE the board (ADR-055 D6/D7) |
-| B2 | `ESP32-S3-WROOM-1U-N8R8` | 2.5 | 1 | **2.5** | **ESTIMATE** by analogy to the repo's `ESP32-C3-Mini-1` line (2.5 g) in `docs/PAYLOAD-WEIGHT-ESTIMATES.md` §3 — **no S3 mass anywhere in repo** (`docs/V9-RADIO-SITE-MATRIX.md` §3.5) |
+| B2 | `ESP32-S3-WROOM-1U-N8R8` | 2.5 | 1 | **2.5** | **ESTIMATE** by analogy to the repo's `ESP32-C3-Mini-1` line (2.5 g) in `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` §3 — **no S3 mass anywhere in repo** (`docs/V9-RADIO-SITE-MATRIX.md` §3.5) |
 | B3 | `SX1280IMLTRT` + matching/passives | 0.2 | 1 | **0.2** | **ESTIMATE** (QFN-24 + 0402 class) |
-| B4 | Bare `LoRa2021` castellated module | 1.2 | 1 | **1.2** | **CITED** `docs/PAYLOAD-WEIGHT-ESTIMATES.md` §3 ("LR2021 bare, 1–2 g"); exact part `TODO(unverified)` |
+| B4 | Bare `LoRa2021` castellated module | 1.2 | 1 | **1.2** | **CITED** `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` §3 ("LR2021 bare, 1–2 g"); exact part `TODO(unverified)` |
 | B5 | GNSS `MAX-M10S` (bare, direct-soldered) | 0.4 | 1 | **0.4** | **CITED** same §3 (breakout is 1.0 g) |
 | B6 | LDO `TPS7A02` (SOT-23-5) | 0.05 | 1 | **0.05** | **CITED** `docs/component-guide.md` §6 |
 | B7 | Pressure sensor `MS5611` / `MS5607` (bare) | 0.03 | 1 | **0.03** | **CITED** `docs/POWER-BUDGET-V9-D2BE.md` §4 / `PAYLOAD-WEIGHT-ESTIMATES.md` §3 |
@@ -444,7 +444,7 @@ distinct radio population, distinct power architecture (no 5 V rail), distinct a
 | **0.4 mm FR4** | **5.21 g** | **−2.60 g** |
 
 **Reasoning.** FR4 areal mass is linear in thickness (85.10 vs 127.65 mg/cm², both derived from
-`docs/PAYLOAD-WEIGHT-ESTIMATES.md` line 20's density × uplift), the board *is* the array carrier
+`docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` line 20's density × uplift), the board *is* the array carrier
 (ADR-055 D6), and ADR-055 D4 already names 0.4 mm as the hub target and quantifies it as "larger
 than any other single lever left on the hub". On B that lever is **2.60 g = 13 % of the whole
 payload** — a structural decision, not an optimisation, exactly as the 20 g wall demands.

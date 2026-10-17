@@ -702,7 +702,7 @@ a close-range overdrive hazard on the balloon's receiver.
    €40–90 PSU/heatsink allowance, and the "PSU+heatsink" line.
 8. **Repo defect flagged, not resolved (inherited):** SPX-06 €5,487 @ 716 N·m vs BIG-RAS €1,775
    @ 2,712 N·m brake — price and rating orderings disagree (ADR-068 §Consequences).
-9. **Repo contradiction flagged, not resolved (inherited):** `docs/PAYLOAD-WEIGHT-ESTIMATES.md`
+9. **Repo contradiction flagged, not resolved (inherited):** `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md`
    §D classes the F33 board as *"Ground Station Only … not a pico balloon target"*, which
    contradicts the F33-on-balloon recommendation. Must be settled by an ADR before the F33 flies.
 10. **Not modelled:** the receive-LNA option is not in `ground_station_gain_per_dollar_model.py`,

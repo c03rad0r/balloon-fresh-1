@@ -1,3 +1,10 @@
+> ## ARCHIVED — 2026-10-17 · superseded
+>
+> **Superseded by `docs/E80-SWD-DIAGNOSIS-2026-08-18.md`** (status line there: *"ACTIVE (supersedes the
+> SWD-disable theory in `HANDOFF-SWD-NEXT-STEPS.md`)"*). This file's own header already carried the
+> supersession note dated 2026-08-18; this move only files it.
+> Moved to `docs/archive/` on 2026-10-17. Kept for provenance — do not cite as current state.
+
 # HANDOFF — E80 bench: next steps from here (2026-08-16)
 
 > **SUPERSEDED (2026-08-18):** the SWD-disable theory below is disproven — vendor
