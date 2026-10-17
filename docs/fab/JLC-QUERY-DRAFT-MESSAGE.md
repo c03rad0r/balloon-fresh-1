@@ -115,9 +115,14 @@ outline, drill), a **cross-section drawing of the edge-launch connection** showi
 edge, the mating tab and the tolerances, and a note listing the four connector locations as
 **intentional edge features**.
 
-**What we are asking for in return:** written confirmation on 2.1 and 2.2 (that the edge-located copper
-is buildable as specified, and whether it is plain exposed copper or something else), and the stackup
-numbers from 1.1.
+**What we are asking for in return:** written answers to **2.1 and 2.2** (the edge-located copper: is it
+buildable as specified, and is it plain exposed copper or something else) and to **2A.1 and 2A.3** (how, if
+at all, copper exists on the internal faces of a routed slot - and if it does not, what you would recommend
+instead and what that would cost), plus the stackup numbers from 1.1.
+
+**2.1/2.2 and 2A are the blocking questions.** If the edge interface cannot be built as drawn, or a routed
+slot cannot carry the lands on its internal faces, the wing-tab design needs revising and that is an
+ADR-046/048 change on our side. **1.x is deferrable** to a follow-up revision.
 
 Thank you.
 
