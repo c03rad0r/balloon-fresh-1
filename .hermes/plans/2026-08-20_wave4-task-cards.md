@@ -3,7 +3,7 @@
 > **Generated:** 2026-08-20
 > **Source:** `2026-08-20_firmware-harmonization-schedule.md` (Phase 1, Waves 1-4)
 > **Supplementary:** `2026-08-20_prbs15-harmonization-schedule.md` (PRBS-15 port, P1-P8)
-> **Additional:** `docs/MEAS-task-chain-spec.md` (MEAS-1, MEAS-2)
+> **Additional:** `docs/bench/MEAS-task-chain-spec.md` (MEAS-1, MEAS-2)
 > **Status:** Phase 1 (18 tasks) ✅ Complete. PRBS-15 port in progress (uncommitted, partial).
 
 ---
@@ -58,7 +58,7 @@ The E80 repo (`balloon-e80bench`) has significant uncommitted working-tree chang
 
 ### MEAS-1 / MEAS-2: NOT STARTED
 
-Spec exists at `docs/MEAS-task-chain-spec.md`. MEAS-1 requires Felix at bench. MEAS-2 is fully automated but depends on MEAS-1.
+Spec exists at `docs/bench/MEAS-task-chain-spec.md`. MEAS-1 requires Felix at bench. MEAS-2 is fully automated but depends on MEAS-1.
 
 ### Future Tasks (MEAS-3 through MEAS-6): NOT STARTED
 

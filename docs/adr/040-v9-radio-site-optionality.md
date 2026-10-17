@@ -19,8 +19,8 @@
   `docs/f33-module/F33-LANDPATTERN-VERIFICATION.md` (branch `docs/f33-landpattern-verification`,
   tip `d983bab`);
   `docs/LR2021-LESSONS-2026-09.md` (branch `docs/lr2021-lessons`, tip `581b38b`);
-  `docs/REGULATORY-AMATEUR-LICENCE.md` (branch `docs/regulatory-amateur`, tip `0f02f29d`);
-  `docs/DUAL-VARIANT-DESIGN.md`, `docs/inventory.md`, `docs/power-budget.md`;
+  `docs/link/REGULATORY-AMATEUR-LICENCE.md` (branch `docs/regulatory-amateur`, tip `0f02f29d`);
+  `docs/DUAL-VARIANT-DESIGN.md`, `docs/inventory.md`, `docs/power/power-budget.md`;
   `docs/V9-RADIO-SITE-MATRIX.md` (the per-config population/GPIO/rail/regulatory matrix,
   committed alongside this ADR).
 
@@ -127,7 +127,7 @@ ADR-039). It **is** legal under the operator's German amateur licence on 70 cm �
 1 entry 18 (430–440 MHz): 750 W PEP Class A / 75 W PEP Class E; with the attendant duties that
 the amateur service is **secondary** (must not harm military/radar primaries), that a
 **callsign is required**, and that AFuV §16(7)–(8) **prohibits encryption** of the telemetry
-(`docs/REGULATORY-AMATEUR-LICENCE.md`). The full per-config legal table is in
+(`docs/link/REGULATORY-AMATEUR-LICENCE.md`). The full per-config legal table is in
 `docs/V9-RADIO-SITE-MATRIX.md` §"Legal regime per config".
 
 ---
@@ -152,7 +152,7 @@ the amateur service is **secondary** (must not harm military/radar primaries), t
   escape hatch that the variant site preserves.
 - **O3 — cross-border amateur operation.** Whether a German amateur licence covers an
   unmanned, automatically transmitting, airborne payload abroad is unsettled
-  (`docs/REGULATORY-AMATEUR-LICENCE.md` §7, open item 1). Affects the `{HP}`/`{HP+LP}` legal
+  (`docs/link/REGULATORY-AMATEUR-LICENCE.md` §7, open item 1). Affects the `{HP}`/`{HP+LP}` legal
   case specifically.
 
 ---

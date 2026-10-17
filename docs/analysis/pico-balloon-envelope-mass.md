@@ -69,7 +69,7 @@ products, retrieved 2026-10-07).
 |---|---|---|---|---|
 | **Yokohama "Crystal Clear" 32" sphere — _new_ valveless version** (the one the community now buys; the operator's own docs say he has the "no nozzle" version) | 32 in / ~800 mm nominal; ~100–105 in circumference when stretched | **48.6 g** | **COMMUNITY compilation, first-hand scale value:** `KevWal/Balloon-Info` `README.md` + `Yokohama.MD` (GitHub), compiled from `groups.io/g/picoballoon` posts, "as of 5 November 2022". The file states plainly: *"Balloon empty weight: 48.6g."* | **MEDIUM–HIGH.** A named community practitioner's scale figure, curated into a comparison table (see 2.2). Corroborated in magnitude by Ruthroff's "nearly half of 85 g" (§4) and by the repo's own 47 g. **No manufacturer figure exists to compare against.** |
 | **Same product, _old_ version (with self-sealing valve)** | 32 in | **41 g** | Same source (`README.md`: row "Yoko 32" Old … 41 g") | **MEDIUM.** Same provenance; the Δ≈7.6 g vs the new version is attributed to the removed valve/nozzle hardware. |
-| Yokohama 32" as used in this repo's docs | 32 in | 47 g | `docs/PRE-STRETCHING-PROTOCOL.md` §A/§C/E.2 (`analysis/*` branches carry the same file). The doc's source line names "Yokohama manufacturer" | **LOW provenance.** The manufacturer publishes **no** mass, so the "manufacturer" attribution cannot be right; the value sits between the measured 41 g and 48.6 g and matches the new (heavy) version within ~1.6 g. Treat as a **repo estimate**, superseded by the 48.6 g measurement. |
+| Yokohama 32" as used in this repo's docs | 32 in | 47 g | `docs/prestretch/PRE-STRETCHING-PROTOCOL.md` §A/§C/E.2 (`analysis/*` branches carry the same file). The doc's source line names "Yokohama manufacturer" | **LOW provenance.** The manufacturer publishes **no** mass, so the "manufacturer" attribution cannot be right; the value sits between the measured 41 g and 48.6 g and matches the new (heavy) version within ~1.6 g. Treat as a **repo estimate**, superseded by the 48.6 g measurement. |
 | Coloured / metallic Yokohama 32" sphere | 32 in | not published, not measured | — | **TODO(unverified)** |
 | Yokohama 7 / 10 / 14 / 20 / 24 inch spheres | 7–24 in | not published | `products.json` (MFR) | **MFR states no mass for any size.** |
 
@@ -316,7 +316,7 @@ into the subtraction above.
 * `TODO(unverified)` — **A manufacturer-stated envelope mass.** Yokohama Balloon publishes **no**
   mass for any sphere size on its own store/catalogue (`products.json`, checked 2026-10-07). The
   48.6 g / 41 g figures are community-measured, not manufacturer-stated.
-* `TODO(unverified)` — **The mass attribution in this repo (`docs/PRE-STRETCHING-PROTOCOL.md`,
+* `TODO(unverified)` — **The mass attribution in this repo (`docs/prestretch/PRE-STRETCHING-PROTOCOL.md`,
   47 g).** Its source line names "Yokohama manufacturer", but no such manufacturer figure exists;
   provenance could not be established. Superseded by the 48.6 g measurement.
 * `TODO(unverified)` — **A second, independent first-hand scale value** for the 32" Yokohama

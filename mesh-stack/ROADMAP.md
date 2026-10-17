@@ -576,7 +576,7 @@ Three board variants sharing ESP32-C3 + LR2021 core, with progressive coprocesso
 - **Configuration**: W25Q32JV flash, yosys + nextpnr open-source toolchain
 - **Status**: Design phase — PCB to be ordered from JLCPCB (~$15-20/board)
 
-See `docs/board-variants.md` for full pin assignments, BOMs, and checklists.
+See `docs/hardware-reference/board-variants.md` for full pin assignments, BOMs, and checklists.
 See `docs/adr/015-three-board-hardware-strategy.md` for the decision record.
 
 ### Board Variant Throughput Projections

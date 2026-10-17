@@ -6,9 +6,9 @@
 - Date: 2026-10-06
 - Decision owner: Felix (operator)
 - Author: Hermes agent (consolidation pass)
-- Related: `docs/RECON-duplicate-giftwrap-paths.md`,
-  `docs/RECON-cfg-gated-wrap-paths.md`,
-  `docs/RECON-lane-B-plaintext-fallback-paths.md`, ADR-008 (telemetry protocol),
+- Related: `docs/recon/RECON-duplicate-giftwrap-paths.md`,
+  `docs/recon/RECON-cfg-gated-wrap-paths.md`,
+  `docs/recon/RECON-lane-B-plaintext-fallback-paths.md`, ADR-008 (telemetry protocol),
   ADR-022 (mandatory test coverage)
 - Related artefacts:
   `firmware/e80-stm32-bench/tools/test_giftwrap_single_path.py` (the pinning
