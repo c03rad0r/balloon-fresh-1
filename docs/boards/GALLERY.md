@@ -23,8 +23,8 @@ table drifts; this one cannot.
   - `tracker/hardware/hub_board_v9.kicad_pcb`  sha256 `e55a294628fd38a7…`
 - **wing v9** — wing solar array + cut driver + hub tab
   - ⚠️ **2 net(s) unrouted**
-  - `tracker/hardware/wing_board/wing_board_v9.kicad_pcb`  sha256 `4ed85e6d081aaf1c…`
-- **base station** — ground station: 4G/5G via SIM7600E-H, FLRC link to the hub
+  - `tracker/hardware/wing_board/wing_board_v9.kicad_pcb`  sha256 `34f103774bfba921…`
+- **base station** — ground station: LTE Cat 4 via SIM7600E-H (no 5G), FLRC link to the hub
   - ⚠️ **44 net(s) unrouted**
   - `tracker/hardware/base_station/base_station_v1_placed_v2.kicad_pcb`  sha256 `095d0278410465f2…`
 
@@ -37,7 +37,9 @@ table drifts; this one cannot.
   establish that the intended nets are connected"*. Read the `nets routed` column, not the
   amount of red.
 - Renders are `F.Cu` + `Edge.Cuts`, exported with `--exclude-drawing-sheet` so KiCad's page
-  frame and title block do not overlay the board. Inner and back layers are not shown here;
+  frame and title block do not overlay the board, and with the frame widened around the
+  board so the outline sits inside the image with a clear margin on all four sides. Inner and
+  back layers are not shown here;
   see `docs/fab/reviews/` for per-layer plots and their review.
 - **A render shows geometry, not correctness.** Clearance, impedance and netlist correctness
   are measured by the gates in `docs/fab/GATE-RESULTS.md`. A visual review of these three
