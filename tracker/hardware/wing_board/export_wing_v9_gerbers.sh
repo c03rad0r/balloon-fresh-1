@@ -1,7 +1,14 @@
 #!/usr/bin/env bash
 # JLCPCB order package for the v9 WING board (tracker/hardware/wing_board/wing_board_v9.kicad_pcb).
 # Mirrors the v8f/v8h/v8i/v8j package convention (same layer naming, same zip layout,
-# same empty-gerber sanity table) but for a 2-layer 0.6 mm board.
+# same empty-gerber sanity table) but for a 2-layer 0.8 mm board.
+#
+# 0.8 mm, not 0.6: the board's `(general (thickness ...))` is 0.8 (ADR-046 s3.2 as adjudicated by the
+# WING v9 package audit). This comment said "0.6 mm board" and was a stale claim carried inside the
+# tool itself -- the same defect class the audit fixed in the board file. Measured 2026-10-17: the
+# PRE-audit gerber set was also stale in a worse way -- it had been plotted from the UNROUTED board
+# (B.Cu 6 draw/flash coordinates against 24 for the routed board, and PTH.drl with ZERO holes against
+# 8). Always re-run this script after the board changes; the routing is in the copper artwork.
 set -eu
 HERE="$(cd "$(dirname "$0")" && pwd)"
 OUT="$HERE/../output"
