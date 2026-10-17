@@ -40,13 +40,13 @@ both survive.
 
 | file | superseded by | evidence |
 |---|---|---|
-| `HANDOFF-SWD-NEXT-STEPS.md` | `docs/E80-SWD-DIAGNOSIS-2026-08-18.md` | successor's status line: *"ACTIVE (supersedes the SWD-disable theory in `HANDOFF-SWD-NEXT-STEPS.md`)"* |
+| `HANDOFF-SWD-NEXT-STEPS.md` | `docs/e80-900mbl-02-eval/E80-SWD-DIAGNOSIS-2026-08-18.md` | successor's status line: *"ACTIVE (supersedes the SWD-disable theory in `HANDOFF-SWD-NEXT-STEPS.md`)"* |
 | `PLAN-speed-optimization.md` | `docs/FLRC-512B-THROUGHPUT-AUDIT-2026-10-06.md` §1.1 (+ `sustained-throughput-results-2026-07-23.md`) | its own status: *"SUPERSEDED IN PART — the 1391 kbps baseline below is history"* |
 | `PAYLOAD-WEIGHT-ESTIMATES.md` | `docs/analysis/MEASURED-MASSES.md`, `docs/analysis/CELL-MASS-MEASUREMENTS-2026-10-14.md` | its own *"⚠ SUPERSEDED 2026-10-14: the cells ARE 0.440 g each when measured"* |
-| `flrc-optimization-comprehensive-plan-2026-07-16.md` | `docs/archive/PLAN-speed-optimization.md` + `docs/PLAN-range-tests.md` | its own UPDATE block: *"superseded by two focused, actionable plans"* |
-| `handover-data-collaborator-2026-08-21.md` | `docs/handover-adaptive-sweep-2026-08-22.md` | successor names it *"Prior handover (2026-08-21, for reference)"* |
-| `HANDOVER-speed-tests-2026-07-23.md` | `docs/HANDOVER-COMPLETE-2026-07-24.md` | successor names it the *"Original handover"* |
-| `HANDOVER-sustained-throughput-2026-07-23.md` | `docs/HANDOVER-COMPLETE-2026-07-24.md` (via `HANDOVER-speed-tests-2026-07-23.md`) | named there as the *"Earlier handover"* |
+| `flrc-optimization-comprehensive-plan-2026-07-16.md` | `docs/archive/PLAN-speed-optimization.md` + `docs/plans/PLAN-range-tests.md` | its own UPDATE block: *"superseded by two focused, actionable plans"* |
+| `handover-data-collaborator-2026-08-21.md` | `docs/handovers/handover-adaptive-sweep-2026-08-22.md` | successor names it *"Prior handover (2026-08-21, for reference)"* |
+| `HANDOVER-speed-tests-2026-07-23.md` | `docs/handovers/HANDOVER-COMPLETE-2026-07-24.md` | successor names it the *"Original handover"* |
+| `HANDOVER-sustained-throughput-2026-07-23.md` | `docs/handovers/HANDOVER-COMPLETE-2026-07-24.md` (via `HANDOVER-speed-tests-2026-07-23.md`) | named there as the *"Earlier handover"* |
 
 Seven of the 40 loose docs the triage index flagged as self-marked were archived here. **The other 33 were
 screened out**, each for a stated reason, because their marker sits in body prose or on one row of a live

@@ -7,7 +7,7 @@
 
 This document is the single source of truth for the console protocol shared by all
 three bench boards. Where a board's firmware and this spec disagree, the spec wins;
-where this spec and the harmonization plan (`docs/harmonization-plan-20260821.md`)
+where this spec and the harmonization plan (`docs/bench/harmonization-plan-20260821.md`)
 disagree, this spec wins (it is the T1 deliverable the plan calls for).
 
 ---

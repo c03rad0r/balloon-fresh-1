@@ -2,7 +2,7 @@
 >
 > **Superseded through the same chain:** `docs/archive/HANDOVER-speed-tests-2026-07-23.md` names this file as
 > *"Earlier handover (sustained throughput methodology)"*, and the current handover for that track is
-> `docs/HANDOVER-COMPLETE-2026-07-24.md`.
+> `docs/handovers/HANDOVER-COMPLETE-2026-07-24.md`.
 > Moved to `docs/archive/` on 2026-10-17. Kept for provenance.
 
 # HANDOVER — Sustained Throughput Testing for Speed Group
@@ -17,7 +17,7 @@ You are an AI assistant (Hermes Agent) continuing work on the **balloon-fresh** 
 
 **Repo:** `~/repos/balloon-fresh` (branch: `range-tests` has latest firmware)
 **Worktree:** Create `~/worktrees/balloon-speed-tests/` from `range-tests` branch
-**Start here:** Read this document, then `docs/archive/PLAN-speed-optimization.md`, `docs/RANGE-THROUGHPUT-PLAN.md`, and `docs/range-test-comprehensive-plan-2026-07-17.md`
+**Start here:** Read this document, then `docs/archive/PLAN-speed-optimization.md`, `docs/RANGE-THROUGHPUT-PLAN.md`, and `docs/range/range-test-comprehensive-plan-2026-07-17.md`
 
 ---
 
@@ -196,7 +196,7 @@ LoRa mode needs different SPI init from FLRC. The LR2021 protocol reference (`do
 
 **Build both TX and RX LoRa firmware.** Same packet structure (seq number + payload + RSSI), different radio init.
 
-Reference: RadioLib v7.6.0 has LoRa init code for LR2021 (`docs/lr2021-reference-2026-07-16.md`). Extract the raw SPI commands from RadioLib's `beginLoRa()` to build raw SPI firmware.
+Reference: RadioLib v7.6.0 has LoRa init code for LR2021 (`docs/lr2021/lr2021-reference-2026-07-16.md`). Extract the raw SPI commands from RadioLib's `beginLoRa()` to build raw SPI firmware.
 
 ### 3. Sustained RX Measurement
 
@@ -417,10 +417,10 @@ See: `docs/lr2021-spi-protocol-reference.md` and `docs/lr2021-spi-command-refere
 |---|---|
 | `docs/archive/PLAN-speed-optimization.md` | TX optimization plan (your existing work) |
 | `docs/RANGE-THROUGHPUT-PLAN.md` | Range+throughput plan with modulation comparison |
-| `docs/range-test-comprehensive-plan-2026-07-17.md` | Full 9-axis sweep plan (Axis 4 = modulation) |
+| `docs/range/range-test-comprehensive-plan-2026-07-17.md` | Full 9-axis sweep plan (Axis 4 = modulation) |
 | `docs/lr2021-spi-protocol-reference.md` | SPI protocol reference (init sequences per modulation) |
 | `docs/lr2021-spi-command-reference.md` | SPI command reference (opcodes) |
-| `docs/flrc-timing-profile-2026-07-16.md` | Real TX timing data from hardware |
+| `docs/flrc/flrc-timing-profile-2026-07-16.md` | Real TX timing data from hardware |
 | `docs/adr/007-adaptive-protocol.md` | Adaptive protocol design (why we need full spectrum) |
 | `firmware/rp2040/src/flrc_range_tx_auto.cpp` | Current TX firmware (FLRC burst mode) |
 | `firmware/rp2040/src/flrc_range_rx_auto.cpp` | Current RX firmware (FLRC, working, verified) |

@@ -120,7 +120,7 @@ Each discovery is tagged with relevance categories so tracks know if it applies 
 
 ### [balloon-circuit-design] docs: adopt ROADMAP v5 two-stage architecture + critical PCB lessons from discov (2026-08-07) | tags: HARDWARE
 - **Commit:** `c296754` by Felix
-- **Files:** docs/DISCOVERY-ADOPTION-ROADMAP-V5.md
+- **Files:** docs/discovery/DISCOVERY-ADOPTION-ROADMAP-V5.md
 - **Full message:** docs: adopt ROADMAP v5 two-stage architecture + critical PCB lessons from discovery sync
 - **Relevance:** HARDWARE
 
@@ -211,7 +211,7 @@ Each discovery is tagged with relevance categories so tracks know if it applies 
 
 ### [balloon-circuit-design] docs: adopt 4-layer PCB stackup findings from discovery sync — V0.1 plan update (2026-08-07) | tags: HARDWARE
 - **Commit:** `c95d761` by Felix
-- **Files:** docs/DISCOVERY-ADOPTION-4LAYER.md
+- **Files:** docs/discovery/DISCOVERY-ADOPTION-4LAYER.md
 - **Full message:** docs: adopt 4-layer PCB stackup findings from discovery sync — V0.1 plan update
 - **Relevance:** HARDWARE
 
@@ -275,7 +275,7 @@ Each discovery is tagged with relevance categories so tracks know if it applies 
 
 ### [balloon-hermes] docs: lessons 8-11 + current plan status — placement-first breakthrough, Kimi K2 (2026-08-06) | tags: HARDWARE
 - **Commit:** `b7225f4` by Felix
-- **Files:** docs/PCB-LESSONS-LEARNED-2026-08-05.md, tracker/hardware/PCB-TWO-STAGE-PLAN.md
+- **Files:** docs/pcb/PCB-LESSONS-LEARNED-2026-08-05.md, tracker/hardware/PCB-TWO-STAGE-PLAN.md
 - **Full message:** docs: lessons 8-11 + current plan status — placement-first breakthrough, Kimi K2.7 local works
 - **Relevance:** HARDWARE
 
@@ -875,7 +875,7 @@ Each discovery is tagged with relevance categories so tracks know if it applies 
 
 ### [balloon-circuit-design] docs: consultant PCB review — V1/F33 DRC analysis, GPIO fix assessment, architec (2026-08-05) | tags: HARDWARE
 - **Commit:** `502d33f` by Felix
-- **Files:** docs/CONSULTANT-PCB-REVIEW.md, tracker/hardware/drc_f33_fresh.txt, tracker/hardware/drc_v1_fresh.txt
+- **Files:** docs/pcb/CONSULTANT-PCB-REVIEW.md, tracker/hardware/drc_f33_fresh.txt, tracker/hardware/drc_v1_fresh.txt
 - **Full message:** docs: consultant PCB review — V1/F33 DRC analysis, GPIO fix assessment, architecture mismatch found
 - **Relevance:** HARDWARE
 
@@ -1067,7 +1067,7 @@ Each discovery is tagged with relevance categories so tracks know if it applies 
 
 ### [balloon-hermes] P1B.1-FIX: Add comprehensive SPI TX debugging for raw FLRC transmission (2026-08-01) | tags: SPI, RADIO, PROTOCOL
 - **Commit:** `822cdf0` by Felix
-- **Files:** docs/SPEED-P0P2P3-HW-VERIFICATION-PLAN.md, docs/coordination/DISCOVERIES.md, graphify-out/cache/stat-index.json (+2 more)
+- **Files:** docs/speed/SPEED-P0P2P3-HW-VERIFICATION-PLAN.md, docs/coordination/DISCOVERIES.md, graphify-out/cache/stat-index.json (+2 more)
 - **Full message:** P1B.1-FIX: Add comprehensive SPI TX debugging for raw FLRC transmission
 - **Relevance:** SPI, RADIO, PROTOCOL
 
@@ -1161,7 +1161,7 @@ Each discovery is tagged with relevance categories so tracks know if it applies 
 
 ### [balloon-hermes] plan: clearance-aware routing rewrite + DRC analysis tooling (2026-07-30) | tags: PROTOCOL, TEST
 - **Commit:** `2222b8f` by Felix
-- **Files:** docs/PLAN-ROUTING-REWRITE.md, tracker/hardware/drc_f33_baseline.txt, tracker/hardware/drc_v1_baseline.txt (+3 more)
+- **Files:** docs/plans/PLAN-ROUTING-REWRITE.md, tracker/hardware/drc_f33_baseline.txt, tracker/hardware/drc_v1_baseline.txt (+3 more)
 - **Full message:** plan: clearance-aware routing rewrite + DRC analysis tooling
 - **Relevance:** PROTOCOL, TEST
 
@@ -1275,7 +1275,7 @@ Each discovery is tagged with relevance categories so tracks know if it applies 
 
 ### [balloon-range-tests] plan: clearance-aware routing rewrite + DRC analysis tooling (2026-07-30) | tags: PROTOCOL, TEST
 - **Commit:** `2222b8f` by Felix
-- **Files:** docs/PLAN-ROUTING-REWRITE.md, tracker/hardware/drc_f33_baseline.txt, tracker/hardware/drc_v1_baseline.txt (+3 more)
+- **Files:** docs/plans/PLAN-ROUTING-REWRITE.md, tracker/hardware/drc_f33_baseline.txt, tracker/hardware/drc_v1_baseline.txt (+3 more)
 - **Full message:** plan: clearance-aware routing rewrite + DRC analysis tooling
 - **Relevance:** PROTOCOL, TEST
 
@@ -1383,7 +1383,7 @@ Each discovery is tagged with relevance categories so tracks know if it applies 
 
 ### [balloon-circuit-design] plan: clearance-aware routing rewrite + DRC analysis tooling (2026-07-30) | tags: PROTOCOL, TEST
 - **Commit:** `2222b8f` by Felix
-- **Files:** docs/PLAN-ROUTING-REWRITE.md, tracker/hardware/drc_f33_baseline.txt, tracker/hardware/drc_v1_baseline.txt (+3 more)
+- **Files:** docs/plans/PLAN-ROUTING-REWRITE.md, tracker/hardware/drc_f33_baseline.txt, tracker/hardware/drc_v1_baseline.txt (+3 more)
 - **Full message:** plan: clearance-aware routing rewrite + DRC analysis tooling
 - **Relevance:** PROTOCOL, TEST
 
@@ -1492,7 +1492,7 @@ Each discovery is tagged with relevance categories so tracks know if it applies 
 
 ### [balloon-hermes] docs: Phase 2 plan — hardware adapter + cross-track finding resolution (2026-07-29) | tags: GENERAL
 - **Commit:** `a416b38` by Felix
-- **Files:** docs/PLAN-phase2-hardware-adapter-2026-07-29.md
+- **Files:** docs/plans/PLAN-phase2-hardware-adapter-2026-07-29.md
 - **Full message:** docs: Phase 2 plan — hardware adapter + cross-track finding resolution
 - **Relevance:** GENERAL
 
@@ -1522,13 +1522,13 @@ Each discovery is tagged with relevance categories so tracks know if it applies 
 
 ### [balloon-hermes] data: RP2040 baseline capture + results — 1760kbps at 10.40MHz SPI (2026-07-30) | tags: SPI, RADIO, TEST
 - **Commit:** `a31f971` by Felix
-- **Files:** .gitignore, captures/bench-rp2040.sr, docs/rp2040-baseline-results.md
+- **Files:** .gitignore, captures/bench-rp2040.sr, docs/rp2040/rp2040-baseline-results.md
 - **Full message:** data: RP2040 baseline capture + results — 1760kbps at 10.40MHz SPI
 - **Relevance:** SPI, RADIO, TEST
 
 ### [balloon-hermes] docs+feat: SPI timing findings + payload size sweep targets (2026-07-29) | tags: SPI
 - **Commit:** `af2457f` by Felix
-- **Files:** Makefile, docs/spi-timing-analysis.md, firmware/rp2040/platformio.ini
+- **Files:** Makefile, docs/spi/spi-timing-analysis.md, firmware/rp2040/platformio.ini
 - **Full message:** docs+feat: SPI timing findings + payload size sweep targets
 - **Relevance:** SPI
 
@@ -1588,7 +1588,7 @@ Each discovery is tagged with relevance categories so tracks know if it applies 
 
 ### [balloon-range-tests] docs: Phase 2 plan — hardware adapter + cross-track finding resolution (2026-07-29) | tags: GENERAL
 - **Commit:** `a416b38` by Felix
-- **Files:** docs/PLAN-phase2-hardware-adapter-2026-07-29.md
+- **Files:** docs/plans/PLAN-phase2-hardware-adapter-2026-07-29.md
 - **Full message:** docs: Phase 2 plan — hardware adapter + cross-track finding resolution
 - **Relevance:** GENERAL
 
@@ -1624,7 +1624,7 @@ Each discovery is tagged with relevance categories so tracks know if it applies 
 
 ### [balloon-range-tests] data: RP2040 baseline capture + results — 1760kbps at 10.40MHz SPI (2026-07-30) | tags: SPI, RADIO, TEST
 - **Commit:** `a31f971` by Felix
-- **Files:** .gitignore, captures/bench-rp2040.sr, docs/rp2040-baseline-results.md
+- **Files:** .gitignore, captures/bench-rp2040.sr, docs/rp2040/rp2040-baseline-results.md
 - **Full message:** data: RP2040 baseline capture + results — 1760kbps at 10.40MHz SPI
 - **Relevance:** SPI, RADIO, TEST
 
@@ -1666,7 +1666,7 @@ Each discovery is tagged with relevance categories so tracks know if it applies 
 
 ### [balloon-range-tests] docs+feat: SPI timing findings + payload size sweep targets (2026-07-29) | tags: SPI
 - **Commit:** `af2457f` by Felix
-- **Files:** Makefile, docs/spi-timing-analysis.md, firmware/rp2040/platformio.ini
+- **Files:** Makefile, docs/spi/spi-timing-analysis.md, firmware/rp2040/platformio.ini
 - **Full message:** docs+feat: SPI timing findings + payload size sweep targets
 - **Relevance:** SPI
 
@@ -1732,7 +1732,7 @@ Each discovery is tagged with relevance categories so tracks know if it applies 
 
 ### [balloon-pre-stretching] docs: Phase 2 plan — hardware adapter + cross-track finding resolution (2026-07-29) | tags: GENERAL
 - **Commit:** `a416b38` by Felix
-- **Files:** docs/PLAN-phase2-hardware-adapter-2026-07-29.md
+- **Files:** docs/plans/PLAN-phase2-hardware-adapter-2026-07-29.md
 - **Full message:** docs: Phase 2 plan — hardware adapter + cross-track finding resolution
 - **Relevance:** GENERAL
 
@@ -1768,7 +1768,7 @@ Each discovery is tagged with relevance categories so tracks know if it applies 
 
 ### [balloon-pre-stretching] data: RP2040 baseline capture + results — 1760kbps at 10.40MHz SPI (2026-07-30) | tags: SPI, RADIO, TEST
 - **Commit:** `a31f971` by Felix
-- **Files:** .gitignore, captures/bench-rp2040.sr, docs/rp2040-baseline-results.md
+- **Files:** .gitignore, captures/bench-rp2040.sr, docs/rp2040/rp2040-baseline-results.md
 - **Full message:** data: RP2040 baseline capture + results — 1760kbps at 10.40MHz SPI
 - **Relevance:** SPI, RADIO, TEST
 
@@ -1810,7 +1810,7 @@ Each discovery is tagged with relevance categories so tracks know if it applies 
 
 ### [balloon-pre-stretching] docs+feat: SPI timing findings + payload size sweep targets (2026-07-29) | tags: SPI
 - **Commit:** `af2457f` by Felix
-- **Files:** Makefile, docs/spi-timing-analysis.md, firmware/rp2040/platformio.ini
+- **Files:** Makefile, docs/spi/spi-timing-analysis.md, firmware/rp2040/platformio.ini
 - **Full message:** docs+feat: SPI timing findings + payload size sweep targets
 - **Relevance:** SPI
 
@@ -1864,7 +1864,7 @@ Each discovery is tagged with relevance categories so tracks know if it applies 
 
 ### [balloon-circuit-design] plan: clearance-aware routing rewrite + DRC analysis tooling (2026-07-30) | tags: PROTOCOL, TEST
 - **Commit:** `75fb76e` by Felix
-- **Files:** docs/PLAN-ROUTING-REWRITE.md, tracker/hardware/drc_f33_baseline.txt, tracker/hardware/drc_v1_baseline.txt (+3 more)
+- **Files:** docs/plans/PLAN-ROUTING-REWRITE.md, tracker/hardware/drc_f33_baseline.txt, tracker/hardware/drc_v1_baseline.txt (+3 more)
 - **Full message:** plan: clearance-aware routing rewrite + DRC analysis tooling
 - **Relevance:** PROTOCOL, TEST
 
@@ -1972,7 +1972,7 @@ Each discovery is tagged with relevance categories so tracks know if it applies 
 
 ### [balloon-circuit-design] docs: Phase 2 plan — hardware adapter + cross-track finding resolution (2026-07-29) | tags: GENERAL
 - **Commit:** `a416b38` by Felix
-- **Files:** docs/PLAN-phase2-hardware-adapter-2026-07-29.md
+- **Files:** docs/plans/PLAN-phase2-hardware-adapter-2026-07-29.md
 - **Full message:** docs: Phase 2 plan — hardware adapter + cross-track finding resolution
 - **Relevance:** GENERAL
 
@@ -2008,7 +2008,7 @@ Each discovery is tagged with relevance categories so tracks know if it applies 
 
 ### [balloon-circuit-design] data: RP2040 baseline capture + results — 1760kbps at 10.40MHz SPI (2026-07-30) | tags: SPI, RADIO, TEST
 - **Commit:** `a31f971` by Felix
-- **Files:** .gitignore, captures/bench-rp2040.sr, docs/rp2040-baseline-results.md
+- **Files:** .gitignore, captures/bench-rp2040.sr, docs/rp2040/rp2040-baseline-results.md
 - **Full message:** data: RP2040 baseline capture + results — 1760kbps at 10.40MHz SPI
 - **Relevance:** SPI, RADIO, TEST
 
@@ -2050,7 +2050,7 @@ Each discovery is tagged with relevance categories so tracks know if it applies 
 
 ### [balloon-circuit-design] docs+feat: SPI timing findings + payload size sweep targets (2026-07-29) | tags: SPI
 - **Commit:** `af2457f` by Felix
-- **Files:** Makefile, docs/spi-timing-analysis.md, firmware/rp2040/platformio.ini
+- **Files:** Makefile, docs/spi/spi-timing-analysis.md, firmware/rp2040/platformio.ini
 - **Full message:** docs+feat: SPI timing findings + payload size sweep targets
 - **Relevance:** SPI
 
@@ -2318,7 +2318,7 @@ Each discovery is tagged with relevance categories so tracks know if it applies 
 
 ### [balloon-hermes] checkpoint: main repo committed before walk test freeze (2026-07-24) | tags: TEST
 - **Commit:** `54500a1` by Felix
-- **Files:** docs/HANDOVER-KEY-ROTATION.md, docs/coordination/DISCOVERIES.md
+- **Files:** docs/handovers/HANDOVER-KEY-ROTATION.md, docs/coordination/DISCOVERIES.md
 - **Full message:** checkpoint: main repo committed before walk test freeze
 - **Relevance:** TEST
 
@@ -2440,7 +2440,7 @@ Each discovery is tagged with relevance categories so tracks know if it applies 
 
 ### [balloon-speed-tests] docs: multi-radio sweep characterization results (2026-07-24) | tags: GENERAL
 - **Commit:** `343342e` by Felix
-- **Files:** docs/SWEEP-RESULTS.md
+- **Files:** docs/bench/SWEEP-RESULTS.md
 - **Full message:** docs: multi-radio sweep characterization results
 - **Relevance:** GENERAL
 
@@ -2453,20 +2453,20 @@ Each discovery is tagged with relevance categories so tracks know if it applies 
 
 ### [balloon-speed-tests] docs: complete handover for range testing group — all results, bugs, setup, plan (2026-07-24) | tags: GENERAL
 - **Commit:** `0fe824e` by Felix
-- **Files:** docs/HANDOVER-COMPLETE-2026-07-24.md
+- **Files:** docs/handovers/HANDOVER-COMPLETE-2026-07-24.md
 - **Full message:** docs: complete handover for range testing group — all results, bugs, setup, plan
 - **Relevance:** GENERAL
 
 ### [balloon-speed-tests] docs: power sweep results + master JSON + range testing handover (2026-07-24) | tags: GENERAL
 - **Commit:** `c1c1811` by Felix
-- **Files:** docs/master-results.json, docs/power-sweep-results-2026-07-24.md, docs/range-testing-handover.md
+- **Files:** docs/master-results.json, docs/power-sweep-results-2026-07-24.md, docs/range/range-testing-handover.md
 - **Full message:** docs: power sweep results + master JSON + range testing handover
 - **Relevance:** GENERAL
 
 
 ### [balloon-speed-tests] docs: comprehensive session summary — 10 commits, all results, plan status (2026-07-24) | tags: GENERAL
 - **Commit:** `2be0010` by Felix
-- **Files:** docs/SESSION-SUMMARY-2026-07-24.md
+- **Files:** docs/handovers/SESSION-SUMMARY-2026-07-24.md
 - **Full message:** docs: comprehensive session summary — 10 commits, all results, plan status
 - **Relevance:** GENERAL
 
@@ -2606,7 +2606,7 @@ Each discovery is tagged with relevance categories so tracks know if it applies 
 
 ### [balloon-hermes] docs: add decisions/blockers sections to assessment prompt + coordinator trackin (2026-07-18) | tags: GENERAL
 - **Commit:** `f39bf4e` by c03rad0r
-- **Files:** docs/ASSESSMENT-PROMPT.md, docs/coordination/COORDINATOR-TRACKING.md
+- **Files:** docs/repo/ASSESSMENT-PROMPT.md, docs/coordination/COORDINATOR-TRACKING.md
 - **Full message:** docs: add decisions/blockers sections to assessment prompt + coordinator tracking
 - **Relevance:** GENERAL
 
@@ -2697,7 +2697,7 @@ Each discovery is tagged with relevance categories so tracks know if it applies 
 
 ### [balloon-circuit-design] docs: add decisions/blockers sections to assessment prompt + coordinator trackin (2026-07-18) | tags: GENERAL
 - **Commit:** `f39bf4e` by c03rad0r
-- **Files:** docs/ASSESSMENT-PROMPT.md, docs/coordination/COORDINATOR-TRACKING.md
+- **Files:** docs/repo/ASSESSMENT-PROMPT.md, docs/coordination/COORDINATOR-TRACKING.md
 - **Full message:** docs: add decisions/blockers sections to assessment prompt + coordinator tracking
 - **Relevance:** GENERAL
 
@@ -2793,7 +2793,7 @@ Each discovery is tagged with relevance categories so tracks know if it applies 
 
 ### [balloon-pre-stretching] docs: add decisions/blockers sections to assessment prompt + coordinator trackin (2026-07-18) | tags: GENERAL
 - **Commit:** `f39bf4e` by c03rad0r
-- **Files:** docs/ASSESSMENT-PROMPT.md, docs/coordination/COORDINATOR-TRACKING.md
+- **Files:** docs/repo/ASSESSMENT-PROMPT.md, docs/coordination/COORDINATOR-TRACKING.md
 - **Full message:** docs: add decisions/blockers sections to assessment prompt + coordinator tracking
 - **Relevance:** GENERAL
 
@@ -2887,5 +2887,5 @@ Each discovery is tagged with relevance categories so tracks know if it applies 
 - **rp2040-flrc-max uses RadioLib LR2021 driver** — 2600 kbps target, builds OK, UNTESTED
 - **RSSI negation fix applied** — was showing +36 instead of -36 dBm
 - **FLRC bitrate options:** 2600/2080/1300/1040/650/520/325/260 kbps
-- **Files:** firmware/rp2040-flrc-max/, docs/speed-test-results-single-batch-2026-07-18.md, docs/flrc-throughput-final-conclusion-2026-07-16.md
+- **Files:** firmware/rp2040-flrc-max/, docs/speed-test-results-single-batch-2026-07-18.md, docs/flrc/flrc-throughput-final-conclusion-2026-07-16.md
 - **Relevance:** RADIO, SPI, TEST

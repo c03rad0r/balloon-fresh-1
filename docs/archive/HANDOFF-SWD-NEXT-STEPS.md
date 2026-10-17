@@ -1,6 +1,6 @@
 > ## ARCHIVED — 2026-10-17 · superseded
 >
-> **Superseded by `docs/E80-SWD-DIAGNOSIS-2026-08-18.md`** (status line there: *"ACTIVE (supersedes the
+> **Superseded by `docs/e80-900mbl-02-eval/E80-SWD-DIAGNOSIS-2026-08-18.md`** (status line there: *"ACTIVE (supersedes the
 > SWD-disable theory in `HANDOFF-SWD-NEXT-STEPS.md`)"*). This file's own header already carried the
 > supersession note dated 2026-08-18; this move only files it.
 > Moved to `docs/archive/` on 2026-10-17. Kept for provenance — do not cite as current state.
@@ -9,7 +9,7 @@
 
 > **SUPERSEDED (2026-08-18):** the SWD-disable theory below is disproven — vendor
 > firmware calls only `__HAL_AFIO_REMAP_SWJ_NOJTAG()` (SWD stays enabled). Current
-> state of play: `docs/E80-SWD-DIAGNOSIS-2026-08-18.md`. UART control tool: `tools/e80ctl.py`.
+> state of play: `docs/e80-900mbl-02-eval/E80-SWD-DIAGNOSIS-2026-08-18.md`. UART control tool: `tools/e80ctl.py`.
 
 Read `docs/E80-FLASH-ACCESS-FINDINGS.md` first (why we're here).
 State: investigation DONE, SWD path CHOSEN, host tools READY.

@@ -8,7 +8,7 @@ Date 2026-10-08. Base `github/main` @ `09e1b69`. Worktree `/home/c03rad0r/worktr
    + `docs/analysis/level_control_model.py` (reproduces every number)
    + `docs/analysis/render_level_control_figures.py` + `docs/analysis/assets/level-control/*`
    + **ADR-084** `docs/adr/084-ground-station-automatic-level-control.md`.
-2. **Base-station board checklist** — `docs/BASE-STATION-BOARD-CHECKLIST.md`
+2. **Base-station board checklist** — `docs/base-station/BASE-STATION-BOARD-CHECKLIST.md`
    (OWNED / TO-BUY / TODO(unverified) / OPT statuses, subtotals, spec-dispute verify notes).
 
 ## Result head-line

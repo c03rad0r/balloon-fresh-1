@@ -20,8 +20,8 @@
 `docs/analysis/wing-mass-shape.md`, `docs/analysis/wing-insolation-geometry.md`,
 `docs/analysis/array-power-architecture.md`, `docs/analysis/wing-jettison.md`,
 `docs/analysis/wing-electrical.md`, `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md`,
-`docs/POWER-BUDGET-V9-D2BE.md`, `docs/SOLAR-PIN-REGULATORY.md`, `docs/hardware-design.md`,
-`docs/component-guide.md`, `docs/inventory.md`, `docs/V9-RADIO-SITE-MATRIX.md`,
+`docs/POWER-BUDGET-V9-D2BE.md`, `docs/link/SOLAR-PIN-REGULATORY.md`, `docs/hardware-design.md`,
+`docs/hardware-reference/component-guide.md`, `docs/inventory.md`, `docs/V9-RADIO-SITE-MATRIX.md`,
 `docs/adr/006-supercapacitor-power.md` (**Accepted**), `docs/adr/009-antenna-strategy-v1-v2.md`,
 `docs/adr/044-v9-power-rails.md`, `docs/adr/046-wing-board-interface.md`,
 `docs/adr/047-v9-power-provisioning.md`, `docs/adr/048-v9-hub-wing-interfaces.md`,
@@ -153,7 +153,7 @@ alternative is given in §3.2 because it is the single largest mass lever.
 | A4 | Bare `LoRa2021` castellated module (2.4 GHz RX) | 1.2 | 1 | **1.2** | **CITED** `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` §3 ("LR2021 bare, 1–2 g") | `TODO(unverified)` for the exact part (`V9-RADIO-SITE-MATRIX.md` §3.5) |
 | A5 | `LoRa2021F33-2G4` module (433 TX, 1 W PA) | 4.0 | 1 | **4.0** | **CITED** `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` §3 ("LR2021F33, 3–5 g") | `TODO(unverified)` for the exact part (`V9-RADIO-SITE-MATRIX.md` §3.5) |
 | A6 | GPS `MAX-M10S` (bare, direct-soldered) | 0.4 | 1 | **0.4** | **CITED** `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` §3 | CITED (bare; breakout is 1.0 g) |
-| A7 | Voltage regulator `TPS7A02` (SOT-23-5) | 0.05 | 1 | **0.05** | **CITED** `docs/component-guide.md` §6 | CITED |
+| A7 | Voltage regulator `TPS7A02` (SOT-23-5) | 0.05 | 1 | **0.05** | **CITED** `docs/hardware-reference/component-guide.md` §6 | CITED |
 | A8 | Pressure sensor `MS5611` (bare) | 0.03 | 1 | **0.03** | **CITED** `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` §3 | CITED (bare; breakout 0.3 g) |
 | A9 | Supercap bank, 2 × AVX SCC 3.3 F 2.7 V | 1.5 | 2 | **3.0** | **CITED** `docs/adr/006-supercapacitor-power.md` ("2× 1.5 g = 3.0 g"); `docs/POWER-BUDGET-V9-D2BE.md` §4 | CITED (doubled 4-cell option = 6.0 g, ADR-047 §3.2) |
 | A10 | Antenna wire dipole (433 + 2.4 GHz) | 0.2 | 1 | **0.2** | **CITED** `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` §3 (868 MHz wire ~0.2 g) | `TODO(unverified)` for the v9 dual-band harness; U.FL pigtails add mass (see A16) |
@@ -334,7 +334,7 @@ Two caveats that keep this honest:
   cell area). It happens to be numerically close to a heavily-derated winter plane irradiance,
   but it is used here as **power per installed cell cm²**, which is what the rotation factor and
   the area arithmetic require. The repo's *separate* insolation/derate model
-  (`docs/SOLAR-PIN-REGULATORY.md` §1.1: 1361 W/m² × η 0.22 × 0.35 = **10.5 mW/cm²** for rigid
+  (`docs/link/SOLAR-PIN-REGULATORY.md` §1.1: 1361 W/m² × η 0.22 × 0.35 = **10.5 mW/cm²** for rigid
   c-Si) is a **different** figure answering a different question (irradiance→electricity), and
   the two must not be mixed. Using 10.5 mW/cm² instead would roughly halve the *derate-inclusive*
   area, so this document stays with the **array-nameplate** method above and says which method it

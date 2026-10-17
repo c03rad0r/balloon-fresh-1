@@ -49,7 +49,7 @@ Successfully implemented a comprehensive hardware mutex system for TollGate that
 - **Hardware integration tests**
 - **Documentation examples**
 
-### 6. Comprehensive Documentation (`docs/HARDWARE_MUTEX.md`)
+### 6. Comprehensive Documentation (`docs/hardware-reference/HARDWARE_MUTEX.md`)
 
 - **Architecture overview** and system design
 - **Usage examples** for all interfaces

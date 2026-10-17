@@ -142,7 +142,7 @@ point: local citable copy
 Firmware/rate list from the repo (not invented): 2600 / 2080 / 1300 / 1040 / 650 / 520 /
 325 / 260 kbps — `docs/RANGE-THROUGHPUT-PLAN.md` lines 71–80, and the committed adaptive
 policy **"FLRC 2600 → 1300 → 650 → LoRa fallback"** (line 139) with 511 B FLRC payloads
-(`docs/LR2021-THROUGHPUT-OPTIMIZATION-ANALYSIS.md` §payload). The repo's *expected* ranges
+(`docs/lr2021/LR2021-THROUGHPUT-OPTIMIZATION-ANALYSIS.md` §payload). The repo's *expected* ranges
 at +33 dBm on both ends (line 162–163) were FLRC 2600 kbps 20–50 km at altitude and FLRC
 650 kbps 50–100+ km — this document replaces those estimates with a closed-form
 `S + FSPL` calculation (§3) and shows what a ground dish does to them.

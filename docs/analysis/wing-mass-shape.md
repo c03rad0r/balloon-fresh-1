@@ -226,7 +226,7 @@ Cells joined by a 50 µm polyimide flex (160 × 6 mm) plus a 12 × 9 mm root tab
    There is no angle at which both are lit.
 3. The only light that could reach the far face is reflected off the balloon envelope, and
    the repo's derate model already treats the envelope as an **occluder** (`envelope
-   shading ≈ 0.9`, `docs/SOLAR-PIN-REGULATORY.md` §1.1), not as a reflector. Counting the
+   shading ≈ 0.9`, `docs/link/SOLAR-PIN-REGULATORY.md` §1.1), not as a reflector. Counting the
    dark face would double-count a term that is already inside the 0.35 derate.
 
 Numbers: **(d) wing 8.892 g and array 35.567 g for exactly the same 2.4 W as (a)** —

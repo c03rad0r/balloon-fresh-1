@@ -1,6 +1,6 @@
 > ## ARCHIVED — 2026-10-17 · superseded
 >
-> **Superseded by `docs/handover-adaptive-sweep-2026-08-22.md`**, which names this file as
+> **Superseded by `docs/handovers/handover-adaptive-sweep-2026-08-22.md`**, which names this file as
 > *"Prior handover (2026-08-21, for reference)"*. This file also marks its own Dataset 3 as superseded
 > ("early 14-config sweep … Use Dataset 2 instead; kept for history").
 > Moved to `docs/archive/` on 2026-10-17. Kept for provenance.
@@ -107,7 +107,7 @@ bit_err_total sums PRBS errors — 0 everywhere in Dataset 1)
 - Post-fix re-run: chip-CRC fix (Match123 + RX FIFO clear) in review;
   after flash, definitive sweep where crc_err should be 0 everywhere —
   supersedes Dataset 1 CRC columns only (RSSI/PRBS/throughput stay valid).
-- Cross-board data: harmonization plan (docs/harmonization-plan-20260821.md)
+- Cross-board data: harmonization plan (docs/bench/harmonization-plan-20260821.md)
   will add ESP32-C3 and RP2040 boards running the SAME protocol/sweeps;
   CSVs joinable on session,config,pkt_idx.
 

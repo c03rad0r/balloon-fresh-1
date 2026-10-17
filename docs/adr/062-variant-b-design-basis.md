@@ -148,7 +148,7 @@ it is frozen (ADR-055 D4, Open item 3) and is **not** done here.
 | B3 | `SX1280IMLTRT` + matching/passives | 0.2 | 1 | **0.2** | **ESTIMATE** (QFN-24 + 0402 class) |
 | B4 | Bare `LoRa2021` castellated module | 1.2 | 1 | **1.2** | **CITED** `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` §3 ("LR2021 bare, 1–2 g"); exact part `TODO(unverified)` |
 | B5 | GNSS `MAX-M10S` (bare, direct-soldered) | 0.4 | 1 | **0.4** | **CITED** same §3 (breakout is 1.0 g) |
-| B6 | LDO `TPS7A02` (SOT-23-5) | 0.05 | 1 | **0.05** | **CITED** `docs/component-guide.md` §6 |
+| B6 | LDO `TPS7A02` (SOT-23-5) | 0.05 | 1 | **0.05** | **CITED** `docs/hardware-reference/component-guide.md` §6 |
 | B7 | Pressure sensor `MS5611` / `MS5607` (bare) | 0.03 | 1 | **0.03** | **CITED** `docs/POWER-BUDGET-V9-D2BE.md` §4 / `PAYLOAD-WEIGHT-ESTIMATES.md` §3 |
 | B8 | Supercap 0.47 F class | 2.0 | 1 | **2.0** | **ESTIMATE** 2–7 g/F × 0.47 F vs the repo's 0.45 g/F AVX cell — **no 0.47 F part named anywhere** |
 | B9 | **Solar cells, 61.2 cm² bare-Si** (flat array, §4.4) | 2.99 | 1 | **2.99** | **COMPUTED** 61.2 × 48.93 mg/cm² — bare-Si floor; the heavy listing would be 11.97 g (see §3.4) |
@@ -513,7 +513,7 @@ would be **≈ 19.8 g** — inside 20 g only nominally, and failing on the first
    basis lands. Nothing is drawn here.
 8. **The launch latitude and season** — every insolation figure assumes **50.0 °N, winter
    solstice** (`docs/analysis/wing-insolation-geometry.md` §1); no in-repo source states it.
-9. **The derate factors** — envelope shading 0.9 (`docs/SOLAR-PIN-REGULATORY.md` §1.1) and
+9. **The derate factors** — envelope shading 0.9 (`docs/link/SOLAR-PIN-REGULATORY.md` §1.1) and
    charge-path efficiency 0.85 (ADR-050, itself `TODO(unverified)`). Adopting them would take B's
    array from 55.4 → ≈ 72.4 cm².
 10. **B's night deep-sleep current (µA)** — decides whether B's flight log survives the night

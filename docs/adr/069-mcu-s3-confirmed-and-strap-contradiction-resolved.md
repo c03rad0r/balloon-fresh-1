@@ -30,7 +30,7 @@ all.
 
 ## 1. Resolving the contradiction (the defect, fixed rather than sided)
 
-> **SEE ALSO `docs/CHIP-AND-PIN-PLANE-INDEX.md`** — the one-page index that makes
+> **SEE ALSO `docs/hardware-reference/CHIP-AND-PIN-PLANE-INDEX.md`** — the one-page index that makes
 > this unmistakable and maps every record that touches it. **Both of the records
 > below are correct; neither is superseded.** Each now carries a **CHIP SCOPE**
 > banner so it cannot be read out of context again.
@@ -40,7 +40,7 @@ The two records appeared to disagree:
 | Record | Says | True for |
 |---|---|---|
 | `docs/STATUS-balloon-pow.md:155` | *"GPIO0 is NOT a strapping pin on C3 (unlike ESP32/S3) — safe for ADC/GPIO"* | **C3** |
-| `docs/PCB-LESSONS-LEARNED-2026-08-05.md:91` | *"FEM_RX moved from GPIO0 (strapping pin) to GPIO8"* | **the S3-class board it was fixing** |
+| `docs/pcb/PCB-LESSONS-LEARNED-2026-08-05.md:91` | *"FEM_RX moved from GPIO0 (strapping pin) to GPIO8"* | **the S3-class board it was fixing** |
 
 **Both are correct. They are not in conflict.** The resolution is that they describe
 **different chips**, and the repo had simply not written that down in one place:
@@ -76,7 +76,7 @@ ADR-029 D1 already reasoned this; verified again here:
 
 **The C3 keeps its real role: the bench MCU** (ADR-028, ADR-001). That is
 unchanged — the SuperMini C3 is the cheap bench/LR2021 board, and the bring-up
-bug list (`docs/esp32c3-supermini-bringup.md`) exists precisely because it is the
+bug list (`docs/rp2040/esp32c3-supermini-bringup.md`) exists precisely because it is the
 bench part. **Do not unify them;** the split is deliberate and correct.
 
 ## 3. Does the upgrade introduce problems? What are they, and how to work around them

@@ -3,12 +3,12 @@
 **Track:** balloon-pre-stretching · **Status:** DESIGN + STUB — **no hardware test has been run**
 **Firmware contract:** `tools/balloon_pressure_test/main/interlock.h` (+ `interlock.c`)
 **Host proof:** `tools/balloon_pressure_test/test/test_interlock.c` (33 assertions, `make -C tools/balloon_pressure_test/test check`)
-**Related:** `docs/PRE-STRETCHING-PROTOCOL.md` §C.2–C.3, `docs/PRESSURE-TEST-PLAN.md`, `docs/STATUS-balloon-pre-stretching.md`
+**Related:** `docs/prestretch/PRE-STRETCHING-PROTOCOL.md` §C.2–C.3, `docs/prestretch/PRESSURE-TEST-PLAN.md`, `docs/STATUS-balloon-pre-stretching.md`
 
 > **Read this first.** This document designs a safety interlock. It does **not** contain a
 > validated pressure limit, because **no such number exists in this repo and no test has
 > been run.** Every threshold below is a **PLACEHOLDER**. The one measured action that
-> turns them into numbers is bench session **B1** (`docs/PRESTRETCH-BENCH-SESSION-B1.md`).
+> turns them into numbers is bench session **B1** (`docs/prestretch/PRESTRETCH-BENCH-SESSION-B1.md`).
 
 ---
 
@@ -18,7 +18,7 @@ The protocol names the rig's failure mode in its own words:
 
 > **THE CONTROL VARIABLE IS CIRCUMFERENCE, NOT PRESSURE.**
 > Ruthroff confused 0.31 mbar with 0.31 PSI and **overpressured** his balloons — this
-> caused the **JR01–JR06 failures.** — `docs/PRE-STRETCHING-PROTOCOL.md` §C.3
+> caused the **JR01–JR06 failures.** — `docs/prestretch/PRE-STRETCHING-PROTOCOL.md` §C.3
 
 Today the rig (`tools/balloon_pressure_test`) is a **logger**, not a controller: the pump
 runs open-loop and nothing in the firmware can stop an over-inflation. The stated failure
@@ -213,8 +213,8 @@ reason B1's own measurement, not a quoted number, sets the limit.
 
 ## 8. References
 
-- `docs/PRE-STRETCHING-PROTOCOL.md` §B.2 (1.05 bar, ambiguous), §C.2 (9 steps, circumference targets), §C.3 (circumference-not-pressure rule; JR01–JR06), §D.1–D.2 (BMP280 rig), §D.5 (−18 °C freezer), §F (rejection criteria incl. >8 g burst risk)
-- `docs/PRESSURE-TEST-PLAN.md`, `docs/STATUS-balloon-pre-stretching.md`
-- `docs/FLIGHT-TEST-READINESS-2026-07-29.md`, `docs/first-flight-checklist.md`
+- `docs/prestretch/PRE-STRETCHING-PROTOCOL.md` §B.2 (1.05 bar, ambiguous), §C.2 (9 steps, circumference targets), §C.3 (circumference-not-pressure rule; JR01–JR06), §D.1–D.2 (BMP280 rig), §D.5 (−18 °C freezer), §F (rejection criteria incl. >8 g burst risk)
+- `docs/prestretch/PRESSURE-TEST-PLAN.md`, `docs/STATUS-balloon-pre-stretching.md`
+- `docs/flight/FLIGHT-TEST-READINESS-2026-07-29.md`, `docs/flight/first-flight-checklist.md`
 - `tools/balloon_pressure_test/main/interlock.h`, `interlock.c`, `test/test_interlock.c`
-- `docs/PRESTRETCH-BENCH-SESSION-B1.md` — the single bench session that de-placeholders §6
+- `docs/prestretch/PRESTRETCH-BENCH-SESSION-B1.md` — the single bench session that de-placeholders §6
