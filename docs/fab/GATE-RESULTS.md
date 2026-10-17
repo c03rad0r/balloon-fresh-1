@@ -7,11 +7,14 @@ All three gates run against `tracker/hardware/hub_board_v9.kicad_pcb`
 
 ```
 ~/venvs/kicad/bin/python tracker/hardware/tests/test_netlist_integrity.py
-RESULT: 14 pass, 0 FAIL, 2 PENDING
+RESULT: 14 pass, 0 FAIL, 2 WAIVED, 0 PENDING
 ```
 
-The two PENDING items are the base-station route artifacts (see below). **A pending check is not a
-pass** — it is a gap that has been stated rather than hidden. See `PENDING-SUMMARY` at the end.
+The two WAIVED items are the base-station route artifacts (see below). **A waiver is not a pass** — it
+is a gap that has been stated rather than hidden, with its reason **printed at run time** from the
+committed record `tracker/hardware/base_station/FR-CHECK-WAIVER.md`. Deleting that record does not make
+the gap green: an absent artifact with no `WAIVER:` entry is reported **FAIL**. See `WAIVED-SUMMARY` at
+the end and the full reasoning in `BASE-STATION-F-CHECKS.md`.
 
 **Fixed this session:** `G` (no exemption relies on `Reference` matching) was a false positive — the
 check scanned comment lines, so the comment documenting *why* the `Reference` form is inert tripped its
@@ -89,16 +92,26 @@ class for the builder — **the fix was never generalised to this script.**
 
 ---
 
-## PENDING-SUMMARY
+## WAIVED-SUMMARY
+
+Both F-class base-station checks are **WAIVED** (not pass, not silently skipped, not deleted). The
+reason below is **printed when the suite runs**, read at run time from
+`tracker/hardware/base_station/FR-CHECK-WAIVER.md` so the printed and the committed reason cannot
+drift. Absence proven as "never committed in any ref", not "forgotten": `git log --all` finds no
+`bs_v1_routed*.kicad_pcb` at all, and `find /` finds no such file anywhere on this host.
 
 | item | why it cannot run | how to clear it |
 |---|---|---|
-| `F. base station (first route — REJECTED, must FAIL): board present` | the base station has a **netlist but no editable schematic**; Astra's gap analysis places its work at **B2–B9** and states *"a netlist is a useful baseline, not proof of a correct circuit"*. Routing now would freeze unverified assumptions and manufacture an artifact whose only purpose is to assert an unearned floor | complete B2 (reconstruct the schematic) and B5–B6 (re-place, route); commit a deliberately-loose route as `bs_v1_routed.kicad_pcb` (must violate 0.10/0.45/0.20) and a strict one as `bs_v1_routed_strict.kicad_pcb` (must meet them) |
-| `F. base station (strict, --escalation off, must PASS): board present` | same | same |
+| `F. base station (first route — REJECTED, must FAIL): board present` | the base station has a **netlist but no editable schematic** and its placed board carries **0 tracks on 44 nets**; Astra's gap analysis places its work at **B2–B9** and states *"a netlist is a useful baseline, not proof of a correct circuit"*. Fabricating the board now would manufacture an artifact whose only purpose is to assert an unearned floor — and the artifact has **never existed in any ref** | complete B2 (reconstruct the schematic) and B5–B6 (re-place, route); commit a deliberately-loose route as `bs_v1_routed.kicad_pcb` (must violate 0.10/0.45/0.20) at a path the gate resolves — `output/` is gitignored, so a tracked path or an on-demand build |
+| `F. base station (strict, --escalation off, must PASS): board present` | same, and the historical strict attempt was honestly **incomplete** (17/35 routed, 18–19 open), so a committed file could only satisfy the CLEAN assertion by hiding those opens | same as above, and the route must actually complete (refill, then grade from the board; 0 unconnected) |
 
 **Not deleted on purpose.** The check guards a real property — that a rejected route measures dirty and
 a shipped one measures clean, graded **from the board** rather than from a project file the tool may
 have rewritten. A permanent red would train the reader to ignore it; deletion would hide the gap.
+**Both boards are mechanically re-routeable** (the router is at `/data/repos/KiCadRoutingTools`, and the
+historical rejected route measured 0.0889/0.25/0.15 mm) — so the reason this is a waiver is *"not earned
+at this stage of the design"*, **not** *"impossible"*. Full argument, the fail-closed proof, and the
+positive/negative controls: `BASE-STATION-F-CHECKS.md`.
 
 ---
 
