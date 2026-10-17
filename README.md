@@ -43,7 +43,10 @@ Read the `nets routed` column, **not** the amount of copper in a render — a co
 
 **Fit to show a fabricator for review. Not fit to order.** Open items:
 
-- **`U1.41`** — the radio's exposed ground pad **has no net** (pad-number mismatch)
+- **`U1.41`** — the radio's exposed ground pad ~~**has no net** (pad-number mismatch)~~ — **CORRECTED
+  2026-10-17:** measured, `U1`'s 13 pads numbered `41` are **all on `GND`** (thermal-via array, correct
+  by design) and its 9 unnamed pads are `F.Paste`-only stencil apertures. Not a defect. Owning record:
+  [`docs/fab/U1-FOOTPRINT-DIAGNOSIS.md`](docs/fab/U1-FOOTPRINT-DIAGNOSIS.md)
 - **ERC: 20 errors** — incl. 12 floating `U_CUT1–4` pins; **parity passes**, so the board has not drifted
 - **DRC: 16 errors — all 16 are the intentional `J_W*` edge lands. Zero real electrical errors.** The 137
   warnings are silkscreen or library metadata

@@ -104,7 +104,7 @@
     "2026-08-06"
    ],
    "dir": "docs",
-   "last_commit": "2026-10-14",
+   "last_commit": "2026-10-17",
    "lines": 191,
    "links": [],
    "loose": true,
@@ -119,7 +119,7 @@
     "superseded",
     "withdrawn"
    ],
-   "chars": 43196,
+   "chars": 13260,
    "cluster": "repo",
    "dates": [
     "2026-10-14",
@@ -128,7 +128,7 @@
    ],
    "dir": "docs",
    "last_commit": "2026-10-17",
-   "lines": 439,
+   "lines": 166,
    "links": [],
    "loose": true,
    "name": "REPO-TRIAGE-INDEX.md",
@@ -180,7 +180,7 @@
     "2026-10-14"
    ],
    "dir": "docs",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 62,
    "links": [
     "archive/README.md",
@@ -299,7 +299,7 @@
     "2026-07-26"
    ],
    "dir": "docs",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 323,
    "links": [],
    "loose": true,
@@ -351,7 +351,7 @@
     "2026-07-30"
    ],
    "dir": "docs",
-   "last_commit": "2026-07-31",
+   "last_commit": "2026-10-17",
    "lines": 148,
    "links": [],
    "loose": true,
@@ -416,7 +416,7 @@
     "2026-10-12"
    ],
    "dir": "docs",
-   "last_commit": "2026-10-13",
+   "last_commit": "2026-10-17",
    "lines": 175,
    "links": [],
    "loose": true,
@@ -453,7 +453,7 @@
     "2026-10-14"
    ],
    "dir": "docs",
-   "last_commit": "2026-10-14",
+   "last_commit": "2026-10-17",
    "lines": 159,
    "links": [],
    "loose": true,
@@ -531,7 +531,7 @@
     "2026-07-29"
    ],
    "dir": "docs",
-   "last_commit": "2026-07-29",
+   "last_commit": "2026-10-17",
    "lines": 431,
    "links": [],
    "loose": true,
@@ -680,7 +680,7 @@
     "2026-08-29"
    ],
    "dir": "docs",
-   "last_commit": "2026-08-28",
+   "last_commit": "2026-10-17",
    "lines": 250,
    "links": [],
    "loose": true,
@@ -716,7 +716,7 @@
     "2026-08-29"
    ],
    "dir": "docs",
-   "last_commit": "2026-09-13",
+   "last_commit": "2026-10-17",
    "lines": 113,
    "links": [],
    "loose": true,
@@ -751,7 +751,7 @@
     "2026-07-29"
    ],
    "dir": "docs",
-   "last_commit": "2026-10-10",
+   "last_commit": "2026-10-17",
    "lines": 221,
    "links": [],
    "loose": true,
@@ -767,7 +767,7 @@
     "2026-08-01"
    ],
    "dir": "docs",
-   "last_commit": "2026-08-01",
+   "last_commit": "2026-10-17",
    "lines": 200,
    "links": [],
    "loose": true,
@@ -853,7 +853,7 @@
     "2026-08-24"
    ],
    "dir": "docs",
-   "last_commit": "2026-08-24",
+   "last_commit": "2026-10-17",
    "lines": 584,
    "links": [],
    "loose": true,
@@ -884,7 +884,7 @@
    "cluster": "plan.md",
    "dates": [],
    "dir": "docs",
-   "last_commit": "2026-05-20",
+   "last_commit": "2026-10-17",
    "lines": 174,
    "links": [
     "adr/001-esp32-c3-as-mcu.md",
@@ -913,7 +913,7 @@
     "2026-10-07"
    ],
    "dir": "docs",
-   "last_commit": "2026-10-07",
+   "last_commit": "2026-10-17",
    "lines": 246,
    "links": [],
    "loose": true,
@@ -961,7 +961,7 @@
     "2026-08-21"
    ],
    "dir": "docs",
-   "last_commit": "2026-08-21",
+   "last_commit": "2026-10-17",
    "lines": 366,
    "links": [],
    "loose": true,
@@ -1097,7 +1097,7 @@
     "2026-10-07"
    ],
    "dir": "docs",
-   "last_commit": "2026-10-07",
+   "last_commit": "2026-10-17",
    "lines": 214,
    "links": [],
    "loose": true,
@@ -1160,7 +1160,7 @@
     "2026-09-16"
    ],
    "dir": "docs",
-   "last_commit": "2026-10-06",
+   "last_commit": "2026-10-17",
    "lines": 189,
    "links": [],
    "loose": true,
@@ -1258,7 +1258,7 @@
     "2026-09-04"
    ],
    "dir": "docs/nostr",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 64,
    "links": [],
    "loose": false,
@@ -1274,7 +1274,7 @@
     "2026-10-14"
    ],
    "dir": "docs/nostr",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 53,
    "links": [],
    "loose": false,
@@ -1290,7 +1290,7 @@
     "2026-10-14"
    ],
    "dir": "docs/nostr",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 77,
    "links": [],
    "loose": false,
@@ -1306,7 +1306,7 @@
     "2026-08-19"
    ],
    "dir": "docs/nostr",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 679,
    "links": [],
    "loose": false,
@@ -1324,7 +1324,7 @@
     "2026-08-05"
    ],
    "dir": "docs/nostr",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 282,
    "links": [],
    "loose": false,
@@ -1341,7 +1341,7 @@
     "2026-10-14"
    ],
    "dir": "docs/analysis",
-   "last_commit": "2026-10-14",
+   "last_commit": "2026-10-17",
    "lines": 115,
    "links": [],
    "loose": false,
@@ -1391,7 +1391,7 @@
     "2026-10-10"
    ],
    "dir": "docs/analysis",
-   "last_commit": "2026-10-10",
+   "last_commit": "2026-10-17",
    "lines": 499,
    "links": [],
    "loose": false,
@@ -1407,7 +1407,7 @@
     "2026-10-08"
    ],
    "dir": "docs/analysis",
-   "last_commit": "2026-10-14",
+   "last_commit": "2026-10-17",
    "lines": 121,
    "links": [],
    "loose": false,
@@ -1461,7 +1461,7 @@
     "2026-10-07"
    ],
    "dir": "docs/analysis",
-   "last_commit": "2026-10-07",
+   "last_commit": "2026-10-17",
    "lines": 657,
    "links": [],
    "loose": false,
@@ -1478,7 +1478,7 @@
     "2026-10-08"
    ],
    "dir": "docs/analysis",
-   "last_commit": "2026-10-08",
+   "last_commit": "2026-10-17",
    "lines": 562,
    "links": [],
    "loose": false,
@@ -1495,7 +1495,7 @@
     "2026-10-08"
    ],
    "dir": "docs/analysis",
-   "last_commit": "2026-10-08",
+   "last_commit": "2026-10-17",
    "lines": 564,
    "links": [],
    "loose": false,
@@ -1564,7 +1564,7 @@
     "2026-10-14"
    ],
    "dir": "docs/analysis",
-   "last_commit": "2026-10-14",
+   "last_commit": "2026-10-17",
    "lines": 115,
    "links": [],
    "loose": false,
@@ -1663,7 +1663,7 @@
     "2026-10-07"
    ],
    "dir": "docs/analysis",
-   "last_commit": "2026-10-07",
+   "last_commit": "2026-10-17",
    "lines": 657,
    "links": [],
    "loose": false,
@@ -1680,7 +1680,7 @@
     "2026-10-11"
    ],
    "dir": "docs/analysis",
-   "last_commit": "2026-10-11",
+   "last_commit": "2026-10-17",
    "lines": 432,
    "links": [],
    "loose": false,
@@ -1728,7 +1728,7 @@
     "2026-10-07"
    ],
    "dir": "docs/analysis",
-   "last_commit": "2026-10-07",
+   "last_commit": "2026-10-17",
    "lines": 563,
    "links": [],
    "loose": false,
@@ -1745,7 +1745,7 @@
     "2026-10-08"
    ],
    "dir": "docs/analysis",
-   "last_commit": "2026-10-08",
+   "last_commit": "2026-10-17",
    "lines": 553,
    "links": [],
    "loose": false,
@@ -1763,7 +1763,7 @@
     "2026-10-08"
    ],
    "dir": "docs/analysis",
-   "last_commit": "2026-10-08",
+   "last_commit": "2026-10-17",
    "lines": 621,
    "links": [],
    "loose": false,
@@ -1897,7 +1897,7 @@
     "2026-10-10"
    ],
    "dir": "docs/analysis",
-   "last_commit": "2026-10-10",
+   "last_commit": "2026-10-17",
    "lines": 263,
    "links": [],
    "loose": false,
@@ -1915,7 +1915,7 @@
     "2026-10-07"
    ],
    "dir": "docs/analysis",
-   "last_commit": "2026-10-07",
+   "last_commit": "2026-10-17",
    "lines": 493,
    "links": [],
    "loose": false,
@@ -2090,7 +2090,7 @@
     "2026-10-08"
    ],
    "dir": "docs/analysis",
-   "last_commit": "2026-10-08",
+   "last_commit": "2026-10-17",
    "lines": 643,
    "links": [],
    "loose": false,
@@ -2220,7 +2220,7 @@
    "cluster": "half",
    "dates": [],
    "dir": "docs/analysis",
-   "last_commit": "2026-10-10",
+   "last_commit": "2026-10-17",
    "lines": 300,
    "links": [],
    "loose": false,
@@ -2238,7 +2238,7 @@
     "2026-10-07"
    ],
    "dir": "docs/analysis",
-   "last_commit": "2026-10-07",
+   "last_commit": "2026-10-17",
    "lines": 374,
    "links": [],
    "loose": false,
@@ -2320,7 +2320,7 @@
     "2026-10-10"
    ],
    "dir": "docs/analysis",
-   "last_commit": "2026-10-10",
+   "last_commit": "2026-10-17",
    "lines": 97,
    "links": [],
    "loose": false,
@@ -2435,7 +2435,7 @@
     "2026-10-10"
    ],
    "dir": "docs/analysis",
-   "last_commit": "2026-10-10",
+   "last_commit": "2026-10-17",
    "lines": 358,
    "links": [],
    "loose": false,
@@ -2485,7 +2485,7 @@
     "2026-10-07"
    ],
    "dir": "docs/analysis",
-   "last_commit": "2026-10-07",
+   "last_commit": "2026-10-17",
    "lines": 331,
    "links": [],
    "loose": false,
@@ -2517,7 +2517,7 @@
     "2026-10-14"
    ],
    "dir": "docs/analysis",
-   "last_commit": "2026-10-14",
+   "last_commit": "2026-10-17",
    "lines": 478,
    "links": [],
    "loose": false,
@@ -2611,7 +2611,7 @@
     "2026-10-07"
    ],
    "dir": "docs/analysis",
-   "last_commit": "2026-10-07",
+   "last_commit": "2026-10-17",
    "lines": 828,
    "links": [],
    "loose": false,
@@ -2627,7 +2627,7 @@
     "2026-10-08"
    ],
    "dir": "docs/analysis",
-   "last_commit": "2026-10-08",
+   "last_commit": "2026-10-17",
    "lines": 607,
    "links": [],
    "loose": false,
@@ -2644,7 +2644,7 @@
     "2026-10-10"
    ],
    "dir": "docs/analysis",
-   "last_commit": "2026-10-10",
+   "last_commit": "2026-10-17",
    "lines": 193,
    "links": [],
    "loose": false,
@@ -2785,7 +2785,7 @@
     "2026-10-08"
    ],
    "dir": "docs/analysis/ground-station",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 55,
    "links": [],
    "loose": false,
@@ -2801,7 +2801,7 @@
     "2026-10-08"
    ],
    "dir": "docs/analysis/ground-station",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 70,
    "links": [],
    "loose": false,
@@ -3118,7 +3118,7 @@
    "cluster": "bootstrap",
    "dates": [],
    "dir": "docs/coordination",
-   "last_commit": "2026-07-18",
+   "last_commit": "2026-10-17",
    "lines": 109,
    "links": [],
    "loose": false,
@@ -3335,7 +3335,7 @@
     "2026-10-14"
    ],
    "dir": "docs/coordination",
-   "last_commit": "2026-10-14",
+   "last_commit": "2026-10-17",
    "lines": 50,
    "links": [],
    "loose": false,
@@ -3389,7 +3389,7 @@
     "2026-07-24"
    ],
    "dir": "docs/coordination",
-   "last_commit": "2026-07-24",
+   "last_commit": "2026-10-17",
    "lines": 598,
    "links": [],
    "loose": false,
@@ -3653,7 +3653,7 @@
     "2026-08-05"
    ],
    "dir": "docs/coordination",
-   "last_commit": "2026-10-07",
+   "last_commit": "2026-10-17",
    "lines": 254,
    "links": [],
    "loose": false,
@@ -3924,7 +3924,7 @@
    "cluster": "bootstrap",
    "dates": [],
    "dir": "docs/coordination",
-   "last_commit": "2026-07-18",
+   "last_commit": "2026-10-17",
    "lines": 72,
    "links": [],
    "loose": false,
@@ -4135,7 +4135,7 @@
     "2026-08-05"
    ],
    "dir": "docs/coordination",
-   "last_commit": "2026-08-05",
+   "last_commit": "2026-10-17",
    "lines": 143,
    "links": [],
    "loose": false,
@@ -4197,7 +4197,7 @@
     "2026-08-20"
    ],
    "dir": "docs/coordination",
-   "last_commit": "2026-08-20",
+   "last_commit": "2026-10-17",
    "lines": 87,
    "links": [],
    "loose": false,
@@ -4213,7 +4213,7 @@
     "2026-10-07"
    ],
    "dir": "docs/link",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 215,
    "links": [],
    "loose": false,
@@ -4227,7 +4227,7 @@
    "cluster": "antenna",
    "dates": [],
    "dir": "docs/link",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 223,
    "links": [],
    "loose": false,
@@ -4245,7 +4245,7 @@
     "2026-10-13"
    ],
    "dir": "docs/link",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 101,
    "links": [],
    "loose": false,
@@ -4263,7 +4263,7 @@
     "2026-10-06"
    ],
    "dir": "docs/link",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 193,
    "links": [],
    "loose": false,
@@ -4279,7 +4279,7 @@
    "cluster": "licence",
    "dates": [],
    "dir": "docs/link",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 144,
    "links": [
     "../adr/039-licence-exempt-433-design-point.md",
@@ -4296,7 +4296,7 @@
    "cluster": "link",
    "dates": [],
    "dir": "docs/link",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 120,
    "links": [],
    "loose": false,
@@ -4312,7 +4312,7 @@
     "2026-10-07"
    ],
    "dir": "docs/link",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 269,
    "links": [],
    "loose": false,
@@ -4328,7 +4328,7 @@
     "2026-07-24"
    ],
    "dir": "docs/bench",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 86,
    "links": [],
    "loose": false,
@@ -4344,7 +4344,7 @@
     "2026-07-23"
    ],
    "dir": "docs/bench",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 69,
    "links": [],
    "loose": false,
@@ -4360,7 +4360,7 @@
     "2025-07-25"
    ],
    "dir": "docs/bench",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 83,
    "links": [],
    "loose": false,
@@ -4376,7 +4376,7 @@
     "2026-07-25"
    ],
    "dir": "docs/bench",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 282,
    "links": [],
    "loose": false,
@@ -4392,7 +4392,7 @@
     "2026-08-21"
    ],
    "dir": "docs/bench",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 94,
    "links": [],
    "loose": false,
@@ -4408,7 +4408,7 @@
     "2026-08-20"
    ],
    "dir": "docs/bench",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 877,
    "links": [],
    "loose": false,
@@ -4424,7 +4424,7 @@
     "2026-07-23"
    ],
    "dir": "docs/bench",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 37,
    "links": [],
    "loose": false,
@@ -4442,7 +4442,7 @@
     "2026-07-25"
    ],
    "dir": "docs/bench",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 433,
    "links": [],
    "loose": false,
@@ -4458,7 +4458,7 @@
     "2026-08-20"
    ],
    "dir": "docs/bench",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 395,
    "links": [],
    "loose": false,
@@ -4475,7 +4475,7 @@
     "2026-09-16"
    ],
    "dir": "docs/bench",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 173,
    "links": [],
    "loose": false,
@@ -4491,7 +4491,7 @@
     "2026-06-28"
    ],
    "dir": "docs/bench",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 132,
    "links": [],
    "loose": false,
@@ -4507,7 +4507,7 @@
     "2026-07-23"
    ],
    "dir": "docs/bench",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 227,
    "links": [],
    "loose": false,
@@ -4524,7 +4524,7 @@
     "2026-08-23"
    ],
    "dir": "docs/bench",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 179,
    "links": [],
    "loose": false,
@@ -4540,7 +4540,7 @@
     "2026-07-23"
    ],
    "dir": "docs/bench",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 55,
    "links": [],
    "loose": false,
@@ -4554,7 +4554,7 @@
    "cluster": "throughput",
    "dates": [],
    "dir": "docs/bench",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 288,
    "links": [],
    "loose": false,
@@ -4568,7 +4568,7 @@
    "cluster": "payload",
    "dates": [],
    "dir": "docs/bench",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 70,
    "links": [],
    "loose": false,
@@ -4584,7 +4584,7 @@
     "2026-08-23"
    ],
    "dir": "docs/bench",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 320,
    "links": [],
    "loose": false,
@@ -4598,7 +4598,7 @@
    "cluster": "human",
    "dates": [],
    "dir": "docs/status",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 97,
    "links": [],
    "loose": false,
@@ -4614,7 +4614,7 @@
     "2026-07-25"
    ],
    "dir": "docs/status",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 119,
    "links": [],
    "loose": false,
@@ -4632,7 +4632,7 @@
     "2026-07-24"
    ],
    "dir": "docs/status",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 74,
    "links": [],
    "loose": false,
@@ -4651,7 +4651,7 @@
     "2026-10-13"
    ],
    "dir": "docs/status",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 153,
    "links": [],
    "loose": false,
@@ -4771,7 +4771,7 @@
     "2026-08-19"
    ],
    "dir": "docs/data-handover",
-   "last_commit": "2026-08-20",
+   "last_commit": "2026-10-17",
    "lines": 274,
    "links": [],
    "loose": false,
@@ -4791,7 +4791,7 @@
     "2026-08-20"
    ],
    "dir": "docs/data-handover",
-   "last_commit": "2026-08-20",
+   "last_commit": "2026-10-17",
    "lines": 208,
    "links": [],
    "loose": false,
@@ -4809,7 +4809,7 @@
     "2026-08-17"
    ],
    "dir": "docs/data-handover",
-   "last_commit": "2026-08-17",
+   "last_commit": "2026-10-17",
    "lines": 234,
    "links": [],
    "loose": false,
@@ -4827,7 +4827,7 @@
     "2026-07-24"
    ],
    "dir": "docs/lr2021",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 189,
    "links": [],
    "loose": false,
@@ -4844,7 +4844,7 @@
     "2026-09-11"
    ],
    "dir": "docs/lr2021",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 313,
    "links": [],
    "loose": false,
@@ -4860,7 +4860,7 @@
     "2026-07-16"
    ],
    "dir": "docs/lr2021",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 164,
    "links": [],
    "loose": false,
@@ -4876,7 +4876,7 @@
     "2026-07-15"
    ],
    "dir": "docs/lr2021",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 138,
    "links": [],
    "loose": false,
@@ -4895,7 +4895,7 @@
     "2026-07-17"
    ],
    "dir": "docs/lr2021",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 97,
    "links": [],
    "loose": false,
@@ -4911,7 +4911,7 @@
     "2026-07-16"
    ],
    "dir": "docs/lr2021",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 254,
    "links": [],
    "loose": false,
@@ -4927,7 +4927,7 @@
     "2026-07-23"
    ],
    "dir": "docs/lr2021",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 219,
    "links": [],
    "loose": false,
@@ -4943,7 +4943,7 @@
     "2026-07-16"
    ],
    "dir": "docs/lr2021",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 229,
    "links": [],
    "loose": false,
@@ -4959,7 +4959,7 @@
     "2026-07-29"
    ],
    "dir": "docs/lr2021",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 504,
    "links": [],
    "loose": false,
@@ -4975,7 +4975,7 @@
     "2026-07-16"
    ],
    "dir": "docs/lr2021",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 39,
    "links": [],
    "loose": false,
@@ -4991,7 +4991,7 @@
     "2026-08-24"
    ],
    "dir": "docs/lr2021",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 609,
    "links": [],
    "loose": false,
@@ -5009,7 +5009,7 @@
     "2026-09-11"
    ],
    "dir": "docs/lr2021",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 173,
    "links": [],
    "loose": false,
@@ -5025,7 +5025,7 @@
     "2026-07-16"
    ],
    "dir": "docs/lr2021",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 68,
    "links": [],
    "loose": false,
@@ -5039,7 +5039,7 @@
    "cluster": "misc",
    "dates": [],
    "dir": "docs/lr2021",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 96,
    "links": [],
    "loose": false,
@@ -5055,7 +5055,7 @@
     "2026-07-23"
    ],
    "dir": "docs/lr2021",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 157,
    "links": [],
    "loose": false,
@@ -5069,7 +5069,7 @@
    "cluster": "pre",
    "dates": [],
    "dir": "docs/prestretch",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 261,
    "links": [],
    "loose": false,
@@ -5085,7 +5085,7 @@
    "cluster": "pressure",
    "dates": [],
    "dir": "docs/prestretch",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 187,
    "links": [],
    "loose": false,
@@ -5099,7 +5099,7 @@
    "cluster": "prestretch",
    "dates": [],
    "dir": "docs/prestretch",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 108,
    "links": [],
    "loose": false,
@@ -5113,7 +5113,7 @@
    "cluster": "prestretch",
    "dates": [],
    "dir": "docs/prestretch",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 116,
    "links": [],
    "loose": false,
@@ -5127,7 +5127,7 @@
    "cluster": "plan",
    "dates": [],
    "dir": "docs/plans",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 370,
    "links": [],
    "loose": false,
@@ -5193,7 +5193,7 @@
     "2026-07-29"
    ],
    "dir": "docs/plans",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 588,
    "links": [],
    "loose": false,
@@ -5207,7 +5207,7 @@
    "cluster": "plan",
    "dates": [],
    "dir": "docs/plans",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 158,
    "links": [],
    "loose": false,
@@ -5223,7 +5223,7 @@
     "2026-07-29"
    ],
    "dir": "docs/plans",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 455,
    "links": [],
    "loose": false,
@@ -5256,7 +5256,7 @@
     "2026-07-27"
    ],
    "dir": "docs/plans",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 56,
    "links": [],
    "loose": false,
@@ -5272,7 +5272,7 @@
     "2026-07-30"
    ],
    "dir": "docs/plans",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 207,
    "links": [],
    "loose": false,
@@ -5304,7 +5304,7 @@
     "2025-07-25"
    ],
    "dir": "docs/plans",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 236,
    "links": [],
    "loose": false,
@@ -5320,7 +5320,7 @@
     "2026-07-29"
    ],
    "dir": "docs/plans",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 219,
    "links": [],
    "loose": false,
@@ -5352,7 +5352,7 @@
     "2026-07-16"
    ],
    "dir": "docs/plans",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 322,
    "links": [
     "../flrc/flrc-final-summary-2026-07-16.md",
@@ -5374,7 +5374,7 @@
     "2025-07-25"
    ],
    "dir": "docs/plans",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 176,
    "links": [],
    "loose": false,
@@ -5407,7 +5407,7 @@
     "2026-07-23"
    ],
    "dir": "docs/plans",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 718,
    "links": [],
    "loose": false,
@@ -5421,7 +5421,7 @@
    "cluster": "plan",
    "dates": [],
    "dir": "docs/plans",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 82,
    "links": [],
    "loose": false,
@@ -5437,7 +5437,7 @@
     "2026-07-29"
    ],
    "dir": "docs/plans",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 207,
    "links": [],
    "loose": false,
@@ -5453,7 +5453,7 @@
     "2026-07-30"
    ],
    "dir": "docs/plans",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 552,
    "links": [],
    "loose": false,
@@ -5469,7 +5469,7 @@
     "2026-07-30"
    ],
    "dir": "docs/plans",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 421,
    "links": [],
    "loose": false,
@@ -5485,7 +5485,7 @@
     "2026-10-11"
    ],
    "dir": "docs/plans",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 232,
    "links": [],
    "loose": false,
@@ -5504,7 +5504,7 @@
     "2026-08-15"
    ],
    "dir": "docs/plans",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 141,
    "links": [],
    "loose": false,
@@ -5520,7 +5520,7 @@
     "2026-07-29"
    ],
    "dir": "docs/plans",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 218,
    "links": [],
    "loose": false,
@@ -5538,7 +5538,7 @@
     "2026-07-29"
    ],
    "dir": "docs/plans",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 363,
    "links": [],
    "loose": false,
@@ -5554,7 +5554,7 @@
     "2026-07-29"
    ],
    "dir": "docs/plans",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 299,
    "links": [],
    "loose": false,
@@ -5617,17 +5617,19 @@
    "title": "HUB v9 \u2014 ORDER READINESS (measured 2026-10-15)"
   },
   {
-   "archive_markers": [],
-   "chars": 4574,
+   "archive_markers": [
+    "superseded"
+   ],
+   "chars": 5264,
    "cluster": "erc",
    "dates": [
-    "2026-10-14",
     "2026-10-15",
-    "2026-10-16"
+    "2026-10-16",
+    "2026-10-17"
    ],
    "dir": "docs/fab",
    "last_commit": "2026-10-16",
-   "lines": 82,
+   "lines": 90,
    "links": [],
    "loose": false,
    "name": "ERC-AND-U1-CLASSIFICATION.md",
@@ -5759,7 +5761,7 @@
     "2026-10-14"
    ],
    "dir": "docs/fab",
-   "last_commit": "2026-10-14",
+   "last_commit": "2026-10-17",
    "lines": 122,
    "links": [],
    "loose": false,
@@ -5769,9 +5771,11 @@
   },
   {
    "archive_markers": [],
-   "chars": 3576,
+   "chars": 3809,
    "cluster": "readme.md",
-   "dates": [],
+   "dates": [
+    "2026-10-17"
+   ],
    "dir": "docs/fab",
    "last_commit": "2026-10-16",
    "lines": 78,
@@ -5860,15 +5864,18 @@
    "title": "SX1280 (U4) wiring spec \u2014 the authority for the redraw"
   },
   {
-   "archive_markers": [],
-   "chars": 6457,
+   "archive_markers": [
+    "withdrawn"
+   ],
+   "chars": 7453,
    "cluster": "gate",
    "dates": [
-    "2026-10-16"
+    "2026-10-16",
+    "2026-10-17"
    ],
    "dir": "docs/fab",
    "last_commit": "2026-10-16",
-   "lines": 114,
+   "lines": 124,
    "links": [],
    "loose": false,
    "name": "GATE-RESULTS.md",
@@ -6007,15 +6014,16 @@
    "archive_markers": [
     "superseded"
    ],
-   "chars": 6379,
+   "chars": 8022,
    "cluster": "end",
    "dates": [
     "2026-10-14",
-    "2026-10-16"
+    "2026-10-16",
+    "2026-10-17"
    ],
    "dir": "docs/fab",
    "last_commit": "2026-10-16",
-   "lines": 107,
+   "lines": 127,
    "links": [],
    "loose": false,
    "name": "END-TO-END-BOARD-INVENTORY.md",
@@ -6649,7 +6657,7 @@
     "2026-10-01"
    ],
    "dir": "docs/lr2021-research",
-   "last_commit": "2026-10-07",
+   "last_commit": "2026-10-17",
    "lines": 341,
    "links": [],
    "loose": false,
@@ -6953,7 +6961,7 @@
     "2026-09-10"
    ],
    "dir": "docs/design",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 112,
    "links": [],
    "loose": false,
@@ -6970,7 +6978,7 @@
     "2026-08-30"
    ],
    "dir": "docs/design",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 313,
    "links": [],
    "loose": false,
@@ -6986,7 +6994,7 @@
     "2026-07-30"
    ],
    "dir": "docs/rp2040",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 63,
    "links": [],
    "loose": false,
@@ -7000,7 +7008,7 @@
    "cluster": "radio",
    "dates": [],
    "dir": "docs/rp2040",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 152,
    "links": [],
    "loose": false,
@@ -7017,7 +7025,7 @@
     "2026-07-27"
    ],
    "dir": "docs/rp2040",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 357,
    "links": [],
    "loose": false,
@@ -7033,7 +7041,7 @@
     "2026-07-30"
    ],
    "dir": "docs/rp2040",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 108,
    "links": [],
    "loose": false,
@@ -7049,7 +7057,7 @@
     "2026-05-24"
    ],
    "dir": "docs/rp2040",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 83,
    "links": [],
    "loose": false,
@@ -7068,7 +7076,7 @@
     "2026-07-15"
    ],
    "dir": "docs/rp2040",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 244,
    "links": [],
    "loose": false,
@@ -7084,7 +7092,7 @@
     "2026-08-22"
    ],
    "dir": "docs/rp2040",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 90,
    "links": [
     "../BENCH-CONSOLE-SPEC.md"
@@ -7103,7 +7111,7 @@
     "2026-07-30"
    ],
    "dir": "docs/rp2040",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 90,
    "links": [],
    "loose": false,
@@ -7117,7 +7125,7 @@
    "cluster": "range",
    "dates": [],
    "dir": "docs/range",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 274,
    "links": [],
    "loose": false,
@@ -7133,7 +7141,7 @@
     "2026-07-17"
    ],
    "dir": "docs/range",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 300,
    "links": [],
    "loose": false,
@@ -7147,7 +7155,7 @@
    "cluster": "range",
    "dates": [],
    "dir": "docs/range",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 129,
    "links": [],
    "loose": false,
@@ -7163,7 +7171,7 @@
     "2026-07-21"
    ],
    "dir": "docs/range",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 256,
    "links": [],
    "loose": false,
@@ -7179,7 +7187,7 @@
     "2026-08-24"
    ],
    "dir": "docs/range",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 212,
    "links": [],
    "loose": false,
@@ -7193,7 +7201,7 @@
    "cluster": "breadboard",
    "dates": [],
    "dir": "docs/hardware-reference",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 141,
    "links": [],
    "loose": false,
@@ -7207,7 +7215,7 @@
    "cluster": "component",
    "dates": [],
    "dir": "docs/hardware-reference",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 454,
    "links": [],
    "loose": false,
@@ -7226,7 +7234,7 @@
     "2026-10-14"
    ],
    "dir": "docs/hardware-reference",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 101,
    "links": [],
    "loose": false,
@@ -7240,7 +7248,7 @@
    "cluster": "hardware",
    "dates": [],
    "dir": "docs/hardware-reference",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 284,
    "links": [],
    "loose": false,
@@ -7254,7 +7262,7 @@
    "cluster": "gps",
    "dates": [],
    "dir": "docs/hardware-reference",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 53,
    "links": [],
    "loose": false,
@@ -7268,7 +7276,7 @@
    "cluster": "board",
    "dates": [],
    "dir": "docs/hardware-reference",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 140,
    "links": [],
    "loose": false,
@@ -7282,7 +7290,7 @@
    "cluster": "collaborator",
    "dates": [],
    "dir": "docs/handovers",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 107,
    "links": [],
    "loose": false,
@@ -7296,7 +7304,7 @@
    "cluster": "handover",
    "dates": [],
    "dir": "docs/handovers",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 101,
    "links": [],
    "loose": false,
@@ -7310,7 +7318,7 @@
    "cluster": "worktree",
    "dates": [],
    "dir": "docs/handovers",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 84,
    "links": [],
    "loose": false,
@@ -7326,7 +7334,7 @@
     "2026-07-23"
    ],
    "dir": "docs/handovers",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 102,
    "links": [],
    "loose": false,
@@ -7344,7 +7352,7 @@
     "2026-07-02"
    ],
    "dir": "docs/handovers",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 262,
    "links": [],
    "loose": false,
@@ -7360,7 +7368,7 @@
     "2026-07-25"
    ],
    "dir": "docs/handovers",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 180,
    "links": [],
    "loose": false,
@@ -7377,7 +7385,7 @@
     "2026-07-24"
    ],
    "dir": "docs/handovers",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 308,
    "links": [],
    "loose": false,
@@ -7393,7 +7401,7 @@
     "2026-07-16"
    ],
    "dir": "docs/handovers",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 192,
    "links": [],
    "loose": false,
@@ -7409,7 +7417,7 @@
    "cluster": "ralph",
    "dates": [],
    "dir": "docs/handovers",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 129,
    "links": [],
    "loose": false,
@@ -7425,7 +7433,7 @@
     "2026-07-16"
    ],
    "dir": "docs/handovers",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 145,
    "links": [],
    "loose": false,
@@ -7441,7 +7449,7 @@
     "2026-07-23"
    ],
    "dir": "docs/handovers",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 282,
    "links": [],
    "loose": false,
@@ -7458,7 +7466,7 @@
     "2026-07-18"
    ],
    "dir": "docs/handovers",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 171,
    "links": [],
    "loose": false,
@@ -7475,7 +7483,7 @@
     "2026-08-22"
    ],
    "dir": "docs/handovers",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 480,
    "links": [],
    "loose": false,
@@ -7491,7 +7499,7 @@
     "2026-07-17"
    ],
    "dir": "docs/handovers",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 125,
    "links": [],
    "loose": false,
@@ -7507,7 +7515,7 @@
     "2026-07-29"
    ],
    "dir": "docs/handovers",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 204,
    "links": [],
    "loose": false,
@@ -7523,7 +7531,7 @@
     "2025-07-25"
    ],
    "dir": "docs/handovers",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 84,
    "links": [],
    "loose": false,
@@ -7539,7 +7547,7 @@
     "2026-07-17"
    ],
    "dir": "docs/handovers",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 122,
    "links": [],
    "loose": false,
@@ -7556,7 +7564,7 @@
     "2026-07-17"
    ],
    "dir": "docs/handovers",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 177,
    "links": [],
    "loose": false,
@@ -7570,7 +7578,7 @@
    "cluster": "wing",
    "dates": [],
    "dir": "docs/wing",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 129,
    "links": [],
    "loose": false,
@@ -7586,7 +7594,7 @@
     "2026-08-05"
    ],
    "dir": "docs/pcb",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 210,
    "links": [],
    "loose": false,
@@ -7602,7 +7610,7 @@
     "2026-08-05"
    ],
    "dir": "docs/pcb",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 313,
    "links": [],
    "loose": false,
@@ -7663,7 +7671,7 @@
    "cluster": "spi",
    "dates": [],
    "dir": "docs/spi",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 101,
    "links": [],
    "loose": false,
@@ -7677,7 +7685,7 @@
    "cluster": "spi",
    "dates": [],
    "dir": "docs/spi",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 29,
    "links": [],
    "loose": false,
@@ -7694,7 +7702,7 @@
     "2026-08-05"
    ],
    "dir": "docs/spi",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 289,
    "links": [],
    "loose": false,
@@ -7710,7 +7718,7 @@
     "2026-07-29"
    ],
    "dir": "docs/spi",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 78,
    "links": [],
    "loose": false,
@@ -7726,7 +7734,7 @@
     "2026-07-16"
    ],
    "dir": "docs/spi",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 51,
    "links": [],
    "loose": false,
@@ -7742,7 +7750,7 @@
     "2026-07-16"
    ],
    "dir": "docs/spi",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 70,
    "links": [],
    "loose": false,
@@ -7838,7 +7846,7 @@
     "2026-10-07"
    ],
    "dir": "docs/adr",
-   "last_commit": "2026-10-07",
+   "last_commit": "2026-10-17",
    "lines": 339,
    "links": [],
    "loose": false,
@@ -7943,7 +7951,7 @@
     "2026-10-08"
    ],
    "dir": "docs/adr",
-   "last_commit": "2026-10-08",
+   "last_commit": "2026-10-17",
    "lines": 208,
    "links": [],
    "loose": false,
@@ -7979,7 +7987,7 @@
     "2026-10-07"
    ],
    "dir": "docs/adr",
-   "last_commit": "2026-10-07",
+   "last_commit": "2026-10-17",
    "lines": 265,
    "links": [],
    "loose": false,
@@ -8011,7 +8019,7 @@
     "2026-07-29"
    ],
    "dir": "docs/adr",
-   "last_commit": "2026-07-30",
+   "last_commit": "2026-10-17",
    "lines": 194,
    "links": [],
    "loose": false,
@@ -8116,7 +8124,7 @@
     "2026-10-06"
    ],
    "dir": "docs/adr",
-   "last_commit": "2026-10-06",
+   "last_commit": "2026-10-17",
    "lines": 77,
    "links": [],
    "loose": false,
@@ -8167,7 +8175,7 @@
     "2026-10-08"
    ],
    "dir": "docs/adr",
-   "last_commit": "2026-10-08",
+   "last_commit": "2026-10-17",
    "lines": 181,
    "links": [],
    "loose": false,
@@ -8451,7 +8459,7 @@
     "2026-10-07"
    ],
    "dir": "docs/adr",
-   "last_commit": "2026-10-07",
+   "last_commit": "2026-10-17",
    "lines": 241,
    "links": [],
    "loose": false,
@@ -8489,7 +8497,7 @@
     "2026-10-07"
    ],
    "dir": "docs/adr",
-   "last_commit": "2026-10-07",
+   "last_commit": "2026-10-17",
    "lines": 813,
    "links": [],
    "loose": false,
@@ -8643,7 +8651,7 @@
     "2026-10-07"
    ],
    "dir": "docs/adr",
-   "last_commit": "2026-10-07",
+   "last_commit": "2026-10-17",
    "lines": 168,
    "links": [],
    "loose": false,
@@ -8802,7 +8810,7 @@
     "2026-10-16"
    ],
    "dir": "docs/adr",
-   "last_commit": "2026-10-16",
+   "last_commit": "2026-10-17",
    "lines": 527,
    "links": [],
    "loose": false,
@@ -8857,7 +8865,7 @@
     "2026-10-05"
    ],
    "dir": "docs/adr",
-   "last_commit": "2026-10-07",
+   "last_commit": "2026-10-17",
    "lines": 343,
    "links": [],
    "loose": false,
@@ -9187,7 +9195,7 @@
     "2026-10-14"
    ],
    "dir": "docs/adr",
-   "last_commit": "2026-10-14",
+   "last_commit": "2026-10-17",
    "lines": 124,
    "links": [],
    "loose": false,
@@ -9388,7 +9396,7 @@
     "2026-10-07"
    ],
    "dir": "docs/adr",
-   "last_commit": "2026-10-07",
+   "last_commit": "2026-10-17",
    "lines": 753,
    "links": [
     "054-array-topology-final.md",
@@ -9507,7 +9515,7 @@
     "2026-10-07"
    ],
    "dir": "docs/adr",
-   "last_commit": "2026-10-07",
+   "last_commit": "2026-10-17",
    "lines": 76,
    "links": [],
    "loose": false,
@@ -9558,7 +9566,7 @@
     "2026-08-05"
    ],
    "dir": "docs/recon",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 75,
    "links": [],
    "loose": false,
@@ -9594,7 +9602,7 @@
     "2026-10-06"
    ],
    "dir": "docs/recon",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 218,
    "links": [],
    "loose": false,
@@ -9631,7 +9639,7 @@
     "2026-10-06"
    ],
    "dir": "docs/recon",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 345,
    "links": [],
    "loose": false,
@@ -9647,7 +9655,7 @@
     "2026-10-06"
    ],
    "dir": "docs/recon",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 255,
    "links": [],
    "loose": false,
@@ -9661,7 +9669,7 @@
    "cluster": "harmonized",
    "dates": [],
    "dir": "docs/harmonized",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 257,
    "links": [
     "../BENCH-CONSOLE-SPEC.md",
@@ -9689,7 +9697,7 @@
     "2026-08-21"
    ],
    "dir": "docs/harmonized",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 172,
    "links": [
     "../BENCH-CONSOLE-SPEC.md",
@@ -9714,7 +9722,7 @@
     "2026-08-22"
    ],
    "dir": "docs/harmonized",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 207,
    "links": [
     "HARMONIZED-BENCH-PACKAGE.md",
@@ -9742,7 +9750,7 @@
     "2026-08-24"
    ],
    "dir": "docs/harmonized",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 712,
    "links": [],
    "loose": false,
@@ -9758,7 +9766,7 @@
     "2026-10-14"
    ],
    "dir": "docs/balloon",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 81,
    "links": [],
    "loose": false,
@@ -9774,7 +9782,7 @@
     "2026-07-29"
    ],
    "dir": "docs/balloon",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 66,
    "links": [],
    "loose": false,
@@ -9790,7 +9798,7 @@
     "2026-10-14"
    ],
    "dir": "docs/base-station",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 185,
    "links": [],
    "loose": false,
@@ -9804,7 +9812,7 @@
    "cluster": "tollgate",
    "dates": [],
    "dir": "docs/base-station",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 390,
    "links": [],
    "loose": false,
@@ -9820,7 +9828,7 @@
     "2026-10-08"
    ],
    "dir": "docs/base-station",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 114,
    "links": [],
    "loose": false,
@@ -9834,7 +9842,7 @@
    "cluster": "readme.md",
    "dates": [],
    "dir": "docs/runs",
-   "last_commit": "2026-09-27",
+   "last_commit": "2026-10-17",
    "lines": 24,
    "links": [
     "../harmonized/HARMONIZED-RUN-REPORT-TEMPLATE.md",
@@ -9853,7 +9861,7 @@
     "2025-07-25"
    ],
    "dir": "docs/sdr",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 137,
    "links": [],
    "loose": false,
@@ -9871,7 +9879,7 @@
     "2026-07-25"
    ],
    "dir": "docs/sdr",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 608,
    "links": [],
    "loose": false,
@@ -10154,7 +10162,7 @@
     "2026-07-15"
    ],
    "dir": "docs/flight",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 174,
    "links": [],
    "loose": false,
@@ -10172,7 +10180,7 @@
     "2026-06-19"
    ],
    "dir": "docs/flight",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 187,
    "links": [],
    "loose": false,
@@ -10190,7 +10198,7 @@
     "2026-07-29"
    ],
    "dir": "docs/flight",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 135,
    "links": [],
    "loose": false,
@@ -10204,7 +10212,7 @@
    "cluster": "first",
    "dates": [],
    "dir": "docs/flight",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 92,
    "links": [],
    "loose": false,
@@ -10218,7 +10226,7 @@
    "cluster": "execution",
    "dates": [],
    "dir": "docs/flight",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 218,
    "links": [],
    "loose": false,
@@ -10234,7 +10242,7 @@
     "2026-08-18"
    ],
    "dir": "docs/flrc",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 315,
    "links": [],
    "loose": false,
@@ -10250,7 +10258,7 @@
     "2026-07-16"
    ],
    "dir": "docs/flrc",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 61,
    "links": [],
    "loose": false,
@@ -10266,7 +10274,7 @@
     "2026-07-16"
    ],
    "dir": "docs/flrc",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 41,
    "links": [],
    "loose": false,
@@ -10280,7 +10288,7 @@
    "cluster": "flrc",
    "dates": [],
    "dir": "docs/flrc",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 206,
    "links": [],
    "loose": false,
@@ -10296,7 +10304,7 @@
     "2026-07-16"
    ],
    "dir": "docs/flrc",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 85,
    "links": [],
    "loose": false,
@@ -10312,7 +10320,7 @@
     "2026-07-16"
    ],
    "dir": "docs/flrc",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 174,
    "links": [],
    "loose": false,
@@ -10328,7 +10336,7 @@
     "2026-07-24"
    ],
    "dir": "docs/flrc",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 292,
    "links": [],
    "loose": false,
@@ -10346,7 +10354,7 @@
     "2026-08-30"
    ],
    "dir": "docs/flrc",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 449,
    "links": [],
    "loose": false,
@@ -10362,7 +10370,7 @@
     "2026-07-16"
    ],
    "dir": "docs/flrc",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 91,
    "links": [],
    "loose": false,
@@ -10378,7 +10386,7 @@
     "2026-07-16"
    ],
    "dir": "docs/flrc",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 230,
    "links": [],
    "loose": false,
@@ -10394,7 +10402,7 @@
     "2026-07-16"
    ],
    "dir": "docs/flrc",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 65,
    "links": [],
    "loose": false,
@@ -10411,7 +10419,7 @@
     "2026-07-16"
    ],
    "dir": "docs/flrc",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 218,
    "links": [],
    "loose": false,
@@ -10427,7 +10435,7 @@
     "2026-07-16"
    ],
    "dir": "docs/flrc",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 105,
    "links": [],
    "loose": false,
@@ -10443,7 +10451,7 @@
     "2026-07-16"
    ],
    "dir": "docs/flrc",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 127,
    "links": [],
    "loose": false,
@@ -10460,7 +10468,7 @@
     "2026-07-15"
    ],
    "dir": "docs/flrc",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 76,
    "links": [],
    "loose": false,
@@ -10476,7 +10484,7 @@
     "2026-07-15"
    ],
    "dir": "docs/flrc",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 78,
    "links": [],
    "loose": false,
@@ -10492,7 +10500,7 @@
     "2026-07-16"
    ],
    "dir": "docs/flrc",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 171,
    "links": [],
    "loose": false,
@@ -10508,7 +10516,7 @@
     "2026-07-23"
    ],
    "dir": "docs/flrc",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 42,
    "links": [],
    "loose": false,
@@ -10524,7 +10532,7 @@
     "2026-07-15"
    ],
    "dir": "docs/flrc",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 117,
    "links": [],
    "loose": false,
@@ -10540,7 +10548,7 @@
     "2026-07-16"
    ],
    "dir": "docs/flrc",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 58,
    "links": [],
    "loose": false,
@@ -10556,7 +10564,7 @@
     "2026-07-16"
    ],
    "dir": "docs/flrc",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 242,
    "links": [],
    "loose": false,
@@ -10572,7 +10580,7 @@
     "2026-07-16"
    ],
    "dir": "docs/flrc",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 60,
    "links": [],
    "loose": false,
@@ -10588,7 +10596,7 @@
     "2026-07-16"
    ],
    "dir": "docs/flrc",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 67,
    "links": [],
    "loose": false,
@@ -10604,7 +10612,7 @@
     "2026-07-16"
    ],
    "dir": "docs/flrc",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 83,
    "links": [],
    "loose": false,
@@ -10620,7 +10628,7 @@
     "2025-07-25"
    ],
    "dir": "docs/flrc",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 109,
    "links": [],
    "loose": false,
@@ -10636,7 +10644,7 @@
     "2026-07-16"
    ],
    "dir": "docs/flrc",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 70,
    "links": [],
    "loose": false,
@@ -10652,7 +10660,7 @@
     "2026-07-16"
    ],
    "dir": "docs/flrc",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 141,
    "links": [],
    "loose": false,
@@ -10668,7 +10676,7 @@
     "2026-07-16"
    ],
    "dir": "docs/flrc",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 272,
    "links": [],
    "loose": false,
@@ -10684,7 +10692,7 @@
     "2026-07-16"
    ],
    "dir": "docs/flrc",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 133,
    "links": [],
    "loose": false,
@@ -10700,7 +10708,7 @@
     "2026-07-16"
    ],
    "dir": "docs/flrc",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 241,
    "links": [],
    "loose": false,
@@ -10716,7 +10724,7 @@
     "2026-07-16"
    ],
    "dir": "docs/flrc",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 47,
    "links": [],
    "loose": false,
@@ -10732,7 +10740,7 @@
     "2026-07-16"
    ],
    "dir": "docs/flrc",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 84,
    "links": [],
    "loose": false,
@@ -10749,7 +10757,7 @@
     "2026-07-16"
    ],
    "dir": "docs/flrc",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 127,
    "links": [],
    "loose": false,
@@ -10767,7 +10775,7 @@
     "2026-07-24"
    ],
    "dir": "docs/flrc",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 82,
    "links": [],
    "loose": false,
@@ -10785,7 +10793,7 @@
     "2026-10-13"
    ],
    "dir": "docs/rfa",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 116,
    "links": [],
    "loose": false,
@@ -10801,7 +10809,7 @@
     "2026-10-14"
    ],
    "dir": "docs/rfa",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 191,
    "links": [],
    "loose": false,
@@ -10815,7 +10823,7 @@
    "cluster": "readme.md",
    "dates": [],
    "dir": "docs/assets/lr2021",
-   "last_commit": "2026-06-27",
+   "last_commit": "2026-10-17",
    "lines": 191,
    "links": [],
    "loose": false,
@@ -10831,7 +10839,7 @@
     "2026-07-17"
    ],
    "dir": "docs/speed",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 247,
    "links": [],
    "loose": false,
@@ -10845,7 +10853,7 @@
    "cluster": "speed",
    "dates": [],
    "dir": "docs/speed",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 291,
    "links": [],
    "loose": false,
@@ -10859,7 +10867,7 @@
    "cluster": "gallery.md",
    "dates": [],
    "dir": "docs/boards",
-   "last_commit": "2026-10-16",
+   "last_commit": "2026-10-17",
    "lines": 50,
    "links": [],
    "loose": false,
@@ -10909,7 +10917,7 @@
     "2026-10-06"
    ],
    "dir": "docs/sx1280",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 140,
    "links": [],
    "loose": false,
@@ -10923,7 +10931,7 @@
    "cluster": "sx1280",
    "dates": [],
    "dir": "docs/sx1280",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 218,
    "links": [],
    "loose": false,
@@ -10940,7 +10948,7 @@
     "2026-09-23"
    ],
    "dir": "docs/sx1280",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 200,
    "links": [],
    "loose": false,
@@ -10956,7 +10964,7 @@
     "2026-07-26"
    ],
    "dir": "docs/repo",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 245,
    "links": [],
    "loose": false,
@@ -10970,7 +10978,7 @@
    "cluster": "assessment",
    "dates": [],
    "dir": "docs/repo",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 100,
    "links": [],
    "loose": false,
@@ -10986,7 +10994,7 @@
     "2026-08-05"
    ],
    "dir": "docs/discovery",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 23,
    "links": [],
    "loose": false,
@@ -11002,7 +11010,7 @@
     "2026-08-07"
    ],
    "dir": "docs/discovery",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 40,
    "links": [],
    "loose": false,
@@ -11018,7 +11026,7 @@
     "2026-08-05"
    ],
    "dir": "docs/discovery",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 61,
    "links": [],
    "loose": false,
@@ -11034,7 +11042,7 @@
     "2026-08-07"
    ],
    "dir": "docs/discovery",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 26,
    "links": [],
    "loose": false,
@@ -11052,7 +11060,7 @@
     "2026-08-07"
    ],
    "dir": "docs/discovery",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 40,
    "links": [],
    "loose": false,
@@ -11068,7 +11076,7 @@
     "2026-08-05"
    ],
    "dir": "docs/discovery",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 28,
    "links": [],
    "loose": false,
@@ -11084,7 +11092,7 @@
     "2026-08-05"
    ],
    "dir": "docs/discovery",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 17,
    "links": [],
    "loose": false,
@@ -11100,7 +11108,7 @@
     "2026-08-07"
    ],
    "dir": "docs/discovery",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 24,
    "links": [],
    "loose": false,
@@ -11116,7 +11124,7 @@
     "2026-08-08"
    ],
    "dir": "docs/discovery",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 53,
    "links": [],
    "loose": false,
@@ -11130,7 +11138,7 @@
    "cluster": "power",
    "dates": [],
    "dir": "docs/power",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 257,
    "links": [],
    "loose": false,
@@ -11144,7 +11152,7 @@
    "cluster": "powerbank",
    "dates": [],
    "dir": "docs/power",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 70,
    "links": [],
    "loose": false,
@@ -11160,7 +11168,7 @@
     "2025-07-25"
    ],
    "dir": "docs/walk-tests",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 148,
    "links": [],
    "loose": false,
@@ -11174,7 +11182,7 @@
    "cluster": "walkthrough",
    "dates": [],
    "dir": "docs/walk-tests",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 340,
    "links": [],
    "loose": false,
@@ -11190,7 +11198,7 @@
     "2026-07-24"
    ],
    "dir": "docs/walk-tests",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 38,
    "links": [],
    "loose": false,
@@ -11206,7 +11214,7 @@
     "2026-07-24"
    ],
    "dir": "docs/walk-tests",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 167,
    "links": [],
    "loose": false,
@@ -11222,7 +11230,7 @@
     "2026-07-24"
    ],
    "dir": "docs/walk-tests",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 281,
    "links": [],
    "loose": false,
@@ -11255,7 +11263,7 @@
     "2026-08-15"
    ],
    "dir": "docs/e80-900mbl-02-eval",
-   "last_commit": "2026-08-15",
+   "last_commit": "2026-10-17",
    "lines": 11,
    "links": [],
    "loose": false,
@@ -11272,7 +11280,7 @@
     "2026-08-20"
    ],
    "dir": "docs/e80-900mbl-02-eval",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 227,
    "links": [],
    "loose": false,
@@ -11302,7 +11310,7 @@
     "2026-08-20"
    ],
    "dir": "docs/e80-900mbl-02-eval",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 467,
    "links": [],
    "loose": false,
@@ -11352,7 +11360,7 @@
     "2026-08-18"
    ],
    "dir": "docs/e80-900mbl-02-eval",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 79,
    "links": [],
    "loose": false,
@@ -11369,7 +11377,7 @@
     "2026-08-17"
    ],
    "dir": "docs/e80-900mbl-02-eval",
-   "last_commit": "",
+   "last_commit": "2026-10-17",
    "lines": 110,
    "links": [],
    "loose": false,

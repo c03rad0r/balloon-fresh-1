@@ -89,7 +89,7 @@ that say what a move costs. Re-run it after any move; it is cheap and determinis
 | `balloon-pressure-test.md` | 163 | Mylar-Ballon Drucktest | balloon | 0 | 2026-10-10 |  |
 | `balloon-test-results.md` | 367 | Balloon Leak Test Results | balloon | 0 | 2026-05-21 |  |
 | `BASE-STATION-PCBA-D14-FREEZE.md` | 68 | Base-station PCBA v1 — D14 part and bias/rail freeze | base-station | 0 | 2026-10-10 |  |
-| `BENCH-CONSOLE-SPEC.md` | 366 | BENCH Console Protocol — Normative Cross-Board Speci… | bench | 5 | 2026-08-21 |  |
+| `BENCH-CONSOLE-SPEC.md` | 366 | BENCH Console Protocol — Normative Cross-Board Speci… | bench | 5 | 2026-10-17 |  |
 | `blossom-design.md` | 273 | Balloon Blossom Server — Design Document | blossom | 0 | 2026-07-29 |  |
 | `BRANCH-TRIAGE-2026-10-06.md` | 152 | Branch triage — balloon-fresh divergence from the co… | branch | 0 | 2026-10-06 | obsolete, superseded |
 | `BUILD-SIZE-REPORT.md` | 172 | TollGate ESP32-C3 Build Size Report | build | 0 | 2026-07-30 |  |
@@ -103,46 +103,46 @@ that say what a move costs. Re-run it after any move; it is cheap and determinis
 | `FLIGHT-BOARD-AUTO-BOOTSEL.md` | 218 | Auto-BOOTSEL Recovery: ESP32-C3 → RP2040 Flight Boar… | flight | 0 | 2026-07-13 |  |
 | `FLRC-512B-THROUGHPUT-AUDIT-2026-10-06.md` | 278 | FLRC 512 B / 2.6 Mbps — settled | flrc | 0 | 2026-10-17 | do not use |
 | `flrc-rx-verified-results-2026-07-16.md` | 71 | FLRC TX/RX Throughput Test Results — 2026-07-16 | flrc | 0 | 2026-07-16 |  |
-| `FRIDAY-DEMO-CHEATSHEET.md` | 113 | E80 Friday Field Demo — Cheat Sheet (2026-08-29, Fun… | friday | 0 | 2026-09-13 |  |
-| `FRIDAY-DEMO-HANDOVER-2026-08-29.md` | 250 | Field Measurement Handover — Friday 2026-08-29, Func… | friday | 0 | 2026-08-28 |  |
+| `FRIDAY-DEMO-CHEATSHEET.md` | 113 | E80 Friday Field Demo — Cheat Sheet (2026-08-29, Fun… | friday | 0 | 2026-10-17 |  |
+| `FRIDAY-DEMO-HANDOVER-2026-08-29.md` | 250 | Field Measurement Handover — Friday 2026-08-29, Func… | friday | 0 | 2026-10-17 |  |
 | `guard-time-config-cvm-optimization-plan.md` | 902 | Guard Time Reduction + Config Optimization + CVM Int… | guard | 0 | 2026-08-24 |  |
 | `HANDOVER-WING-RELEASE-AND-BYPASS-DIODE.md` | 246 | HANDOVER — fit the wing bypass Schottky + design the… | handover | 0 | 2026-10-15 | do not use |
 | `hardware-design.md` | 30 | **— none —** | hardware | 1 | 2026-10-14 | superseded |
 | `INTEGRATION-ASSESSMENT.md` | 90 | Integration Assessment — balloon-nostr (Nostr Store-… | integration | 0 | 2026-08-05 |  |
 | `inventory.md` | 132 | Inventarliste - Vorhandene Komponenten | inventory.md | 0 | 2026-07-26 |  |
-| `LINK-BUDGET-LICENCE-EXEMPT.md` | 246 | Link Budget — Licence-Exempt Regime (v9, 300 km slan… | link | 0 | 2026-10-07 |  |
+| `LINK-BUDGET-LICENCE-EXEMPT.md` | 246 | Link Budget — Licence-Exempt Regime (v9, 300 km slan… | link | 0 | 2026-10-17 |  |
 | `LR2021-LESSONS-2026-09.md` | 80 | LR2021 Community Lessons — 2026-09 | lr2021 | 0 | 2026-09-04 |  |
-| `lr2021-flrc-24ghz-datasheet-audit-2026-07-26.md` | 323 | LR2021 FLRC 2.4 GHz — Datasheet Audit & Code→Result … | lr2021 | 0 |  |  |
+| `lr2021-flrc-24ghz-datasheet-audit-2026-07-26.md` | 323 | LR2021 FLRC 2.4 GHz — Datasheet Audit & Code→Result … | lr2021 | 0 | 2026-10-17 |  |
 | `lr2021-spi-command-reference.md` | 228 | LR2021 SPI Command Reference — Cross-Referenced Anal… | lr2021 | 0 | 2026-07-29 |  |
 | `lr2021-spi-protocol-reference.md` | 164 | LR2021 SPI Protocol — Authoritative Reference | lr2021 | 0 | 2026-07-29 |  |
 | `MEASUREMENT-REQUEST-WING-RELEASE.md` | 128 | MEASUREMENT REQUEST — what the operator needs to wei… | measurement | 0 | 2026-10-15 |  |
 | `3d-model-coverage-wing.md` | 236 | 3D model coverage — v9 WING board | misc | 0 | 2026-10-11 |  |
-| `RF-EXPERIMENT-DESIGN-ANALYSIS.md` | 584 | RF Experiment Design Analysis: Min Configs × Distanc… | misc | 0 | 2026-08-24 | superseded |
-| `V9-RADIO-SITE-MATRIX.md` | 214 | V9 Radio-Site Matrix — population, GPIO, rail, regul… | misc | 0 | 2026-10-07 |  |
+| `RF-EXPERIMENT-DESIGN-ANALYSIS.md` | 584 | RF Experiment Design Analysis: Min Configs × Distanc… | misc | 0 | 2026-10-17 | superseded |
+| `V9-RADIO-SITE-MATRIX.md` | 214 | V9 Radio-Site Matrix — population, GPIO, rail, regul… | misc | 0 | 2026-10-17 |  |
 | `bw-code-table.md` | 105 | LR2021 LoRa Bandwidth Codes — Authoritative Table (B… | misc | 0 | 2026-08-17 |  |
 | `v9-BOM.md` | 193 | v9 balloon flight board - Bill of Materials | misc | 0 | 2026-10-07 |  |
-| `P4.1-DMA-CHAINING-ZERO-COPY.md` | 200 | P4.1 — DMA Chaining for Zero-Copy Packet Transfer (R… | p4.1 | 0 | 2026-08-01 |  |
-| `PCB-HANDOVER-FOR-JLCPCB.md` | 431 | PCB Handover Document — Balloon Tracker for JLCPCB M… | pcb | 0 | 2026-07-29 | do not use |
+| `P4.1-DMA-CHAINING-ZERO-COPY.md` | 200 | P4.1 — DMA Chaining for Zero-Copy Packet Transfer (R… | p4.1 | 0 | 2026-10-17 |  |
+| `PCB-HANDOVER-FOR-JLCPCB.md` | 431 | PCB Handover Document — Balloon Tracker for JLCPCB M… | pcb | 0 | 2026-10-17 | do not use |
 | `PLAN-adaptive-sweep-firmware.md` | 130 | UPDATED PLAN: Adaptive Sweep + Outdoor Range Test | plan | 0 | 2026-07-24 |  |
-| `PLAN-esp32-vs-rp2040-benchmark.md` | 148 | BENCHMARK PLAN: ESP32-C3 vs RP2040 — LR2021 Throughp… | plan | 0 | 2026-07-31 |  |
+| `PLAN-esp32-vs-rp2040-benchmark.md` | 148 | BENCHMARK PLAN: ESP32-C3 vs RP2040 — LR2021 Throughp… | plan | 0 | 2026-10-17 |  |
 | `PLAN-host-driven-bench.md` | 254 | Host-Driven Range Bench — Build-Ready Plan (RP2040 +… | plan | 0 | 2026-08-17 |  |
-| `plan.md` | 174 | Projektplan: ESP32 Pico-Balloon Tracker | plan.md | 0 | 2026-05-20 |  |
+| `plan.md` | 174 | Projektplan: ESP32 Pico-Balloon Tracker | plan.md | 0 | 2026-10-17 |  |
 | `POWER-BUDGET-V9-D2BE.md` | 232 | v9 flight-board power + mass budget (reconciled agai… | power | 0 | 2026-10-07 | withdrawn |
 | `power-sweep-results-2026-07-24.md` | 56 | TX Power Sweep Results — 2026-07-24 | power | 0 | 2026-07-24 |  |
-| `PRESTRETCH-OVERPRESSURE-INTERLOCK.md` | 221 | Pre-Stretch Bench Rig — Over-Pressure / Over-Inflati… | prestretch | 0 | 2026-10-10 | do not use, superseded |
+| `PRESTRETCH-OVERPRESSURE-INTERLOCK.md` | 221 | Pre-Stretch Bench Rig — Over-Pressure / Over-Inflati… | prestretch | 0 | 2026-10-17 | do not use, superseded |
 | `RANGE-TEST-PLAN.md` | 132 | RANGE-TEST-PLAN — E80-900MBL-02 outdoor range campai… | range | 0 | 2026-08-16 |  |
 | `RANGE-THROUGHPUT-PLAN.md` | 182 | Range & Throughput Test Plan | range | 0 | 2026-07-23 | superseded |
-| `rca-fix-plan-20260821.md` | 189 | RCA & Fix Plan — L511 non-bug, FLRC CRC, LEN=255 bou… | rca | 3 | 2026-10-06 |  |
-| `README.md` | 62 | `docs/` — layout | readme.md | 2 |  | superseded |
-| `REPO-TRIAGE-INDEX.md` | 439 | Repo triage index — what each doc IS, before anythin… | repo | 1 | 2026-10-17 | do not use, obsolete, superseded, withdrawn |
-| `RFA1-ELRS-LR2021-DIFF-2026-10-12.md` | 175 | RFA-1 — ExpressLRS LR2021 driver vs our raw-SPI init… | rfa1 | 0 | 2026-10-13 |  |
-| `RFA1b-FOLLOWUP-650KBPS-ZEROS-2026-10-14.md` | 159 | RFA-1b follow-up — the 650 kbps "zero packet" cells:… | rfa1b | 0 | 2026-10-14 |  |
+| `rca-fix-plan-20260821.md` | 189 | RCA & Fix Plan — L511 non-bug, FLRC CRC, LEN=255 bou… | rca | 3 | 2026-10-17 |  |
+| `README.md` | 62 | `docs/` — layout | readme.md | 2 | 2026-10-17 | superseded |
+| `REPO-TRIAGE-INDEX.md` | 166 | Repo triage index — what each doc IS, before anythin… | repo | 1 | 2026-10-17 | do not use, obsolete, superseded, withdrawn |
+| `RFA1-ELRS-LR2021-DIFF-2026-10-12.md` | 175 | RFA-1 — ExpressLRS LR2021 driver vs our raw-SPI init… | rfa1 | 0 | 2026-10-17 |  |
+| `RFA1b-FOLLOWUP-650KBPS-ZEROS-2026-10-14.md` | 159 | RFA-1b follow-up — the 650 kbps "zero packet" cells:… | rfa1b | 0 | 2026-10-17 |  |
 | `RFA1b-PRAM-PATCH-VERDICT-2026-10-14.md` | 180 | RFA-1b — PRAM-patch bench experiment: verdict + evid… | rfa1b | 0 | 2026-10-14 |  |
 | `SECURITY-FINDINGS.md` | 69 | Security findings — e80 bench tooling | security | 0 | 2026-10-06 |  |
 | `SOFTWARE-PREPARE-LIST.md` | 58 | SOFTWARE PREPARE LIST — build before the flights | software | 0 | 2026-10-14 |  |
 | `STATUS-balloon-circuit-design.md` | 11 | STATUS REPORT: balloon-circuit-design | status | 0 | 2026-07-21 |  |
 | `STATUS-balloon-nostr.md` | 262 | STATUS — balloon-nostr (Nostr Store-and-Forward Trac… | status | 0 | 2026-07-30 |  |
-| `STATUS-balloon-pow.md` | 191 | Status — balloon-pow (E-Hash Mining Relay) | status | 0 | 2026-10-14 |  |
+| `STATUS-balloon-pow.md` | 191 | Status — balloon-pow (E-Hash Mining Relay) | status | 0 | 2026-10-17 |  |
 | `STATUS-balloon-pre-stretching.md` | 30 | STATUS REPORT: balloon-pre-stretching | status | 0 | 2026-08-08 | obsolete |
 | `STATUS-balloon-range-tests.md` | 160 | STATUS: balloon-range-tests | status | 0 | 2026-08-05 |  |
 | `STATUS-balloon-speed-tests.md` | 109 | Balloon Speed Tests — Status | status | 0 | 2026-08-05 |  |
