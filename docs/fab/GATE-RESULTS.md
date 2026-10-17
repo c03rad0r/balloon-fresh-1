@@ -74,10 +74,19 @@ VERDICT: NOT ORDERABLE
 **Zero real electrical DRC errors.** Every error-class item is the documented edge interface. All 137
 warnings are silkscreen or library metadata.
 
-**`U1.41` — the exposed QFN pad with no net — is confirmed on the board.** It appears **12 times** in the
+~~**`U1.41` — the exposed QFN pad with no net — is confirmed on the board.** It appears **12 times** in the
 stitcher's unresolved-pad list (`U1.41` ×12). This is an open defect from
 `SX1280_QFN24.kicad_mod`, whose pads are numbered 1..24 plus a bare `25`; the symbol's exposed pad is
-`41`. The pad-number mismatch means the RF ground pad is **not connected to GND**.
+`41`. The pad-number mismatch means the RF ground pad is **not connected to GND**.~~
+
+> **⚠️ THIS PARAGRAPH WAS WRONG ON EVERY CLAUSE — corrected 2026-10-17, kept struck through so the error
+> stays visible.** Measured: (a) `U1` is the **ESP32-S3-WROOM-1U**, not the SX1280 — the SX1280 is `U4`;
+> (b) all thirteen pads numbered `41` are **on `GND`** — a thermal-via array, the stock KiCad idiom for
+> several physical pads on one net, which the official `RF_Module:ESP32-S3-WROOM-1U` footprint ships
+> itself; (c) `SX1280_QFN24.kicad_mod` belongs to `U4` and is irrelevant here; (d) it is **13**, not 12 —
+> the stitcher truncates its list at 20 and the `12` was a miscount of a truncated print.
+> **Evidence:** `U1-FOOTPRINT-DIAGNOSIS.md`, and DRC's own unconnected list, which does not involve `U1`.
+> See the CORRECTIONS section below for the full table.
 
 **Preflight fixed this session.** Gate 3 initially reported *"ROUTE FAILED"* — which was **not** a
 routing failure. `fab_grade.sh` searched `$HOME/tools` and `$HOME/repos`, neither of which exists here
@@ -104,7 +113,10 @@ have rewritten. A permanent red would train the reader to ignore it; deletion wo
 
 ## WHAT IS NOT ORDERABLE, AND WHY
 
-1. **The `U1.41` exposed RF pad has no net** — an electrical defect in the radio's ground return.
+1. ~~**The `U1.41` exposed RF pad has no net** — an electrical defect in the radio's ground return.~~
+   **DISPROVEN 2026-10-17.** The thirteen `41` pads are a **thermal-via array all on `GND`** and the nine
+   unnamed pads are **`F.Paste`-only stencil apertures with no copper**. This is **not** a reason the board
+   is unorderable. See the CORRECTIONS section.
 2. **20 schematic ERC errors** — including 12 floating cut-driver pins and the radio's two power pins.
 3. **16 edge-clearance items need a fabricator's written acceptance** — they are intentional, but the
    disposition is JLCPCB's to give, not ours to assume. See `JLC-QUERY-DRAFT-MESSAGE.md`.

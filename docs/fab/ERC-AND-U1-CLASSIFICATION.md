@@ -70,7 +70,10 @@ decision, and the closing analysis adds a constraint (no spare ADC) that whoever
 
 **There are arguably two, and neither is the one the record named:**
 
-1. **nine unnamed pads on `U1` with no net** — real floating copper
+1. ~~**nine unnamed pads on `U1` with no net** — real floating copper~~ **CORRECTED 2026-10-17:** they are
+   `F.Paste`-only stencil apertures — **no copper layer at all**, so they cannot be "floating copper" and
+   have nothing to connect. They are the standard idiom for controlling paste coverage over a large
+   thermal pad. See `U1-FOOTPRINT-DIAGNOSIS.md`.
 2. **thirteen pads sharing number `41`** — duplicated numbering on distinct copper
 
 Plus one genuine but small artefact: the 2-mil dangling wire.
