@@ -77,7 +77,19 @@ _font_cache: dict = {}
 
 def _font(size: float, bold: bool):
     """A font rendered at 4x the requested size, for quarter-pixel-accurate ink bboxes."""
-    from PIL import ImageFont
+    try:
+        from PIL import ImageFont
+    except ImportError:
+        # FAIL LOUDLY AND SPECIFICALLY. Before this guard the missing dependency surfaced as a bare
+        # ModuleNotFoundError traceback from inside a generator helper, which reads like a broken script
+        # rather than an undeclared dependency -- and it cost a red CI run to diagnose. The rule this
+        # repo keeps relearning: a gate that cannot run must say WHY, not just fail.
+        raise SystemExit(
+            "check_system_diagram_geometry: Pillow is not installed, so text ink bboxes cannot be "
+            "measured and every text-overlap check would be a guess.\n"
+            "  Install it:  pip install pillow\n"
+            "  CI declares it in .github/workflows/test.yml (Install Python dependencies)."
+        )
     key = (round(size, 3), bool(bold))
     if key not in _font_cache:
         path = FONT_BOLD if bold else FONT_REGULAR
