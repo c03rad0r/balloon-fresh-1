@@ -73,7 +73,7 @@ the v9 MCU is **`ESP32-S3-WROOM-1U-N8R8`**.
 > PSRAM and are not available for other uses."*
 
 So the part number decodes exactly as the repo's own `docs/V9-RADIO-SITE-MATRIX.md` line 70
-and `docs/SX1280-ARRAY-FEASIBILITY.md` line 75 already assume: **N8 = 8 MB flash, R8 = 8 MB
+and `docs/sx1280/SX1280-ARRAY-FEASIBILITY.md` line 75 already assume: **N8 = 8 MB flash, R8 = 8 MB
 PSRAM**, and the `-1U` suffix is the U.FL antenna variant.
 
 **Three consequences the analysis must state plainly:**

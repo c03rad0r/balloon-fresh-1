@@ -30,7 +30,7 @@ BOARDS = [
     ("wing v9", "tracker/hardware/wing_board/wing_board_v9.kicad_pcb",
      "wing solar array + cut driver + hub tab"),
     ("base station", "tracker/hardware/base_station/base_station_v1_placed_v2.kicad_pcb",
-     "ground station: 4G/5G via SIM7600E-H, FLRC link to the hub"),
+     "ground station: LTE Cat 4 via SIM7600E-H (no 5G), FLRC link to the hub"),
 ]
 
 
@@ -83,6 +83,46 @@ def measure(path):
     return out
 
 
+# Fraction of the SVG's longer side added as a margin on EVERY side of the frame. Two independent
+# visual reviews of this gallery found the same framing defect: the wing's "leftmost connector-tab edge
+# and the far-right board edge touch the image boundaries", and the top edge "extremely close to the top
+# boundary". Measured, the board was NOT clipped -- it was framed with a horizontal margin of only
+# 0.10 mm (board 184.00 mm wide inside a 184.0992 mm viewBox), so it visually touched the edge. The fix
+# is to widen the frame around the board, which is a viewport change, not a change to the board or a
+# hand-edit of the render.
+MARGIN_FRACTION = 0.06
+
+
+def _widen_frame(svg):
+    """Expand the SVG's viewBox (and width/height) by MARGIN_FRACTION on all four sides.
+
+    `--page-size-mode 2` ("board area only") sizes the page to the board's bounding box, so a long thin
+    board gets an almost-zero margin on its long axis: the wing is 184.00 mm wide inside a 184.0992 mm
+    viewBox (0.10 mm margin) while KiCad pads 12.13 mm VERTICALLY. `--fit-page-to-board` does not change
+    this -- measured, it produces a byte-identical viewBox for all three boards -- so the margin is added
+    here, at the frame, by widening the viewBox around the board. This does NOT re-enable the drawing
+    sheet: `--exclude-drawing-sheet` still holds and no page furniture is reintroduced.
+    """
+    try:
+        text = open(svg, encoding="utf-8", errors="replace").read()
+    except OSError:
+        return
+    m = re.search(r'viewBox="([-\d.eE]+)\s+([-\d.eE]+)\s+([-\d.eE]+)\s+([-\d.eE]+)"', text)
+    if not m:
+        return
+    x0, y0, w, h = (float(v) for v in m.groups())
+    if w <= 0 or h <= 0:
+        return
+    mx = my = MARGIN_FRACTION * max(w, h)
+    text = (text[:m.start()]
+            + f'viewBox="{x0 - mx:.4f} {y0 - my:.4f} {w + 2 * mx:.4f} {h + 2 * my:.4f}"'
+            + text[m.end():])
+    text = re.sub(r'width="[\d.eE]+mm"\s+height="[\d.eE]+mm"',
+                  f'width="{w + 2 * mx:.4f}mm" height="{h + 2 * my:.4f}mm"', text, count=1)
+    with open(svg, "w", encoding="utf-8") as fh:
+        fh.write(text)
+
+
 def render(path, png, layers="F.Cu,Edge.Cuts"):
     """Render a board to PNG.
 
@@ -92,12 +132,9 @@ def render(path, png, layers="F.Cu,Edge.Cuts"):
     traces, and a title-block label sat on top of a trace. A board render that mixes in page furniture
     cannot be read as board geometry, and that is the only thing it is for.
 
-    --fit-page-to-board is ALSO required. `--page-size-mode 2` ("board area only") does not size the
-    page to the BOARD's shape on a very elongated board: the wing is 184 x 25 mm (aspect 7.36) but the
-    render came out 1600 x 323 px (aspect 4.95), so the long edges overflowed the canvas and were cut
-    off at the image boundary. A second visual review found that clipping ("the leftmost
-    connector-tab edge and the far-right board edge touch the image boundaries"). Fit the page to the
-    board and the whole outline is inside the frame.
+    The FRAME is then widened by _widen_frame() so the board outline sits inside the image with a clear
+    margin on all four sides. `--page-size-mode 2` alone leaves an elongated board touching the image
+    boundary (see MARGIN_FRACTION).
     """
     svg = png.replace(".png", ".svg")
     r = subprocess.run(["kicad-cli", "pcb", "export", "svg", path, "-o", svg,
@@ -106,11 +143,14 @@ def render(path, png, layers="F.Cu,Edge.Cuts"):
                        capture_output=True, text=True)
     if not os.path.exists(svg):
         return False, (r.stderr or r.stdout or "")[-200:]
+    # Widen the frame around the board so the outline has a clear margin on all four sides. Done before
+    # the viewBox is read, because the raster step sizes the canvas from that viewBox.
+    _widen_frame(svg)
 
-    # Read the SVG's OWN viewBox and rasterise at that aspect. Do NOT pass `-w 1600`: rsvg-convert
-    # honours the width and derives the height from the SVG, which for an elongated board yields a very
-    # short canvas -- the wing came out 1600x323 (aspect 4.95) against a board aspect of 7.36, so its
-    # long edges were clipped at the image boundary. Sizing by the viewBox keeps the whole outline.
+    # Read the SVG's OWN viewBox and rasterise at that aspect: size the LONG side to 1600 px and let
+    # rsvg-convert derive the other from the viewBox, so the canvas aspect matches the frame exactly and
+    # nothing is cropped. The frame was already widened above, so the board sits inside the canvas with
+    # a clear margin on every side.
     vb = None
     try:
         head = open(svg, encoding="utf-8", errors="replace").read(4000)
@@ -203,7 +243,9 @@ def main():
               "  establish that the intended nets are connected\"*. Read the `nets routed` column, not the",
               "  amount of red.",
               "- Renders are `F.Cu` + `Edge.Cuts`, exported with `--exclude-drawing-sheet` so KiCad's page",
-              "  frame and title block do not overlay the board. Inner and back layers are not shown here;",
+              "  frame and title block do not overlay the board, and with the frame widened around the",
+              "  board so the outline sits inside the image with a clear margin on all four sides. Inner and",
+              "  back layers are not shown here;",
               "  see `docs/fab/reviews/` for per-layer plots and their review.",
               "- **A render shows geometry, not correctness.** Clearance, impedance and netlist correctness",
               "  are measured by the gates in `docs/fab/GATE-RESULTS.md`. A visual review of these three",

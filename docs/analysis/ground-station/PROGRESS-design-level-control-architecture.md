@@ -14,7 +14,7 @@ Base: `github/main` @ `09e1b69`. Worktree `/home/c03rad0r/worktrees/bf-levelctrl
 - [x] **M3 — figures.** `receive-agc-chain.*` and `dynamic-range-budget.*` under
       `docs/analysis/assets/level-control/`.
 - [x] **M4 — design doc.** `docs/analysis/ground-station-level-control-design.md`.
-- [x] **M5 — checklist.** `docs/BASE-STATION-BOARD-CHECKLIST.md` (OWNED / TO-BUY / TODO(unverified)
+- [x] **M5 — checklist.** `docs/base-station/BASE-STATION-BOARD-CHECKLIST.md` (OWNED / TO-BUY / TODO(unverified)
       statuses; TO-BUY + OWNED subtotals; spec-dispute verify notes).
 - [x] **M6 — ADR-084.** `docs/adr/084-ground-station-automatic-level-control.md`; INDEX regenerated
       (`scripts/gen_adr_index.py`); `tests/test_adr_numbering.py` green. Number 084 verified free

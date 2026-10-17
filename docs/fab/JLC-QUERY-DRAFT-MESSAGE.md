@@ -70,6 +70,37 @@ ruin the contact.
 2.6 For the solder mask and surface finish at the edge: please recommend what to specify so the pads
 stay solderable after assembly.
 
+### 2A. Copper on the INTERNAL FACES of a routed slot -- separate from 2.1/2.2
+
+Questions 2.1-2.6 concern copper that terminates at the **board edge**. This is a different geometry and
+we need it answered separately.
+
+Per **ADR-048**, the hub carries a **routed slot 0.9 mm wide x 6.0 mm deep** in each of four board edges,
+and the wing tab (0.6 mm) slides into it. The four electrical lands are intended to sit on the slot's
+**opposing internal faces** -- i.e. the *walls of the cut*, not the board's outer edge.
+
+2A.1 **How would copper be present on the internal faces of a routed slot at all?** Ordinary F.Cu/B.Cu is
+     on the board's outer surfaces. A routed cut exposes the *substrate* on its walls, not copper. Please
+     describe what process (if any) produces conductive surfaces on those internal faces, or state that it
+     is not achievable by routing alone.
+
+2A.2 If it **is** achievable, what must we specify on the fabrication drawing, and what is the resulting
+     surface (bare copper? plated? which finish, and does it differ from the outer-surface finish)?
+
+2A.3 If it is **not** achievable, what is the alternative you would recommend for a 0.6 mm tab that must
+     make four connections inside a 0.9 x 6.0 mm slot -- and what would it cost to add?
+
+2A.4 What is the **positional tolerance** of the slot's internal faces relative to the intended land
+     positions, and the tolerance of the slot **width** (nominal 0.9 mm)?
+
+2A.5 The slot is a **routed internal cut-out**, not an edge rout. Does that change the minimum slot width,
+     the achievable depth-to-width ratio, or the tooling?
+
+**We are not asking you to approve a design.** The slot-face land construction is currently recorded as
+**UNVERIFIED** in our own drawing (`docs/fab/jlc-query/edge-launch-cross-section.svg`, row "Slot-face land
+construction"). These questions exist to replace that assumption with your answer, or to learn that the
+geometry needs revising -- which would be an ADR-046/048 change on our side.
+
 ### 3. Thin-board handling
 
 3.1 For a **0.6 mm** board, is there anything you need from us on panelisation or handling, and any
@@ -84,9 +115,14 @@ outline, drill), a **cross-section drawing of the edge-launch connection** showi
 edge, the mating tab and the tolerances, and a note listing the four connector locations as
 **intentional edge features**.
 
-**What we are asking for in return:** written confirmation on 2.1 and 2.2 (that the edge-located copper
-is buildable as specified, and whether it is plain exposed copper or something else), and the stackup
-numbers from 1.1.
+**What we are asking for in return:** written answers to **2.1 and 2.2** (the edge-located copper: is it
+buildable as specified, and is it plain exposed copper or something else) and to **2A.1 and 2A.3** (how, if
+at all, copper exists on the internal faces of a routed slot - and if it does not, what you would recommend
+instead and what that would cost), plus the stackup numbers from 1.1.
+
+**2.1/2.2 and 2A are the blocking questions.** If the edge interface cannot be built as drawn, or a routed
+slot cannot carry the lands on its internal faces, the wing-tab design needs revising and that is an
+ADR-046/048 change on our side. **1.x is deferrable** to a follow-up revision.
 
 Thank you.
 

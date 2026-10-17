@@ -105,7 +105,7 @@ With both measured:
 | **balloon (measured)** | **46.84 g** |
 | **TOTAL floating mass** | **77.62 g** |
 
-**`docs/PAYLOAD-WEIGHT-ESTIMATES.md` targets "under 9 g" / "under 14 g". The measured total is
+**`docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` targets "under 9 g" / "under 14 g". The measured total is
 77.6 g — 5.5× the 14 g target.**
 
 **GAP 1 is now CLOSED as a measurement, not a reconciliation:** the `<14 g` target is **not

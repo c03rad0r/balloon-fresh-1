@@ -234,4 +234,4 @@ git log --all --oneline -- firmware/e80-stm32-bench/tools/test_e80_range_split.p
 - Gate 2.5 cross-family review (kimi-k3 / moonshot) of the original chain:
   `~/reports/reviews/e80-bench-t_aabd1170-kimi.md`, board card `t_ce8c6b36`.
 - Operator guide: `firmware/e80-stm32-bench/docs/RANGE-TEST-GUIDE.md`.
-- Design: `docs/DESIGN-distributed-range-test.md`, `docs/ADR-range-sync-cvm.md`.
+- Design: `docs/design/DESIGN-distributed-range-test.md`, `docs/ADR-range-sync-cvm.md`.

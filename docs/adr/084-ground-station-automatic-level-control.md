@@ -17,7 +17,7 @@
   `docs/analysis/level_control_model.py` (every numeric table) +
   `docs/analysis/render_level_control_figures.py` (figures in `docs/analysis/assets/level-control/`).
   Extends `docs/analysis/rf-shopping-list-and-duplex-architecture.md` (source branch
-  `design/rf-shopping-list` @ `eea1cbc00702`) and `docs/BASE-STATION-BOARD-CHECKLIST.md`.
+  `design/rf-shopping-list` @ `eea1cbc00702`) and `docs/base-station/BASE-STATION-BOARD-CHECKLIST.md`.
   Reproduce: `python3 docs/analysis/level_control_model.py`.
 - **Independent review:** the two figures + the plan were submitted to `scripts/fleet/visual_consult.py`
   (`--timeout 540 --json`), **served model `gpt-6-astra`** (read back from the response). The model's own
@@ -108,7 +108,7 @@ anti-windup, (c) a **downlink-failure watchdog** that drops to the D1 fixed gain
 (d) the **TX LUT state independent of the RX-loop state** even if one MCU serves both.
 
 **D7 — The level-control parts are added to the base-station board checklist**
-(`docs/BASE-STATION-BOARD-CHECKLIST.md`) as row items; the checklist **extends** the sibling shopping
+(`docs/base-station/BASE-STATION-BOARD-CHECKLIST.md`) as row items; the checklist **extends** the sibling shopping
 list rather than duplicating it. No PA is added to the ISM uplink (ADR-072 INV-4).
 
 ## Invariants

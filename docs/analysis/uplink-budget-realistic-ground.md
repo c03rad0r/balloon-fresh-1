@@ -113,7 +113,7 @@ Kl. A 75 W PEP / Kl. E 5 W PEP on 2400–2450 MHz) and §2.5 (the 14.26 dBm ISM 
 
 **Balloon receive antenna: `G_balloon = 0 dBi`** — no attitude control; the repo's conservative
 assumption (ADR-066, ADR-081). **Feed loss `L_feed` is stated per table** (0 dB in §3; the realistic
-Airborne-10 **1.92 dB / 10 m** from `docs/BASE-STATION-BOARD-CHECKLIST.md` row 12, i.e. **2.88 dB for
+Airborne-10 **1.92 dB / 10 m** from `docs/base-station/BASE-STATION-BOARD-CHECKLIST.md` row 12, i.e. **2.88 dB for
 15 m**, in §4).
 
 ---
@@ -169,7 +169,7 @@ margin   = −135.51 − (−99.5) = −36.01 dB        → DOES NOT CLOSE
 ## 4. With a realistic ground feeder — 15 m Airborne-10, 2.88 dB
 
 Airborne 10 (LMR-400 class) attenuates **1.92 dB / 10 m at 2.4 GHz**
-(`docs/BASE-STATION-BOARD-CHECKLIST.md` row 12) → **2.88 dB** for the 15 m run in that row. This is
+(`docs/base-station/BASE-STATION-BOARD-CHECKLIST.md` row 12) → **2.88 dB** for the 15 m run in that row. This is
 the *conservative* case (feed loss in the ground TX chain); a **masthead PA** would remove it (§6).
 
 | Transmit power | 6 dBi omni | 12 dBi Yagi | 20 dBi Yagi | 24 dBi dish |
@@ -257,6 +257,6 @@ python3 -c "P,G,L=36.99,20,0; print(P+G-L-149.77+99.5)"                         
   (`LORA_2G4_1000_SF12 = −129.5 dBm`), front page (`LoRa sub-GHz −141.5 dBm @ 125 kHz`).
 - **Power / legal:** `docs/analysis/433-lna-substitution-and-amateur-licence.md` §2.1, §2.5;
   `docs/adr/039-licence-exempt-433-design-point.md`; `docs/adr/041-rf-frontend-licence-exempt.md`.
-- **Feed / antennas:** `docs/BASE-STATION-BOARD-CHECKLIST.md` rows 9, 12; ADR-078.
+- **Feed / antennas:** `docs/base-station/BASE-STATION-BOARD-CHECKLIST.md` rows 9, 12; ADR-078.
 - **The error this corrects:** `docs/2G4-LINK-BUDGET-ANALYSIS.md` lines 76, 89;
   `docs/analysis/GAP-TRACKING-CHECKLIST.md` row RF-02.

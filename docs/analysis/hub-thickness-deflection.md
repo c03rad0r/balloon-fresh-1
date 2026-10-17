@@ -80,7 +80,7 @@ mechanics question, and is **not** answered here).
 | Plate | **103.0 × 103.0 mm** | ADR-055 D5 (`√106.1 cm² ≈ 103 mm`); ADR-051 §2.3 |
 | Plate area | **106.09 cm² (1.0609 × 10⁻² m²)** | derived from the above |
 | Plate thickness | **0.6 mm (current) / 0.4 mm (target)** | ADR-055 D4; `docs/hardware-design.md` line 14 ("oder 0.4mm fuer Gewichtsoptimierung") |
-| FR4 density | **1.85 g/cm³** | `wing-mass-shape.md` §1.1 (CITED to `docs/PAYLOAD-WEIGHT-ESTIMATES.md` line 20) |
+| FR4 density | **1.85 g/cm³** | `wing-mass-shape.md` §1.1 (CITED to `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` line 20) |
 | Finished-board uplift | **×1.15** | `wing-mass-shape.md` §1.1 (same source: "adds ~15 % for copper, soldermask, silkscreen") |
 | Areal mass, 0.6 mm | **127.65 mg/cm²** | ADR-055 §1.5; `wing-mass-shape.md` §2.1 |
 | Areal mass, 0.4 mm | **85.10 mg/cm²** | ADR-055 §1.5; `wing-mass-shape.md` §2.1 |

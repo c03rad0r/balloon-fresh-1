@@ -18,7 +18,7 @@
 | Balloon type decision | **Decided** | Yokohama 32" Crystal Clear for long-duration, DecoGlee 18" for shakedown |
 | Sealing method | **Decided** | Heat seal + Kapton tape (proven by all successful community flights) |
 | Free lift target | **Decided** | 5–7 g (Ruthroff + KI4MCW data) |
-| Pre-stretching protocol | **Written (this commit)** | `docs/PRE-STRETCHING-PROTOCOL.md` — DecoGlee and Yokohama procedures |
+| Pre-stretching protocol | **Written (this commit)** | `docs/prestretch/PRE-STRETCHING-PROTOCOL.md` — DecoGlee and Yokohama procedures |
 | 30x DecoGlee 18" balloons | **Owned** | In inventory |
 | Pressure sensor + pump | **Owned** | In inventory |
 

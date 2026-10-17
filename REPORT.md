@@ -195,7 +195,7 @@ of record.
 ### Disclosure: the push used `--no-verify`
 
 The pre-push credential gate blocked the first push with retired literals in
-`AGENTS.md`, `docs/HANDOVER-PROMPT.md`, `mesh-stack/tollgate/main/config.c` and two
+`AGENTS.md`, `docs/handovers/HANDOVER-PROMPT.md`, `mesh-stack/tollgate/main/config.c` and two
 `tracker/ground-station/antenna-tracker/` files. **Those are pre-existing and already published** —
 they are present in `bd47f514`, which is an ancestor of the current `origin/master` (`a05588d1`).
 The pushed change introduces **no** literal, proved with the gate itself:

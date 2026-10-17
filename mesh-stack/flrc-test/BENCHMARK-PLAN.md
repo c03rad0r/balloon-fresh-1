@@ -190,7 +190,7 @@ Test at each distance: FLRC 1300k @ 2.4G, FLRC 650k @ 868M, FLRC 325k @ 868M, Lo
 - [ ] 7.4 Plot throughput vs packet size curve
 - [ ] 7.5 Plot RSSI vs distance (validate FSPL model)
 - [ ] 7.6 Analyze burst loss distribution for Wirehair tuning
-- [ ] 7.7 Update `docs/link-budget.md` with measured data
+- [ ] 7.7 Update `docs/link/link-budget.md` with measured data
 - [ ] 7.8 Update `docs/adr/010-adaptive-tx-power.md` with real throughput
 - [ ] 7.9 Update `mesh-stack/ROADMAP.md` — mark FLRC characterization complete
 - [ ] 7.10 Update `AGENTS.md` with benchmark status

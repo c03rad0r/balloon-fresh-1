@@ -3,7 +3,7 @@
 > Audience: you are joining tomorrow morning's field measurement and have never seen this
 > project. This page is self-contained. Read it once tonight, keep it open tomorrow.
 > Companion docs (shorter/longer): `docs/FRIDAY-DEMO-CHEATSHEET.md` (operator quick
-> reference), `docs/RANGE-TEST-FUNCHAL.md` (full viewpoint survey).
+> reference), `docs/range/RANGE-TEST-FUNCHAL.md` (full viewpoint survey).
 
 ## 1. What this is and why tomorrow matters
 
@@ -232,8 +232,8 @@ worse than 868 — expect 2.4 G to fall off first as distance grows.
 - GitHub repo: https://github.com/felixfelix-bot/balloon-fresh
 - Operator cheat sheet: `docs/FRIDAY-DEMO-CHEATSHEET.md` →
   https://github.com/felixfelix-bot/balloon-fresh/blob/main/docs/FRIDAY-DEMO-CHEATSHEET.md
-- Viewpoint survey: `docs/RANGE-TEST-FUNCHAL.md` →
-  https://github.com/felixfelix-bot/balloon-fresh/blob/main/docs/RANGE-TEST-FUNCHAL.md
+- Viewpoint survey: `docs/range/RANGE-TEST-FUNCHAL.md` →
+  https://github.com/felixfelix-bot/balloon-fresh/blob/main/docs/range/RANGE-TEST-FUNCHAL.md
 - Session metadata: `data/e80-bench/20260829-funchal/session-meta.json` →
   https://github.com/felixfelix-bot/balloon-fresh/blob/main/data/e80-bench/20260829-funchal/session-meta.json
 - This handover (after push):

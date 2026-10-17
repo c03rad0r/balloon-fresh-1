@@ -10,7 +10,7 @@
 - **Related (stable references):** ADR-071 (design basis), ADR-073 (FLRC-max), ADR-074 (the two
   flight boards), ADR-078 (the antenna class the F33 removes), ADR-081 (the tier ladder), ADR-047
   (V9 power provisioning — the F33's 6.15 W TX rail), ADR-039 / ADR-041 (licence-exempt point),
-  `docs/PAYLOAD-WEIGHT-ESTIMATES.md`.
+  `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md`.
 - **Evidence:** `docs/analysis/ground-station-gain-per-dollar.md` (§Decision 6 + the cost metric,
   source branch `design/gain-per-dollar`, whose file `docs/adr/068-ground-station-gain-per-dollar.md`
   is **superseded by this record** / ADR-078 / ADR-081); the F33 trade table in
@@ -94,7 +94,7 @@ buying any ground dB.
 **D2 — The F33's balloon-side cost is recorded honestly, and its flight is GATED.** +2.8 g module
 mass (4.0 g F33 vs 1.2 g bare LR2021) and +3.1 W TX DC (5.50 W @ 5.0 V; 6.15 W @ 5.5 V, already
 provisioned by ADR-047). **This record explicitly contradicts
-`docs/PAYLOAD-WEIGHT-ESTIMATES.md` §D**, which classes the V2 F33 board as *"Heavy-Lift Reference
+`docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` §D**, which classes the V2 F33 board as *"Heavy-Lift Reference
 … Ground Station Only … not a pico balloon target"*. That label is a **whole-board** statement
 (~20.6 g with solar); the radio decision here is a **module swap** (+2.8 g). The contradiction is
 **named, not silently resolved**: the operator must confirm the +2.8 g module is acceptable on the
@@ -145,7 +145,7 @@ that no vendor sells and no sourced rotator holds — not as expensive.
 
 - **`TODO(unverified)`** the **live F33 module price** (in-repo ≈ USD 8, LCSC `C5913567`, "check").
 - **`TODO(unverified)`** the DE amateur-licence and airborne-SRD position (ADR-039 item (a)).
-- **Flagged defect:** `docs/PAYLOAD-WEIGHT-ESTIMATES.md` §D "Ground Station Only" vs this record's
+- **Flagged defect:** `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` §D "Ground Station Only" vs this record's
   module-swap reading (D2).
 - **Flagged:** the solar array is recorded both as **2.4 W** (ADR-044 / ADR-006) and **7.2 W peak**
   (`docs/v9-BOM.md`, ADR-049/051); ADR-047 provisions against the 2.4 W figure.

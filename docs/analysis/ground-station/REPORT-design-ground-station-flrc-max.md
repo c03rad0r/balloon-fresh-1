@@ -36,7 +36,7 @@ ADR update + a consultant verdict.
 3. **But the binding gate is not mass — it is the licence.** The whole +13…+33 dBm class
    exceeds the licence-exempt **+12.15 dBm EIRP** cap (ADR-039/041). The F33 makes the 433
    downlink amateur-band by design. Also flagged: the repo's own
-   `docs/PAYLOAD-WEIGHT-ESTIMATES.md` §D classes the F33 board *"ground station only"*
+   `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` §D classes the F33 board *"ground station only"*
    (~20.6 g whole board) — the radio change here is a **module swap (+2.8 g)**, and the
    contradiction is named, not silently resolved.
 4. **Mesh:** λ/10 = **69.2 mm** at 433 MHz, so commodity 6–25 mm welded mesh is electrically

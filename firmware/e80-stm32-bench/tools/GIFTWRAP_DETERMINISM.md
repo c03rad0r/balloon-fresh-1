@@ -20,9 +20,9 @@ their worktree from `origin/pr/giftwrap-deterministic` (or a descendant), not fr
 
 Existing adversarial recon of the construction paths already lives on `origin/main` — read
 it instead of re-deriving it:
-`docs/RECON-duplicate-giftwrap-paths.md` (lane A),
-`docs/RECON-lane-B-plaintext-fallback-paths.md` (lane B),
-`docs/RECON-cfg-gated-wrap-paths.md` (lane C),
+`docs/recon/RECON-duplicate-giftwrap-paths.md` (lane A),
+`docs/recon/RECON-lane-B-plaintext-fallback-paths.md` (lane B),
+`docs/recon/RECON-cfg-gated-wrap-paths.md` (lane C),
 `docs/adr/033-giftwrap-single-construction-path.md` (ADR-033, the pinning decision).
 
 ---

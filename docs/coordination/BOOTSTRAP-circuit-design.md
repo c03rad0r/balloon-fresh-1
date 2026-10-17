@@ -36,9 +36,9 @@ Focus areas:
 - tracker/hardware/hub_board_diy/ — DIY v0.1 dev hub board (toner transfer)
 - tracker/hardware/wing_board/ — 4x antenna+solar wing boards
 - tracker/hardware/footprints/ — custom component footprint data (JSON)
-- docs/component-guide.md — all parts with explanations and alternatives
-- docs/power-budget.md — tracker + mesh relay power analysis
-- docs/plan-variants.md — DIY / Minimal / Mittel / Komfort / Mesh V1 / Mesh V2 variants
+- docs/hardware-reference/component-guide.md — all parts with explanations and alternatives
+- docs/power/power-budget.md — tracker + mesh relay power analysis
+- docs/plans/plan-variants.md — DIY / Minimal / Mittel / Komfort / Mesh V1 / Mesh V2 variants
 
 ## Radio Pin Assignments (from balloon-hermes, VALIDATED)
 

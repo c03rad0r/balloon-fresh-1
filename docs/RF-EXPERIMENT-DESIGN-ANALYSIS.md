@@ -119,7 +119,7 @@ smaller payloads work. This is exactly the user's intuition, and it's correct.
 
 ### 1.4 The AGC RSSI artifact (LR2021-specific)
 
-From `docs/analysis-flrc-rssi-cliff.md`: the LR2021 chip has an AGC settling
+From `docs/bench/analysis-flrc-rssi-cliff.md`: the LR2021 chip has an AGC settling
 artifact where short FLRC packets (<6 ms airtime) show **depressed RSSI readings**
 by 25-35 dB. This is a **reporting artifact**, not a sensitivity difference —
 the packets are still received correctly (10/10 at 218m with 64B, 0% PER).

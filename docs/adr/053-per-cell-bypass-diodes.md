@@ -62,7 +62,7 @@
   `tracker/hardware/schematics/flight_board/v9_flight.net` / `.kicad_sch`,
   `docs/analysis/pico-balloon-solar-survey.md` §7 item 5,
   `docs/analysis/wing-ladder.md` (the per-junction Schottky pricing),
-  `docs/PAYLOAD-WEIGHT-ESTIMATES.md` (the repo's own diode mass estimates).
+  `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` (the repo's own diode mass estimates).
 - Companion artefacts of this record (both new, both on this branch):
   `scripts/bypass_diode_check.py` (the mechanical gate) and
   `tests/test_bypass_diode_check.py` (the gate's tests, including deliberate-failure mutations).
@@ -570,7 +570,7 @@ fail is itself tested (§6, and ADR-051 §2.1.3 for the same doctrine).
   flight on `adr/cell-mounting-end-only`; the corpus rule (ADR-051/ADR-052 headers) is to check
   across **all branches**, where 053 is the next free. Recorded in the header so the collision cannot
   be mistaken for a defect. This record does not rename anything.
-- **Why the diode masses differ from the repo's own.** `docs/PAYLOAD-WEIGHT-ESTIMATES.md` line 36
+- **Why the diode masses differ from the repo's own.** `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` line 36
   gives 15 mg (SOD-123) and `docs/analysis/wing-ladder.md` line 252 gives ~20 mg (SOD-323) / 30 mg
   (SMA) — both explicitly **estimates**, not datasheet figures. This record uses **vendor datasheet**
   masses (B240 SMA = 64 mg) because the sizing hinges on the number and a guess would be worse than

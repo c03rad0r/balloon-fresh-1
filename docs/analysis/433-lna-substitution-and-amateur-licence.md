@@ -29,7 +29,7 @@
   ADR-072 (band-split duplex, BPF-before-LNA).
 - `design/rf-shopping-list` @ `eea1cbc00702` → `docs/analysis/rf-shopping-list-and-duplex-architecture.md`
   (the shopping list this document amends).
-- `design/level-control-architecture` @ `35683a5` → `docs/BASE-STATION-BOARD-CHECKLIST.md` (the checklist
+- `design/level-control-architecture` @ `35683a5` → `docs/base-station/BASE-STATION-BOARD-CHECKLIST.md` (the checklist
   this document amends) + ADR-084.
 - `design/rf-gaps-harmonics-diy` @ `3dbcdb8c0224` → ADR-083 + Part C's mast-head-vs-shack coax-loss finding.
 - `docs/analysis/radio-legal-power-limits.md` + `docs/adr/041-rf-frontend-licence-exempt.md` (the

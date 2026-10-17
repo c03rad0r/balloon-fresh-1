@@ -69,7 +69,7 @@ Legacy terms being mapped to the above:
 - `data/walk-comprehensive-analysis.png`, `data/walk-5km-results.png` (analysis plots)
 - `data/walk-analysis-20260724.md` (analysis notes)
 
-**What it is:** The flagship field dataset. TX in a rucksack (GPS + battery), RX on a balcony. Person walked 5.7 km. V4 firmware cycled through 14 modes (6 LoRa + 8 FLRC) across both bands. FLRC reached -55 dBm at 5.7 km with near-zero degradation. LoRa produced 0 packets (radio-config/phase-desync bug, not antenna -- documented in postmortem `docs/WALK-TEST-2026-07-24-POSTMORTEM.md`).
+**What it is:** The flagship field dataset. TX in a rucksack (GPS + battery), RX on a balcony. Person walked 5.7 km. V4 firmware cycled through 14 modes (6 LoRa + 8 FLRC) across both bands. FLRC reached -55 dBm at 5.7 km with near-zero degradation. LoRa produced 0 packets (radio-config/phase-desync bug, not antenna -- documented in postmortem `docs/walk-tests/WALK-TEST-2026-07-24-POSTMORTEM.md`).
 
 **Why it's useful:** This is the only real outdoor range data in existence. Phone GPS provides true distance ground truth (440 timestamped points). FLRC RSSI-vs-distance curve is the best available data for link-budget slope analysis. The LoRa failure is itself a documented data point (PER=100% across all SF, both bands, at all distances -- attributable to phase desync, not range).
 
