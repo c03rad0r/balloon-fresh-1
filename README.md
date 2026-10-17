@@ -6,7 +6,8 @@
 
 A flight hub carries a 2.4 GHz FLRC radio, GNSS and a solar harvester, and carries four solar wings. Two
 ground base stations reach each other **only through the balloon** — there is no ground-to-ground path.
-Each base station has 4G/5G backhaul.
+Each base station has cellular backhaul — LTE Cat 4 (SIM7600E-H), not 5G. See
+`docs/TELCO-BACKHAUL-DECISIONS.md` R3: "LTE Cat-4 now. Do NOT buy 5G."
 
 **This README has two parts.** The relay system (below) is the current programme. The E80-STM32 range
 test bench further down is the bench instrumentation used to characterise the radio link.
@@ -24,7 +25,7 @@ test bench further down is the bench instrumentation used to characterise the ra
 |---|---|---|---|---|
 | **hub v9** | 59 | **57 / 59** | 834 | flight hub: SX1280 FLRC, GNSS, solar harvester, 4 wing sockets |
 | **wing v9** | 15 | **4 / 6** | 20 | wing solar array + cut driver + hub tab |
-| **base station** | 44 | **0 / 44** | 0 | ground: SIM7600E-H 4G/5G, FLRC to the hub |
+| **base station** | 44 | **0 / 44** | 0 | ground: SIM7600E-H LTE Cat 4, FLRC to the hub |
 
 Read the `nets routed` column, **not** the amount of copper in a render — a copper pour is not routing.
 
