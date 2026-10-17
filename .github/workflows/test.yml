@@ -24,7 +24,7 @@ jobs:
           python-version: '3.13'
 
       - name: Install Python dependencies
-        run: pip install pytest pyserial
+        run: pip install pytest pyserial pillow
 
       - name: Run all tests
         run: python -m pytest tests/ -v --tb=short
