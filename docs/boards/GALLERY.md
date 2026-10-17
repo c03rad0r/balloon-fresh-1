@@ -37,7 +37,9 @@ table drifts; this one cannot.
   establish that the intended nets are connected"*. Read the `nets routed` column, not the
   amount of red.
 - Renders are `F.Cu` + `Edge.Cuts`, exported with `--exclude-drawing-sheet` so KiCad's page
-  frame and title block do not overlay the board. Inner and back layers are not shown here;
+  frame and title block do not overlay the board, and with the frame widened around the
+  board so the outline sits inside the image with a clear margin on all four sides. Inner and
+  back layers are not shown here;
   see `docs/fab/reviews/` for per-layer plots and their review.
 - **A render shows geometry, not correctness.** Clearance, impedance and netlist correctness
   are measured by the gates in `docs/fab/GATE-RESULTS.md`. A visual review of these three
