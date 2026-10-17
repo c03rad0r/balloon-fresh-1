@@ -138,7 +138,7 @@ def main():
                  ["SX1280 FLRC 2.4 GHz radio · GNSS · solar harvester",
                   "BQ25504 harvester + supercap · 4 wing sockets J_W1…J_W4",
                   "hub v9: 59 footprints · 57/59 nets routed · 834 tracks · 286 vias",
-                  "2 nets unrouted · 16 DRC errors (all the intentional J_W* edge lands)"],
+                  "2 nets unrouted · DRC: 16 edge-land + 4 unconnected (no other error class)"],
                  "#e8f1ff", "#2f6fb0"))
 
     # ---------------- wings (height 118 so the third line clears the border)
@@ -156,9 +156,13 @@ def main():
              '4× wing socket: tab into a 0.9×6.0 mm slot — GEOMETRY OPEN (ADR-046 §4.2.1)</text>')
 
     # ---------------- TWO ground stations, with the balloon as the relay between them
+    # "4G/5G" was WRONG and a visual review caught it: the fitted module is SIM7600E-H, which is LTE
+    # Cat 4 only, and docs/TELCO-BACKHAUL-DECISIONS.md R3 decides "LTE Cat-4 now. Do NOT buy 5G."
+    # The claim lived in README.md, GALLERY.md, make_board_gallery.py and here -- the diagram was the
+    # only place it was measured rather than copied.
     p.append(box(STATION_X, 150, STATION_W, 170,
                  "BASE STATION A — ground · 70×50 mm",
-                 ["SIM7600E-H 4G/5G backhaul",
+                 ["SIM7600E-H LTE Cat 4 backhaul (no 5G)",
                   "FLRC link up to the balloon",
                   "placed only: 44 footprints, 44 nets, 0 tracks",
                   "no editable schematic yet (B2–B9)"],
@@ -233,22 +237,28 @@ def main():
     p.append(f'<text x="{hop_x}" y="{NODE["cy"] + 110}" font-size="12" fill="#b00020">'
              f'from the node\'s bottom, onto B\'s top edge — no ground path</text>')
 
-    # the flight segment's own radio feed into the relay node: comes in horizontally and lands on the
-    # node's LEFT side. r3 measured this one 3.93 px SHORT of the ring; now it is derived by attach().
-    end_left, _ = attach(NODE, (1.0, 0.0))
-    p.append(f'<path d="M 770 {NODE["cy"]:.2f} L {pt(end_left)}" stroke="#b00020" '
-             f'stroke-width="3" fill="none" marker-end="url(#ar)"/>')
-    # Label ABOVE the arrow with measured clearance: at cy-2 the ink sat 0.25 px off the 3-wide
-    # stroke, i.e. touching -- a visual reviewer called it "cramped" and the checker then measured it.
-    p.append(f'<text x="{NODE["cx"] - NODE["r"] - 126:.2f}" y="{NODE["cy"] - 40:.2f}" '
-             f'font-size="12.5" fill="#b00020">on-board FLRC</text>')
-    p.append(f'<text x="{NODE["cx"] - NODE["r"] - 126:.2f}" y="{NODE["cy"] - 26:.2f}" '
-             f'font-size="12.5" fill="#b00020">2.4 GHz link</text>')
+    # The flight segment and the relay node are THE SAME PHYSICAL THING, so the connector between them
+    # is a REFERENCE ("this circle is that box"), not a radio link. Drawn as a red directional arrow it
+    # read as a third radio hop between two separate devices -- a review said so: "the extra
+    # hub-to-balloon radio arrow misleadingly depicts communication between two representations of the
+    # same hardware." It is now a grey dotted leader with no arrowhead, and says what it is.
+    end_left = (NODE["cx"] - NODE["r"] - 2.5, NODE["cy"])
+    p.append(f'<path d="M 770 {NODE["cy"]:.2f} L {pt(end_left)}" stroke="#666" stroke-width="1.6" '
+             f'stroke-dasharray="6,4" fill="none"/>')
+    p.append(f'<circle cx="{end_left[0]:.2f}" cy="{end_left[1]:.2f}" r="2.4" fill="#666"/>')
+    # NO second label on the leader. The BALLOON block already says "relay node — the flight segment:
+    # hub v9 + 4 wings", so a second caption was redundant, and placed anywhere in the 136-unit gap
+    # between the flight box and the node it measured 1.5 px from the A-link's vertical run. The
+    # leader is grey, dotted and arrowless, which is the whole point: same hardware, not a radio hop.
 
     # ---------------- status band, placed CLEAR of the ground boxes
+    # "0 real electrical errors" was a FALSE REASSURANCE and a visual review called it: the same box
+    # lists U1.41 with no net, and the DRC run reports 4 UNCONNECTED errors besides the 16 edge
+    # clearances. GATE-RESULTS.md's "zero real electrical DRC errors" refers only to the error-class
+    # clearance items, which is not what a reader takes from the sentence. Stated precisely now.
     p.append(box(70, 710, 700, 210,
                  "STATE — fit to show JLCPCB for review; NOT fit to order",
-                 ["16 DRC errors = ALL are the intentional J_W* edge lands · 0 real electrical errors",
+                 ["DRC 16 edge-land (+4 unconnected) · 20 ERC · both fully enumerated below",
                   "U1.41 (radio exposed ground pad) has NO NET — pad-number mismatch",
                   "ERC 20 errors incl. 12 floating U_CUT pins; parity PASSES (no board drift)",
                   "package regenerated 59/59 (was 39: the RF match/filter was missing)",

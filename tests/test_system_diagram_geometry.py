@@ -62,12 +62,17 @@ def _move_a_arrow_off_the_node(text: str) -> str:
 
 
 def _shorten_a_link(text: str) -> str:
-    """Move every arrow endpoint 14 units BACK along its last segment: all three links then miss."""
+    """Move every red arrow endpoint 14 units BACK along its last segment, so both links miss.
+
+    Counted from the SVG, not asserted: the drawing has TWO red link arrows (A->node, node->B). The
+    third connector is a grey reference leader between two drawings of the same hardware and carries
+    no arrowhead, so pulling it back would not create the gap this test is about.
+    """
     def repl(m):
         x, y = float(m.group(1)), float(m.group(2))
         return f'L {x:.2f} {y - 14:.2f}" stroke="#b00020" stroke-width="3"'
     out, n = re.subn(r'L ([\d.]+) ([\d.]+)" stroke="#b00020" stroke-width="3"', repl, text)
-    assert n == 3, f"expected 3 arrow endpoints, rewrote {n}"
+    assert n == 2, f"expected 2 red arrow endpoints, rewrote {n}"
     return out
 
 

@@ -222,12 +222,15 @@ def check(svg_path: str, want_png: bool = True) -> dict:
     W = float(root.get("width", "0"))
     H = float(root.get("height", "0"))
 
+    # The relay node is the LARGEST circle: small filled dots are allowed (a leader's terminator is
+    # one), but exactly one ring may be the node, or the geometry below is measuring the wrong shape.
     circles = [dict(cx=float(c.get("cx")), cy=float(c.get("cy")), r=float(c.get("r")),
                     sw=float(c.get("stroke-width", "1")))
                for c in root.iter(NS + "circle")]
-    if len(circles) != 1:
-        raise SystemExit(f"expected exactly 1 circle (the relay node), found {len(circles)}")
-    hub = circles[0]
+    rings = [c for c in circles if c["r"] >= 10]
+    if len(rings) != 1:
+        raise SystemExit(f"expected exactly 1 relay-node ring (r >= 10), found {len(rings)}: {rings}")
+    hub = rings[0]
     centre = (hub["cx"], hub["cy"])
     r_out = hub["r"] + hub["sw"] / 2.0
     r_in = hub["r"] - hub["sw"] / 2.0
@@ -254,10 +257,13 @@ def check(svg_path: str, want_png: bool = True) -> dict:
                           stroke=p.get("stroke", ""), has_marker=bool(me)))
 
     defect_list: list = []
+    # TWO red link arrows, not three. The third used to join the flight box to the node -- a REFERENCE
+    # between two drawings of the same hardware, which a review read as an extra radio hop. It is now
+    # a grey dotted leader and is deliberately NOT counted here.
     links = [p for p in paths if p["has_marker"] and p["stroke"] == LINK_COLOUR]
-    if len(links) != 3:
-        defect_list.append(dict(defect=f"expected 3 red link arrows (A->hub, flight->hub, hub->B), "
-                                       f"found {len(links)}"))
+    if len(links) != 2:
+        defect_list.append(dict(defect=f"expected 2 red link arrows (A->node, node->B), found "
+                                       f"{len(links)}"))
 
     # the two station boxes: in the right-hand column, the topmost and the bottommost
     right = [r for r in rects if r[0] > W * 0.6 and (r[2] - r[0]) > 200]

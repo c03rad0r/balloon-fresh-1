@@ -8,7 +8,7 @@
 <text x="420.0" y="178" font-size="13.5" fill="#111" text-anchor="middle">SX1280 FLRC 2.4 GHz radio · GNSS · solar harvester</text>
 <text x="420.0" y="198" font-size="13.5" fill="#111" text-anchor="middle">BQ25504 harvester + supercap · 4 wing sockets J_W1…J_W4</text>
 <text x="420.0" y="218" font-size="13.5" fill="#111" text-anchor="middle">hub v9: 59 footprints · 57/59 nets routed · 834 tracks · 286 vias</text>
-<text x="420.0" y="238" font-size="13.5" fill="#111" text-anchor="middle">2 nets unrouted · 16 DRC errors (all the intentional J_W* edge lands)</text>
+<text x="420.0" y="238" font-size="13.5" fill="#111" text-anchor="middle">2 nets unrouted · DRC: 16 edge-land + 4 unconnected (no other error class)</text>
 <rect x="88" y="520" width="156" height="118" rx="10" fill="#eef7ee" stroke="#3d7a45" stroke-width="2"/>
 <text x="166.0" y="552" font-size="17" font-weight="bold" fill="#111" text-anchor="middle">wing 1</text>
 <text x="166.0" y="578" font-size="13.5" fill="#111" text-anchor="middle">solar array</text>
@@ -36,7 +36,7 @@
 <text x="88" y="668" font-size="12.5" fill="#3d7a45">4× wing socket: tab into a 0.9×6.0 mm slot — GEOMETRY OPEN (ADR-046 §4.2.1)</text>
 <rect x="1120.0" y="150" width="430.0" height="170" rx="10" fill="#fff4e8" stroke="#b0742f" stroke-width="2"/>
 <text x="1335.0" y="182" font-size="17" font-weight="bold" fill="#111" text-anchor="middle">BASE STATION A — ground · 70×50 mm</text>
-<text x="1335.0" y="208" font-size="13.5" fill="#111" text-anchor="middle">SIM7600E-H 4G/5G backhaul</text>
+<text x="1335.0" y="208" font-size="13.5" fill="#111" text-anchor="middle">SIM7600E-H LTE Cat 4 backhaul (no 5G)</text>
 <text x="1335.0" y="228" font-size="13.5" fill="#111" text-anchor="middle">FLRC link up to the balloon</text>
 <text x="1335.0" y="248" font-size="13.5" fill="#111" text-anchor="middle">placed only: 44 footprints, 44 nets, 0 tracks</text>
 <text x="1335.0" y="268" font-size="13.5" fill="#111" text-anchor="middle">no editable schematic yet (B2–B9)</text>
@@ -56,12 +56,11 @@
 <text x="990.0" y="400.0" font-size="12" fill="#b00020">A leaves its left edge, lands on the node's top</text>
 <text x="990.0" y="422.0" font-size="13.5" font-weight="bold" fill="#b00020">hop 2 of 2: balloon → B</text>
 <text x="990.0" y="440.0" font-size="12" fill="#b00020">from the node's bottom, onto B's top edge — no ground path</text>
-<path d="M 770 330.00 L 907.50 330.00" stroke="#b00020" stroke-width="3" fill="none" marker-end="url(#ar)"/>
-<text x="780.00" y="290.00" font-size="12.5" fill="#b00020">on-board FLRC</text>
-<text x="780.00" y="304.00" font-size="12.5" fill="#b00020">2.4 GHz link</text>
+<path d="M 770 330.00 L 903.50 330.00" stroke="#666" stroke-width="1.6" stroke-dasharray="6,4" fill="none"/>
+<circle cx="903.50" cy="330.00" r="2.4" fill="#666"/>
 <rect x="70" y="710" width="700" height="210" rx="10" fill="#f6f6f6" stroke="#888" stroke-width="2"/>
 <text x="420.0" y="742" font-size="17" font-weight="bold" fill="#111" text-anchor="middle">STATE — fit to show JLCPCB for review; NOT fit to order</text>
-<text x="420.0" y="768" font-size="13.5" fill="#111" text-anchor="middle">16 DRC errors = ALL are the intentional J_W* edge lands · 0 real electrical errors</text>
+<text x="420.0" y="768" font-size="13.5" fill="#111" text-anchor="middle">DRC 16 edge-land (+4 unconnected) · 20 ERC · both fully enumerated below</text>
 <text x="420.0" y="788" font-size="13.5" fill="#111" text-anchor="middle">U1.41 (radio exposed ground pad) has NO NET — pad-number mismatch</text>
 <text x="420.0" y="808" font-size="13.5" fill="#111" text-anchor="middle">ERC 20 errors incl. 12 floating U_CUT pins; parity PASSES (no board drift)</text>
 <text x="420.0" y="828" font-size="13.5" fill="#111" text-anchor="middle">package regenerated 59/59 (was 39: the RF match/filter was missing)</text>

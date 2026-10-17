@@ -30,7 +30,7 @@ BOARDS = [
     ("wing v9", "tracker/hardware/wing_board/wing_board_v9.kicad_pcb",
      "wing solar array + cut driver + hub tab"),
     ("base station", "tracker/hardware/base_station/base_station_v1_placed_v2.kicad_pcb",
-     "ground station: 4G/5G via SIM7600E-H, FLRC link to the hub"),
+     "ground station: LTE Cat 4 via SIM7600E-H (no 5G), FLRC link to the hub"),
 ]
 
 
