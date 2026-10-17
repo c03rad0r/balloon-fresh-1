@@ -1,6 +1,29 @@
-# Wing v9: the ADR-065 routed board was REPLACED by an unrouted one, and the commit claimed the opposite
+# ~~Wing v9: the ADR-065 routed board was REPLACED by an unrouted one, and the commit claimed the opposite~~
 
-## The measurement
+> ## 🔴 THIS FINDING IS WRONG — CORRECTED IN PLACE 2026-10-17
+>
+> **The board is intact. My measurement was broken.** `pcbnew.LoadBoard()` on the committed board returns
+> **15 footprints, 28 tracks, 20 segments, 8 vias, per-layer `{F.Cu: 10, B.Cu: 10}`** — exactly what
+> ADR-065 requires and exactly what the test demands. **Nothing was deleted. The commit message was
+> accurate.**
+>
+> **What actually happened:** I counted with `grep -c -F '(segment '` — **with a trailing space**. KiCad
+> changed its writer format: `0ed25484e` wrote `(segment (start 3 12.5)` (matches); HEAD writes `(segment`
+> on its own line (**no trailing space → no match**). **A reformat is not a deletion, and a
+> format-dependent delimiter cannot tell the two apart.**
+>
+> **The real defect is the TEST**, which uses the same delimiter (`text.split('(segment ')`) and therefore
+> parses **zero** segments out of a fully routed board. **Master CI is red for a parsing reason, not an
+> engineering one.**
+>
+> **Full correction, including the compounding failure** (I built a new audit tool *because* I wanted this
+> gate, then trusted its output without validating the parser against a known-good board):
+> **`docs/fab/WING-ROUTING-REGRESSION-CORRECTION.md`**
+>
+> **The false claims below are kept visible on purpose — a correction that hides the original is worse than
+> no correction.** Read them as the record of a wrong measurement, not as findings.
+
+## ~~The measurement~~ (WRONG — see correction above)
 
 | revision | segments | vias | footprints | model blocks | sha256 |
 |---|---|---|---|---|---|
