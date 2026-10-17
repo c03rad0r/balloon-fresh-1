@@ -258,7 +258,9 @@ def main():
     # clearance items, which is not what a reader takes from the sentence. Stated precisely now.
     p.append(box(70, 710, 700, 210,
                  "STATE — fit to show JLCPCB for review; NOT fit to order",
-                 ["DRC 16 edge-land (+4 unconnected) · 20 ERC · both fully enumerated below",
+                 # NOT "fully enumerated below": this box summarises. A reviewer caught the claim,
+                 # which was mine and was false -- GATE-RESULTS.md enumerates, this caption does not.
+                 ["DRC 16 edge-land + 4 unconnected · ERC 20 · summary; full lists in GATE-RESULTS",
                   "U1.41 (radio exposed ground pad) has NO NET — pad-number mismatch",
                   "ERC 20 errors incl. 12 floating U_CUT pins; parity PASSES (no board drift)",
                   "package regenerated 59/59 (was 39: the RF match/filter was missing)",

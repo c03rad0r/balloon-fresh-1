@@ -60,7 +60,7 @@
 <circle cx="903.50" cy="330.00" r="2.4" fill="#666"/>
 <rect x="70" y="710" width="700" height="210" rx="10" fill="#f6f6f6" stroke="#888" stroke-width="2"/>
 <text x="420.0" y="742" font-size="17" font-weight="bold" fill="#111" text-anchor="middle">STATE — fit to show JLCPCB for review; NOT fit to order</text>
-<text x="420.0" y="768" font-size="13.5" fill="#111" text-anchor="middle">DRC 16 edge-land (+4 unconnected) · 20 ERC · both fully enumerated below</text>
+<text x="420.0" y="768" font-size="13.5" fill="#111" text-anchor="middle">DRC 16 edge-land + 4 unconnected · ERC 20 · summary; full lists in GATE-RESULTS</text>
 <text x="420.0" y="788" font-size="13.5" fill="#111" text-anchor="middle">U1.41 (radio exposed ground pad) has NO NET — pad-number mismatch</text>
 <text x="420.0" y="808" font-size="13.5" fill="#111" text-anchor="middle">ERC 20 errors incl. 12 floating U_CUT pins; parity PASSES (no board drift)</text>
 <text x="420.0" y="828" font-size="13.5" fill="#111" text-anchor="middle">package regenerated 59/59 (was 39: the RF match/filter was missing)</text>
