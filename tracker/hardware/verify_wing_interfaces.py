@@ -17,6 +17,11 @@ The claim under test: the four interfaces are NOT equivalent -- J_W1/J_W3 rotate
 J_W2/J_W4, leaving the left/right milled slots wholly inside the board while top/bottom cross their edges.
 
 Run: ~/venvs/kicad/bin/python verify_wing_interfaces.py [board]
+
+EXIT CODE (the detector, wired 2026-10-17): the EDGE-REACH assertion drives it --
+  0 = every one of the four wing slots reaches its own board edge (within TOL)
+  1 = at least one slot is wholly inside the board (not an edge slot)
+Use it as a gate: `verify_wing_interfaces.py || echo "wing interface defect"`.
 """
 import hashlib
 import math
@@ -88,9 +93,12 @@ def main():
 
     print("\n=== does each tab's SLOT reach its board edge? ===")
     TOL = 0.30
+    unreached = []
     for ref in TABS:
         d = info.get(ref)
         if not d or not d["slot"]:
+            print(f"  {ref}: no slot measured -- cannot reach any edge")
+            unreached.append(ref)
             continue
         sx0, sy0, sx1, sy1 = d["slot"]
         cand = []
@@ -108,6 +116,16 @@ def main():
         else:
             d_edge = min(sx0 - ox0, ox1 - sx1, sy0 - oy0, oy1 - sy1)
             print(f"  {ref}: ** WHOLLY INSIDE ** -- nearest slot edge is {d_edge:.2f} mm from the outline")
+            unreached.append(ref)
+
+    print(f"\n=== EDGE-REACH ASSERTION (tolerance {TOL:.2f} mm) ===")
+    if unreached:
+        print(f"  FAIL: {len(unreached)} of {len(TABS)} wing slots do NOT reach their own edge: "
+              f"{', '.join(unreached)}")
+        print("  A milled edge slot that is wholly inside the board is not an edge slot")
+        print("  (ADR-048 s2.2 'identical geometry'; WING-TO-HUB-SOCKET-SPEC s2.1 'milled edge slot').")
+    else:
+        print(f"  PASS: all {len(TABS)} wing slots reach their own edge within {TOL:.2f} mm")
 
     print("\n=== equivalence: pad set vs J_W4, at every 90-degree multiple ===")
     def norm(ref, extra=0.0):
@@ -142,7 +160,12 @@ def main():
 
     for ref in TABS:
         print(f"  {ref}: slot relative to origin = {slot_rel(ref)}")
-    return 0
+
+    # EXIT CODE: the edge-reach assertion drives it.  0 = every wing slot reaches
+    # its own board edge; 1 = at least one does not.  This is the gate that stops
+    # the four interfaces silently diverging again -- nothing electrical sees this
+    # class of defect.
+    return 1 if unreached else 0
 
 
 if __name__ == "__main__":
