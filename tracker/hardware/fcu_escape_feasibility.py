@@ -329,6 +329,83 @@ def pour_gap(board, pad, layer):
     return None, None, None
 
 
+def existing_net_copper(board, pad):
+    """Copper the pad's OWN net already has on the board.
+
+    Load-bearing: if a via already exists inside the pad, the pad is ALREADY
+    layer-transitioned, and "can F.Cu leave?" is no longer the deciding
+    question. Reporting a verdict without this would be the same class of
+    error as measuring B.Cu for an F.Cu pad.
+    """
+    net = pad.GetNetCode()
+    g = pad_geometry(pad)
+    cx, cy = g["centre"]
+    out = []
+    for t in board.GetTracks():
+        if t.GetNetCode() != net:
+            continue
+        if t.Type() == pcbnew.PCB_VIA_T:
+            p = t.GetPosition()
+            d = math.hypot(p.x / U - cx, p.y / U - cy)
+            out.append({
+                "kind": "via",
+                "pos": (p.x / U, p.y / U),
+                "dia": t.GetWidth(pcbnew.F_Cu) / U,
+                "drill": t.GetDrill() / U,
+                "spans": (board.GetLayerName(t.TopLayer()), board.GetLayerName(t.BottomLayer())),
+                "dist": d,
+                "in_pad": pad_item(pad, pcbnew.F_Cu).d_point(p.x / U, p.y / U) < t.GetWidth(pcbnew.F_Cu) / U / 2.0,
+            })
+        elif t.Type() == pcbnew.PCB_TRACE_T:
+            s, e = t.GetStart(), t.GetEnd()
+            out.append({
+                "kind": "trace",
+                "pos": (s.x / U, s.y / U),
+                "end": (e.x / U, e.y / U),
+                "layer": board.GetLayerName(t.GetLayer()),
+                "dist": math.hypot(s.x / U - cx, s.y / U - cy),
+            })
+    return out
+
+
+def via_continues(board, rules, pad, vpos, reach=1.0):
+    """True if the via at `vpos` has own-net copper continuing beyond itself on
+    any inner/back layer, i.e. the via is an escape rather than a stub."""
+    net = pad.GetNetCode()
+    for t in board.GetTracks():
+        if t.GetNetCode() != net:
+            continue
+        if t.Type() not in (pcbnew.PCB_TRACE_T, pcbnew.PCB_ARC_T):
+            continue
+        L = t.GetLayer()
+        if L not in (pcbnew.In1_Cu, pcbnew.In2_Cu, pcbnew.B_Cu):
+            continue
+        s, e = t.GetStart(), t.GetEnd()
+        it = Item([((s.x / U, s.y / U), (e.x / U, e.y / U))], t.GetWidth() / U / 2.0, net, "trace", "")
+        if it.d_point(vpos[0], vpos[1]) <= reach:
+            return True, board.GetLayerName(L)
+    return False, None
+
+
+def via_is_legal(board, rules, pad, vpos, vdia, drill):
+    """Re-check one specific existing via against every rule (no search)."""
+    net = pad.GetNetCode()
+    win = (vpos[0] - 2, vpos[1] - 2, vpos[0] + 2, vpos[1] + 2)
+    worst_cu, who = float("inf"), None
+    for L, lname in COPPER_LAYERS:
+        for it in collect(board, L, net, win):
+            v = it.d_point(vpos[0], vpos[1]) - vdia / 2.0
+            if v < worst_cu:
+                worst_cu, who = v, (lname, it.kind, it.label)
+    worst_h, hn = float("inf"), None
+    for hx, hy, hr, hlab in collect_holes(board, net):
+        v = math.hypot(hx - vpos[0], hy - vpos[1]) - drill / 2.0 - hr
+        if v < worst_h:
+            worst_h, hn = v, hlab
+    ok = worst_cu >= rules.clearance - EPS and worst_h >= rules.hole_to_hole - EPS
+    return ok, worst_cu, who, worst_h, hn
+
+
 def fcu_reachability(board, pad, rules, half=2.5, step=0.05):
     """DRC-legal flood fill on F.Cu from the pad's own copper.
 
@@ -494,7 +571,7 @@ def via_search(board, pad, rules, r_max=2.0, step_deg=3.0, step_r=0.05):
 # --------------------------------------------------------------------------
 # verdict + self-consistency
 # --------------------------------------------------------------------------
-def self_check(name, verdict, ring_rows, via_res, rules):
+def self_check(name, verdict, ring_rows, via_res, rules, _existing_seen=()):
     """Refuse to emit a verdict that contradicts the measured obstacle data.
 
     This is the gate that pad_reachability.py lacked: the verdict and the
@@ -509,6 +586,14 @@ def self_check(name, verdict, ring_rows, via_res, rules):
     if verdict["kind"] == "VIA":
         if not any(v["legal"] for v in via_res.values()):
             problems.append("verdict says via-escapable but no legal via candidate was found")
+    if verdict["kind"] == "STUB_VIA":
+        stubs = [e for e in _existing_seen if e["kind"] == "via" and e.get("legal", (False,))[0]
+                 and e["in_pad"] and not e.get("continues", (False,))[0]]
+        if not stubs:
+            problems.append("verdict says stub via but no legal in-pad via without continuation was found")
+    if verdict["kind"] == "ALREADY_VIA" and not any(
+            e["kind"] == "via" and e.get("legal", (False,))[0] for e in _existing_seen):
+        problems.append("verdict says an existing legal via exists but none was found legal")
     if verdict["kind"] == "BLOCKED":
         if verdict.get("fcu_escaped"):
             problems.append("verdict says blocked but the F.Cu flood fill escaped")
@@ -537,9 +622,51 @@ def measure(board, rules, ref, num):
     pg, pz, pclr = pour_gap(board, pad, pcbnew.F_Cu)
     reach = fcu_reachability(board, pad, rules)
     vias = via_search(board, pad, rules)
+    existing = existing_net_copper(board, pad)
+    for e in existing:
+        if e["kind"] == "via":
+            e["legal"] = via_is_legal(board, rules, pad, e["pos"], e["dia"], e["drill"])
+            # does the via actually GO anywhere? a via with no continuing copper
+            # is a stub, not an escape.
+            e["continues"] = via_continues(board, rules, pad, e["pos"])
 
-    # verdict
-    if reach["escaped"]:
+    # verdict.
+    # An existing LEGAL via-in-pad already transitions this pad to every inner
+    # layer + B.Cu. In that case "can F.Cu leave?" is not the question that
+    # decides the escape: the layer transition already exists on the board.
+    live_vias = [e for e in existing if e["kind"] == "via" and e.get("legal", (False,))[0]]
+    in_pad_via = [e for e in live_vias if e["in_pad"]]
+
+    if in_pad_via:
+        e = min(in_pad_via, key=lambda x: x["dist"])
+        ok, cu, cu_by, hh, hn = e["legal"]
+        cont, clay = e.get("continues", (False, None))
+        fcu_note = ("F.Cu also escapes" if reach["escaped"] else
+                    "F.Cu itself does not escape (flood fill stalls at %.2f mm)" % reach["reach"])
+        via_txt = ("an existing %.2f/%.2f mm through via at (%.3f, %.3f) sits inside this pad "
+                   "(%.4f mm from centre) and re-checks LEGAL (worst copper %.4f mm, "
+                   "hole-to-hole %.4f mm)"
+                   % (e["dia"], e["drill"], e["pos"][0], e["pos"][1], e["dist"], cu, hh))
+        if cont:
+            verdict = {
+                "kind": "ALREADY_VIA",
+                "fcu_escaped": reach["escaped"],
+                "text": "ESCAPABLE only via layer transition (F.Cu -> %s) -- transition already on the board" % clay,
+                "layer": clay,
+                "detail": via_txt + (". Copper continues on %s, so this via IS an escape. %s."
+                                    % (clay, fcu_note)),
+            }
+        else:
+            verdict = {
+                "kind": "STUB_VIA",
+                "fcu_escaped": reach["escaped"],
+                "text": "ESCAPABLE via layer transition (F.Cu -> In1/In2/B.Cu) -- existing in-pad via is a STUB, not an escape",
+                "layer": "B.Cu",
+                "detail": via_txt + (". But NO own-net copper continues on In1/In2/B.Cu beyond "
+                                    "the via: it is a stub (a via with nothing on the far side), "
+                                    "so it does not constitute an escape. %s." % fcu_note),
+            }
+    elif reach["escaped"]:
         best = min(
             (r for r in fcu_ring if r[1] != "zone"),
             default=(float("inf"), "", ""),
@@ -597,7 +724,7 @@ def measure(board, rules, ref, num):
                 "short_by": short,
             }
 
-    problems = self_check("%s.%s" % (ref, num), verdict, fcu_ring, vias, rules)
+    problems = self_check("%s.%s" % (ref, num), verdict, fcu_ring, vias, rules, existing)
     return {
         "ref": "%s.%s" % (ref, num),
         "net": pad.GetNetname(),
@@ -609,6 +736,7 @@ def measure(board, rules, ref, num):
         "pour": (pg, pz, pclr),
         "reach": reach,
         "vias": vias,
+        "existing": existing,
         "verdict": verdict,
         "problems": problems,
     }
@@ -677,6 +805,31 @@ def main():
               % (rc["step"], rc.get("half", 0), rc["note"]))
         print("                 legal cells reached %d, furthest %.2f mm from pad centre"
               % (rc["cells"], rc["reach"]))
+        print("  EXISTING COPPER ON THIS NET (from the board, not from a router):")
+        if not any(e["kind"] == "via" for e in r["existing"]) and \
+           not any(e["kind"] == "trace" for e in r["existing"]):
+            print("                 none -- the net has no copper at all")
+        for e in r["existing"]:
+            if e["kind"] == "via":
+                ok, cu, cu_by, hh, hn = e["legal"]
+                print("                 via %.2f/%.2f mm at (%.3f, %.3f), spans %s->%s"
+                      % (e["dia"], e["drill"], e["pos"][0], e["pos"][1], e["spans"][0], e["spans"][1]))
+                print("                   %.4f mm from pad centre -> %s"
+                      % (e["dist"], "VIA-IN-PAD (pad is already layer-transitioned)"
+                         if e["in_pad"] else "outside the pad"))
+                print("                   re-checked: %s (worst copper %.4f mm vs %.3f required%s; "
+                      "hole-to-hole %.4f mm)"
+                      % ("LEGAL" if ok else "NOT LEGAL", cu, rules.clearance,
+                         (", " + " ".join(str(x) for x in cu_by if x)) if cu_by else "",
+                         hh))
+                if not ok:
+                    print("                   violation neighbour: %s / %s" % (cu_by, hn))
+                cont, clay = e.get("continues", (False, None))
+                print("                   own-net copper continuing beyond it: %s"
+                      % (("yes, on " + clay) if cont else "NO -- stub, this via is not an escape"))
+            else:
+                print("                 trace on %s from (%.2f, %.2f) to (%.2f, %.2f)"
+                      % (e["layer"], e["pos"][0], e["pos"][1], e["end"][0], e["end"][1]))
         print("  LEGAL VIA CANDIDATES (all 4 copper layers + hole-to-hole + F.Cu approach):")
         for vd in sorted(r["vias"]):
             legal = r["vias"][vd]["legal"]
