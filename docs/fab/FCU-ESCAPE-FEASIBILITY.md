@@ -46,7 +46,7 @@ directions"*: it was measured on a layer these pads cannot reach without a via.
 | **U1.8** | MOSI | 1.0746 mm | 5 | **escapes**, reaches 3.54 mm from centre | 350 @ ⌀0.60 (nearest R=1.10 mm) | **ESCAPABLE on F.Cu** — and the existing in-pad via is a *stub*, not an escape |
 | **U1.22** | SCK | 1.0746 mm | 4 | **escapes**, reaches 3.54 mm from centre | 364 @ ⌀0.60 (nearest R=1.05 mm) | **ESCAPABLE on F.Cu** — and the existing in-pad via is a *stub*, not an escape |
 | **U4.17** | MOSI | 0.6272 mm | 11 | no exit — stalls 1.41 mm from centre | 3 @ ⌀0.50 only; **none** at ⌀0.60 | **ESCAPABLE only via layer transition** (F.Cu → In1/In2/B.Cu) |
-| **U4.18** | SCK | 0.6272 mm | 7 | no exit — stalls 0.78 mm from centre | **none** at ⌀0.60 or ⌀0.50 | **NOT ESCAPABLE at current rules** — bound by pad-to-copper clearance, short by 0.0655 mm |
+| **U4.18** | SCK | 0.6272 mm | 7 | ~~no exit — stalls 0.78 mm from centre~~ **escapes on F.Cu at y = 24.700** | **none needed** | **ESCAPABLE on F.Cu** — **CORRECTED 2026-10-18, see § U4.18 correction** |
 
 ### U1.8 — ESCAPABLE on F.Cu
 
@@ -119,33 +119,35 @@ package: a dogbone, not via-in-pad.
 **Existing copper on this net:** the only via on `/SX1280_MOSI` is the U1.8 one, 14.38 mm away. U4.17 has
 no copper of its own.
 
-### U4.18 — NOT ESCAPABLE at current rules
+### U4.18 — ~~NOT ESCAPABLE~~ **ESCAPABLE on F.Cu** (CORRECTED)
 
-| Distance | Kind | Net |
-|---|---|---|
-| +0.2000 mm | trace | `/SX1280_MISO` |
-| +0.2000 mm | pad U4.17 | adjacent pin, **other net** |
-| +0.2154 mm | via | `/SX1280_MISO` |
-| +0.2182 mm | trace | `/SX1280_DIO1` |
-| +0.2354 mm | trace | `/SX1280_DIO1` |
-| +0.5933 / +0.6058 mm | trace ×2 | `/SX1280_MISO` |
+**This section previously concluded that U4.18 had no legal escape. That conclusion was WRONG, and it
+was disproved by the board's own DRC, not by a better model.**
 
-F.Cu flood fill stalls at **0.78 mm** from centre — the shortest reach of the four. No legal via at either
-size:
+**The counter-evidence.** A routing run on `pr/standing-authority` (commit `618dcf693`) placed
+`/SX1280_SCK` copper leaving U4.18 along the path
+`(55.150, 24.750) -> (55.900, 24.600) -> ... -> (60.605, 20.710)`. `kicad-cli pcb drc` reported
+**zero violations touching U4.17 or U4.18** on that run. The net connected.
 
-| Via ⌀ | Best near-miss | Copper | Hole-to-hole | F.Cu approach | Short by |
-|---|---|---|---|---|---|
-| 0.60 mm | R = 0.85 mm @ 18° | 0.1176 ✗ | 1.1774 | 0.1093 ✗ | 0.0824 mm |
-| 0.50 mm | R = 0.80 mm @ 15° | 0.1492 ✗ | 1.2399 | 0.1345 ✗ | **0.0655 mm** |
+**Why the original analysis missed it.** It searched for an escape from the **pad centreline** at the
+pad's nominal `y`, and at that `y` the neighbouring pads (`U4.17` above, and the `U4.16`/`MISO` copper)
+sit exactly 0.200 mm away — the clearance rule — so nothing fits. **But a `0.80 × 0.30 mm` pad spans
+`y = 24.600 .. 24.900`. A 0.200 mm track may sit anywhere inside that band.** At `y = 24.700` the track
+clears U4.18's own pad edges on both sides and slides out sideways in `+x` with no violation.
 
-**Binding rule: pad-to-copper clearance, 0.200 mm. Tightest neighbour: pad U4.17** — the pad on the *other*
-net that must also escape. Two 0.80 × 0.30 pads sit 0.50 mm apart centre-to-centre, leaving 0.200 mm
-between their edges. A 0.50 mm via needs its own edge 0.200 mm clear of U4.17's copper, so its centre must
-be ≥ 0.45 mm from U4.17's edge — the local geometry admits no such point at any angle. Best achievable is
-0.1345 mm of the 0.200 mm required: **short by 0.0655 mm.**
+**The general defect this records:** the escape ring (`half-diagonal + clearance = 0.6272 mm`) is the
+correct radius for **approaching from outside the pad**. It is the **wrong** test for **exiting along
+the pad's own axis**, where the pad's own footprint is not an obstacle at all. A pad escape is a
+*corridor* question along the pad's short axis, not only a *ring* question.
 
-This is a placement fact, not a search failure, and **no rule was relaxed to produce it.** It also means
-`/SX1280_SCK` cannot be completed while U4.18 stays where it is — its U1 end is escapable, its U4 end is not.
+**What this does NOT change:**
+- `U4.17` (MOSI) genuinely has no in-plane F.Cu escape — that finding stands, and it is bounded by
+  `/SX1280_MISO`'s copper rather than by pad geometry.
+- `U4.17` escapes only via a layer transition, at exactly one legal site: `(55.850, 25.250)`,
+  `0.50 mm / 0.25 mm`, worst clearance `0.211 mm` to `U4.16`. Independent routing runs confirm both.
+- The `0.5 mm` pitch finding is still correct: **no track passes BETWEEN pads**. U4.18 escapes by
+  moving *along its own pad*, not between pads.
+
 
 ## Method
 
