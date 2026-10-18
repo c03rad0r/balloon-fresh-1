@@ -60,38 +60,50 @@ confirms it.**
 
 ---
 
-## D4 — `+3V3` shove by 0.2 mm, then a conventional via, then route `MOSI` on B.Cu
+## D4 — A 0.50/0.25 mm via at 0.285 mm offset. **Do NOT move `+3V3`.**
 
-**Decision:** this is the fix for `MOSI`.
+**Decision (REVISED — version 1 was worse and is kept below rather than deleted):** place a
+**0.50 mm diameter / 0.25 mm drill** via on the MOSI centreline, **0.285 mm outward from the pad's outer
+edge**, then route MOSI on `B.Cu`. **`+3V3` is not touched.**
 
-**Evidence:**
+**Evidence — the via fits under the board's own rules, with no waiver:**
 
-| `+3V3` shift in `y` | outcome |
+| via dia/drill | result in the outward window |
 |---|---|
-| `+0.0 mm` | no legal via anywhere in the window |
-| `+0.1 mm` | no legal via anywhere in the window |
-| **`+0.2 mm`** | **via fits at offset 0.367 mm, clearance 0.207 mm** ✅ |
-| `+0.3 / +0.4 / +0.5 mm` | same result (0.367 mm / 0.207 mm) — no further benefit |
+| `0.60/0.30` | does **not** fit |
+| `0.50/0.25` | **FITS at offset 0.285 mm — worst gap 0.201 mm vs the 0.200 mm rule** ✅ |
+| `0.45/0.20` | fits at 0.305 mm with 0.237 mm — but **violates `m_ViasMinSize`** |
+| `0.40/0.20`, `0.35/0.15`, `0.30/0.15` | fit, all violate the minimum via size |
 
-The shove applies to the two short `+3V3` segments near `U4.17`:
-`(55.650, 26.250) → (55.150, 26.250)` and `(56.700, 25.200) → (55.650, 26.250)`, both `0.20 mm` wide on
-`F.Cu`.
+**Board design rules read directly (`GetDesignSettings()`):**
 
-**Via geometry, per Astra's derivation and verified against the board:** `0.60 mm` diameter, `0.30 mm` drill,
-centre **0.367 mm outward from the pad's outer edge on the MOSI centreline**. Astra's interval bound was
-`0.357 … 0.500`; the adjacent-pad corner tightens the *usable* bound to `0.367`. **This is NOT via-in-pad** —
-the annulus does not overlap the component pad.
+```
+m_ViasMinSize      = 0.500 mm
+m_MinThroughDrill  = 0.200 mm
+```
 
-**Astra's ranking this satisfies:** option #1 *"reposition the ordinary via within the legal interval"* and
-option #2 *"locally move/shove the obstructing non-RF track, such as +3V3 — usually the smallest layout change
-if the normal via is genuinely blocked."*
+**All four layers verified at `(55.855, 25.250)`** with `MISO`/`DIO1` ripped up:
 
-**What would change this:** if a full four-layer DRC check shows the via obstructed on `In1.Cu` / `In2.Cu` /
-`B.Cu` — the arithmetic proves the **F.Cu local geometry** only. Astra stated this limit explicitly:
-*"a conventional through-via must clear foreign copper on all four layers… it does not certify unreported
-geometry on the other layers."*
+```
+F.Cu     +0.2371 mm to +3V3 track
+In1.Cu   +0.4250 mm to /SX1280_VDD
+In2.Cu   +0.4493 mm to /W3_SOLAR_N
+B.Cu     +0.7549 mm to /SX1280_VDD via
+```
 
----
+**This is Astra's ranked option #1** — *"Local fine-feature escape at U4, using a qualified fabrication
+rule… Implement it through a deliberate local/net-specific rule — not by waiving a DRC error."* The via
+complies with `m_ViasMinSize` exactly, so **no rule change and no DRC waiver is needed.**
+
+**⚠️ VERSION 1 OF THIS DECISION WAS WORSE.** It called for shoving `+3V3` by 0.2 mm so a `0.60/0.30` via
+would fit. That works (0.207 mm clearance) but **moves a power track** when a compliant via size achieves
+the same result. Astra ranked the fine-feature escape *above* moving a neighbour track, and it was right.
+**I had not checked whether a smaller via already complied with the board's minimum via size** — it does,
+and that is the whole answer. The mistake was assuming the existing 0.60 mm via was the only size to reason
+about.
+
+**What would change this:** if the fabricator's real minimum via exceeds `0.50 mm`, or if a `0.125 mm`
+annular ring is below their capability. **That is a JLCPCB question and is now in the query.**
 
 ## D5 — The MOSI via sitting on `U1.8`'s centre is an unfinished routing feature, not a thermal via
 
@@ -136,6 +148,49 @@ Zone 'GND_PLANE_F.Cu'  [GND] F.Cu   <->  Zone 'GND_PLANE_F.Cu'   [GND] F.Cu
 This was not in the original RALPH queue and is a **new finding**.
 
 ---
+
+## D8 — Keep components single-sided. Do NOT move parts to `B.Cu`.
+
+**Decision:** the board stays single-side assembled. All 59 footprints remain on `F.Cu`.
+
+**This was asked directly** — *"would it help if we put components on both sides? It's a double-sided
+4 layer board right? Maybe that would allow components to be packed more densely with less pressure on
+surface area."*
+
+**Evidence — the board is not area-constrained, and that is the whole point:**
+
+```
+all 59 footprints on F.Cu; zero on B.Cu          → 4-layer board, currently single-side populated
+board area                5026 mm²  (70.2 × 71.7)
+4-layer copper area      20105 mm²
+routed copper length      3192 mm  (F 733 / In1 787 / In2 1209 / B 463)
+copper length / Cu area    15.9%     → at 0.20 mm width, only 3.2% of copper area
+footprint area total      2818 mm²  = 56% of one side
+rule areas / keepouts        0
+B.Cu track endpoints in the board's central 15 × 15 mm: 8   → bottom centre is nearly empty
+```
+
+**Astra's distinction, which is the reason to say no:** *"You have **global capacity** and lack **local
+accessibility** at two U4 pads. Moving unrelated components underneath does not change that."*
+
+**And the two premises I had to correct:**
+- **Mass does not improve.** Astra: *"moving the same parts to the other face does not inherently add
+  meaningful mass… it mostly redistributes mass."* The 57 g hub+wings target is unaffected either way.
+- **Flipping `U4` itself does not help.** Astra: *"a pad escape forbidden by intrinsic pad geometry
+  remains forbidden after flipping."* Pitch and inter-pad clearance do not change when the part is turned
+  over. It would also force the 2.4 GHz path through a layer transition, and *"at values of 0.8 pF and
+  3.0 nH, layout parasitics are significant enough that the existing match should not be assumed to
+  survive unchanged."*
+
+**Real cost if it were done anyway:** a second paste-print, placement and reflow pass; heavy-module
+sequencing review; and `J_W1…J_W4` bottom-side solder access — their 4 `B.Cu` pads each mean *"edge
+placement helps, but does not remove clearance requirements."*
+
+**What would change this:** a genuine packaging constraint — a smaller outline, a shorter critical
+interconnect, or an enclosure limit. **None is established.** Double-sided assembly is a valid future
+option if the board must shrink; it is not a fix for two pads behind their own neighbours.
+
+**Recorded as a real option the operator raised, and declined on measurement — not dismissed.**
 
 ## Standing risk flags for the fabricator
 
