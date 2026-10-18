@@ -33,13 +33,13 @@ superseded RP2040 Arduino-SPI history.
 > ships (FLRC **CR 3/4** — `radio_bench.c:55`; LR20xx driver time-on-air numerator),
 > or 2540 / 2570 kbps *if the link were uncoded* (CR NONE). The CR-3/4 figure agrees
 > to 0.6 % with the repo's independently computed 1921.8 kbps on-air rate
-> (`full-sweep-report-20260821-175612.md:99`).
+> (`docs/bench/full-sweep-report-20260821-175612.md:99`).
 > An operator report of ~2.6 Mbps attributed to doubling the payload 255 B → 512 B
 > was investigated and does not hold: **512 B is not a legal FLRC length** (the
 > driver's documented range is `[6:511]`, `lr20xx_radio_flrc_types.h:210`), and no
 > 512 B run exists on disk. What *is* demonstrated is 511 B working — 50/50
 > delivered, PRBS-15 `bit_err = 0`, at BR650/1300/2600
-> (`full-sweep-report-20260821-175612.md`). Full audit:
+> (`docs/bench/full-sweep-report-20260821-175612.md`). Full audit:
 > `docs/FLRC-512B-THROUGHPUT-AUDIT-2026-10-06.md`,
 > `tools/flrc_512b_throughput_audit.py`.
 >

@@ -4,6 +4,8 @@ Scope: every TollGate symbol reference in `tracker/firmware/main/app_task.cpp` o
 `autonomous/mesh-baseline` at commit `4ec5e53` (`docs(tollgate): author
 TOLLGATE_PROTO_CONTRACT.md …`). All paths below are relative to the worktree root
 `/home/c03rad0r/worktrees/tg-proto-contract` unless prefixed with `tracker/firmware/`.
+The contract itself now lives at `docs/tollgate/TOLLGATE_PROTO_CONTRACT.md` in this repo
+(it sat at the repo root until 2026-10-18).
 
 **Upstream-report provenance.** Report B was supplied and is on disk as
 `docs/recon/.tollgate_config_notes.md` (verified line-for-line, see §d). **Report A had no

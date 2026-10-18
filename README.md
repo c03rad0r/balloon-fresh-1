@@ -339,7 +339,7 @@ balloon-fresh/
 | [Hardware Integration Findings](firmware/e80-stm32-bench/docs/hardware-integration-findings.md) | Live hardware test results |
 | [Operator Quickstart](firmware/e80-stm32-bench/tools/OPERATOR-QUICKSTART.md) | Quick reference for command structure |
 | [ADR Index](docs/adr/) | Architecture Decision Records |
-| [Hardware Connections](HARDWARE_CONNECTIONS.md) | Board wiring reference |
+| [Hardware Connections](docs/hardware/HARDWARE_CONNECTIONS.md) | Board wiring reference |
 
 ---
 

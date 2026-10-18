@@ -126,5 +126,5 @@ lsusb | grep 2e8a  # Watch for RP2040 PID changes
 ## References
 
 - `docs/FLIGHT-BOARD-AUTO-BOOTSEL.md` — Circuit design and theory
-- `HARDWARE_CONNECTIONS.md` — Detailed soldering instructions
+- `docs/hardware/HARDWARE_CONNECTIONS.md` — Detailed soldering instructions
 - Skill: `esp32-rp2040-bootsel-control` — Full troubleshooting guide

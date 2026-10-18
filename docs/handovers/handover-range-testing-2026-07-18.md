@@ -139,7 +139,7 @@ python3 ~/repos/balloon-fresh/tools/balloon-board-lock.py acquire both --purpose
 RP2040 flash via picotool needs the board in BOOTSEL mode:
 - 1200 baud touch on serial port (may not work without pyserial)
 - Manual: hold BOOTSEL button while plugging USB
-- ESP32-C3 controller can auto-trigger BOOTSEL (if wired per HARDWARE_CONNECTIONS.md)
+- ESP32-C3 controller can auto-trigger BOOTSEL (if wired per docs/hardware/HARDWARE_CONNECTIONS.md)
 
 ---
 

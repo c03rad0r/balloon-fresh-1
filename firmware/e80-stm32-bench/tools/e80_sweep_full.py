@@ -584,7 +584,7 @@ def _build_all_configs():
 def build_len_bisect_configs():
     """FIX-T6 phase (b): the LEN 253-257 boundary bisect @BR1300 pa10 868 MHz.
 
-    BUG 3 / flrc-retest-20260821.md: LEN=255 was the ONE failing FLRC length
+    BUG 3 / docs/bench/flrc-retest-20260821.md: LEN=255 was the ONE failing FLRC length
     (0/10 CRC at both BRs) with a +35 dB RSSI step at >= 255, while 254<= and
     256..511 were clean. 253-257 brackets that discontinuity; run it with
     N=20 (card) or N=50 (--npkts) so a single flake cannot decide the verdict.

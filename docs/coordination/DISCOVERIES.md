@@ -336,7 +336,7 @@ Each discovery is tagged with relevance categories so tracks know if it applies 
 
 ### [balloon-hermes] fix: dedent placed symbols in C3 schematic (K2.7 found 2-tab→1-tab issue) (2026-08-05) | tags: HARDWARE
 - **Commit:** `d8ae8e4` by Felix
-- **Files:** test_sch-erc.rpt, test_trunc-erc.rpt, tracker/hardware/output/PRE-LAYOUT-C3.md (+10 more)
+- **Files:** docs/reports/drc/test_sch-erc.rpt, docs/reports/drc/test_trunc-erc.rpt, tracker/hardware/output/PRE-LAYOUT-C3.md (+10 more)
 - **Full message:** fix: dedent placed symbols in C3 schematic (K2.7 found 2-tab→1-tab issue)
 - **Relevance:** HARDWARE
 
@@ -433,7 +433,7 @@ Each discovery is tagged with relevance categories so tracks know if it applies 
 
 ### [balloon-hermes] persist: kimi-k3 power routing scripts + inspection tools (2-layer power routing (2026-08-05) | tags: HARDWARE, PROTOCOL
 - **Commit:** `46d8214` by Felix
-- **Files:** check_layers.py, find_unconnected.py, inspect_board.py (+5 more)
+- **Files:** tools/check_layers.py, tools/find_unconnected.py, tools/inspect_board.py (+5 more)
 - **Full message:** persist: kimi-k3 power routing scripts + inspection tools (2-layer power routing abandoned — needs 4-layer)
 - **Relevance:** HARDWARE, PROTOCOL
 
@@ -664,7 +664,7 @@ Each discovery is tagged with relevance categories so tracks know if it applies 
 
 ### [balloon-hermes] docs: ESP32-C3 MINI-1 pinout verification + V2-ADC pinmap (2026-08-05) | tags: FIRMWARE, HARDWARE
 - **Commit:** `4b7203b` by Felix
-- **Files:** docs/coordination/DISCOVERIES.md, hub_board_v1-drc.rpt, tracker/firmware/dependencies.lock (+5 more)
+- **Files:** docs/coordination/DISCOVERIES.md, docs/reports/drc/hub_board_v1-drc.rpt, tracker/firmware/dependencies.lock (+5 more)
 - **Full message:** docs: ESP32-C3 MINI-1 pinout verification + V2-ADC pinmap
 - **Relevance:** FIRMWARE, HARDWARE
 
@@ -1010,7 +1010,7 @@ Each discovery is tagged with relevance categories so tracks know if it applies 
 
 ### [balloon-hermes] chore: commit pending track work — FLRC fixes, board lock tooling, coordination  (2026-08-05) | tags: RADIO
 - **Commit:** `0292aec` by Felix
-- **Files:** BOARD_LOCK_DELIVERABLES.md, FLRC_RP2040_FIXES_SUMMARY.md, Makefile (+9 more)
+- **Files:** docs/reports/BOARD_LOCK_DELIVERABLES.md, docs/hardware/FLRC_RP2040_FIXES_SUMMARY.md, Makefile (+9 more)
 - **Full message:** chore: commit pending track work — FLRC fixes, board lock tooling, coordination docs
 - **Relevance:** RADIO
 

@@ -18,12 +18,12 @@ Import/consumption rule (learned the hard way in `tools/alt`): anything here is 
 
 **Why there are two:** both documents were authored on **2026-09-27** for the same
 header, independently. Neither blob appears in the other's history at that path
-(`git log <rev> -- TOLLGATE_PROTO_CONTRACT.md`), so this is a genuine parallel
+(`git log <rev> -- docs/tollgate/TOLLGATE_PROTO_CONTRACT.md`), so this is a genuine parallel
 authorship, not an old-vs-new pair.
 
 | | live doc (trunk) | this retained copy |
 |---|---|---|
-| path | `TOLLGATE_PROTO_CONTRACT.md` | `docs/alt/TOLLGATE_PROTO_CONTRACT.mesh-baseline.md` |
+| path | `docs/tollgate/TOLLGATE_PROTO_CONTRACT.md` | `docs/alt/TOLLGATE_PROTO_CONTRACT.mesh-baseline.md` |
 | blob | `453d8265` | `b1cd96d9` |
 | size | 41,983 B / 611 lines | 44,879 B / 756 lines |
 | title | "Authoritative **API Contract** for `tollgate_payment_proto.h`" | "Authoritative **wire contract** for `tollgate_payment_proto.h`" |

@@ -158,18 +158,18 @@ All artifacts are on branch `feat/2g4-sweep`. Every path is shown as GitHub URL
 
 | Artifact | GitHub URL | Local path |
 |----------|-----------|------------|
-| Session meta JSON | https://github.com/felixfelix-bot/balloon-fresh/tree/feat/2g4-sweep/full-sweep-results-2g4-meta-20260822-210817.json | `full-sweep-results-2g4-meta-20260822-210817.json` |
-| Per-config summary CSV (113 rows + header) | https://github.com/felixfelix-bot/balloon-fresh/tree/feat/2g4-sweep/full-sweep-results-2g4-summary-20260822-210817.csv | `full-sweep-results-2g4-summary-20260822-210817.csv` |
-| Per-packet CSV (~5650 rows) | https://github.com/felixfelix-bot/balloon-fresh/tree/feat/2g4-sweep/full-sweep-results-2g4-pkts-20260822-210817.csv | `full-sweep-results-2g4-pkts-20260822-210817.csv` |
-| Analysis report (read first) | https://github.com/felixfelix-bot/balloon-fresh/tree/feat/2g4-sweep/full-sweep-results-2g4-report-20260822-210817.md | `full-sweep-results-2g4-report-20260822-210817.md` |
+| Session meta JSON | https://github.com/felixfelix-bot/balloon-fresh/tree/feat/2g4-sweep/full-sweep-results-2g4-meta-20260822-210817.json | `data/sweeps/2026-08-22/full-sweep-results-2g4-meta-20260822-210817.json` |
+| Per-config summary CSV (113 rows + header) | https://github.com/felixfelix-bot/balloon-fresh/tree/feat/2g4-sweep/full-sweep-results-2g4-summary-20260822-210817.csv | `data/sweeps/2026-08-22/full-sweep-results-2g4-summary-20260822-210817.csv` |
+| Per-packet CSV (~5650 rows) | https://github.com/felixfelix-bot/balloon-fresh/tree/feat/2g4-sweep/full-sweep-results-2g4-pkts-20260822-210817.csv | `data/sweeps/2026-08-22/full-sweep-results-2g4-pkts-20260822-210817.csv` |
+| Analysis report (read first) | https://github.com/felixfelix-bot/balloon-fresh/tree/feat/2g4-sweep/full-sweep-results-2g4-report-20260822-210817.md | `docs/bench/full-sweep-results-2g4-report-20260822-210817.md` |
 
 ### Prior 868 MHz sweep data (2026-08-21, session 2608212001, fw 88a00cf, 61 configs)
 
 | Artifact | GitHub URL | Local path |
 |----------|-----------|------------|
-| Session meta JSON | https://github.com/felixfelix-bot/balloon-fresh/tree/feat/2g4-sweep/full-sweep-meta-20260821-200111.json | `full-sweep-meta-20260821-200111.json` |
-| Per-config summary CSV (61 rows + header) | https://github.com/felixfelix-bot/balloon-fresh/tree/feat/2g4-sweep/full-sweep-summary-20260821-200111.csv | `full-sweep-summary-20260821-200111.csv` |
-| Per-packet CSV (~3050 rows) | https://github.com/felixfelix-bot/balloon-fresh/tree/feat/2g4-sweep/full-sweep-pkts-20260821-200111.csv | `full-sweep-pkts-20260821-200111.csv` |
+| Session meta JSON | https://github.com/felixfelix-bot/balloon-fresh/tree/feat/2g4-sweep/full-sweep-meta-20260821-200111.json | `data/sweeps/2026-08-21/full-sweep-meta-20260821-200111.json` |
+| Per-config summary CSV (61 rows + header) | https://github.com/felixfelix-bot/balloon-fresh/tree/feat/2g4-sweep/full-sweep-summary-20260821-200111.csv | `data/sweeps/2026-08-21/full-sweep-summary-20260821-200111.csv` |
+| Per-packet CSV (~3050 rows) | https://github.com/felixfelix-bot/balloon-fresh/tree/feat/2g4-sweep/full-sweep-pkts-20260821-200111.csv | `data/sweeps/2026-08-21/full-sweep-pkts-20260821-200111.csv` |
 
 ### Sweep tool source
 
@@ -428,13 +428,13 @@ git checkout feat/2g4-sweep
 |------|---------|
 | `docs/plans/adaptive-sweep-plan-20260822.md` | The adaptive sweep plan (modes, SPRT, controller pseudocode, operator decisions D1–D6) |
 | `docs/plans/stop-verify-results.md` | STOP mid-burst abort verification results (ADAPT-0, VERDICT: STOP-CLEAN both mods) |
-| `full-sweep-results-2g4-meta-20260822-210817.json` | Dual-band sweep session meta (fw 0561b29, 113 configs) |
-| `full-sweep-results-2g4-summary-20260822-210817.csv` | Per-config summary (113 rows + header) |
-| `full-sweep-results-2g4-pkts-20260822-210817.csv` | Per-packet rows (~5650 rows) |
-| `full-sweep-results-2g4-report-20260822-210817.md` | Analysis report for the dual-band sweep |
-| `full-sweep-meta-20260821-200111.json` | Prior 868-only sweep session meta (fw 88a00cf, 61 configs) |
-| `full-sweep-summary-20260821-200111.csv` | Prior 868-only per-config summary (61 rows + header) |
-| `full-sweep-pkts-20260821-200111.csv` | Prior 868-only per-packet rows (~3050 rows) |
+| `data/sweeps/2026-08-22/full-sweep-results-2g4-meta-20260822-210817.json` | Dual-band sweep session meta (fw 0561b29, 113 configs) |
+| `data/sweeps/2026-08-22/full-sweep-results-2g4-summary-20260822-210817.csv` | Per-config summary (113 rows + header) |
+| `data/sweeps/2026-08-22/full-sweep-results-2g4-pkts-20260822-210817.csv` | Per-packet rows (~5650 rows) |
+| `docs/bench/full-sweep-results-2g4-report-20260822-210817.md` | Analysis report for the dual-band sweep |
+| `data/sweeps/2026-08-21/full-sweep-meta-20260821-200111.json` | Prior 868-only sweep session meta (fw 88a00cf, 61 configs) |
+| `data/sweeps/2026-08-21/full-sweep-summary-20260821-200111.csv` | Prior 868-only per-config summary (61 rows + header) |
+| `data/sweeps/2026-08-21/full-sweep-pkts-20260821-200111.csv` | Prior 868-only per-packet rows (~3050 rows) |
 | `firmware/e80-stm32-bench/tools/e80_sweep_full.py` | The sweep orchestrator (auto port detect, role handshake, adaptive gap, PRBS verify, CSV/MD emission) |
 | `firmware/e80-stm32-bench/tools/stop_verify.py` | STOP verify test script |
 | `firmware/e80-stm32-bench/src/` | Firmware source (console `bench_cmd.c`, `prbs.c`, `bench_pkt.c` — the protocol reference) |

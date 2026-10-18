@@ -1,3 +1,7 @@
+> **Location note (2026-10-18).** This file was moved from the repo root to
+> `docs/reports/REPORT.md` in the root-tidy pass. Source comments elsewhere in the repo
+> that say "see REPORT.md" refer to THIS file.
+
 # REPORT — U4 (SX1280) WIRING REBUILD  ·  card t_5c5937f9
 
 **Branch:** `pr/u4-rewire` · **Commit:** `322f37b5` · **Date:** 2026-10-15

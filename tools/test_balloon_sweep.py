@@ -10,7 +10,7 @@ Golden transcript provenance (tests/golden/):
       PKT lines are byte-exact output of the REAL E80 firmware formatter
       (firmware/e80-stm32-bench/src/bench_pkt.c @ buf/t5a-rx-pcrc16,
       host-compiled), with field values from the recorded sweep
-      full-sweep-pkts-20260821-175612.csv (session 2608211756).
+      data/sweeps/2026-08-21/full-sweep-pkts-20260821-175612.csv (session 2608211756).
       OK*/CONFIG_START/TX-stat reply strings are byte-exact per the
       firmware console_put sequences in src/bench.c; the trailing STAT
       line follows the current bench.c STAT shape (incl. session=/cr=

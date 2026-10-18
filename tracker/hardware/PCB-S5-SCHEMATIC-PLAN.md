@@ -28,7 +28,7 @@ generation timestamp, so it is expected to show a one-line diff after any gate r
 | custom symbol lib | `balloon_flight.kicad_sym` | `dfeb5c7b…d3e2` | the LR2021F33 symbol (only part absent from KiCad v9 libs) |
 | footprint lib | `balloon_flight.pretty/` (15 `.kicad_mod`) | — | the PCB's own footprints, exported verbatim |
 | lib tables | `sym-lib-table`, `fp-lib-table` | `1823b99b…a05b`, `f5e0002f…3a55` | make ERC resolve both link classes |
-| ERC report | `v_c3_flight-erc.rpt` | — | 0 errors, 1 warning (`pin_to_pin`, see §4) |
+| ERC report | `docs/reports/drc/v_c3_flight-erc.rpt` | — | 0 errors, 1 warning (`pin_to_pin`, see §4) |
 
 Gate evidence for v0 (re-runnable, `python3 check_sch_gates.py`, exit 0):
 

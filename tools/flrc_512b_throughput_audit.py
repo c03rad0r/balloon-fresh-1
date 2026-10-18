@@ -122,10 +122,16 @@ SWEEP_GLOBS = [
 ]
 
 
+# Sweep data lives in dated directories under data/sweeps/ (moved out of the repo root
+# on 2026-10-18). The repo root is still searched so an un-filed sweep is not missed.
+SWEEP_DIRS = ("", os.path.join("data", "sweeps", "*"))
+
+
 def _summary_paths(root: str) -> list[str]:
     out: list[str] = []
-    for pat in SWEEP_GLOBS:
-        out.extend(sorted(glob.glob(os.path.join(root, pat))))
+    for sub in SWEEP_DIRS:
+        for pat in SWEEP_GLOBS:
+            out.extend(sorted(glob.glob(os.path.join(root, sub, pat))))
     return out
 
 
@@ -371,7 +377,7 @@ def build_report(root: str) -> dict:
                 "own time-on-air numerator puts it at "
                 f"{ceilings[511]['fw_cr34_kbps']} kbps -- which is within 1 % of the "
                 "independently computed 1921.8 kbps on-air payload rate in "
-                "full-sweep-report-20260821-175612.md. Every model, and every legal "
+                "docs/bench/full-sweep-report-20260821-175612.md. Every model, and every legal "
                 "payload length, is below 2600. The best measured sustained figure on "
                 "disk is 1484.9 kbps (2026-07-23, LEN=127) = "
                 f"{round(1484.9 / ceilings[127]['fw_cr34_kbps'] * 100, 1)} % of the "

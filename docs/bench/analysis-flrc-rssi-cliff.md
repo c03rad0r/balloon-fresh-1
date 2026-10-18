@@ -3,7 +3,7 @@
 **Date:** 2026-08-23
 **Bench:** Indoor 1 m, E80 (VCXO-TCXO) boards, custom STM32F103 firmware
 **Commit:** 0561b29 (`feat/2g4-sweep` branch)
-**Data:** `full-sweep-summary-20260821-200111.csv`, `full-sweep-results-2g4-summary-20260822-210817.csv`
+**Data:** `data/sweeps/2026-08-21/full-sweep-summary-20260821-200111.csv`, `data/sweeps/2026-08-22/full-sweep-results-2g4-summary-20260822-210817.csv`
 
 ## Verdict (TL;DR)
 
@@ -103,7 +103,7 @@ above the 6 ms threshold.
 
 ### Per-packet RSSI is bimodal for short FLRC packets
 
-Per-pkt CSV `full-sweep-pkts-20260821-200111.csv` (config 39 = FLRC 650k, PA0,
+Per-pkt CSV `data/sweeps/2026-08-21/full-sweep-pkts-20260821-200111.csv` (config 39 = FLRC 650k, PA0,
 plen 64), column `$8` (rssi_dbm), histogram from 50 packets:
 
 ```
@@ -314,6 +314,6 @@ via `--only` filter overrides) are now surfaced in the CSV error column.
 - `firmware/e80-stm32-bench/tools/e80_bench_ctl.py` (STAT? parse logic)
 - `docs/lr2021-spi-protocol-reference.md`
 - `firmware/e80-stm32-bench/docs/hardware-integration-findings.md`
-- Summary CSVs: `full-sweep-summary-20260821-200111.csv`,
-  `full-sweep-results-2g4-summary-20260822-210817.csv`
-- Per-packet CSV: `full-sweep-pkts-20260821-200111.csv`
+- Summary CSVs: `data/sweeps/2026-08-21/full-sweep-summary-20260821-200111.csv`,
+  `data/sweeps/2026-08-22/full-sweep-results-2g4-summary-20260822-210817.csv`
+- Per-packet CSV: `data/sweeps/2026-08-21/full-sweep-pkts-20260821-200111.csv`

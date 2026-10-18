@@ -427,4 +427,4 @@ When the firmware team ports v4 to ESP32-C3, the circuit designer needs to know:
 | `tracker/hardware/hub_board_diy/implementation-plan.md` | Full fab + test plan |
 | `tracker/hardware/hub_board/hub_schematic.py` | SKiDL stub (not usable — reference only) |
 | `docs/hardware-reference/component-guide.md` | Complete parts list with alternatives + pricing |
-| `HARDWARE_CONNECTIONS.md` | ESP32-C3 ↔ RP2040 BOOTSEL controller wiring (for dev flashing rig) |
+| `docs/hardware/HARDWARE_CONNECTIONS.md` | ESP32-C3 ↔ RP2040 BOOTSEL controller wiring (for dev flashing rig) |

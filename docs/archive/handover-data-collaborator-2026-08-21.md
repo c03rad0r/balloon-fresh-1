@@ -28,9 +28,9 @@ LEN {16,64,128,192,255,256,300,384,448,511} @ 650 kbps
 + LEN {384,511} @ 1300 kbps + LEN 511 @ 2600 kbps. GAP 40 ms.
 
 - Report (read first — includes analysis + throughput table):
-  full-sweep-report-20260821-175612.md
-- Per-config summary: full-sweep-summary-20260821-175612.csv
-- Per-packet rows: full-sweep-pkts-20260821-175612.csv  ← the data
+  docs/bench/full-sweep-report-20260821-175612.md
+- Per-config summary: data/sweeps/2026-08-21/full-sweep-summary-20260821-175612.csv
+- Per-packet rows: data/sweeps/2026-08-21/full-sweep-pkts-20260821-175612.csv  ← the data
 - Commits: 70a6e27 (data), 6ff1292 (throughput table appended)
 
 Headline: 100% delivery all 13 configs; PRBS-15 bit errors = 0 on all 651
@@ -43,9 +43,9 @@ Throughput: delivered 89.5 kbps max (gap-limited), raw air rate 1.92 Mbps
 LoRa SF5-12 (BW125), PA 0-10 dBm, FREQ 863-870 MHz, FLRC all 8 bitrates
 (260-2600 kbps), LEN 64 fixed. 46/48 configs clean; anomalies documented
 in-report:
-- full-sweep-report-20260821-162143.md
-- full-sweep-summary-20260821-162143.csv
-- full-sweep-pkts-20260821-162143.csv (~2300 packets)
+- docs/bench/full-sweep-report-20260821-162143.md
+- data/sweeps/2026-08-21/full-sweep-summary-20260821-162143.csv
+- data/sweeps/2026-08-21/full-sweep-pkts-20260821-162143.csv (~2300 packets)
 - Commits: ed63659, corrected 8c11f79
 
 Key numbers: LoRa SNR +~3 dB per SF step (SF5 10.1 → SF8 16.8 → SF12 14.0
@@ -54,7 +54,7 @@ RSSI -37.7 @ 863 MHz → -32.2 @ 870 MHz; SF11/SF12 need GAP >= 1.2x ToA.
 
 ## Dataset 3 — early 14-config sweep, 14:58 (superseded)
 
-sweep-results-20260821-151147.md/.csv — smaller predecessor; some configs
+docs/bench/sweep-results-20260821-151147.md + data/sweeps/2026-08-21/sweep-results-20260821-151147.csv — smaller predecessor; some configs
 ran with too-small GAP. Use Dataset 2 instead; kept for history.
 
 ## CSV schemas (verified against actual file headers, both datasets)

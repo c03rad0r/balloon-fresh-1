@@ -95,7 +95,7 @@ because they differ by a third and the repo has published two of them:
   CR 3/4 costs 4/3 in air time, so the payload rate tops out at 2600 × 3/4 = 1950
   kbps minus overhead. At 511 B that is **1909.9 kbps**, which agrees to **0.6 %**
   with the *independently* computed on-air figure already in the repo —
-  **1921.8 kbps** (LEN·8/ToA @ CR 3/4, `full-sweep-report-20260821-175612.md:99`).
+  **1921.8 kbps** (LEN·8/ToA @ CR 3/4, `docs/bench/full-sweep-report-20260821-175612.md:99`).
   Two derivations from different directions landing inside 1 % is the cross-check
   that rev 1 was missing.
 
@@ -134,12 +134,12 @@ PA 5 dBm, SMA ~30 cm apart, GAP 40 ms, CR 3/4):
 | **511** | **2600** | **50/50** | 50 | **0** | ✓ |
 
 † the `175612` session recorded `51/51` for this row (one stray 51st packet, 5.3 s
-span — `full-sweep-report-20260821-175612.md:97-99`); the `200111` and 2g4
+span — `docs/bench/full-sweep-report-20260821-175612.md:97-99`); the `200111` and 2g4
 sessions recorded `50/50`. The rows are otherwise identical.
 
-Sources: `full-sweep-summary-20260821-175612.csv`,
-`full-sweep-summary-20260821-200111.csv`,
-`full-sweep-results-2g4-summary-20260822-210817.csv`.
+Sources: `data/sweeps/2026-08-21/full-sweep-summary-20260821-175612.csv`,
+`data/sweeps/2026-08-21/full-sweep-summary-20260821-200111.csv`,
+`data/sweeps/2026-08-22/full-sweep-results-2g4-summary-20260822-210817.csv`.
 
 Reading it correctly matters:
 
@@ -149,7 +149,7 @@ Reading it correctly matters:
   lengths that are demonstrably fine. Do not read the `50` as loss.
 * **`rx 50/50` at 511 B × BR2600 is a delivery result, not a throughput result.**
   At GAP 40 ms the delivered rate is gap-limited (~90 kbps); the on-air payload
-  rate is 1.92 Mbps (`full-sweep-report-20260821-175612.md:99`). Neither number is
+  rate is 1.92 Mbps (`docs/bench/full-sweep-report-20260821-175612.md:99`). Neither number is
   the sustained goodput the card asks for.
 * **All ≥255 B evidence is 868 MHz.** The card asked for 2440 MHz. Frequency does
   not change the packet-length/bitrate ceiling (it is a PHY-length property) — it

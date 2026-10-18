@@ -1,3 +1,8 @@
+> **Location note (2026-10-18).** This file was moved from the repo root to
+> `docs/reports/INTEGRATION-ASSESSMENT.md`. It is NOT the different
+> `docs/INTEGRATION-ASSESSMENT.md` that the cross-track assessment prompts refer to —
+> those prompts are about a per-track file in a worktree, not this one.
+
 # Integration Assessment — Balloon Pre-Stretching
 
 **Track:** balloon-pre-stretching (physical preparation only)

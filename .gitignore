@@ -64,6 +64,9 @@ firmware/rp2040/host-tests/test_radio
 firmware/rp2040/host-tests/test_dispatch
 firmware/rp2040/host-tests/test_temp_comp
 # worker scratch logs — per-task, never merged (v9 consolidation, 2026-10-07)
+# NOTE: these patterns match at ANY depth. The tracked U4 report is now
+# docs/reports/REPORT.md (moved there 2026-10-18); it stays tracked, but never
+# `git rm --cached` it or the ignore rule above will hide it from `git add`.
 PROGRESS.md
 REPORT.md
 # v8j DRC triage scratch (worker logs; evidence kept on the pr/v8j branch + backup/ tag)

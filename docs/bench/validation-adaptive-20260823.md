@@ -49,7 +49,7 @@ Note: All bench configs at short range are CLEAN (109 with 0 errors). The DEAD p
 ## V3: SF11/12 Regression — Overrun Check (GO)
 
 **Script**: `tools/v3_regression.py`
-**CSV**: `v3-regression-20260823-135828.csv`
+**CSV**: `data/sweeps/2026-08-23/v3-regression-20260823-135828.csv`
 
 5-config sequence: FLRC → SF12 → FLRC → SF11 → SF12, with SWD resets only on parameter changes (gated policy). 50 packets per config.
 
@@ -78,7 +78,7 @@ Note: All bench configs at short range are CLEAN (109 with 0 errors). The DEAD p
 ## V2: Reset A/B — Strict vs Gated (GO)
 
 **Script**: `tools/v2_reset_ab.py`
-**CSV**: `v2-reset-ab-20260823-150321.csv`
+**CSV**: `data/sweeps/2026-08-23/v2-reset-ab-20260823-150321.csv`
 
 10-config sequence × 4 runs (A1 strict, A2 strict, B1 gated, B2 gated). Each config sends 50 packets. Both boards were SWD-reset before the run to ensure clean state.
 
