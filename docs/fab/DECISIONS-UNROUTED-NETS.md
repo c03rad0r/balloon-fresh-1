@@ -192,6 +192,82 @@ option if the board must shrink; it is not a fix for two pads behind their own n
 
 **Recorded as a real option the operator raised, and declined on measurement — not dismissed.**
 
+## D9 — Do NOT shrink the outline. It is interface-constrained, not area-constrained.
+
+**Decision:** the 70.15 × 71.65 mm outline stays. **No rectangular shrink.** If mass must come off the
+board later, the option is **substrate cutouts inside the existing envelope**, and only after the mass
+budget is corrected (see D10).
+
+**This was asked directly** — *"shrinking the board would be great because it saves cost and makes the board
+lighter. Please do this if it's low-hanging fruit and if it makes it easier to route."*
+
+**Evidence — the parts already span the outline:**
+
+```
+bounding box of ALL 59 footprints:   69.96 × 74.95 mm
+board outline:                       70.15 × 71.65 mm
+slack:                               0.19 mm in x,   -3.30 mm in y
+```
+
+**Negative slack in `y`**: two wing connectors overhang the outline by 1.65 mm each — they are edge tabs, by
+design. The six edge-locked parts pin all four sides:
+
+```
+J_W1 hugs LEFT    J_W2 hugs TOP (overhangs 1.65)    ANT1 hugs LEFT  (0.10 mm gap)
+J_W3 hugs RIGHT   J_W4 hugs BOTTOM (overhangs 1.65) ANT2 hugs TOP   (0.95 mm gap)
+```
+
+**Astra's framing, which is the whole argument:** *"this board is **interface-constrained, not
+routing-density-constrained**… low copper utilisation does not mean the outside dimensions are freely
+reducible."*
+
+**On cost, Astra refused to invent a number and that is correct:** *"the area saving is real; a material
+reduction in the final fabrication bill is not guaranteed… at small prototype quantities, minimum-order and
+setup charges and the four-layer process premium often dominate… Without those quotes, a dollar saving or a
+firm claim that setup dominates would be invented."* **Action: compare otherwise-identical quotes at the
+real quantity. Do not redesign mechanics on an assumed saving.**
+
+**On routing, the premise is backwards:** *"Harder, or at best no better. It does not address the actual
+blocker… MOSI/SCK are blocked by local escape geometry at the SX1280's 0.5 mm-pitch QFN pads. Reducing the
+outline does not create more room between those pads."*
+
+**What a shrink would cost:** a mechanical redesign of **four wing interfaces** (the balloon's structural
+attachments at 90°) plus **two antenna placements**, for a substrate saving of `1.58 g` at 60 × 60 or
+`2.80 g` at 50 × 50 — **2.8 % / 4.9 % of a 57 g payload.**
+
+**What would change this:** a packaging requirement that the balloon's wing span or hub envelope must
+shrink. Then the wing interfaces dominate and the board follows.
+
+---
+
+## D10 — 🔴 The mass budget's PCB figure is WRONG by 3.6×, and it has been driving design decisions
+
+**Decision:** `docs/analysis/ALTITUDE-AND-MASS-REQUIREMENTS.md` line 15 is defective and must be corrected.
+**The board is 5.58 g, not 20.2 g.**
+
+**Evidence — same formula the budget itself cites (FR4 at 1.85 g/cm³):**
+
+```
+board area 50.26 cm²
+@ 0.6 mm (the board file says (thickness 0.6)):  5.58 g
+@ 0.8 mm (what the budget claims):               7.44 g
+```
+
+**To reach 20.2 g of FR4 at 0.8 mm you would need 136 cm² = 117 × 117 mm.** The board is 70 × 72. **The
+budget's own row reads "PCB 20.2 @0.8 mm" and cites "board file + datasheet parts" as its source — but the
+board file says 0.6 mm, and no reading of the board file yields 20.2 g.** It appears to have been derived
+against an outline roughly 2.7× larger in area.
+
+**Why this matters more than the routing work:** the row feeds `Hub v9 populated = 25.5 g`, which feeds the
+`≈ 57 g` payload, which feeds envelope choice (**36–40 in latex**), which feeds the **≥ 13.5 km** altitude
+target. **A 3.6× error in one term of a 4-term sum propagates into the envelope decision.** Every mass-based
+design argument in this session inherited it — including "is the board worth shrinking": the honest answer is
+that **the board is ~10 % of payload, not ~45 %**, so shrinking it was never the lever.
+
+**Not corrected in place yet:** the corrected board figure must be paired with a re-check of the *parts*
+figure in the same row (5.3 g of components is plausible but unverified), or the row is only half-fixed.
+**That is the next task, and it must be done as one measurement, not two edits.**
+
 ## Standing risk flags for the fabricator
 
 1. **Via-in-pad at `U1.8`** — needs filled/capped specification, or relocate the via outside the pad.

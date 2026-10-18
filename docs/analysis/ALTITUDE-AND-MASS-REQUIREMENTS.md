@@ -12,10 +12,10 @@ flight hardware is the **115×103 mm hub** plus a **4-arm cross carrying 4 wings
 
 | Item | Mass | Source |
 |---|---|---|
-| Hub v9 populated (PCB 20.2 @0.8 mm + 5.3 parts) | **25.5 g** | board file + datasheet parts |
+| Hub v9 populated (PCB ~~20.2 @0.8 mm~~ **5.58 @0.6 mm** + 5.3 parts) | **~10.9 g** | **CORRECTED 2026-10-18** — board file says `(thickness 0.6)`, area 50.26 cm², FR4 1.85 g/cm³ ⇒ **5.58 g**. The old 20.2 g needed 136 cm² (117×117 mm) at 0.8 mm; the board is 70.15×71.65. Parts figure still unverified. See `docs/fab/DECISIONS-UNROUTED-NETS.md` D10. |
 | 4-wing array, **full carrier as built** (7.300 g/wing) | **29.2 g** | `docs/analysis/wing_mass_model.py` (committed) |
 | Harness, tether, tie-points | **~2.5 g** | estimate |
-| **FLIGHT PAYLOAD** | **≈ 57 g** | |
+| **FLIGHT PAYLOAD** | **≈ 57 g** ⚠️ | **See D10: the PCB term was 3.6× too high, so this total is inflated by ~14.6 g — a corrected figure is nearer 42 g, but do NOT adopt it until the parts term is re-measured. Envelope choice (36–40 in latex) is derived from this number.** |
 
 That is **~4× the old target**. Nobody re-derived the lift when the design moved
 from a 50×40 C3 board to the hub v9 — this document closes that gap.
