@@ -268,6 +268,92 @@ that **the board is ~10 % of payload, not ~45 %**, so shrinking it was never the
 figure in the same row (5.3 g of components is plausible but unverified), or the row is only half-fixed.
 **That is the next task, and it must be done as one measurement, not two edits.**
 
+## D11 — D7 (the GND breaks): measured. A stitching via does NOT fix it; the refuted hypothesis is recorded.
+
+**Decision:** D7 needs a **zone/pour-rule change**, not a stitching via. The stitching attempt is
+**refuted and withdrawn**, and the tooling that produced it is kept with its finding recorded.
+
+### What the GND pour actually looks like (measured, `pcbnew`, board `/tmp/hub_refilled.kicad_pcb`)
+
+```
+GND_PLANE_F.Cu    6 filled islands
+GND_PLANE_In1.Cu  2 filled islands
+GND_PLANE_B.Cu    1 filled island
+```
+
+**F.Cu island areas (mm²):**
+
+```
+island 5: 3543.334   <- THE MAIN PLANE (98.7% of copper area)
+island 0:    8.615   <- orphan, centroid (53.70, 31.23)
+island 1:    1.428   <- orphan, centroid (53.35, 29.84)
+island 2:   15.734   <- orphan, centroid (51.07, 26.64)   the U4 escape zone
+island 3:    0.278   <- sliver, centroid (55.21, 27.26)
+island 4:    0.445   <- sliver, centroid (25.77,  2.89)
+```
+
+**Orphans total 26.5 mm² = 0.74 % of the plane.** All five sit around `U4`/`U1` — the dense copper
+where the routing work happened.
+
+### The refuted hypothesis
+
+**I hypothesised:** place a stitching via inside each orphan to tie it to `In1.Cu`, and DRC's
+`F.Cu ↔ F.Cu` unconnected item would clear.
+
+**Measured outcome — it does nothing:**
+
+```
+BEFORE:  F.Cu GND: 6 islands, areas=[3543.334, 15.734, 8.615, 1.428, 0.445, 0.278]
+AFTER:   F.Cu GND: 6 islands, areas=[3543.334, 15.734, 8.615, 1.428, 0.445, 0.278]
+DRC:     unconnected items 4 -> 4   (unchanged)
+```
+
+**Why:** a stitching via is a **vertical** connection. It does not merge two disjoint **same-layer**
+outlines. The DRC `F.Cu ↔ F.Cu` item is about same-layer continuity, so a via cannot address it.
+
+### And a second wrong assumption, also measured
+
+I then hypothesised the orphans were **stale fill** (RALPH rule #1) because
+`GetIslandRemovalMode = 0` = `ISLAND_REMOVAL_MODE_ALWAYS`.
+
+**Refilling changes nothing:**
+
+```
+after refill: 6 islands, areas=[3543.334, 15.734, 8.615, 1.428, 0.445, 0.278]
+```
+
+**Why they survive a refill:** island removal drops islands with **no connection to the net anywhere in
+the stack**. These five are each tied down to `In1.Cu`, so KiCad correctly keeps them. **The fill is not
+stale.** Rule #1 was applied and cleared the fill as a suspect.
+
+### Where that leaves D7
+
+**Two candidate fixes, neither yet attempted:**
+
+1. **Widen the pour's local clearance** so the fragments merge into the main plane. Costs copper
+   clearance margin in the densest area of the board — needs a fab question if it crosses 0.20 mm.
+2. **Add a short GND F.Cu track** across each fragment boundary, merging outlines on the same layer.
+   This is what the vertical via could not do. Must be checked against the 0.20 mm rule and must not
+   create a `tracks_crossing`.
+
+**Option 2 is the direct fit for the DRC item and is the next step.** It is cheap: 4 fragments above
+`0.20 mm²`, total copper 26 cm²… no — total **26.5 mm²**, i.e. a few short tracks.
+
+### Tooling
+
+`tracker/hardware/stitch_gnd_islands.py` is kept. Its **measurement** half (island enumeration, areas,
+per-island legal-via search, and the two-via `0.800 mm` centre-to-centre check) is correct and reusable.
+Its **remedy** half (place a via) is the refuted part and is marked as such in the header. It also
+reports island 2/3/4 as `BLOCKED — no legal via site`, which was true and is now moot.
+
+**Known-good via sites it found, if a vertical tie is ever wanted for return current:**
+`island2 (51.501, 26.344)` clearance `0.232` · `island0 (53.339, 30.012)` clearance `0.288` ·
+`island1 (53.478, 29.943)` clearance `0.212`. **But those first two are `0.155 mm` apart — ILLEGAL,
+need `0.800 mm`. That is the exact trap that broke routing runs 4-7, and it was caught only because the
+script checks new vias against previously placed ones.**
+
+---
+
 ## Standing risk flags for the fabricator
 
 1. **Via-in-pad at `U1.8`** — needs filled/capped specification, or relocate the via outside the pad.
