@@ -173,5 +173,5 @@ What it does not prove: that a soldered harness conducts. That is
   watcher-script variants); superseded by this one.
 * skill `esp32-rp2040-bootsel-control` — pin logic, pad identification, the full
   troubleshooting history.
-* `HARDWARE_CONNECTIONS.md`, `docs/FLIGHT-BOARD-AUTO-BOOTSEL.md` — soldering and
+* `docs/hardware/HARDWARE_CONNECTIONS.md`, `docs/FLIGHT-BOARD-AUTO-BOOTSEL.md` — soldering and
   circuit theory.

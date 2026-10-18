@@ -236,7 +236,7 @@ Direct wire lets ESP32 overpower the pull-up and drive to true 0V.
 
 - `docs/adr/015-three-board-hardware-strategy.md` — Three-board architecture decision
 - `docs/FLIGHT-BOARD-AUTO-BOOTSEL.md` — BOOTSEL circuit design (VERIFIED WORKING)
-- `HARDWARE_CONNECTIONS.md` — Detailed soldering instructions
+- `docs/hardware/HARDWARE_CONNECTIONS.md` — Detailed soldering instructions
 - `mesh-stack/flrc-bench-espidf/THROUGHPUT-OPTIMIZATION-PLAN.md` — Optimization phases
 - `mesh-stack/flrc-bench-espidf/main/fast_rx.cpp` — ESP32-C3 raw SPI bypass reference
 - `firmware/rp2040/src/radio.cpp` — RP2040 raw SPI driver

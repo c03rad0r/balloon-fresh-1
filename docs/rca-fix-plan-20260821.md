@@ -2,7 +2,7 @@
 
 Date: 2026-08-21. Consultant RCA (glm-5.2, 31 API calls, verified against code,
 git history, RadioLib LR2021 module, balloon-range-tests 9b740aa) + same-day
-empirical spot-tests (flrc-retest-20260821.md).
+empirical spot-tests (docs/bench/flrc-retest-20260821.md).
 
 ## BUG 1 — LoRa LEN=511: RESOLVED, no fw defect
 - bench.c:688 correctly refuses LEN>255 LoRa (255 = uint8_t silicon limit in
@@ -85,7 +85,7 @@ The acceptance criteria at the end of this plan are unmet, not waived.
 |-----|---------|----------|
 | BUG 1 — LoRa LEN=511 | **RESOLVED (code), host-verified** | the cap is real and per-modulation: LoRa `pld_len_in_bytes` is a `uint8_t` (`third_party/Radio/lr20xx_driver/inc/lr20xx_radio_lora_types.h:247`), FLRC is `uint16_t` with documented range `[6:511]` (`.../lr20xx_radio_flrc_types.h:210`). Firmware TX gate is on `main` (`src/bench.c:786-790`); the RX parity gate + shared predicate is `fix/t2-rx-start-len-gate` (69dfd17); host-side START-reply fail-fast + LoRa cap + FLRC LEN section is `fix/t1-sweep-start-validation` (2e4a2c6). Hardware confirmation still pending (FIX-T7). |
 | BUG 2 — FLRC CRC (Match123 + FIFO hygiene) | **IMPLEMENTED, hardware-UNVERIFIED** | Match123 + golden-byte host tests: `fix/t3-flrc-match123` (a1fcd27). RX FIFO clear per re-arm + TX FIFO clear: `fix/t4-fifo-clear` (07dbb8d). Both are branch-local — neither is an ancestor of `main`, so `main` still carries `RX_MATCH_SYNCWORD_1`. The "100 % chip CRC failure" claim has NOT been re-measured on hardware. |
-| BUG 3 — LEN=255 exact boundary fail + +35 dB RSSI step | **OPEN / UNMEASURED** | the only evidence is the 2026-08-21 spot-test data (`flrc-retest-20260821.md`). The FIX-T6 bisect (LEN 253-257 @BR1300 PA10) never ran. If the +35 dB step survives the Match123 fix it is a separate firmware finding, not a Match123 artefact. |
+| BUG 3 — LEN=255 exact boundary fail + +35 dB RSSI step | **OPEN / UNMEASURED** | the only evidence is the 2026-08-21 spot-test data (`docs/bench/flrc-retest-20260821.md`). The FIX-T6 bisect (LEN 253-257 @BR1300 PA10) never ran. If the +35 dB step survives the Match123 fix it is a separate firmware finding, not a Match123 artefact. |
 
 ### Line-reference corrections for the BUG sections above
 

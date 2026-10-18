@@ -1010,7 +1010,7 @@ Each discovery is tagged with relevance categories so tracks know if it applies 
 
 ### [balloon-hermes] chore: commit pending track work — FLRC fixes, board lock tooling, coordination  (2026-08-05) | tags: RADIO
 - **Commit:** `0292aec` by Felix
-- **Files:** BOARD_LOCK_DELIVERABLES.md, FLRC_RP2040_FIXES_SUMMARY.md, Makefile (+9 more)
+- **Files:** docs/reports/BOARD_LOCK_DELIVERABLES.md, docs/hardware/FLRC_RP2040_FIXES_SUMMARY.md, Makefile (+9 more)
 - **Full message:** chore: commit pending track work — FLRC fixes, board lock tooling, coordination docs
 - **Relevance:** RADIO
 

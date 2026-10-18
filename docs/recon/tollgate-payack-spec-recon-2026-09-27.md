@@ -23,7 +23,7 @@ enumerate:
 | Upstream audit | `docs/tollgate-payack-upstream-audit-2026-09-14.md` (commit `a9b9126f`) | Verdict **(b)**: only incidental references upstream; canonical definition lives in the balloon workspace |
 | Six-symbol accounting | `docs/tollgate-six-symbol-grep-accounting-2026-09-14.md` (commit `b3ebd969`) | Per-symbol hit tables + counts; every real hit in the 3 balloon-family trees |
 | Missed-location probe | `docs/tollgate-missed-location-probe-2026-09-15.md` | Probed bare-git/git-object blind spots + the never-searched `~/repos/tollgate` spec repo |
-| Contract (rev 2) | `TOLLGATE_PROTO_CONTRACT.md` (§0.4 lineage) | Normative contract for the balloon header; records `~/repos/balloon-fresh/` does not exist |
+| Contract (rev 2) | `docs/tollgate/TOLLGATE_PROTO_CONTRACT.md` (§0.4 lineage) | Normative contract for the balloon header; records `~/repos/balloon-fresh/` does not exist |
 
 **Verdict for this task: no upstream normative spec; only the balloon-local draft
 (functional, not a mock).** A new header must be specified de novo and reconciled
@@ -118,18 +118,19 @@ plus `tollgate_payment_proto.h` with `tollgate_ack_payload_t`, `tollgate_nack_pa
 mocks, not stubs.** Caveats that matter for "is this normative?":
 - It exists in **two divergent copies** (payload conventions differ: packed ACK struct vs
   JSON payloads) with no single normative source other than the prose contract
-  `TOLLGATE_PROTO_CONTRACT.md` (rev 2) — which itself records two open deviations
+  `docs/tollgate/TOLLGATE_PROTO_CONTRACT.md` (rev 2) — which itself records two open deviations
   (DEF-1: `encode(NULL, len>0)` succeeds where the contract says −1; DEF-2: `decode(hdr==NULL)`
   dereferences NULL).
 - Its ADR citation is misleading: `docs/adr/100-tollgate-over-fips-mesh-udp.md` decides
   *transport* (TollGate payment messages ride UDP over the FIPS mesh, not direct LR2021).
   It defines **no** header, message type, or encoding — the format lives only in code
-  comments + `TOLLGATE_PROTO_CONTRACT.md`.
+  comments + `docs/tollgate/TOLLGATE_PROTO_CONTRACT.md` (then at the repo root; moved
+  2026-10-18).
 - One soft spot flagged by prior recon: `app_task.cpp` ACK path has
   `ack_payload.price_sats = 0; /* TODO: real price from config */` — a functional stub
   *inside* an otherwise real struct.
 
-Path correction (consistent with the prior audit and `TOLLGATE_PROTO_CONTRACT.md` §0):
+Path correction (consistent with the prior audit and `docs/tollgate/TOLLGATE_PROTO_CONTRACT.md` §0):
 **`~/repos/balloon-fresh/` does not exist on this machine.** The task's referenced tree is
 `~/repos/balloon` (branch `autonomous/mesh-baseline`); `balloon-e80bench` (branch `main`)
 is the pushable clone of the same remote.
@@ -188,7 +189,8 @@ families (Nostr-event+HTTP; CBOR channels) both differ in shape from the balloon
 ## 4. Bottom line for whoever writes the header
 
 1. Do **not** claim an upstream spec exists — it does not. The balloon 8-byte header is a
-   local invention; its only normative documentation is `TOLLGATE_PROTO_CONTRACT.md` (rev 2).
+   local invention; its only normative documentation is
+`docs/tollgate/TOLLGATE_PROTO_CONTRACT.md` (rev 2).
 2. Any new header must be **specified de novo** and explicitly reconciled against:
    `TIP-02`/`HTTP-01` (token-over-transport, 200 + kind-1022, 21023 on error) and
    `tollgate-rs` CBOR framing (2-byte LE prefix, 15 typed messages) — with a stated reason

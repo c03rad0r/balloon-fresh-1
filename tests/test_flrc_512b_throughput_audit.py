@@ -76,7 +76,7 @@ def test_fw_cr34_model_matches_the_driver_numerator():
 
 
 def test_fw_cr34_cross_checks_the_repo_on_air_figure():
-    """full-sweep-report-20260821-175612.md computes 1921.8 kbps on air for
+    """docs/bench/full-sweep-report-20260821-175612.md computes 1921.8 kbps on air for
     BR2600 L511 @ CR3/4 from the sweep data; the independent numerator model
     must agree to within 1 %."""
     assert M.fw_goodput_ceiling_kbps(511) == pytest.approx(1921.8, rel=0.01)

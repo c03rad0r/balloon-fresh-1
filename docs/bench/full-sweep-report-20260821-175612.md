@@ -40,8 +40,8 @@
 
 ## Files
 
-- Summary CSV: `full-sweep-summary-20260821-175612.csv`
-- Per-packet CSV: `full-sweep-pkts-20260821-175612.csv`
+- Summary CSV: `data/sweeps/2026-08-21/full-sweep-summary-20260821-175612.csv`
+- Per-packet CSV: `data/sweeps/2026-08-21/full-sweep-pkts-20260821-175612.csv`
 - Script: `firmware/e80-stm32-bench/tools/e80_sweep_full.py`
 
 ## Notes

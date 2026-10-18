@@ -106,7 +106,7 @@ pre-existing. With builders (no key added) the parity test is green and the full
 
 ### Still open (no hardware, not measurable today)
 
-**M1 — the +35 dB RSSI step at LEN ≥ 255** (`flrc-retest-20260821.md`: −69 → −34 dBm
+**M1 — the +35 dB RSSI step at LEN ≥ 255** (`docs/bench/flrc-retest-20260821.md`: −69 → −34 dBm
 at the same link budget, with LEN=255 the only CRC-failing length at both BRs).
 Whether the Match123 fix also removes the RSSI discontinuity is exactly what the
 resumed run must record per LEN. If it persists after Match123, it is a separate

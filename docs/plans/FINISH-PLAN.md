@@ -149,7 +149,7 @@
 - [x] Fix board name "XIAO" → "ESP32-C3_Mini_V1" in execution-checklist.md
 - [x] Update FINISH-PLAN.md workstream statuses (W1-W7 → DONE)
 - [x] Mark `tracker/firmware/components/lr2021/` as deprecated (already removed)
-- [ ] Update `IMPLEMENTATION-PLAN.md` to reflect actual completion status
+- [ ] Update `docs/plans/IMPLEMENTATION-PLAN.md` to reflect actual completion status
 - [x] Fix absolute-path symlink for `EspHalC3.h` in ground station (now relative)
 - [x] Add `README.md` to `tracker/firmware/components/crypto/` explaining it's reserved for future use
 
@@ -257,7 +257,7 @@ Phase 5 (Advanced):
 
 | Work Stream | Status | What's Left |
 |-------------|--------|-------------|
-| W8: Clean up | IN PROGRESS | Update IMPLEMENTATION-PLAN.md |
+| W8: Clean up | IN PROGRESS | Update docs/plans/IMPLEMENTATION-PLAN.md |
 | W10: GS pipeline integration | PENDING | FIPS decrypt + defragmentation in gs_main.cpp |
 
 ## Key Risks

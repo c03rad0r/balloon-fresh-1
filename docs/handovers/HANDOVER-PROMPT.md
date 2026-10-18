@@ -215,8 +215,8 @@ RP2040 #2:   USB 2e8a:0003 (BOOTSEL mode)
 - `docs/HARDWARE-COMBO-PLAN.md` — Comprehensive combo test plan (in worktree `lr2021-hardware-combo-plan`, may need cherry-picking to master)
 - `docs/SPEED-TEST-PLAN-2G4.md` — 2.4 GHz speed test with throughput analysis
 - `docs/TOOLCHAIN-DEBUGGING.md` — Toolchain issues and fixes
-- `IMPLEMENTATION-PLAN.md` — Master checklist
-- `FINISH-PLAN.md` — Work streams to finish
+- `docs/plans/IMPLEMENTATION-PLAN.md` — Master checklist
+- `docs/plans/FINISH-PLAN.md` — Work streams to finish
 - `mesh-stack/ROADMAP.md` — Mesh network architecture and link budgets
 
 ### Commits On Master

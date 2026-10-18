@@ -6,9 +6,10 @@
 > (`65a46fd1`), the mock was **removed**, and the test now exercises the real
 > implementation with a bare `#include "tollgate_payment_proto.h"`
 > (`test_relay_pipeline.c:75-83`). This file is retained as the historical input to
-> `TOLLGATE_PROTO_CONTRACT.md` §0.1 and the delta record for the mock→real transition — it is
+> `docs/tollgate/TOLLGATE_PROTO_CONTRACT.md` §0.1 and the delta record for the mock→real transition — it is
 > **not** the current contract. For the current contract see
-> `tracker/firmware/TOLLGATE_PROTO_API.md` and repo-root `TOLLGATE_PROTO_CONTRACT.md`.
+> `tracker/firmware/TOLLGATE_PROTO_API.md` and `docs/tollgate/TOLLGATE_PROTO_CONTRACT.md`
+> (repo root until 2026-10-18).
 
 Date: 2026-09-14
 Branch: `autonomous/mesh-baseline` (worktree `/home/c03rad0r/repos/balloon`)
@@ -463,7 +464,7 @@ and the success predicate (`== 0` → `> 0`) changed.
 
 The header now exists (`tracker/firmware/main/tollgate_payment_proto.h`,
 created `65a46fd1`, hardened `38360fb1`; authoritative contract in
-`TOLLGATE_PROTO_CONTRACT.md` at repo root). Recording the questions the mock
+`docs/tollgate/TOLLGATE_PROTO_CONTRACT.md`, then at the repo root). Recording the questions the mock
 left open, with the observed answers, because the two are **not
 wire-compatible** and any future reader must know where the mock contract
 was superseded:

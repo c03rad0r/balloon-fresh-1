@@ -3,7 +3,7 @@ Probes: TX=148757200D2D1425 RX=203584200D2D0D42  50 pkts/config
 Ports: TX=/dev/ttyUSB3 RX=/dev/ttyUSB4
 Configs: 113
 ==========================================================================================
-meta -> /home/c03rad0r/repos/balloon-e80bench/full-sweep-results-2g4-meta-20260822-210817.json
+meta -> data/sweeps/2026-08-22/full-sweep-results-2g4-meta-20260822-210817.json  (in-repo copy; the e80bench worktree path dated from the run)
 [1/113] SF5 BW125 PA10 ... rx=50/50 rssi=-40.0 snr=9.9 crc=0 done=True
 [2/113] SF6 BW125 PA10 ... rx=50/50 rssi=-40.0 snr=12.8 crc=0 done=True
 [3/113] SF7 BW125 PA10 ... rx=50/50 rssi=-40.0 snr=14.6 crc=0 done=True
@@ -118,6 +118,6 @@ meta -> /home/c03rad0r/repos/balloon-e80bench/full-sweep-results-2g4-meta-202608
 [112/113] 2G4 SF8 BW125 @ 2460MHz ... rx=47/50 rssi=-37.0 snr=16.0 crc=0 done=True
 [113/113] 2G4 SF8 BW125 @ 2480MHz ... rx=49/50 rssi=-39.0 snr=16.0 crc=0 done=True
 
-Summary CSV: /home/c03rad0r/repos/balloon-e80bench/full-sweep-results-2g4-summary-20260822-210817.csv
-Per-packet CSV: /home/c03rad0r/repos/balloon-e80bench/full-sweep-results-2g4-pkts-20260822-210817.csv
-Markdown report: /home/c03rad0r/repos/balloon-e80bench/full-sweep-results-2g4-report-20260822-210817.md
+Summary CSV: data/sweeps/2026-08-22/full-sweep-results-2g4-summary-20260822-210817.csv  (in-repo copy; the e80bench worktree path dated from the run)
+Per-packet CSV: data/sweeps/2026-08-22/full-sweep-results-2g4-pkts-20260822-210817.csv  (in-repo copy; the e80bench worktree path dated from the run)
+Markdown report: docs/bench/full-sweep-results-2g4-report-20260822-210817.md  (in-repo copy; the e80bench worktree path dated from the run)
