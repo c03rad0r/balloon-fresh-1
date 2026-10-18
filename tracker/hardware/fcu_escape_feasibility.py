@@ -570,17 +570,29 @@ def measure(board, rules, ref, num):
         else:
             smallest = min(vias)
             near = vias[smallest]["near"]
-            short = rules.clearance - near["margin"]
-            binding = near["cu_by"] or near["appr_by"]
+            # which of the three constraints actually fails, and by how much?
+            parts = [
+                ("copper clearance", near["cu"], rules.clearance, near["cu_by"]),
+                ("hole-to-hole", near["h2h"], rules.hole_to_hole, ("hole", near["h2h_by"])),
+                ("F.Cu pad-to-via approach", near["appr"], rules.clearance, near["appr_by"]),
+            ]
+            bind_name, bind_achieved, bind_need, binding = min(parts, key=lambda t: t[1] - t[2])
+            short = bind_need - bind_achieved
+            if binding and len(binding) >= 3:
+                bind_what = "%s %s" % (binding[1], binding[2])
+            elif binding:
+                bind_what = "%s %s" % (binding[0], binding[1])
+            else:
+                bind_what = "n/a"
             verdict = {
                 "kind": "BLOCKED",
                 "fcu_escaped": False,
                 "text": "NOT ESCAPABLE at current rules",
-                "detail": ("best dogbone via candidate (dia %.2f mm) misses by %.4f mm on "
-                           "copper clearance (%.3f mm required, %.3f mm achieved); "
-                           "tightest neighbour: %s"
-                           % (smallest, short, rules.clearance,
-                              near["margin"], ("%s %s" % (binding[1], binding[2])) if binding else "n/a")),
+                "detail": ("best dogbone via candidate (dia %.2f mm, R=%.2f mm @%.0f deg) "
+                           "misses by %.4f mm on the %s rule (%.3f mm required, %.4f mm "
+                           "achieved); tightest neighbour: %s"
+                           % (smallest, near["R"], near["deg"], short, bind_name,
+                              bind_need, bind_achieved, bind_what)),
                 "binds": binding,
                 "short_by": short,
             }
