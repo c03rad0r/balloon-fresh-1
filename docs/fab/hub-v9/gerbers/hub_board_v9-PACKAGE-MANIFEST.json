@@ -1,5 +1,5 @@
 {
-  "source_board": "/home/c08r4d0r/worktrees/u1-footprint/tracker/hardware/hub_board_v9.kicad_pcb",
+  "source_board": "/home/c08r4d0r/worktrees/master-check/tracker/hardware/hub_board_v9.kicad_pcb",
   "source_sha256": "e55a294628fd38a73e5006fa7fa9138958ab986812b167263a9d130d661c93dd",
   "packaged_board": "hub_v9.kicad_pcb",
   "footprints": 59,
