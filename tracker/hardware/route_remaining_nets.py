@@ -137,13 +137,23 @@ class Model:
 
 
 def astar(model, layer, own_code, start, goal, margin=None, grid=GRID):
+    """Grid A*.
+
+    GRID PHASE IS NOT COSMETIC. The first version derived x0 from the endpoints minus a margin,
+    which put cells at 50.275 + i*0.100 -- none of which is 54.450. The MISO corridor between U4's
+    thermal pad (right edge x=54.100) and the right pad column (left edge x=54.750) is only
+    0.650 - 0.200 - 2*0.200 = 0.050 mm wide, and its usable range is 54.400..54.450. A 0.100 grid
+    whose origin is arbitrary misses that entirely and reports "no path" on a corridor the shipped
+    board actually routes at x=54.450 (0.250 mm to the thermal pad, exactly 0.200 to the column).
+    So: align the origin to ABSOLUTE multiples of the step, via math.floor.
+    """
     if margin is None:
         # A route must be allowed to go around things, not just between endpoints.
         margin = max(4.0, 0.35 * math.hypot(goal[0] - start[0], goal[1] - start[1]))
-    x0 = min(start[0], goal[0]) - margin
-    y0 = min(start[1], goal[1]) - margin
-    nx = int(round((abs(start[0] - goal[0]) + 2 * margin) / grid)) + 1
-    ny = int(round((abs(start[1] - goal[1]) + 2 * margin) / grid)) + 1
+    x0 = math.floor((min(start[0], goal[0]) - margin) / grid) * grid
+    y0 = math.floor((min(start[1], goal[1]) - margin) / grid) * grid
+    nx = int(math.ceil((max(start[0], goal[0]) + margin - x0) / grid)) + 1
+    ny = int(math.ceil((max(start[1], goal[1]) + margin - y0) / grid)) + 1
 
     def cell(p):
         return (int(round((p[0] - x0) / grid)), int(round((p[1] - y0) / grid)))
@@ -242,7 +252,31 @@ def main():
     # Model with MISO + DIO1's F.Cu removed: the state in which MOSI/SCK must escape.
     m = Model(tracks, vias, pads, r_track, ignore_f_of=set(RIP_F))
 
+    # NETS MUST SEE EACH OTHER. The first version routed every net against the SAME static model,
+    # so /SX1280_SCK and /SX1280_DIO1 were invisible to each other and the board came back with
+    # 5 shorting_items, 4 clearance violations at 0.0236mm, and 2 tracks_crossing. An A* that does
+    # not add its own result to the obstacle set is not a router, it is four independent line
+    # drawers. After each successful path, commit its segments into the model.
+    def commit_to_model(mdl, layer, own_code, pts, netname):
+        for i in range(len(pts) - 1):
+            (x1, y1), (x2, y2) = pts[i], pts[i + 1]
+            mdl.segs[layer].append(Seg(x1, y1, x2, y2, TRACK_W / 2 + r_track, netname, own_code, layer))
+
     plan = []
+
+    # ORDER MATTERS. With nets visible to each other, the FIRST routed net wins the contested
+    # space. Routing SCK before DIO1 starved DIO1 (the longest span, U4.8 -> U1.33) into "no path".
+    # So: longest/most-constrained first.
+    # 0. DIO1 first: U4.8 -> U1.33 (~15mm, crosses the whole board)
+    print("\n--- /SX1280_DIO1  U4.8 -> U1.33  (F.Cu) ---")
+    path, err = astar(m, "F.Cu", codes["/SX1280_DIO1"], u4_8, u1_33)
+    if path:
+        pts = simplify(path)
+        print(f"    {len(path)} cells -> {len(pts)-1} segments")
+        plan.append(("track", "/SX1280_DIO1", "F.Cu", pts))
+        commit_to_model(m, "F.Cu", codes["/SX1280_DIO1"], pts, "/SX1280_DIO1")
+    else:
+        print(f"    FAILED on F.Cu: {err}")
 
     # 1. SCK on F.Cu: U4.18 -> U1.22
     print("\n--- /SX1280_SCK  U4.18 -> U1.22  (F.Cu) ---")
@@ -251,6 +285,7 @@ def main():
         pts = simplify(path)
         print(f"    {len(path)} cells -> {len(pts)-1} segments")
         plan.append(("track", "/SX1280_SCK", "F.Cu", pts))
+        commit_to_model(m, "F.Cu", codes["/SX1280_SCK"], pts, "/SX1280_SCK")
     else:
         print(f"    FAILED: {err}")
         plan.append(("fail", "/SX1280_SCK", None, None))
@@ -261,31 +296,101 @@ def main():
     #    and it is not routable on F.Cu anyway.
     MISO_VIA = (54.275, 24.400)
     print(f"\n--- /SX1280_MISO  U4.16 -> existing via {MISO_VIA}  (F.Cu stub) ---")
-    path, err = astar(m, "F.Cu", codes["/SX1280_MISO"], u4_16, MISO_VIA)
+    path, err = astar(m, "F.Cu", codes["/SX1280_MISO"], u4_16, MISO_VIA, grid=0.025)
     if path:
         pts = simplify(path)
         print(f"    {len(path)} cells -> {len(pts)-1} segments")
         plan.append(("track", "/SX1280_MISO", "F.Cu", pts))
+        commit_to_model(m, "F.Cu", codes["/SX1280_MISO"], pts, "/SX1280_MISO")
     else:
         print(f"    FAILED on F.Cu: {err}")
 
-    # 3. DIO1 restored: U4.8 -> U1.33
-    print("\n--- /SX1280_DIO1  U4.8 -> U1.33  (F.Cu) ---")
-    path, err = astar(m, "F.Cu", codes["/SX1280_DIO1"], u4_8, u1_33)
+    # 4. MOSI: F.Cu stub from the pad out to the via, then B.Cu to U1.8.
+    #    The via is 0.50/0.25 at 0.285 mm out from the pad edge (== m_ViasMinSize, so no waiver).
+    #    Measured legal on all four layers with MISO/DIO1 F.Cu removed.
+    MOSI_VIA = (55.855, 25.250)
+    print(f"\n--- /SX1280_MOSI  U4.17 -> via {MOSI_VIA} -> B.Cu -> U1.8 ---")
+    print(f"    via 0.50/0.25 at 0.285 mm from the pad edge (spans {MOSI_VIA[0]-0.25:.3f}..{MOSI_VIA[0]+0.25:.3f})")
+    plan.append(("track", "/SX1280_MOSI", "F.Cu", [u4_17, MOSI_VIA]))
+    plan.append(("via", "/SX1280_MOSI", None, [MOSI_VIA]))
+    for lyr in ("F.Cu", "In1.Cu", "In2.Cu", "B.Cu"):
+        m.segs[lyr].append(Seg(MOSI_VIA[0], MOSI_VIA[1], MOSI_VIA[0], MOSI_VIA[1],
+                               VIA_DIA / 2 + r_track, "/SX1280_MOSI", codes["/SX1280_MOSI"], lyr))
+    path, err = astar(m, "B.Cu", codes["/SX1280_MOSI"], MOSI_VIA, u1_8)
     if path:
         pts = simplify(path)
-        print(f"    {len(path)} cells -> {len(pts)-1} segments")
-        plan.append(("track", "/SX1280_DIO1", "F.Cu", pts))
+        print(f"    B.Cu: {len(path)} cells -> {len(pts)-1} segments")
+        plan.append(("track", "/SX1280_MOSI", "B.Cu", pts))
+        commit_to_model(m, "B.Cu", codes["/SX1280_MOSI"], pts, "/SX1280_MOSI")
     else:
-        print(f"    FAILED on F.Cu: {err}")
+        print(f"    FAILED on B.Cu: {err}")
 
     print("\n--- plan summary ---")
+    ok = True
     for kind, net, layer, pts in plan:
         if kind == "track":
             print(f"    {net:16s} {layer:6s} {len(pts)-1} segments")
+        elif kind == "via":
+            print(f"    {net:16s} via at {pts[0]}")
         else:
             print(f"    {net:16s} FAILED")
-    return 0
+            ok = False
+
+    if not args.apply:
+        print("\n(dry run -- pass --apply to write)")
+        return 0 if ok else 2
+
+    # ---- phase 2: reload, mutate, refill, save
+    print("\n--- APPLYING ---")
+    b2 = pcbnew.LoadBoard(args.inp)
+    code_of = {n: b2.FindNet(n).GetNetCode() for n in NETS}
+
+    rip_codes = {code_of[n] for n in RIP_F}
+    doomed = []
+    for t in list(b2.GetTracks()):
+        if t.GetNetCode() in rip_codes and t.Type() == pcbnew.PCB_TRACE_T and b2.GetLayerName(t.GetLayer()) == "F.Cu":
+            doomed.append(t)
+    for t in doomed:
+        b2.Remove(t)
+    print(f"  ripped {len(doomed)} F.Cu segments of {', '.join(RIP_F)}")
+
+    lyrmap = {"F.Cu": pcbnew.F_Cu, "In1.Cu": pcbnew.In1_Cu,
+              "In2.Cu": pcbnew.In2_Cu, "B.Cu": pcbnew.B_Cu}
+
+    def add_track(net, p0, p1, layer, width=TRACK_W):
+        t = pcbnew.PCB_TRACK(b2)
+        t.SetStart(pcbnew.VECTOR2I(int(round(p0[0] * UM)), int(round(p0[1] * UM))))
+        t.SetEnd(pcbnew.VECTOR2I(int(round(p1[0] * UM)), int(round(p1[1] * UM))))
+        t.SetWidth(int(round(width * UM)))
+        t.SetLayer(lyrmap[layer])
+        t.SetNet(b2.FindNet(net))
+        b2.Add(t)
+
+    def add_via(net, pos):
+        v = pcbnew.PCB_VIA(b2)  # PCB_VIA exists; PCB_TRACE does not
+        v.SetPosition(pcbnew.VECTOR2I(int(round(pos[0] * UM)), int(round(pos[1] * UM))))
+        v.SetWidth(int(round(VIA_DIA * UM)))
+        v.SetDrill(int(round(VIA_DRILL * UM)))
+        v.SetNet(b2.FindNet(net))
+        v.SetLayerPair(pcbnew.F_Cu, pcbnew.B_Cu)
+        b2.Add(v)
+
+    n_tr, n_vi = 0, 0
+    for kind, net, layer, pts in plan:
+        if kind == "track":
+            for i in range(len(pts) - 1):
+                add_track(net, pts[i], pts[i + 1], layer)
+                n_tr += 1
+        elif kind == "via":
+            add_via(net, pts[0])
+            n_vi += 1
+    print(f"  added {n_tr} segments, {n_vi} vias")
+
+    print("  refilling zones")
+    pcbnew.ZONE_FILLER(b2).Fill(b2.Zones())
+    pcbnew.SaveBoard(args.out, b2)
+    print(f"  saved {args.out}")
+    return 0 if ok else 2
 
 
 if __name__ == "__main__":
