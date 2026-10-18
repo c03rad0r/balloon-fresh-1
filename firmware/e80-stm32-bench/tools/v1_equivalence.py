@@ -27,6 +27,7 @@ import e80_campaign as camp
 
 PKTS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                          "..", "..", "..",
+                         "data", "sweeps", "2026-08-22",
                          "full-sweep-results-2g4-pkts-20260822-210817.csv")
 PKTS_FILE = os.path.abspath(PKTS_FILE)
 

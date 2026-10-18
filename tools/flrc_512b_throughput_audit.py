@@ -122,10 +122,16 @@ SWEEP_GLOBS = [
 ]
 
 
+# Sweep data lives in dated directories under data/sweeps/ (moved out of the repo root
+# on 2026-10-18). The repo root is still searched so an un-filed sweep is not missed.
+SWEEP_DIRS = ("", os.path.join("data", "sweeps", "*"))
+
+
 def _summary_paths(root: str) -> list[str]:
     out: list[str] = []
-    for pat in SWEEP_GLOBS:
-        out.extend(sorted(glob.glob(os.path.join(root, pat))))
+    for sub in SWEEP_DIRS:
+        for pat in SWEEP_GLOBS:
+            out.extend(sorted(glob.glob(os.path.join(root, sub, pat))))
     return out
 
 
