@@ -60,8 +60,18 @@ def git(*args: str) -> str:
 
 
 def root_loose() -> list[str]:
-    out = git("ls-tree", "--name-only", "HEAD")
-    return [p for p in out.split("\n") if p and not p.endswith("/")]
+    """Only BLOB (file) entries at the root -- `git ls-tree --name-only` also lists trees (directories),
+    which the first version of this tool mistook for loose files and then tried to read as text."""
+    out = git("ls-tree", "HEAD")
+    files = []
+    for line in out.split("\n"):
+        if not line.strip():
+            continue
+        meta, _, path = line.partition("\t")
+        parts = meta.split()
+        if len(parts) >= 2 and parts[1] == "blob":
+            files.append(path)
+    return files
 
 
 def files_sharing_basename(name: str) -> int:
@@ -145,13 +155,24 @@ def referrers(name: str, qualified_only: bool) -> list[str]:
 
 def main() -> int:
     loose = root_loose()
-    groups = {
-        "MARKDOWN": [f for f in loose if f.endswith(".md")],
-        "DATA": [f for f in loose if f.endswith(DATA_EXT)],
-        "CODE": [f for f in loose if f.endswith(CODE_EXT)],
-    }
 
-    for label, items in groups.items():
+    # GROUP BY EXTENSION, BUT DO NOT RESTRICT TO A WHITELIST. The first version grouped only
+    # .md / .csv+.json+.rpt / .py -- so it reported "total loose at root: 45" and MISSED three KiCad
+    # scratch files that have no recognised extension at all: a board literally named `test` with NO
+    # extension, plus `test.kicad_prl` and `test.kicad_pro`. A whitelist cannot see what it did not
+    # anticipate; this now buckets EVERY root entry that is not in KEEP.
+    groups: dict[str, list[str]] = {}
+    for f in loose:
+        if f in KEEP:
+            groups.setdefault("KEEP (policy)", []).append(f)
+            continue
+        ext = f.rsplit(".", 1)[-1] if "." in f else "(none)"
+        label = {"md": "MARKDOWN", "csv": "DATA", "json": "DATA", "rpt": "DATA",
+                 "py": "CODE", "(none)": "NO EXTENSION"}.get(ext, f"OTHER (.*{ext})")
+        groups.setdefault(label, []).append(f)
+
+    for label in sorted(groups):
+        items = groups[label]
         print(f"\n{'='*76}\n{label}  --  {len(items)} file(s)\n{'='*76}")
         for f in sorted(items):
             if f in KEEP:
