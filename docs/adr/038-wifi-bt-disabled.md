@@ -167,7 +167,7 @@ With Wi-Fi/BT disabled, **all** 2.4 GHz use on the payload falls under the opera
 with a **licence-exempt** Wi-Fi/BT transmitter (different regulatory regimes — EN 300 328
 short-range-device rules vs the amateur allocation). This decision removes that mixing.
 The amateur-licence position itself is the subject of a separate worker's
-`docs/REGULATORY-AMATEUR-LICENCE.md`; this ADR records the class of issue (single-regime
+`docs/link/REGULATORY-AMATEUR-LICENCE.md`; this ADR records the class of issue (single-regime
 2.4 GHz) and does not redo that work. ADR-034's open item on 433 MHz power legality in DE
 is unaffected and remains open.
 

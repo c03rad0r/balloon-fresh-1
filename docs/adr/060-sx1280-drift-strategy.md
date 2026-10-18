@@ -363,7 +363,7 @@ mass problem):
 
 - **Mass — `ESTIMATE`.** A plain 52 MHz TCXO (3.2 × 2.5 mm or 2.5 × 2.0 mm class ceramic),
   a load switch (SOT-23-5 or SC70), plus an AC-coupling cap and decoupling. By the repo's
-  own package-mass analogues (`docs/PAYLOAD-WEIGHT-ESTIMATES.md`: SOT-23-5 = **40 mg**,
+  own package-mass analogues (`docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md`: SOT-23-5 = **40 mg**,
   1206 = 30 mg, 0805 = 15 mg, 0402 = **2.5 mg**; the whole V1 SMD set = **137.5 mg**), this
   is a **tens-of-milligrams** item. `TODO(unverified)`: no TCXO or load-switch *unit mass*
   is committed in the repo, so the sum is an estimate by package analogue, not a cited

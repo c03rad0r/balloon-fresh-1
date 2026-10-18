@@ -83,5 +83,5 @@ nak req -k 9 -t h=balloon-range-tests ws://100.90.101.9:7780
 
 1. Wire NIP-29 posting into kanban task completion flow — auto-post [STATUS] when tasks complete
 2. Set up a cron job to poll relay for cross-track messages and surface them in Signal
-3. When other friends set up their own Hermes instances, share the handover guide (docs/nip29-relay-sharing-handover.md) and add their pubkeys to relevant groups
+3. When other friends set up their own Hermes instances, share the handover guide (docs/nostr/nip29-relay-sharing-handover.md) and add their pubkeys to relevant groups
 4. Consider auto-posting status summaries every 6h to balloon-orch

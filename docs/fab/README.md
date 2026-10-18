@@ -51,7 +51,7 @@ Dependency-ordered gap list across all three boards, from an independent visual/
 
 | item | state |
 |---|---|
-| **`U1.41` — the radio's exposed ground pad** | **has no net** (pad-number mismatch); an electrical defect |
+| ~~`U1.41` — the radio's exposed ground pad has no net~~ | **DISPROVEN 2026-10-17 — not a defect.** The thirteen `41` pads are a thermal-via array **all on `GND`**; the nine unnamed pads are `F.Paste`-only stencil apertures with **no copper**. See `U1-FOOTPRINT-DIAGNOSIS.md` |
 | **Schematic ERC** | **20 errors** — 12 floating `U_CUT1–4` pins, `U4`'s two power pins undriven |
 | **Wing joint geometry** | **OPEN** — ADR-046 §4.2.1; the board is Option B, the ADR recommends Option A |
 | **Interface drawing** | **HELD** — no interface drawing goes to a fabricator while the geometry is undecided |

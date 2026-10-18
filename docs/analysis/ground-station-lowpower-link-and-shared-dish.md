@@ -60,7 +60,7 @@ from "a small boresighted 433 antenna on the Ku positioner". So:
 > FLRC range."* That strengthens, not weakens, the conclusion: FLRC is a close-range mode.
 
 FLRC is a **short-range, high-rate** mode in this project's own budget
-(`docs/link-budget.md`: "FLRC @ 1.3 Mbps … → Distanz ~25–30 km … perfekt fuer direkten
+(`docs/link/link-budget.md`: "FLRC @ 1.3 Mbps … → Distanz ~25–30 km … perfekt fuer direkten
 Ueberflug"). If that stays true, the refutation never binds and the architecture stands.
 
 ---
@@ -261,7 +261,7 @@ regulatory design point, and it is worth stating plainly:
 * The **committed design point** (ADR-039 "Licence-Exempt 433 MHz Design Point", ADR-041)
   caps the balloon's 433 transmitter at **10 mW ERP with an integral antenna** =
   **+10 dBm ERP = +12.15 dBm EIRP** (`docs/LINK-BUDGET-LICENCE-EXEMPT.md` §0, sourced to
-  `docs/SOLAR-PIN-REGULATORY.md` §3.2 → **ERC Recommendation 70-03, Annex 1**, primary
+  `docs/link/SOLAR-PIN-REGULATORY.md` §3.2 → **ERC Recommendation 70-03, Annex 1**, primary
   source <https://docdb.cept.org> / the LPD433 band definition
   <https://en.wikipedia.org/wiki/LPD433>).
 * **+12.15 dBm EIRP lies below the operator's own +13 dBm low end.** Under the
@@ -457,7 +457,7 @@ Prefer mounting beside/under the dish on the same az/el head rather than across 
 
 4. **Treat FLRC as a short-range mode, and say so in the design.** FLRC at 650 km needs
    +9 to +28 dBi (§2b). If FLRC is only used for nearby high-rate passes (as
-   `docs/link-budget.md` already assumes: ~25–30 km), the architecture is confirmed.
+   `docs/link/link-budget.md` already assumes: ~25–30 km), the architecture is confirmed.
 
 5. **THE ONE CASE THAT CHANGES THE ANSWER — state it and own it:** if the 650 km downlink
    must carry **FLRC at low power (≤ +19 dBm), or any FLRC rate ≥ 1 Mbps**, then the 433
@@ -487,7 +487,7 @@ long-range / low-power case, where the 433 antenna must become a dish.
 6. `TODO(unverified)` `docs/LINK-BUDGET-LICENCE-EXEMPT.md` §0 already flags the exact
    ERC Rec 70-03 Annex 1 row / duty-cycle condition for 2.4 GHz wideband — inherited.
 7. Horizon caveat: 650 km at 30 km altitude is slightly **beyond** the geometric radio
-   horizon `√(2Rh) = 618 km` (the repo uses this formula, `docs/link-budget.md`) but
+   horizon `√(2Rh) = 618 km` (the repo uses this formula, `docs/link/link-budget.md`) but
    within the standard 4/3-Earth refraction horizon (~714 km). 650 km is taken as given
    by the task; it is physically plausible with atmospheric refraction.
 

@@ -36,9 +36,9 @@ the full carrier with a spine-and-ribs frame takes the array to **12.85 g** (−
 
 | Constant | Value | Provenance |
 |---|---|---|
-| FR4 density | **1.85 g/cm³** | **CITED** — `docs/PAYLOAD-WEIGHT-ESTIMATES.md` line 20 ("FR4 density: 1.85 g/cm³") |
+| FR4 density | **1.85 g/cm³** | **CITED** — `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` line 20 ("FR4 density: 1.85 g/cm³") |
 | Substrate thickness | **0.6 mm** | **CITED** — ADR-046 §3.2; `docs/hardware-design.md` line 63 |
-| Finished-board uplift | **×1.15** | **CITED** — `docs/PAYLOAD-WEIGHT-ESTIMATES.md` line 20 ("Finished board adds ~15 % for copper, soldermask, silkscreen") |
+| Finished-board uplift | **×1.15** | **CITED** — `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` line 20 ("Finished board adds ~15 % for copper, soldermask, silkscreen") |
 | Silicon density | **2.33 g/cm³** | physical constant (crystalline Si, 2.329 g/cm³) |
 | Cell thickness | **0.21 mm** | **CITED** — operator caliper (0.20–0.21 mm) |
 | Copper thickness | 0.035 mm (1 oz) | `TODO(unverified)` — see §8 item 3 |
@@ -76,7 +76,7 @@ large: area = 78.55 mm x 38.90 mm            = 3055.59 mm2 = 30.5559 cm2
 This is **bare silicon only** — it ignores the cell's own metallisation, busbars, tabbing
 ribbon and any encapsulant. It is *marked as an estimate*.
 
-**It disagrees with the repo by 4×.** `docs/PAYLOAD-WEIGHT-ESTIMATES.md` lines 92/96 give
+**It disagrees with the repo by 4×.** `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` lines 92/96 give
 the 52 × 19 mm cell as "**~2g each**". Silicon at 2.00 g would need a density of
 9.3 g/cm³ (2.00 / 0.6446 cm³), which is not silicon, not solder (7.4), not glass (2.5) and
 not copper (8.96 — closer, but the cell is not copper). **Neither figure is a measurement.**
@@ -98,7 +98,7 @@ wire joint                                                       10.00 mg  x 4 j
 ```
 
 Order of magnitude agrees with the repo's own solder-paste line
-(`docs/PAYLOAD-WEIGHT-ESTIMATES.md`: "~50 mg total for V1 pad coverage"). Per-land thickness
+(`docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md`: "~50 mg total for V1 pad coverage"). Per-land thickness
 is `TODO(unverified)` (§8 item 5).
 
 ### 1.4 The current wing and every candidate — grams
@@ -226,7 +226,7 @@ Cells joined by a 50 µm polyimide flex (160 × 6 mm) plus a 12 × 9 mm root tab
    There is no angle at which both are lit.
 3. The only light that could reach the far face is reflected off the balloon envelope, and
    the repo's derate model already treats the envelope as an **occluder** (`envelope
-   shading ≈ 0.9`, `docs/SOLAR-PIN-REGULATORY.md` §1.1), not as a reflector. Counting the
+   shading ≈ 0.9`, `docs/link/SOLAR-PIN-REGULATORY.md` §1.1), not as a reflector. Counting the
    dark face would double-count a term that is already inside the 0.35 derate.
 
 Numbers: **(d) wing 8.892 g and array 35.567 g for exactly the same 2.4 W as (a)** —
@@ -509,7 +509,7 @@ solder + wire          ▏                       0.090 g ( 1.2 %)
 ## 8. TODO(unverified) — the exact open questions
 
 1. **What does one 52.07 × 19.65 mm cell actually weigh?** The model computes **0.5006 g**
-   from area × thickness × silicon density; `docs/PAYLOAD-WEIGHT-ESTIMATES.md` lines 92/96
+   from area × thickness × silicon density; `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` lines 92/96
    say **~2 g**. The two differ by 4× and they flip the "largest mass item" answer. Settle
    it with a 0.01 g scale on the cells already in hand. **Do this before any structural
    decision.**

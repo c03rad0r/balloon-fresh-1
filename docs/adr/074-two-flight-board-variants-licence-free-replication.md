@@ -10,10 +10,10 @@
   (`docs/adr/029-dual-band-flight-board.md`), ADR-034 (`docs/adr/034-radio-band-split-433-tx-2g4-rx.md`),
   ADR-047 (`docs/adr/047-v9-power-provisioning.md` — the F33 TX rail), ADR-107 / ADR-108
   (three-variant PCB design, F33 + SX1280 pin plan), ADR-039 / ADR-041 (licence-exempt point),
-  `docs/PAYLOAD-WEIGHT-ESTIMATES.md`.
+  `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md`.
 - **Evidence:** priced in `docs/analysis/ground-station-gain-per-dollar.md` §Decision 6
   (source branch `design/gain-per-dollar`); the board/EU-variant surface is ADR-029 / ADR-107 /
-  ADR-108 on `main`; the weight record is `docs/PAYLOAD-WEIGHT-ESTIMATES.md`.
+  ADR-108 on `main`; the weight record is `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md`.
 
 **Numbering and collision note.** Numbers **066–070 are claimed on sibling design branches**
 (see **ADR-071 §Numbering and collision note** for the full table) and are **not reused**.
@@ -62,7 +62,7 @@ is deliberate: it keeps a single ground design valid for both flight variants.
 **D4 — The F33's +2.8 g module mass and its TX DC rail are recorded honestly and are gated, not
 assumed.** The **High-power** board's flight decision is **not** made by this record: it is
 **gated** on (i) the DE amateur licence / airborne-SRD question (ADR-039 open item (a)) and
-(ii) correcting the weight record — `docs/PAYLOAD-WEIGHT-ESTIMATES.md` §D classes the F33 board
+(ii) correcting the weight record — `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` §D classes the F33 board
 as *"Ground Station Only … not a pico balloon target"*, a **whole-board** statement (~20.6 g with
 solar) that a **+2.8 g module swap** does not by itself overturn. ADR-075 D2 names that
 contradiction; it must be resolved by the operator before the high-power board flies.
@@ -94,7 +94,7 @@ contradiction; it must be resolved by the operator before the high-power board f
 - The low-power board's mission is **short-range FLRC or LoRa-class**, because FLRC-max at 650 km
   needs the F33 (ADR-073 D3). Making that explicit is the point; hiding it would make the
   accessible variant look more capable than it is.
-- Mass and DC bookkeeping is now per-variant, and `docs/PAYLOAD-WEIGHT-ESTIMATES.md` §D
+- Mass and DC bookkeeping is now per-variant, and `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` §D
   currently contradicts the high-power board's flight (D4).
 
 ## Open items (not assumed)
@@ -102,7 +102,7 @@ contradiction; it must be resolved by the operator before the high-power board f
 - **`TODO(unverified)`** the **F33 module price** (in-repo ≈ USD 8, LCSC `C5913567`, marked
   "check"; the page is JS-gated).
 - **`TODO(unverified)`** the DE amateur / airborne-SRD position (ADR-039 open item (a)).
-- **Flagged, no winner:** `docs/PAYLOAD-WEIGHT-ESTIMATES.md` §D ("Ground Station Only") vs this
+- **Flagged, no winner:** `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` §D ("Ground Station Only") vs this
   record's high-power variant — must be corrected by its own record before the high-power board
   flies.
 - **Not decided here:** the mechanical/wing consequence of carrying the F33 (the wing-array

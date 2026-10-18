@@ -55,8 +55,8 @@ parked on unmerged branches.
 
 **Verdict: protocol EXISTS, rig EXISTS (breadboard), the BOARD DOES NOT EXIST.**
 
-- Written protocol: `docs/PRE-STRETCHING-PROTOCOL.md` (9-step Yokohama; **circumference is the
-  control variable, not pressure**) and `docs/PRESSURE-TEST-PLAN.md`.
+- Written protocol: `docs/prestretch/PRE-STRETCHING-PROTOCOL.md` (9-step Yokohama; **circumference is the
+  control variable, not pressure**) and `docs/prestretch/PRESSURE-TEST-PLAN.md`.
 - Working firmware: `tools/balloon_pressure_test/` (ESP-IDF; BMP280 **or** MS5611 auto-detected at
   boot) + `plot_pressure.py` (leak rate + verdict). Thresholds <0.5 mbar/h very good, >5 reject.
 - **Missing:** the board (no schematic/layout/BOM anywhere, on any ref); pump/valve driver and

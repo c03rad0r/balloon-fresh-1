@@ -84,7 +84,7 @@ If TX was running old firmware and RX was running new firmware (or vice versa), 
 
 ## FIXES IMPLEMENTED
 
-See `docs/FIRMWARE-BUILD-AUDIT.md` and commit `4fb6b9c`:
+See `docs/status/FIRMWARE-BUILD-AUDIT.md` and commit `4fb6b9c`:
 - Firmware self-identification (git hash in every packet)
 - Boot banner verification
 - Flash guard (no bypass)

@@ -26,6 +26,18 @@ physical pads, one net". The corrected rules follow from that:
   UNNAMED PAD is NOT a defect when it is PASTE-ONLY. Measured: all 10 unnamed pads on the hub are on
   F.Paste with no copper layer. A pad that carries no copper connects nothing and cannot be floating.
 
+  UNNAMED PAD is NOT a defect when it is a MECHANICAL BORE. An `np_thru_hole` pad is a NON-PLATED hole:
+  it has no copper annulus, so "copper connected to nothing" is not a condition that can exist. Again the
+  library says so -- read it before believing a layer list:
+
+    /usr/share/kicad/footprints/MountingHole.pretty/MountingHole_2.2mm_M2.kicad_mod
+        (pad "" np_thru_hole circle (at 0 0) (size 2.2 2.2) (drill 2.2) (layers "*.Cu" "*.Mask"))
+
+  That `*.Cu` entry is NOMINAL -- it is what made this audit report the wing board's three mounting holes
+  (H1/H2/H3) as defects, on a footprint byte-for-byte the same form as the stock one above. The fault was
+  the CHECK, not the board. Measured 2026-10-17; the hub board carries no NPTH pads, which is why the
+  false positive only surfaced on the wing.
+
 WHAT SURVIVES AS A REAL FINDING: a footprint ID with no library nickname. Measured: U4 reads
 `SX1280_QFN24` where the netlist says `balloon_flight_v9:SX1280_QFN24`, and every other part on the board
 carries a nickname. That is a genuine netlist/board disagreement.
@@ -87,6 +99,21 @@ def has_copper(pad) -> bool:
         if ls.Contains(i) and pcbnew.LayerName(i).endswith(COPPER_SUFFIXES):
             return True
     return False
+
+
+def is_mechanical_bore(pad) -> bool:
+    """True for a NON-PLATED hole -- a bore, not copper.
+
+    KiCad's own MountingHole.pretty/MountingHole_2.2mm_M2.kicad_mod ships
+    `(pad "" np_thru_hole circle (at 0 0) (size 2.2 2.2) (drill 2.2) (layers "*.Cu" "*.Mask"))`.
+    An unnamed `np_thru_hole` pad is therefore the LIBRARY'S idiom, and the `*.Cu` in its layer list is
+    nominal: a non-plated hole has no annulus to connect, so it cannot be "copper connected to nothing".
+    Flagging it was a false positive on the wing board (H1/H2/H3), measured 2026-10-17.
+    """
+    try:
+        return int(pad.GetAttribute()) == int(pcbnew.PAD_ATTRIB_NPTH)
+    except Exception:
+        return False
 
 
 def pad_sig(pad):
@@ -153,19 +180,28 @@ def audit_board(path: str, root: str | None = None) -> tuple[list[str], list[str
                     f"{ref} ({item}): pad number {num!r} appears {len(group)}x, all on {net} "
                     f"-- standard multi-pad single-net idiom")
 
-        # --- real finding 3: UNNAMED pad that is ON COPPER. A paste-only aperture is not an electrical
-        # pad and cannot be floating; an unnamed pad on copper is copper connected to nothing.
+        # --- real finding 3: UNNAMED pad that is ON COPPER. Two correct-by-design idioms are excluded,
+        # each with its library citation in the module docstring: a PASTE-ONLY aperture (no copper at
+        # all) and a MECHANICAL BORE (np_thru_hole -- non-plated, so no annulus to connect). What is
+        # left is an unnamed PLATED pad on copper: copper connected to nothing.
         unnamed = [p for p in fp.Pads() if not str(p.GetNumber()).strip()]
         if unnamed:
-            copper_ones = [p for p in unnamed if has_copper(p)]
+            bores = [p for p in unnamed if is_mechanical_bore(p)]
+            copper_ones = [p for p in unnamed if has_copper(p) and not is_mechanical_bore(p)]
+            paste_only = [p for p in unnamed if not has_copper(p)]
             if copper_ones:
                 nets = sorted({str(p.GetNetname()) or "(none)" for p in copper_ones})
                 findings.append(
                     f"{ref} ({item}): {len(copper_ones)} UNNAMED pad(s) ON COPPER, nets={nets} -- "
                     f"copper connected to nothing")
-            else:
+            if bores:
                 warnings.append(
-                    f"{ref} ({item}): {len(unnamed)} unnamed pad(s), PASTE-ONLY (no copper layer) "
+                    f"{ref} ({item}): {len(bores)} unnamed NPTH pad(s) -- MECHANICAL BORE(s), not copper: "
+                    f"a non-plated hole has no annulus to connect (KiCad's own MountingHole_2.2mm_M2 uses "
+                    f"the identical '(pad \"\" np_thru_hole ...)' form)")
+            if paste_only:
+                warnings.append(
+                    f"{ref} ({item}): {len(paste_only)} unnamed pad(s), PASTE-ONLY (no copper layer) "
                     f"-- paste apertures, correct by design; they carry no current")
 
         # --- model references

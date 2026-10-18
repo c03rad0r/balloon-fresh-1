@@ -33,7 +33,7 @@ Sub-questions asked explicitly:
 - **ADR-072:** band-split duplex, **two antennas, NO circulator**, BPF before LNA.
 - **ADR-084:** ground-station automatic level control (ADL5240 VGA + AD8318
   detector + RP2040).
-- **Board reality today:** `docs/BASE-STATION-PCBA-D14-FREEZE.md` + `docs/BASE-STATION-BOARD-CHECKLIST.md`.
+- **Board reality today:** `docs/BASE-STATION-PCBA-D14-FREEZE.md` + `docs/base-station/BASE-STATION-BOARD-CHECKLIST.md`.
   The PCBA is **control/bias/telemetry only**: RP2040 (QFN-56), AD8318 log
   detector, ADL5240 VGA, ZFBT-4R2GW+ bias tee, TPS62162 5 V buck. **It has no
   host CPU, no networking, no OS, no PCIe/USB host, and no cellular anything.**

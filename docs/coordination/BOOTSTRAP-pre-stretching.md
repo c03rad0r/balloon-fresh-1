@@ -50,7 +50,7 @@ Focus areas:
 4. Design a leak test methodology that validates a balloon can hold sufficient pressure for the target flight duration
 5. Write your findings as a structured protocol document
 
-Save your work to docs/PRE-STRETCHING-PROTOCOL.md in your worktree.
+Save your work to docs/prestretch/PRE-STRETCHING-PROTOCOL.md in your worktree.
 
 ## Then Write Your Assessment
 

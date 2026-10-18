@@ -375,4 +375,4 @@ mesh-stack/meshcore-lr2021/
 - RadioLib LRxxxx base: `tracker/firmware/components/RadioLib/src/modules/LR11x0/LR_common.h`
 - RadioLib PhysicalLayer: `tracker/firmware/components/RadioLib/src/protocols/PhysicalLayer/PhysicalLayer.h`
 - Our pin mapping: `AGENTS.md` (NiceRF LoRa2021 section)
-- Our wiring guide: `docs/execution-checklist.md`
+- Our wiring guide: `docs/flight/execution-checklist.md`

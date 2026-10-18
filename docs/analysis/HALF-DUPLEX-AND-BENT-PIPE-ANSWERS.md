@@ -16,7 +16,7 @@
   `docs/analysis/433-lna-substitution-and-amateur-licence.md`,
   `docs/analysis/rf-shopping-list-and-duplex-architecture.md`,
   `docs/analysis/free-balloon-mass-threshold-DE.md`,
-  `docs/licence-exempt-design-point.md`.
+  `docs/link/licence-exempt-design-point.md`.
 
 ---
 
@@ -135,10 +135,10 @@ D5 is honest that the gain is *not* parallel throughput: "N radios do NOT give N
 | uplink | 2.4 GHz | RX (bare LoRa2021, unamplified) | TX: radio → BPF → DSA → BPF → antenna (`docs/analysis/PROGRAM-GAP-ANALYSIS.md`) |
 
 The balloon is not continuously on: the licence-exempt design runs a **~1.7 % duty cycle — 1 s per
-60 s** (`docs/licence-exempt-design-point.md` §7); ADR-035 bounds the 433 TX slot and gates it on
+60 s** (`docs/link/licence-exempt-design-point.md` §7); ADR-035 bounds the 433 TX slot and gates it on
 stored energy (`docs/adr/035-tdm-radio-schedule.md` D7/D8); and on the licence-exempt footing the
 **2 W F33 is over-limit** (cap ≤10 mW ERP; the bare module's own 22 dBm is also over-limit —
-`docs/licence-exempt-design-point.md` §6). 2 W on 433 is only available on the **amateur** footing,
+`docs/link/licence-exempt-design-point.md` §6). 2 W on 433 is only available on the **amateur** footing,
 which is a separate, unresolved gate (`docs/adr/034-...md` open item "Legality of 2 W on 433 MHz in DE").
 
 **2e. Two further republic-internal consequences to keep in view.**
@@ -222,7 +222,7 @@ is an unresolved collision, not a link-budget problem.
 **4a. The band is 1.74 MHz wide.** 433.05–434.79 MHz = 1.74 MHz = 0.40 % of carrier
 (`docs/analysis/ground-station-amplifier-hypothesis-check.md` §2.1: the priced narrowband LNA
 "forbids any operation outside" the "433.05–434.79 MHz ISM allocation (1.74 MHz, 0.40 %)";
-`docs/licence-exempt-design-point.md` §3; `docs/adr/039-licence-exempt-433-design-point.md`).
+`docs/link/licence-exempt-design-point.md` §3; `docs/adr/039-licence-exempt-433-design-point.md`).
 A 2 MHz signal is wider than the band it would have to sit inside.
 
 **4b. The maximum legal occupied bandwidth on 70 cm, from the repo's own regulatory read.**
@@ -253,7 +253,7 @@ consequence**, not merely a paperwork one, and it must be re-run through the lin
 So the only continuous-duty licence-exempt window caps occupied bandwidth at **25 kHz** — five
 orders of magnitude below FLRC-max — and the whole licence-exempt band is 1.74 MHz, narrower than
 a 2 MHz signal. The licence-exempt design point's own duty-cycle figure is **~1.7 %** anyway
-(`docs/licence-exempt-design-point.md` §7).
+(`docs/link/licence-exempt-design-point.md` §7).
 
 **4d. This is an unreconciled collision in the repo.** `docs/adr/073-433-downlink-flrc-max-lora-rejected.md`
 D1 fixes the 433 downlink at "FLRC at maximum throughput" and rejects LoRa as too slow, while its
@@ -296,4 +296,4 @@ settle explicitly rather than discover in the field.
 - `docs/analysis/ground-station-amplifier-hypothesis-check.md`
 - `docs/analysis/ground-station/REPORT-design-rf-gaps-harmonics-diy.md`
 - `docs/analysis/PROGRAM-GAP-ANALYSIS.md`, `docs/analysis/two-variant-mass-budget.md`
-- `docs/licence-exempt-design-point.md`, `docs/LINK-BUDGET-LICENCE-EXEMPT.md`
+- `docs/link/licence-exempt-design-point.md`, `docs/LINK-BUDGET-LICENCE-EXEMPT.md`

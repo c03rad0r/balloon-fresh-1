@@ -51,7 +51,7 @@ Multi-balloon mesh relay network for internet transport. Balloons at ~12 km alti
 - `mesh-stack/meshcore-lr2021/` — PlatformIO build for LR2021 variant (bench test + upstream PR)
 - `docs/adr/009-antenna-strategy-v1-v2.md` — V1 omni + V2 directional decision
 - `docs/adr/010-adaptive-tx-power.md` — Adaptive TX per TDMA slot
-- `docs/power-budget.md` — Tracker + mesh relay power scenarios
+- `docs/power/power-budget.md` — Tracker + mesh relay power scenarios
 
 ## Key Repos
 

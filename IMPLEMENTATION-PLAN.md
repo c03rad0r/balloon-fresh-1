@@ -36,8 +36,8 @@
 **References**: `tracker/firmware/main/app_main.cpp`
 
 ### A.3 Hardware Assembly (User Tasks)
-- [ ] Wire tracker breadboard per `docs/breadboard-wiring-guide.md`
-- [ ] Wire ground station breadboard per `docs/breadboard-wiring-guide.md`
+- [ ] Wire tracker breadboard per `docs/hardware-reference/breadboard-wiring-guide.md`
+- [ ] Wire ground station breadboard per `docs/hardware-reference/breadboard-wiring-guide.md`
 - [ ] Cut wire dipole antennas (868 MHz: 8.6 cm legs each side)
 - [ ] Connect antennas to U.FL connectors on LoRa2021 modules
 - [ ] Verify BMP280 on I2C (GPIO8 SDA, GPIO9 SCL)
@@ -100,7 +100,7 @@
 - [ ] Weight check: tracker payload on scale (< 4.8g net lift budget)
 - [ ] Antenna orientation test: vertical dipole on balloon
 - [ ] Ground range test: 100m, 500m, 1km, 5km with tracker on pole/tree
-- [ ] Prepare first flight checklist per `docs/first-flight-checklist.md`
+- [ ] Prepare first flight checklist per `docs/flight/first-flight-checklist.md`
 - [ ] HYSPLIT trajectory prediction for launch date
 - [ ] File NOTAM if required
 - [ ] Launch shakedown flight (Yokohama 32" + He 4.6, Minimal variant)
@@ -490,7 +490,7 @@ The balloon broadcasts its position and status via standard MeshCore adverts and
 | `mesh-stack/research/routing/cluster-aware-bridge.md` | Clustering algorithm analysis + MeshCore hooks |
 | `docs/adr/011-first-flight-strategy.md` | Single balloon, He 4.6, Minimal variant |
 | `docs/adr/008-telemetry-protocol.md` | 28-byte telemetry packet format |
-| `docs/breadboard-wiring-guide.md` | ESP32-C3_Mini_V1 + LoRa2021 + GPS + BMP280 |
-| `docs/first-flight-checklist.md` | Pre-flight through post-launch checklist |
-| `docs/power-budget.md` | TX interval power analysis |
+| `docs/hardware-reference/breadboard-wiring-guide.md` | ESP32-C3_Mini_V1 + LoRa2021 + GPS + BMP280 |
+| `docs/flight/first-flight-checklist.md` | Pre-flight through post-launch checklist |
+| `docs/power/power-budget.md` | TX interval power analysis |
 | `bom/BOM.md` | Bill of materials |

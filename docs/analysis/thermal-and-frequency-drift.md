@@ -39,7 +39,7 @@ contain.
 |---|---|---|---|
 | **LoRa2021F33-2G4** (the HP "V2" module; v9 Site A variant) | **Built-in industrial TCXO, 0.5 ppm** | Yes | `docs/V9-RADIO-SITE-MATRIX.md` §2 (TCXO row) · `docs/LR2021-LESSONS-2026-09.md` line 23 · `docs/DUAL-VARIANT-DESIGN.md` line 78 · `docs/F33-MODULE-PLAN.md` lines 18, 44 |
 | **bare LoRa2021** (the LP module; **default** population at BOTH v9 sites) | **Crystal only — no TCXO, no NTC** | Yes — it is the default flight radio | `docs/V9-RADIO-SITE-MATRIX.md` §2 · `docs/LR2021-LESSONS-2026-09.md` line 22 · `docs/V9-RADIO-SITE-MATRIX.md` §5 ("TCXO vs crystal drift" test) |
-| **SX1280** (ranging radio, 2.4 GHz) | **52 MHz reference**; module = TCXO, custom standalone board = **bare 52 MHz crystal** | Yes if used as a timing freference; yes for ranging | `firmware/rp2040/src/bench_radio_sx1280.cpp:59` (`#define XTAL_MHZ 52.0f`) · `docs/FLRC-RANGE-DUAL-PLATFORM-ACTION-PLAN.md` lines 29, 58, 82, 103 |
+| **SX1280** (ranging radio, 2.4 GHz) | **52 MHz reference**; module = TCXO, custom standalone board = **bare 52 MHz crystal** | Yes if used as a timing freference; yes for ranging | `firmware/rp2040/src/bench_radio_sx1280.cpp:59` (`#define XTAL_MHZ 52.0f`) · `docs/flrc/FLRC-RANGE-DUAL-PLATFORM-ACTION-PLAN.md` lines 29, 58, 82, 103 |
 | **ESP32-S3** (MCU) | Internal RC / own crystal, not the radio reference | No — the MCU clock does not set the RF carrier | — |
 | **MAX-M10S** (GNSS) | Its own receiver reference (module-integrated); supplies **1PPS** | It *is* the reference, not a load | `docs/adr/108-f33-sx1280-pin-plan.md` line 38 (`GNSS_PPS`, MAX-M10S) · `docs/adr/029-dual-band-flight-board.md` §"Position / time" |
 
@@ -63,7 +63,7 @@ contain.
 4. **The SX1280 must be a TCXO-bearing module if it is a flight timing reference.** The repo's own
    FLRC work separates the two cases explicitly: the E80 kit has a *"TCXO (module-fitted)"* while
    the RP2040 standalone boards *"use a 52 MHz crystal, not TCXO"*, and it flags the resulting
-   **clock-source mismatch** (`docs/FLRC-RANGE-DUAL-PLATFORM-ACTION-PLAN.md` line 103). The bench
+   **clock-source mismatch** (`docs/flrc/FLRC-RANGE-DUAL-PLATFORM-ACTION-PLAN.md` line 103). The bench
    firmware hard-codes `XTAL_MHZ 52.0f`, so the synthesizer maths is right for a 52 MHz reference
    either way — but a bare crystal is uncompensated.
 5. **The GPS is the zero-cost authority.** A MAX-M10S is on the board with its **1PPS** routed to
@@ -95,8 +95,8 @@ below, because both readings agree the plain module is the drifted part.
 ### 1.3 One more repo conflict (carrier-reference frequency)
 
 The LR2021 datasheet's crystal is **32 MHz** (`docs/adr/042-thermal-drift-strategy.md` Addendum A2,
-§1.9.2 *"32MHz Crystal"*; `docs/radio-config-comparison.md` line 48 *"0.0 V (disabled → 32 MHz
-XTAL)"*). `docs/SDR-HANDOVER.md` line 60 states *"The LR2021 uses a 52 MHz XTAL"*.
+§1.9.2 *"32MHz Crystal"*; `docs/rp2040/radio-config-comparison.md` line 48 *"0.0 V (disabled → 32 MHz
+XTAL)"*). `docs/sdr/SDR-HANDOVER.md` line 60 states *"The LR2021 uses a 52 MHz XTAL"*.
 **52 MHz is the SX1280's reference** (bench code `bench_radio_sx1280.cpp:59`), not the LR2021's.
 This analysis uses **32 MHz for the LR2021/LR2021F33 synthesizer arithmetic and 52 MHz for the
 SX1280**, and marks the SDR-HANDOVER line as a probable cross-radio conflation →
@@ -480,7 +480,7 @@ estimate (G = 3 mW/K) drains the entire bank in ~139 s.
   module exposes a TCXO control pin. *Settle:* module mechanical drawings / deshield photos.
 - **[CENSUS]** The `docs/assets/lr2021/README.md` "onboard 0.5 ppm TCXO / VTCXO pin 13" claim vs the
   LESSONS/DUAL-VARIANT census (§1.2) — conflicting; treat as unresolved.
-- **[XTAL]** `docs/SDR-HANDOVER.md:60`'s "LR2021 uses a 52 MHz XTAL" vs the datasheet's 32 MHz
+- **[XTAL]** `docs/sdr/SDR-HANDOVER.md:60`'s "LR2021 uses a 52 MHz XTAL" vs the datasheet's 32 MHz
   (§1.3) — probable cross-radio conflation; unresolved.
 - **[ESR/COLD]** Cold (−60 °C) capacitance and ESR of the fitted bank — ADR-036/ADR-047 open item;
   §4.2 is parametric only.

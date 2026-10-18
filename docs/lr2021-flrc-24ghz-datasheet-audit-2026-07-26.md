@@ -12,7 +12,7 @@
 - Proven firmware: `firmware/rp2040/src/flrc_raw_tx.cpp` (master), `firmware/esp32-c3-flrc/main/main.cpp` (master)
 - Branch firmware: `feat/radiolib-bypass-tx` `bench_main.cpp`, `feat/rp2040-flrc-rx` `flrc_rx_main.cpp`, `feat/flrc-max-params` `fifo_tx.cpp`
 - `docs/SPEED-TEST-RESULTS.md` (on branch `docs/speed-record-results` — the authoritative measured-numbers doc)
-- `docs/flrc-2600kbps-analysis-2026-07-16.md`, `docs/lr2021-spi-bottleneck-analysis-2026-07-16.md`, `docs/flrc-throughput-final-conclusion-2026-07-16.md`
+- `docs/flrc/flrc-2600kbps-analysis-2026-07-16.md`, `docs/lr2021/lr2021-spi-bottleneck-analysis-2026-07-16.md`, `docs/flrc/flrc-throughput-final-conclusion-2026-07-16.md`
 
 > **Critical caveat on "the datasheet".** We do **NOT** possess the official Semtech
 > LR2021 *chip* datasheet (register/command reference). The only datasheet in the repo is

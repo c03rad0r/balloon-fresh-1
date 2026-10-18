@@ -117,8 +117,8 @@ Siehe [bom/BOM.md](../bom/BOM.md) fuer vollstaendige Einkaufsliste.
 
 ## Link-Budget & Power-Budget
 
-- [docs/link-budget.md](link-budget.md) - Reichweitenberechnung
-- [docs/power-budget.md](power-budget.md) - Stromverbrauchsanalyse
+- [docs/link/link-budget.md](link/link-budget.md) - Reichweitenberechnung
+- [docs/power/power-budget.md](power/power-budget.md) - Stromverbrauchsanalyse
 
 ## Projektstruktur
 
