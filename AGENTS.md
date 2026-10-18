@@ -129,6 +129,42 @@ ESP32-S3 flash (16 MB vs 8 MB); "2.4 GHz RX on the F33" (vs the bare LoRa2021); 
 orientation (ADR-049 vertical vs WING-TO-HUB-SOCKET-SPEC sec 1 "horizontal"). **When you assert a
 parameter, grep the repo for a competing value and cite the record that owns it.**
 
+## STANDING AUTHORITY — MAKE THE DECISION, RECORD THE REASONING (added 2026-10-18)
+
+The operator (c08r4d0r) has granted **standing authority to make technical and design decisions on his
+behalf**, without asking first. This supersedes the previous habit of stopping at every fork to ask.
+
+**The rule:**
+
+1. **Decide.** When a decision is needed — placement, routing strategy, pin assignment, ADR content, which
+   trade-off to take — make it. Do not park the work waiting for approval. The operator reviews outcomes,
+   not every step.
+2. **Consult BEFORE deciding, not after.** Every non-trivial decision gets a consultant pass. For spatial,
+   geometric, layout, or fabrication-visibility questions that is **Astra** (`gpt-6-astra`, via
+   `ask_astra.py`). For cross-family checking use a **different family** — a reviewer from the same family as
+   the author is not a review.
+3. **Record every decision with its reasoning**, in a DECISIONS block in the deliverable (and in the
+   commit message). Each entry: the decision, the evidence it rests on (paths, hashes, numbers), the
+   alternatives rejected and why, and what would change the answer.
+4. **Surface the end result, not the deliberation.** The operator asked to see the finished state plus the
+   decision record. Do not stream "shall I proceed?" questions.
+5. **He corrects what he disagrees with.** A decision made under this authority is a **first pass**, not a
+   verdict. State disagreements plainly so a second pass is cheap.
+6. **This does NOT extend to:** placing a purchase order, spending money, publishing to a public host,
+   rotating credentials, or rewriting git history. Those remain explicit-approval-only.
+
+**Why this exists.** Measured 2026-10-18: the operator was asked to adjudicate a design fork ("move `U4` 2 mm
+or reassign pins") and answered from a summary that was **wrong three times over** — the direction was
+inverted, the move collided with `U1`, and the move would not have freed the pads at all because the
+blocking copper belonged to `U4`'s own neighbours. **Asking a human to choose between options that have not
+been measured is worse than deciding with a consultant**, because it transfers an unmeasured premise into a
+decision that then looks authorised. Measure, consult, decide, record.
+
+**Consultants are oracles, not actors.** Astra is read-only by design. It reasons about an artefact you send
+it; it does not edit files, and it never replaces a tool that computes. Ask it a question that CAN be
+answered wrongly, send the artefact rather than a description, and record the **served** model id — an alias
+is not a model, and a router that substitutes a different family has not given you the review you asked for.
+
 **Environment gotchas — measured, each cost real time:**
 - KiCad's Python bindings (`pcbnew`) load **only under `/usr/bin/python3.14`**, NOT the 3.11 the test
   suite uses. Importing `pcbnew` under 3.11 **segfaults the interpreter** and kills the whole pytest
