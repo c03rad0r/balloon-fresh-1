@@ -102,7 +102,7 @@ TollGate payment. First time all 9 components run together.
   - RP2040 baseline exists: 10.4MHz SCK, 18.3% bus duty, 1754 kbps
   - C3: NO data yet. Need identical capture methodology.
   - Capture script exists: scripts/capture_spi_timing.sh
-  - Wiring docs exist: docs/la-wiring-guide.md, docs/logic-analyzer-wiring-diagram.png
+  - Wiring docs exist: docs/lr2021/la-wiring-guide.md, docs/logic-analyzer-wiring-diagram.png
   - Key question: does C3 SPI bus duty cycle match RP2040's 18.3%?
   - Bottleneck likely radio physics (air time), not MCU — but confirm with data
   - This determines: C3 as relay MCU vs RP2040+C3 dual-MCU architecture

@@ -172,11 +172,11 @@ The other files are **earlier, shorter, or broken captures** from the same walk 
 
 ### Finding: NEEDS FELIX INPUT — no explicit "lab PC data" reference found in any handover document
 
-The DATA-INVENTORY document itself states: *"The handover doc says 'multi-GB artifacts stay on the lab PC.'"* However, searching all handover documents in the repo (`docs/HANDOVER-*.md`, `docs/*handover*`, `docs/SDR-HANDOVER.md`, `docs/MORNING-HANDOVER-V4.md`) found **no mention** of "multi-GB artifacts," "lab PC," or data left on a local machine. The quote appears to be self-referential within the DATA-INVENTORY document itself or references a verbal/Signal handover not captured in the repo.
+The DATA-INVENTORY document itself states: *"The handover doc says 'multi-GB artifacts stay on the lab PC.'"* However, searching all handover documents in the repo (`docs/HANDOVER-*.md`, `docs/*handover*`, `docs/sdr/SDR-HANDOVER.md`, `docs/handovers/MORNING-HANDOVER-V4.md`) found **no mention** of "multi-GB artifacts," "lab PC," or data left on a local machine. The quote appears to be self-referential within the DATA-INVENTORY document itself or references a verbal/Signal handover not captured in the repo.
 
 **What was found:**
-- `docs/SDR-HANDOVER.md` references live capture data at `~/repos/balloon-fresh/data/range-tests/20260725/forwarded-165613.log` — this path is in the repo.
-- `docs/HANDOVER-PROMPT.md` states "All code as PRs/commits — nothing unpushed in worktrees" — suggesting everything was pushed.
+- `docs/sdr/SDR-HANDOVER.md` references live capture data at `~/repos/balloon-fresh/data/range-tests/20260725/forwarded-165613.log` — this path is in the repo.
+- `docs/handovers/HANDOVER-PROMPT.md` states "All code as PRs/commits — nothing unpushed in worktrees" — suggesting everything was pushed.
 - The `.gitignore` excludes only build artifacts (`.pio/`, `build/`, `*.elf`, `*.bin`) — no data files are gitignored.
 
 **What might exist on the lab PC but not in the repo:**

@@ -135,7 +135,7 @@ Firmware sets `TX_POWER_DBM = 12.5f` (line 263). For 2.4 GHz this is the chip's 
 
 ### 2.4 The 2 W external amplifier board — ⚠ OPEN ITEM
 
-> **The task brief specifies a "2 W LR2021 amplifier board with 1.7 A peak current, needs 3+ ground connections."** This part is **not documented anywhere in the repo** — no part number, no datasheet, no footprint, no SKU. The repo's component guide (`docs/component-guide.md`) lists a **SKY66112-11 FEM** (+10 dB TX, +14 dB RX, ~0.1 g, ~3 EUR) as the planned amplifier option — that is a +22 dBm (158 mW) part, not 2 W.
+> **The task brief specifies a "2 W LR2021 amplifier board with 1.7 A peak current, needs 3+ ground connections."** This part is **not documented anywhere in the repo** — no part number, no datasheet, no footprint, no SKU. The repo's component guide (`docs/hardware-reference/component-guide.md`) lists a **SKY66112-11 FEM** (+10 dB TX, +14 dB RX, ~0.1 g, ~3 EUR) as the planned amplifier option — that is a +22 dBm (158 mW) part, not 2 W.
 
 **Before routing the PA rail, the circuit-design sub-manager MUST confirm with Felix:**
 
@@ -159,7 +159,7 @@ If Felix actually means the **SKY66112-11 FEM** (the repo-documented part), the 
 
 ### 2.5 Solar input (flight version)
 
-From `docs/component-guide.md` §5:
+From `docs/hardware-reference/component-guide.md` §5:
 
 - **Cells on hand:** 100× of 52×19 mm (0.5 V, 400 mA each), 50× of 78×39 mm (0.54 W each).
 - **Wiring:** 3 cells in series = 1.5 V; 4 wings in series = 6 V → directly into supercaps (no boost converter).
@@ -344,7 +344,7 @@ When the firmware team ports v4 to ESP32-C3, the circuit designer needs to know:
 | `tracker/hardware/footprints/esp32c3-mini-v1.json` | JSON pinout | **Complete** — all GPIOs, ADC channels, strapping, JTAG | ✅ Reference |
 | `tracker/hardware/footprints/wiring-dev-board.csv` | CSV wiring table | **Complete** — ESP32-C3 ↔ LR2021 ↔ BMP280 net-by-net | ✅ Reference |
 
-### 5.2 Part numbers (from `docs/component-guide.md`)
+### 5.2 Part numbers (from `docs/hardware-reference/component-guide.md`)
 
 | Component | Part number | Package | Qty in inventory | Source |
 |-----------|-------------|---------|------------------|--------|
@@ -426,5 +426,5 @@ When the firmware team ports v4 to ESP32-C3, the circuit designer needs to know:
 | `tracker/hardware/hub_board_diy/plan.md` | Full design plan (45×38 mm single-sided toner transfer — adapt for JLCPCB 2-layer) |
 | `tracker/hardware/hub_board_diy/implementation-plan.md` | Full fab + test plan |
 | `tracker/hardware/hub_board/hub_schematic.py` | SKiDL stub (not usable — reference only) |
-| `docs/component-guide.md` | Complete parts list with alternatives + pricing |
+| `docs/hardware-reference/component-guide.md` | Complete parts list with alternatives + pricing |
 | `HARDWARE_CONNECTIONS.md` | ESP32-C3 ↔ RP2040 BOOTSEL controller wiring (for dev flashing rig) |

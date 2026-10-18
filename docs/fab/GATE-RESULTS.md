@@ -27,7 +27,7 @@ Any order cut from the old package would have produced a board with no 2.4 GHz m
 
 ```
 bash tracker/hardware/run_erc.sh
---- 1. ERC ---                    20 errors, 37 warnings
+--- 1. ERC ---                    19 errors, 36 warnings
 --- 2. netlist regeneration ---   OK (94051 bytes)
 --- 3. schematic-to-board parity ---
     netlist declares 230 (ref,pin) nodes
@@ -36,14 +36,21 @@ bash tracker/hardware/run_erc.sh
 erc: RESULT -- PROBLEMS FOUND
 ```
 
-**Parity PASSES** — the board has not drifted from the schematic. **The 20 ERC errors are in the
+**Parity PASSES** — the board has not drifted from the schematic. **The remaining ERC errors are in the
 schematic itself.** These are real and were never checked before this session:
+
+> **UPDATED 2026-10-17** (was 20 errors / 37 warnings). The one `wire_dangling` error — a 5.08 mm orphan
+> stub, reported by ERC as "0.0508 mm" because its JSON length is the schematic value ÷ 100 — was
+> **FIXED** by deleting it. The other 19 are **dispositions, not repairs**, and the gate now prints a
+> WAIVER naming each one: **13 of them are pins on circuits the records explicitly leave undecided**
+> (`OPEN-25`/`OPEN-28`, `OPEN-26`), so wiring them would invent a design decision. **ERC cannot reach
+> exit 0 honestly.** One row per error, with evidence and decision owners: `ERC-DISPOSITION.md`.
 
 | type | count | detail |
 |---|---|---|
-| `pin_not_connected` | 17 | `U_CUT1–4` pins 4/5/6 (`ARM`, `CTRL`, `SENSE`) = **12 pins**; `U_HUB_CVT` pin 4 (`VOUT`); `U1` pins 3/13/14/35 |
+| `pin_not_connected` | 16 | `U_CUT1–4` pins 4/5/6 (`ARM`, `CTRL`, `SENSE`) = **12 pins**; `U_HUB_CVT` pin 4 (`VOUT`); `U1` pins 3/13/14/35 |
 | `power_pin_not_driven` | 2 | **`U4` pins 2, 11** (`VDD_IN`, `VBAT_IO`) — the radio's power pins |
-| `wire_dangling` | 1 | a 0.05 mm stub |
+| ~~`wire_dangling`~~ | ~~1~~ | **FIXED 2026-10-17** — a 5.08 mm orphan stub, deleted |
 
 `U_CUT1–4` unconnected in the schematic **matches the board** (those pads have empty nets), so the two
 agree: **twelve cut-driver pins were never wired in either.**
@@ -74,10 +81,19 @@ VERDICT: NOT ORDERABLE
 **Zero real electrical DRC errors.** Every error-class item is the documented edge interface. All 137
 warnings are silkscreen or library metadata.
 
-**`U1.41` — the exposed QFN pad with no net — is confirmed on the board.** It appears **12 times** in the
+~~**`U1.41` — the exposed QFN pad with no net — is confirmed on the board.** It appears **12 times** in the
 stitcher's unresolved-pad list (`U1.41` ×12). This is an open defect from
 `SX1280_QFN24.kicad_mod`, whose pads are numbered 1..24 plus a bare `25`; the symbol's exposed pad is
-`41`. The pad-number mismatch means the RF ground pad is **not connected to GND**.
+`41`. The pad-number mismatch means the RF ground pad is **not connected to GND**.~~
+
+> **⚠️ THIS PARAGRAPH WAS WRONG ON EVERY CLAUSE — corrected 2026-10-17, kept struck through so the error
+> stays visible.** Measured: (a) `U1` is the **ESP32-S3-WROOM-1U**, not the SX1280 — the SX1280 is `U4`;
+> (b) all thirteen pads numbered `41` are **on `GND`** — a thermal-via array, the stock KiCad idiom for
+> several physical pads on one net, which the official `RF_Module:ESP32-S3-WROOM-1U` footprint ships
+> itself; (c) `SX1280_QFN24.kicad_mod` belongs to `U4` and is irrelevant here; (d) it is **13**, not 12 —
+> the stitcher truncates its list at 20 and the `12` was a miscount of a truncated print.
+> **Evidence:** `U1-FOOTPRINT-DIAGNOSIS.md`, and DRC's own unconnected list, which does not involve `U1`.
+> See the CORRECTIONS section below for the full table.
 
 **Preflight fixed this session.** Gate 3 initially reported *"ROUTE FAILED"* — which was **not** a
 routing failure. `fab_grade.sh` searched `$HOME/tools` and `$HOME/repos`, neither of which exists here
@@ -104,8 +120,13 @@ have rewritten. A permanent red would train the reader to ignore it; deletion wo
 
 ## WHAT IS NOT ORDERABLE, AND WHY
 
-1. **The `U1.41` exposed RF pad has no net** — an electrical defect in the radio's ground return.
-2. **20 schematic ERC errors** — including 12 floating cut-driver pins and the radio's two power pins.
+1. ~~**The `U1.41` exposed RF pad has no net** — an electrical defect in the radio's ground return.~~
+   **DISPROVEN 2026-10-17.** The thirteen `41` pads are a **thermal-via array all on `GND`** and the nine
+   unnamed pads are **`F.Paste`-only stencil apertures with no copper**. This is **not** a reason the board
+   is unorderable. See the CORRECTIONS section.
+2. **19 schematic ERC errors** — including 12 floating cut-driver pins and the radio's two power pins.
+   (Was 20; the dangling-wire artefact was fixed 2026-10-17. **ERC cannot reach exit 0 honestly** —
+   the gate prints a WAIVER; see `ERC-DISPOSITION.md`.)
 3. **16 edge-clearance items need a fabricator's written acceptance** — they are intentional, but the
    disposition is JLCPCB's to give, not ours to assume. See `JLC-QUERY-DRAFT-MESSAGE.md`.
 4. **The wing joint geometry is OPEN** — ADR-046 §4.2.1; the board implements Option B while the ADR

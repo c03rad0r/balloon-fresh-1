@@ -243,8 +243,8 @@ We have 9 individually-proven components that have NEVER been tested together in
 
 ## APPENDIX B: Key Documents
 
-- `docs/SECP256K1-FLASH-MEASUREMENT.md` — secp256k1 C3 measurement (tonight)
-- `docs/NOSTR-STORE-ASSESSMENT.md` — nostr_store deep assessment (tonight)
+- `docs/recon/SECP256K1-FLASH-MEASUREMENT.md` — secp256k1 C3 measurement (tonight)
+- `docs/nostr/NOSTR-STORE-ASSESSMENT.md` — nostr_store deep assessment (tonight)
 - `~/repos/microfips-upstream/FIPS-BUILD-ISSUE.md` — FIPS root cause (tonight)
 - `mesh-stack/INTEGRATION-ARCHITECTURE.md` — technical architecture
 - `mesh-stack/ROADMAP.md` — full plan, link budgets, power analysis

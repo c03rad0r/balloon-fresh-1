@@ -28,7 +28,7 @@
 
 Both polycrystalline. ~100 small panels in hand; number of large unknown
 (`docs/adr/006-supercapacitor-power.md` §Komponenten: *"Prototyp: 78x39mm (0.54W, 0.5V) -
-bereits vorhanden (50er Pack)"*; `docs/component-guide.md:108`; `docs/coordination/INDEX.md:284`).
+bereits vorhanden (50er Pack)"*; `docs/hardware-reference/component-guide.md:108`; `docs/coordination/INDEX.md:284`).
 
 ```
 small area  = 52.07 mm × 19.65 mm = 1 023.2 mm² = 10.232 cm²      (matches the 10.23 cm² given)
@@ -57,7 +57,7 @@ measurement.** Every large-cell current number below scales linearly with this c
 
 | Symbol | Value | Source |
 |---|---|---|
-| ADR-006 | 4 wings × 3 cells in series = **1.5 V/wing**, **12 cells**, **6.0 V @ 400 mA = 2.4 W** peak | `docs/adr/006-supercapacitor-power.md` (Status **Akzeptiert**); `docs/POWER-BUDGET-V9-D2BE.md:29-33`; `docs/SOLAR-PIN-REGULATORY.md:11` |
+| ADR-006 | 4 wings × 3 cells in series = **1.5 V/wing**, **12 cells**, **6.0 V @ 400 mA = 2.4 W** peak | `docs/adr/006-supercapacitor-power.md` (Status **Akzeptiert**); `docs/POWER-BUDGET-V9-D2BE.md:29-33`; `docs/link/SOLAR-PIN-REGULATORY.md:11` |
 | ADR-046 | 4-pin wing tab: 1 `SOLAR_P`, 2 `GND`, 3 `RF_FEED` (V2-only, unused on v9), 4 `SOLAR_N`; **hub owns the series chain**, GND returned only at the stack bottom; **DNP bypass Schottky per wing** | `docs/adr/046-wing-board-interface.md` §2.1, §2.3, §6 |
 | ADR-046 wing outline | **176.0 × 25.0 mm** body + 8 × 9 mm tab (184 mm total) | `docs/adr/046-wing-board-interface.md` §3.2 |
 | ADR-046 cell lands | 1.6 × 4.0 mm per cell terminal; 6 lands; cells laid **52 mm along length, 19 mm across width** | `docs/adr/046-wing-board-interface.md` §3.3, §3.4 |
@@ -235,7 +235,7 @@ length = 3 × 78.55 + 2 × 6 + 4 + 4  = 255.65 mm  (+ 8 mm tab = 263.65 mm total
 wing area = 255.65 × 44.90 mm       = 11 478 mm² = 114.8 cm²   vs the accepted 44.0 cm²  → ×2.6
 ```
 
-- **Mass:** `docs/component-guide.md:108` gives the 78×39 mm cell at ~2 g vs the 52×19 mm at
+- **Mass:** `docs/hardware-reference/component-guide.md:108` gives the 78×39 mm cell at ~2 g vs the 52×19 mm at
   ~0.5 g → 12 large ≈ 24 g vs 12 small ≈ 6 g. `TODO(unverified)` — the mass table in
   `docs/POWER-BUDGET-V9-D2BE.md` marks all 12 cells `TODO(unverified)`; the per-cell masses
   are from `component-guide.md`, not weighed.
@@ -650,7 +650,7 @@ before relying on it.
 - `docs/adr/048-v9-hub-wing-interfaces.md` (Proposed) — 4 hub sockets, hub series wiring.
 - `docs/WING-TO-HUB-SOCKET-SPEC.md` — hub land geometry, bypass-provision wording.
 - `docs/POWER-BUDGET-V9-D2BE.md` — 12 cells, 6.0 V/400 mA/2.4 W, mass table.
-- `docs/SOLAR-PIN-REGULATORY.md` — array sizing authority, harness derate.
+- `docs/link/SOLAR-PIN-REGULATORY.md` — array sizing authority, harness derate.
 - `docs/hardware-design.md` — 65 × 28 mm wing (superseded by ADR-046), dev-board boost.
-- `docs/component-guide.md` — cell masses, cell options.
+- `docs/hardware-reference/component-guide.md` — cell masses, cell options.
 - IPC-2221A — conductor-width chart fit (§6.1).

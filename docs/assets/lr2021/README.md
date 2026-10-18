@@ -78,7 +78,7 @@ for our use case. Leave them floating.
 
 ### For RP2040 Coprocessor (Board B)
 
-See `docs/rp2040-wiring-guide.md` for the full wiring guide.
+See `docs/rp2040/rp2040-wiring-guide.md` for the full wiring guide.
 
 | LR2021 Pin | RP2040 GPIO | Function |
 |------------|-------------|----------|
@@ -92,7 +92,7 @@ See `docs/rp2040-wiring-guide.md` for the full wiring guide.
 
 ### For ESP32-C3 Direct (Board A / Breadboard)
 
-See `docs/breadboard-wiring-guide.md` for the full wiring guide.
+See `docs/hardware-reference/breadboard-wiring-guide.md` for the full wiring guide.
 
 | LR2021 Pin | ESP32-C3 GPIO | Function |
 |------------|---------------|----------|
@@ -184,7 +184,7 @@ FLRC pulse shaping: BT_05, BT_1, OFF
 ## Cross-References
 
 - `docs/adr/002-lr2021-as-rf-chip.md` — ADR selecting LR2021 over LR1121/SX1280
-- `docs/rp2040-wiring-guide.md` — RP2040-Zero ↔ LR2021 wiring (Board B)
-- `docs/breadboard-wiring-guide.md` — ESP32-C3 ↔ LR2021 breadboard wiring (Board A)
+- `docs/rp2040/rp2040-wiring-guide.md` — RP2040-Zero ↔ LR2021 wiring (Board B)
+- `docs/hardware-reference/breadboard-wiring-guide.md` — ESP32-C3 ↔ LR2021 breadboard wiring (Board A)
 - `docs/adr/015-three-board-hardware-strategy.md` — Three-board architecture (A/B/C)
 - `AGENTS.md` — Project overview, pin mappings, build commands

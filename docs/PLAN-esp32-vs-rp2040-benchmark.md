@@ -27,7 +27,7 @@ Data is version-controlled in the repo. No re-capture needed.
 | SPI cmds per packet | 3 (CLEAR_IRQ + WRITE_FIFO + SET_TX) | — |
 
 Captures: `captures/bench-rp2040.sr`, `captures/sweep-{32,64,128,255}.sr`
-Analysis: `docs/rp2040-baseline-results.md`, `docs/spi-timing-analysis.md`
+Analysis: `docs/rp2040/rp2040-baseline-results.md`, `docs/spi/spi-timing-analysis.md`
 
 **Key finding:** RP2040 is near-optimal. 320us gaps are air time (radio physics),
 not firmware overhead. 10.40 MHz SPI is the RP2040 clock divider ceiling.

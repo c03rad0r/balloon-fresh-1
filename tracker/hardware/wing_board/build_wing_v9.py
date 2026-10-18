@@ -355,15 +355,22 @@ def ferrite_footprint(x, y):
     b = [pad('1', 'smd', 'rect', -0.45, 0.0, 0.5, 0.6, ('F.Cu', 'F.Paste', 'F.Mask')),
          pad('2', 'smd', 'rect', 0.45, 0.0, 0.5, 0.6, ('F.Cu', 'F.Paste', 'F.Mask'))]
     b.append(crtyd_rect(-0.95, -0.55, 0.95, 0.55))
+    # attr='smd dnp': the value string already says DNP, but a BOM/CPL generator reads
+    # the DNP FLAG, not the value text.  The package audit found IsDNP()==False here and
+    # fixed the board only; recording it in the builder keeps the flag and the intent
+    # from diverging again on the next regeneration.
     return footprint('WingV9:FerriteBead_0402_V2provision', 'FB1',
-                     'FerriteBead_0402_DNP_V2only', x, y, '\n'.join(b), model=MODEL_FERRITE)
+                     'FerriteBead_0402_DNP_V2only', x, y, '\n'.join(b),
+                     attr='smd dnp', model=MODEL_FERRITE)
 
 
 def rf_provision_footprint(x, y):
     b = pad('1', 'smd', 'rect', 0.0, 0.0, 2.0, 2.0, ('F.Cu', 'F.Mask'))
     b = b + '\n' + crtyd_rect(-1.25, -1.25, 1.25, 1.25)
+    # attr='smd dnp': V2-only provision pad -- same "intent in the value string, absent
+    # from the flag" defect the package audit fixed on the board (see ferrite_footprint).
     return footprint('WingV9:RF_ProvisionPad_v2only', 'RF1', 'RF_ProvisionPad_v2only',
-                     x, y, b, model=MODEL_RF)
+                     x, y, b, attr='smd dnp', model=MODEL_RF)
 
 
 # ------------------------------------------------------------------ main
@@ -376,7 +383,11 @@ def main() -> int:
     parts.append('  (version 20241229)')
     parts.append('  (generator "wing_board_build_wing_v9")')
     parts.append('  (generator_version "9.0")')
-    parts.append('  (general\n    (thickness 0.6)\n    (legacy_teardrops no)\n  )')      # ADR-046 s3.2
+    # 0.8 mm is the DECISION (ADR-046 s3.2 as adjudicated by the WING v9 package
+    # audit, commit "docs(fab/wing): WING v9 PACKAGE AUDIT"): the file previously
+    # said 0.6, which was the same stale-file defect class found on the hub.  The
+    # value lives HERE so a regeneration cannot silently undo the fix.
+    parts.append('  (general\n    (thickness 0.8)\n    (legacy_teardrops no)\n  )')      # ADR-046 s3.2
     parts.append('  (paper "A4")')
     parts.append(_Layers)
     parts.append(_Setup)

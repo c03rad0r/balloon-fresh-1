@@ -24,11 +24,11 @@ stratosphere.
 
 | # | Part | Rated minimum | Mission minimum | Margin | Source |
 |---|------|---------------|-----------------|--------|--------|
-| 1 | Supercapacitor bank (2× 3.3 F 2.7 V series, C_CAP) | **-40 °C** | -60 °C | **20 K below rating** | `docs/adr/006-supercapacitor-power.md` line 63 (`-40C bis +70C`); agreed by `docs/component-guide.md` line 84 (`Supercaps funktionieren bis -40 C`) |
+| 1 | Supercapacitor bank (2× 3.3 F 2.7 V series, C_CAP) | **-40 °C** | -60 °C | **20 K below rating** | `docs/adr/006-supercapacitor-power.md` line 63 (`-40C bis +70C`); agreed by `docs/hardware-reference/component-guide.md` line 84 (`Supercaps funktionieren bis -40 C`) |
 | 2 | LR2021 radio (U2, LoRa2021_Gen4) | **-40 °C** | -60 °C | **20 K below rating** | `docs/LR2021_LR2022_LR2012_Datasheet_Rev2.1.pdf` §3.2, Table 3-2 (`Top` = -40 … +85 °C ambient; `Tmaxj` 105 °C; `Tmr` -55 … +125 °C) — in-tree Semtech datasheet, verified with `pdftotext -layout` (see Addendum; supersedes the earlier `docs/assets/lr2021/README.md:137` reference) |
 
 Both parts are 20 K below the mission minimum. Suitability of the supercap was
-already an open item: `docs/FLIGHT-TEST-READINESS-2026-07-29.md` line 70
+already an open item: `docs/flight/FLIGHT-TEST-READINESS-2026-07-29.md` line 70
 records *"Need to verify suitablity for high altitude + weight."* This ADR
 closes that open item as: **suitability is a part-selection problem, not a
 heating problem.**
@@ -259,6 +259,6 @@ the systemic fact is that the -60 °C mission sits roughly 5 K below the common
 
 * `docs/adr/006-supercapacitor-power.md` (power architecture, -60 °C premise, -40 °C supercap rating)
 * `docs/RANGE-THROUGHPUT-PLAN.md` (cold soak test at -60 °C)
-* `docs/component-guide.md` (supercap -40 °C range)
-* `docs/FLIGHT-TEST-READINESS-2026-07-29.md` (open item: supercap suitability)
+* `docs/hardware-reference/component-guide.md` (supercap -40 °C range)
+* `docs/flight/FLIGHT-TEST-READINESS-2026-07-29.md` (open item: supercap suitability)
 * `tracker/hardware/tools/bom_temp_gate.py` + `test_bom_temp_gate.py` (the gate)

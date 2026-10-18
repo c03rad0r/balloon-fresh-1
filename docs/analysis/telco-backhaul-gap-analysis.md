@@ -5,8 +5,8 @@
 **Inputs (design of record — cited, not re-derived):** `/home/c08r4d0r/CONSULT-BRIEF-telco-backhaul.md`;
 `docs/adr/071-ground-station-gateway-design-basis.md`; `docs/adr/072-band-split-duplex-two-antennas-no-circulator.md`;
 `docs/adr/100-tollgate-over-fips-mesh-udp.md`; `docs/BASE-STATION-PCBA-D14-FREEZE.md`;
-`docs/BASE-STATION-BOARD-CHECKLIST.md`; plus `docs/LINK-BUDGET-LICENCE-EXEMPT.md`,
-`docs/licence-exempt-design-point.md`, `docs/analysis/PROGRAM-GAP-ANALYSIS-ROUND2.md`,
+`docs/base-station/BASE-STATION-BOARD-CHECKLIST.md`; plus `docs/LINK-BUDGET-LICENCE-EXEMPT.md`,
+`docs/link/licence-exempt-design-point.md`, `docs/analysis/PROGRAM-GAP-ANALYSIS-ROUND2.md`,
 `docs/adr/012-mesh-networking-strategy.md`, `docs/adr/016-fips-implementation-keep-cpp-microfips.md`,
 `docs/adr/111-canonical-board-production-order.md`
 
@@ -153,7 +153,7 @@ Under this topology **nothing in the D14-frozen 5 V network changes**: TPS62162,
 
 **MEASURED state of the program (from the repo, cited):**
 - `docs/analysis/GAP-TRACKING-CHECKLIST.md` row **BS-01**: *"The base-station board does not exist. No schematic, netlist or gerber for the control/bias/telemetry board on any ref; the checklist is explicitly 'a document, NOT a KiCad layout'."* Status: **OPEN**.
-- `docs/PROGRAM-BOARD-COMPLETION-PLAN.md`: base station = **"NO — no schematic, netlist or gerber on any ref"**, and the base-station card is in *triage*/ *todo*.
+- `docs/plans/PROGRAM-BOARD-COMPLETION-PLAN.md`: base station = **"NO — no schematic, netlist or gerber on any ref"**, and the base-station card is in *triage*/ *todo*.
 - `docs/adr/111`: *"Two required boards (base-station, bench-rig) **do not yet exist**."*
 - `docs/BASE-STATION-PCBA-D14-FREEZE.md` header: *"**not** a KiCad layout and **not** an operator purchasing authorization."*
 
@@ -469,9 +469,9 @@ That step costs **≈ €185–190** and answers every open measurement question
 `docs/adr/111-canonical-board-production-order.md` ("base-station … does not exist"; the BLOCKING gates) ·
 `docs/adr/081-ground-station-tier-ladder-and-option-b.md` (tier ladder, EIRP-inertness above ~8 dBi, ≈€735 option B) ·
 `docs/BASE-STATION-PCBA-D14-FREEZE.md` (parts, 316 mA / 0.5 A cont / 1 A peak, 18 V entry limit, "not a purchasing authorization") ·
-`docs/BASE-STATION-BOARD-CHECKLIST.md` (rows 2/10/13 verification criteria, prices, totals €274.58/€441.57) ·
+`docs/base-station/BASE-STATION-BOARD-CHECKLIST.md` (rows 2/10/13 verification criteria, prices, totals €274.58/€441.57) ·
 `docs/LINK-BUDGET-LICENCE-EXEMPT.md` (§2/§3 margins, §5 TODOs) ·
-`docs/licence-exempt-design-point.md` (§3 bands, §7 1.7 % duty, §8 what remains, §9(a) airborne grey area) ·
+`docs/link/licence-exempt-design-point.md` (§3 bands, §7 1.7 % duty, §8 what remains, §9(a) airborne grey area) ·
 `docs/analysis/PROGRAM-GAP-ANALYSIS-ROUND2.md` (§1 the unmerged ground station, §6 wind-load-and-stiffness + MECH-01) ·
 `docs/analysis/GAP-TRACKING-CHECKLIST.md` (BS-01…BS-07) ·
-`docs/PROGRAM-BOARD-COMPLETION-PLAN.md` (board manifest: base station "NO").
+`docs/plans/PROGRAM-BOARD-COMPLETION-PLAN.md` (board manifest: base station "NO").

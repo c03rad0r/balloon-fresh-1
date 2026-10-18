@@ -39,7 +39,7 @@ coordinates**, and the failures were electrical, not cosmetic:
 
 - `gen_pcb.py`'s `seg()` wrote raw KiCad segment text with **no collision check**. Measured on
   V1: **86 shorts, 65 crossings, 53 clearance violations**; on F33: 53 shorts, 42 crossings
-  (`docs/PLAN-ROUTING-REWRITE.md`). The 2-layer handoff state of the flight board scored in
+  (`docs/plans/PLAN-ROUTING-REWRITE.md`). The 2-layer handoff state of the flight board scored in
   `drc_snapshots/history.jsonl` (label `v7-2layer`, `fp 20`, sha `347c56a3cfea`) carries
   **17 × `shorting_items`**, 11 clearance, 40 unconnected, total 69.
 - The same **two pad-overlap pairs** (`U2/C4`, `D1/U1`) survived a 55×45 mm outline, an 80×60 mm
@@ -142,8 +142,8 @@ claims** — board path, `sha256_12`, `shorts`, `clearance`, `unconnected`, `fp`
 `history.jsonl` alongside the board change (`tracker/hardware/PCB-CARD-DOD.md`, GATE S4). A
 screenshot, a rendered PNG, a 100 KB raw DRC dump, or a row scored on a different file are not
 evidence. The policy exists because an early F33 card reported the board ready while the measured
-report held **44 `shorting_items`** (`docs/PLAN-F33-SHORTS-FIX.md`,
-`docs/PLAN-DRC-CLEANUP-JLCPCB-ORDER.md`).
+report held **44 `shorting_items`** (`docs/plans/PLAN-F33-SHORTS-FIX.md`,
+`docs/plans/PLAN-DRC-CLEANUP-JLCPCB-ORDER.md`).
 
 ### D5 — Comparability requires the same rule file and the same placement hash.
 

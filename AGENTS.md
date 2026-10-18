@@ -458,7 +458,7 @@ Full details in `REMOTES.md`. Key facts:
 ## Cross-Board Harmonized Bench (HARM chain)
 
 Before touching any E80 / ESP32 / RP2040 board for a bench measurement, read
-[`docs/HARMONIZED-BENCH-PACKAGE.md`](docs/HARMONIZED-BENCH-PACKAGE.md). It is the
+[`docs/harmonized/HARMONIZED-BENCH-PACKAGE.md`](docs/harmonized/HARMONIZED-BENCH-PACKAGE.md). It is the
 single entry point and it is deliberately self-contained.
 
 - **Repos and branches:** the plan names `balloon-e80bench` and
@@ -477,11 +477,11 @@ single entry point and it is deliberately self-contained.
   LEN > 256, §9 frequency pair). Fix the plan.
 - **Never mix bands.** 868 MHz and 2.4 GHz rows go in separate tables and are
   never compared; 2.4 GHz cross-board work is legal only on
-  `ESP32BENCH ↔ RP2040BENCH`. See `docs/HARMONIZED-RESULTS.md`.
+  `ESP32BENCH ↔ RP2040BENCH`. See `docs/harmonized/HARMONIZED-RESULTS.md`.
 - **Reporting:** write the run up from
-  [`docs/HARMONIZED-RUN-REPORT-TEMPLATE.md`](docs/HARMONIZED-RUN-REPORT-TEMPLATE.md)
+  [`docs/harmonized/HARMONIZED-RUN-REPORT-TEMPLATE.md`](docs/harmonized/HARMONIZED-RUN-REPORT-TEMPLATE.md)
   into `docs/runs/<run-id>.md`, then add the rows to
-  [`docs/HARMONIZED-RESULTS.md`](docs/HARMONIZED-RESULTS.md). Commit the report
+  [`docs/harmonized/HARMONIZED-RESULTS.md`](docs/harmonized/HARMONIZED-RESULTS.md). Commit the report
   and the CSVs in one commit.
 - **No data is better than invented data.** Unrun configs are written `not run`.
   The E80↔E80 sweeps from 2026-08-21/22 are the *regression baseline* only; the
@@ -491,9 +491,9 @@ single entry point and it is deliberately self-contained.
 ## Cross-Board Harmonized Bench (HARM chain) — `range-tests` branch
 This branch is the range-test lane of the harmonized cross-board bench
 (E80 / ESP32 / RP2040). Entry point:
-`docs/HARMONIZED-BENCH-PACKAGE.md` on branch **`main`** of this same repo
+`docs/harmonized/HARMONIZED-BENCH-PACKAGE.md` on branch **`main`** of this same repo
 (`https://github.com/felixfelix-bot/balloon-fresh.git`), together with
-`docs/HARMONIZED-RESULTS.md` and `docs/HARMONIZED-RUN-REPORT-TEMPLATE.md`.
+`docs/harmonized/HARMONIZED-RESULTS.md` and `docs/harmonized/HARMONIZED-RUN-REPORT-TEMPLATE.md`.
 **The harmonized bench console is not on this branch.** `tools/balloon_sweep.py`,
 `docs/BENCH-CONSOLE-SPEC.md` and the harmonized docs exist only on `main`
 (HARM chain, `harm/t5-bench-console`); on this branch `tools/balloon_sweep.py`
@@ -521,6 +521,6 @@ Rules:
   pair).
 - 868 MHz and 2.4 GHz results are never mixed; 2.4 GHz cross-board is legal only
   on RP2040 ↔ ESP32.
-- Report runs from `docs/HARMONIZED-RUN-REPORT-TEMPLATE.md`; record unrun configs
+- Report runs from `docs/harmonized/HARMONIZED-RUN-REPORT-TEMPLATE.md`; record unrun configs
   as `not run`. Data-handover convention for this branch:
   `docs/data-handover/DATA-HANDOVER-2026-08-17.md`.

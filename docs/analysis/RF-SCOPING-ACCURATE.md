@@ -23,14 +23,14 @@ step by step here; `ESTIMATE` = a modelling assumption, stated as such;
 | Asked-for path | Present on `main` (`4ba3e67`)? | Use |
 |---|---|---|
 | `docs/LINK-BUDGET-LICENCE-EXEMPT.md` | **PRESENT** | 433 licence-exempt ERP cap; **carries the inflated −137 dBm LoRa figure** (§1.2) |
-| `docs/REGULATORY-AMATEUR-LICENCE.md` | **PRESENT** | amateur power ceilings, 70 cm (entry 18) and 2400–2450 MHz (entry 23) |
-| `docs/frequency-plan-868.md` | **PRESENT**, but it is the **868 MHz** plan — **not** a 433/2400 MHz source | not used for ceilings |
+| `docs/link/REGULATORY-AMATEUR-LICENCE.md` | **PRESENT** | amateur power ceilings, 70 cm (entry 18) and 2400–2450 MHz (entry 23) |
+| `docs/link/frequency-plan-868.md` | **PRESENT**, but it is the **868 MHz** plan — **not** a 433/2400 MHz source | not used for ceilings |
 | `docs/analysis/radio-legal-power-limits.md` | **PRESENT** | 2.4 GHz licence-exempt density condition → **10 mW EIRP (57a)**; 433 duty-cycle footings |
 | `docs/analysis/433-2g4-flrc-link-budget-and-regulatory-audit.md` | **MISSING on `main`** (exists only as an untracked file in the dirty primary worktree) | cited once, flagged |
 | Datasheets | `docs/LR2021_LR2022_LR2012_Datasheet_Rev2.1.pdf`, `docs/f33-module/LoRa2021F33-2G4-datasheet-v1.1.pdf` | **PRESENT** — all RF specs below |
 
 Other in-repo sources used and present on `main`:
-`docs/link-budget.md`, `docs/coordination/CONSULTANT-PLAN-REVIEW-V2.md` (CONCERN-4),
+`docs/link/link-budget.md`, `docs/coordination/CONSULTANT-PLAN-REVIEW-V2.md` (CONCERN-4),
 `docs/coordination/ARCHITECTURE-FREERTOS-TASKS.md`,
 `docs/adr/036-energy-policy-burst-storage-daylight-only-tx.md`,
 `docs/analysis/pico-balloon-solar-survey.md`,
@@ -134,7 +134,7 @@ ceiling is **1.3 Mbit (1.333 MHz DSB)**. The operator's accepted trade —
 "*slightly lower throughput* to keep the balloon transmitting on 433 MHz" — is
 therefore **mandatory, not optional**, and its cost is small: 2.6 → 1.3 Mbit.
 
-> Cross-check with the amateur 70 cm band plan (`docs/REGULATORY-AMATEUR-LICENCE.md`
+> Cross-check with the amateur 70 cm band plan (`docs/link/REGULATORY-AMATEUR-LICENCE.md`
 > §2/§3): the IARU segments quoted there are "ALL MODES, no bandwidth limit", so
 > under the **amateur** footing 1.333 MHz is unambiguously legal; the 1.74 MHz
 > constraint is specific to the **licence-exempt** 433.05–434.79 SRD window.
@@ -228,7 +228,7 @@ required P_tx        = required EIRP − G_ground + L_feed
 ### 3.1 Headline case — FLRC 2600 kbit, S = −99.0 dBm
 
 Balloon RX antenna **G_balloon = 6 dBi** (`SOURCED`, PCB Yagi,
-`docs/link-budget.md` "Antenne Ballon: PCB-Yagi ~6 dBi"):
+`docs/link/link-budget.md` "Antenne Ballon: PCB-Yagi ~6 dBi"):
 
 ```
 required EIRP = −99.0 + 149.773 − 6.0 = +44.77 dBm
@@ -375,7 +375,7 @@ LNA) or unaffordable (+15…30 g of solar cell for +3 dB of TX).
 | Footing | Ceiling | Duty / BW condition | In-repo source |
 |---|---|---|---|
 | **Licence-exempt** | **10 mW ERP** (= +10 dBm ERP = **+12.15 dBm EIRP**) | available on three footings: (i) ≤ **10 %** duty cycle, or (ii) ≤ **25 kHz** BW inside 434.04–434.79 MHz (≤100 % duty), or (iii) the German national deviation, printed without a parameter. **Unconditional ceiling in the whole band = 1 mW ERP.** | `docs/LINK-BUDGET-LICENCE-EXEMPT.md` L19 (LPD433 / ERC Rec 70-03 Annex 1); `docs/analysis/radio-legal-power-limits.md` row "433 MHz, balloon→ground" + L128/136/153 |
-| **Amateur (70 cm, 430–440 MHz)** | Kl **A 750 W PEP**, Kl **E 75 W PEP**, Kl **N 6.1 W ERP** | secondary allocation; automatic/remote terrestrial stations >30 MHz limited to **50 W ERP** | `docs/REGULATORY-AMATEUR-LICENCE.md` §1 (AFuV Anlage 1 entry 18: „18 430–440 MHz P 750 W PEP 75 W PEP 6,1 W ERP …") |
+| **Amateur (70 cm, 430–440 MHz)** | Kl **A 750 W PEP**, Kl **E 75 W PEP**, Kl **N 6.1 W ERP** | secondary allocation; automatic/remote terrestrial stations >30 MHz limited to **50 W ERP** | `docs/link/REGULATORY-AMATEUR-LICENCE.md` §1 (AFuV Anlage 1 entry 18: „18 430–440 MHz P 750 W PEP 75 W PEP 6,1 W ERP …") |
 
 `ERP → EIRP: +2.15 dB` (`docs/LINK-BUDGET-LICENCE-EXEMPT.md` L34).
 
@@ -384,7 +384,7 @@ LNA) or unaffordable (+15…30 g of solar cell for +3 dB of TX).
 | Footing | Ceiling | Condition | In-repo source |
 |---|---|---|---|
 | **Licence-exempt** | **10 mW EIRP** (= +10 dBm EIRP) | The 100 mW EIRP tier (row **57c / D57c "WLAN"**) carries a **power-density** condition: *10 mW/MHz EIRP for every modulation other than frequency hopping*. FLRC (and LoRa) with ≤1 MHz occupied BW therefore **cannot** radiate 100 mW; the applicable row is **57a / CEPT Annex 1 h = 10 mW EIRP**. | `docs/analysis/radio-legal-power-limits.md` row "2.4 GHz, ground→balloon" |
-| **Amateur (2400–2450 MHz)** | Kl **A 75 W PEP** = +48.75 dBm; Kl **E 5 W PEP** = +36.99 dBm | secondary; AFuV Anlage 1 entry 23 („23 2 400–2 450 MHz S 75 W PEP 5 W PEP …") | `docs/REGULATORY-AMATEUR-LICENCE.md` §8 |
+| **Amateur (2400–2450 MHz)** | Kl **A 75 W PEP** = +48.75 dBm; Kl **E 5 W PEP** = +36.99 dBm | secondary; AFuV Anlage 1 entry 23 („23 2 400–2 450 MHz S 75 W PEP 5 W PEP …") | `docs/link/REGULATORY-AMATEUR-LICENCE.md` §8 |
 
 **The ceiling that decides the uplink answer:** licence-exempt 2.4 GHz is
 **+10 dBm EIRP**, and the required uplink EIRP is **+44.77 dBm** → the
@@ -434,7 +434,7 @@ uplink can only close under the **amateur** licence, whose relevant ceilings are
 
 1. **Move the 2.4 GHz uplink from the licence-exempt +10 dBm EIRP ceiling to the
    operator's amateur footing (Kl A).** Cost **€0** (the operator already holds
-   the licence — `docs/REGULATORY-AMATEUR-LICENCE.md` §1/§8), buys **+38.75 dB**
+   the licence — `docs/link/REGULATORY-AMATEUR-LICENCE.md` §1/§8), buys **+38.75 dB**
    of conducted-power headroom (10 mW EIRP → 75 W PEP). **This is the single
    cheapest change that buys the most margin** — it is the change that turns the
    34.77 dB licence-exempt shortfall into a surplus with no hardware at all.

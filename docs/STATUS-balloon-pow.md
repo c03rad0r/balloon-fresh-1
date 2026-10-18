@@ -155,7 +155,7 @@ E-HASH RELAY PROTOTYPED — integration assessment done, awaiting mesh radio int
   - GPIO0 is NOT a strapping pin on **C3** (unlike ESP32/S3) — safe for ADC/GPIO
   - Strapping pins: GPIO2 (float), GPIO8 (float), GPIO9 (weak pull-up)
 
-  > **CHIP SCOPE — READ `docs/CHIP-AND-PIN-PLANE-INDEX.md` BEFORE REUSING THIS.**
+  > **CHIP SCOPE — READ `docs/hardware-reference/CHIP-AND-PIN-PLANE-INDEX.md` BEFORE REUSING THIS.**
   > Every bullet above is true **for the ESP32-C3 only**.
   > **v9 flight boards are ESP32-S3**, where **IO0 IS a strapping pin**: a supercap
   > divider on IO0 holds the chip in the bootloader. So the *"corrected to

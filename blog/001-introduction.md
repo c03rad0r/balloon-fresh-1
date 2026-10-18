@@ -118,7 +118,7 @@ Follow along as we build this from breadboard to stratosphere!
 
 ## Links
 
-- [Full Component Guide](../docs/component-guide.md)
-- [Plan Variants (DIY to Komfort)](../docs/plan-variants.md)
-- [Antenna Strategy](../docs/antenna-strategy.md)
+- [Full Component Guide](../docs/hardware-reference/component-guide.md)
+- [Plan Variants (DIY to Komfort)](../docs/plans/plan-variants.md)
+- [Antenna Strategy](../docs/link/antenna-strategy.md)
 - [Bill of Materials](../bom/BOM.md)

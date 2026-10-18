@@ -67,7 +67,7 @@ part.
 
 The link-budget tool `tools/link_budget.py` was run for the v9 **2.4 GHz receive path**
 (ground station transmits, the balloon's F33 module receives), at the established 300 km
-slant range (`docs/link-budget.md`) and the ground-station EIRP already in
+slant range (`docs/link/link-budget.md`) and the ground-station EIRP already in
 `docs/2G4-LINK-BUDGET-ANALYSIS.md` / the tool's `ground_station_2g4` scenario.
 
 Observed tool output (`python3 tools/link_budget.py --freq 2400 --sf 12 --bw 125 --tx 27
@@ -137,7 +137,7 @@ it.
      a mandatory fitted part. This is consistent with ADR-029 D8 (the FEM is needed only
      for the bare-module fallback and is depopulated when the F33 flies).
    - SKY66112 still appears in **19** files under `docs/` (6 in `docs/adr/`), including
-     `005`, `006`, `028`, `029`, `034`, `035`, `docs/link-budget.md`, `docs/power-budget.md`.
+     `005`, `006`, `028`, `029`, `034`, `035`, `docs/link/link-budget.md`, `docs/power/power-budget.md`.
 
 ---
 
@@ -163,5 +163,5 @@ it.
 
 The 19 `docs/` files that still mention SKY66112 (6 of them ADRs) should eventually be
 reconciled against the FEM omission. Only the three ADR pointers above are made now; the
-remaining files (`docs/link-budget.md`, `docs/power-budget.md`, and the rest) are a
+remaining files (`docs/link/link-budget.md`, `docs/power/power-budget.md`, and the rest) are a
 follow-up documentation cleanup item, not part of this ADR.

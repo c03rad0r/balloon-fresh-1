@@ -150,7 +150,7 @@ calibration-after-mode-change fix.
 `modem_params_changed()` trigger in `radio_bench_apply_cfg()` (mod, FLRC bitrate,
 LoRa BW/SF) with host tests; 24/24 green. The acceptance interleave could not run
 on the patched binary (SWD link dead, no probe on the RX host). Pre-flash matrix
-(`docs/RFA1c-RECAL-ON-RATE-CHANGE-2026-10-14.md`) refines this verdict: the deaf
+(`docs/rfa/RFA1c-RECAL-ON-RATE-CHANGE-2026-10-14.md`) refines this verdict: the deaf
 end is the **RECEIVER**, not the transmitter — a bring-up re-run on the RX alone
 recovers the 650-after-260 cells (3/3 heard), on the TX alone it does not (1/3),
 and on both ends the full 7-cell interleave is `200/200/0` in two consecutive

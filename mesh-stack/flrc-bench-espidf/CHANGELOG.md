@@ -22,7 +22,7 @@ All notable changes to `flrc-bench-espidf` will be documented in this file.
   - Throughput: modelled at **−8.0%** (1781.7 → 1639 kbps, 255 B payload, 2600 kbps
     FLRC), inside the 20% investigation budget — the link is RF-bound (air time is
     69% of the packet period). See
-    `docs/lr2021-p04-spi-clock-16mhz-2026-09-11.md`.
+    `docs/lr2021/lr2021-p04-spi-clock-16mhz-2026-09-11.md`.
   - **Not yet measured on air:** the 1000-packet hardware run is outstanding — no
     LR2021/C3 boards were connected on 2026-09-11. Procedure + pass criteria are in
     §5 of the doc above.

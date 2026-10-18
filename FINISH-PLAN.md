@@ -145,7 +145,7 @@
 
 - [x] Fix stale duplicate sections in `tests/TEST-PLAN.md`
 - [x] Update `tests/TEST-PLAN.md` test count to 82
-- [x] Fix MISO/MOSI swap in `docs/execution-checklist.md`
+- [x] Fix MISO/MOSI swap in `docs/flight/execution-checklist.md`
 - [x] Fix board name "XIAO" → "ESP32-C3_Mini_V1" in execution-checklist.md
 - [x] Update FINISH-PLAN.md workstream statuses (W1-W7 → DONE)
 - [x] Mark `tracker/firmware/components/lr2021/` as deprecated (already removed)
@@ -166,7 +166,7 @@
 - [x] Create `tools/bench-test.sh` with mutex locking, auto-flash, telemetry wait
 
 #### W9b: Create hardware checklist document
-- [x] `docs/execution-checklist.md` exists with wiring diagram, pin mapping, power notes
+- [x] `docs/flight/execution-checklist.md` exists with wiring diagram, pin mapping, power notes
 
 #### W9c: Add diagnostic commands to CLI
 - [x] `radio_test`: transmit a test packet without deep sleep

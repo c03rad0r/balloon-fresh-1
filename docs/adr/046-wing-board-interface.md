@@ -37,8 +37,8 @@ cannot both be true.**
 
 What wins: **the electrical requirement (3 cells/wing, 12 cells total, 1.5 V/wing, 6.0 V
 stack) wins**, because it is the load-bearing system requirement of ADR-006 and is repeated
-in `docs/POWER-BUDGET-V9-D2BE.md`, `docs/SOLAR-PIN-REGULATORY.md` line 11 and
-`docs/component-guide.md` line 113. The outline is therefore re-derived in §3.
+in `docs/POWER-BUDGET-V9-D2BE.md`, `docs/link/SOLAR-PIN-REGULATORY.md` line 11 and
+`docs/hardware-reference/component-guide.md` line 113. The outline is therefore re-derived in §3.
 
 Note the one number worth keeping: `docs/hardware-design.md`'s **65 mm** length factors
 exactly as *8 mm tab + 3 × 19 mm cell pitch = 65 mm*, which is strong evidence that the
@@ -161,7 +161,7 @@ coverage check" already notes that 1–2 illuminated wings are the representativ
   RX 2.4 GHz on a bare LoRa2021); ADR-040 keeps both radio **sites on the back of the hub**.
   No v9 radio has a port that reaches a wing.
 - `docs/hardware-design.md`'s "RF (vom SP4T)" per slot describes the **v1/v2 single-SP4T**
-  antenna-switch architecture (`docs/antenna-strategy.md` §Yagi/SP4T), which v9 does not have.
+  antenna-switch architecture (`docs/link/antenna-strategy.md` §Yagi/SP4T), which v9 does not have.
 - Therefore on v9 the wing's pin 3 (`RF_FEED`) is a **copper land that is left electrically
   unconnected** (a provision). It carries no net on v9; the wing's RF_FEED net is a
   1-pad net so there is no ratsnest and no DRC consequence.
@@ -251,7 +251,7 @@ wing is a different board, not a population change.
 - The land is therefore a **routing-constrained** land, not a matched land pattern.
   `TODO(unverified)`: the **exact solder-tab geometry of the 52 × 19 mm cell** (contact
   width, contact pitch, contact distance from the cell edge). No in-repo source carries it;
-  `docs/component-guide.md` line 107 lists only "52x19mm (0.5V 400mA)". **If the measured
+  `docs/hardware-reference/component-guide.md` line 107 lists only "52x19mm (0.5V 400mA)". **If the measured
   contact is wider than 4.0 mm the land must grow and the routing must move to B.Cu** — this
   is the single most likely reason for a respin after the cells are measured.
 

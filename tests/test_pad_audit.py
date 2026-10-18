@@ -332,3 +332,111 @@ def test_audit_exits_2_when_it_cannot_run():
                         f"exec(open({str(AUDIT)!r}).read())"],
                        cwd=str(REPO), capture_output=True, text=True, timeout=120)
     assert r.returncode != 0, "audit returned 0 for a board it could not read"
+
+
+# --------------------------------------------------------------- NPTH is a BORE, not floating copper
+_INJECT_UNNAMED_PAD = (
+    "import sys, shutil, pcbnew\n"
+    "src, dst, ref, kind = sys.argv[1:5]\n"
+    "shutil.copy(src, dst)\n"
+    "b = pcbnew.LoadBoard(dst)\n"
+    "fp = b.FindFootprintByReference(ref)\n"
+    "assert fp is not None, 'no %s on the board' % ref\n"
+    "p = pcbnew.PAD(fp)\n"
+    "p.SetNumber('')            # UNNAMED: the condition under test\n"
+    "p.SetPosition(fp.GetPosition())\n"
+    "ls = pcbnew.LSET()\n"
+    "if kind == 'npth':\n"
+    "    p.SetAttribute(pcbnew.PAD_ATTRIB_NPTH)\n"
+    "    p.SetShape(pcbnew.PAD_SHAPE_CIRCLE)\n"
+    "    p.SetSize(pcbnew.VECTOR2I(int(2.2e6), int(2.2e6)))\n"
+    "    p.SetDrillSize(pcbnew.VECTOR2I(int(2.2e6), int(2.2e6)))\n"
+    "    for L in (pcbnew.F_Cu, pcbnew.B_Cu, pcbnew.F_Mask, pcbnew.B_Mask):\n"
+    "        ls.AddLayer(L)\n"
+    "else:\n"
+    "    p.SetAttribute(pcbnew.PAD_ATTRIB_SMD)\n"
+    "    p.SetShape(pcbnew.PAD_SHAPE_RECT)\n"
+    "    p.SetSize(pcbnew.VECTOR2I(int(1.0e6), int(1.0e6)))\n"
+    "    p.SetDrillSize(pcbnew.VECTOR2I(0, 0))\n"
+    "    for L in (pcbnew.F_Cu, pcbnew.F_Mask):\n"
+    "        ls.AddLayer(L)\n"
+    "p.SetLayerSet(ls)\n"
+    "fp.Add(p)\n"
+    "pcbnew.SaveBoard(dst, b)\n"
+    "chk = pcbnew.LoadBoard(dst)\n"
+    "assert chk is not None, 'the injected board is unreadable -- the injection corrupted it'\n"
+    "g = chk.FindFootprintByReference(ref)\n"
+    "unnamed = [q for q in g.Pads() if not str(q.GetNumber()).strip()]\n"
+    "assert len(unnamed) == 1, 'the injected pad did not survive SaveBoard'\n"
+    "print('INJECTED', kind, 'attr', int(unnamed[0].GetAttribute()))\n"
+)
+
+
+def _inject_unnamed_pad(dst, ref, kind):
+    script = dst.parent / "inject_unnamed_pad.py"
+    script.write_text(_INJECT_UNNAMED_PAD, encoding="utf-8")
+    return subprocess.run([PY, str(script), str(BOARD), str(dst), ref, kind],
+                          cwd=str(REPO), capture_output=True, text=True, timeout=300)
+
+
+def test_unnamed_NPTH_pad_is_a_BORE_not_floating_copper():
+    """An unnamed `np_thru_hole` pad must NOT be reported as "copper connected to nothing".
+
+    WHY. The wing board's H1/H2/H3 (MountingHole_2.2mm_NPTH) tripped the "UNNAMED pad ON COPPER" rule and
+    the pre-commit hook refused the commit. The rule was WRONG, and the SOURCE OF TRUTH said so: KiCad's
+    own /usr/share/kicad/footprints/MountingHole.pretty/MountingHole_2.2mm_M2.kicad_mod carries
+    `(pad "" np_thru_hole circle (size 2.2 2.2) (drill 2.2) (layers "*.Cu" "*.Mask"))` -- the identical
+    form. The `*.Cu` in an NPTH pad's layer list is NOMINAL: a non-plated hole has no annulus, so there
+    is nothing that can be floating. The hub board has no NPTH pads, which is why the flip-to-blocking
+    check passed while the wing's own commit was refused.
+
+    The fixture is BUILT HERE (an NPTH pad injected into a copy of the canonical board), so this pins the
+    RULE rather than one board's condition.
+    """
+    tmp = pathlib.Path(tempfile.mkdtemp(prefix="pad-npth-"))
+    try:
+        copy = tmp / BOARD.name
+        inj = _inject_unnamed_pad(copy, FPID_HOST_REF, "npth")
+        assert inj.returncode == 0, (
+            f"the pcbnew injection failed (this is a TEST defect, not an audit one):\n"
+            f"{inj.stdout[-600:]}\n{inj.stderr[-800:]}")
+        assert "INJECTED npth" in inj.stdout, f"injection did not take:\n{inj.stdout}"
+
+        r = _run(copy, root=str(BOARD.parent))
+        errors = [ln for ln in r.stdout.splitlines() if ln.strip().startswith("ERROR")]
+        assert not errors, (
+            "an unnamed NPTH pad (a non-plated bore, the stock MountingHole idiom) is being reported as "
+            "floating copper:\n" + "\n".join(errors))
+        assert r.returncode == 0, f"the audit exited {r.returncode} on a clean board:\n{r.stdout[-800:]}"
+        assert "MECHANICAL BORE" in r.stdout, (
+            "the NPTH bore is no longer even recorded as a warning -- it should be reported with its "
+            f"reason, never silently ignored:\n{r.stdout[-800:]}")
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+def test_unnamed_PLATED_copper_pad_is_STILL_a_finding():
+    """...and the rule it replaced must still be ABLE TO FAIL.
+
+    Exempting non-plated holes is only correct if an unnamed PLATED pad on copper is still caught. An
+    audit that flags nothing anywhere is as useless as one that flags everything -- the same
+    can-fail property the rest of this file pins. The injected pad here is `smd` on F.Cu with no number
+    and no net: copper connected to nothing, exactly the condition the rule exists for.
+    """
+    tmp = pathlib.Path(tempfile.mkdtemp(prefix="pad-plated-"))
+    try:
+        copy = tmp / BOARD.name
+        inj = _inject_unnamed_pad(copy, FPID_HOST_REF, "plated")
+        assert inj.returncode == 0, (
+            f"the pcbnew injection failed (this is a TEST defect, not an audit one):\n"
+            f"{inj.stdout[-600:]}\n{inj.stderr[-800:]}")
+        assert "INJECTED plated" in inj.stdout, f"injection did not take:\n{inj.stdout}"
+
+        r = _run(copy, root=str(BOARD.parent))
+        assert r.returncode == 1, (
+            f"the audit exited {r.returncode} on an unnamed PLATED copper pad -- it cannot fail:\n"
+            f"{r.stdout[-900:]}")
+        assert re.search(r"UNNAMED pad\(s\) ON COPPER", r.stdout), \
+            f"the floating copper pad was not reported:\n{r.stdout[-900:]}"
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)

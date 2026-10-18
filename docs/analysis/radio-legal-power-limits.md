@@ -16,7 +16,7 @@ file is modified by this analysis; no decision is taken here.
   `docs/adr/020-deprecate-radiolib-adopt-raw-lr2021-spi.md` (raw 2-byte-opcode LR2021 /
   LoRa / FLRC), `docs/adr/034-…`, `docs/adr/035-…`, `docs/adr/036-…`,
   `docs/adr/039-licence-exempt-433-design-point.md`, `docs/adr/041-rf-frontend-licence-exempt.md`,
-  `docs/LINK-BUDGET-LICENCE-EXEMPT.md`, `docs/licence-exempt-design-point.md`,
+  `docs/LINK-BUDGET-LICENCE-EXEMPT.md`, `docs/link/licence-exempt-design-point.md`,
   `docs/bw-code-table.md`, `docs/airtime_calc.py`, `docs/inventory.md`, `tools/link_budget.py`.
 
 **Provenance policy.** Every regulatory statement below is quoted from a **primary source
@@ -246,7 +246,7 @@ ERP is referenced to a half-wave dipole (0 dBd); **EIRP = ERP + 2.15 dB**. So:
 | 44b, 45c / `f`, `f2` | 10 mW = **+10 dBm ERP** | 15.85 mW = **+12.15 dBm EIRP** |
 
 Conducted-power requirement for the firmware clamp and the production test (ADR-039
-consequence 3 / ADR-041 D2 / `docs/licence-exempt-design-point.md` § 6):
+consequence 3 / ADR-041 D2 / `docs/link/licence-exempt-design-point.md` § 6):
 `conducted power + antenna gain in dBd ≤ +10 dBm`.
 With the ADR-041 assumption of a **0 dBi** balloon antenna (which is **−2.15 dBd**), the
 conducted ceiling is **+12.15 dBm**; with a half-wave dipole (0 dBd) it is **+10 dBm**.
@@ -256,7 +256,7 @@ Note that ADR-041's headline case is therefore *conservative by 2.15 dB*: it com
 
 ### 2.5 Correction — there is **no** "integral antenna" condition at 433 MHz
 
-`docs/licence-exempt-design-point.md` § 3 states the 433 MHz permission as *"~10 mW ERP
+`docs/link/licence-exempt-design-point.md` § 3 states the 433 MHz permission as *"~10 mW ERP
 with an **integral antenna**"*, citing ERC/REC 70-03 Annex 1 (which that document itself
 marks `TODO(unverified)`) plus an in-repo secondary source that `docs/LINK-BUDGET-LICENCE-EXEMPT.md`
 § 0 records as derived from the **Wikipedia LPD433 article**. **Neither primary source
@@ -544,7 +544,7 @@ ADR-041 actually computes):
 > - Nothing here violates the CEPT per-burst advisory either: a 9.02 s burst is well inside
 >   the 36 s maximum "on" time of the "< 10 %" class.
 
-> ⚠️ **Internal inconsistency found in the repo.** `docs/licence-exempt-design-point.md` § 7
+> ⚠️ **Internal inconsistency found in the repo.** `docs/link/licence-exempt-design-point.md` § 7
 > asserts *"Actual beacon duty cycle is ~1.7 % — 1 s per 60 s"*. **1 s of airtime per 60 s
 > is 1.67 % and is lawful — but it is not the configuration ADR-041's link budget uses.**
 > 1 s of LoRa airtime at the ADR-041 baseline modulation corresponds to a payload of only
@@ -688,7 +688,7 @@ Ordered by cost, cheapest first. **Nothing here is ordered or decided by this do
 | **G. Make the ground transmitter genuinely 57c-compliant** | Replace the ground LoRa transmitter with a **WLAN (≥ 10 MHz OCB) or FHSS** transmitter that meets EN 300 328 adaptivity, and put the matching radio on the balloon. | A **design fork**, not a firmware flag: the LR2021 has no 802.11 and no FHSS mode (ADR-020). Buys the full 20 dBm EIRP back, at the cost of a different radio on both ends. |
 | **H. Argue 57b (Funkortung, 25 mW EIRP)** for the ranging link only | Ask BNetzA whether two-way ranging qualifies as *Funkortung*. | +4 dB, and it does **not** help the LoRa uplink (that is not ranging). The category definition's exclusion of point-to-point communication makes the claim contestable (§ 3.4). |
 | **I. Move the burden to a licensed service (the operator's amateur licence)** | The operator holds a German DE amateur licence (ADR-039 explicitly rejected this route for the balloon). A ground-station transmitter under the amateur service is not bound by Vfg. 91/2025's EIRP caps. | Removes the 10 dB on the *ground* side, but reintroduces **amateur obligations** (callsign, no-encryption/plain-telemetry, "no pecuniary interest", station control) that ADR-039 removed, and couples a commercial-ish project to a personal licence. `TODO(unverified)`: the German 13 cm amateur power limit and whether the exact 2 400–2 483.5 MHz range is covered (amateur allocation begins at 2 320 MHz) — not read. |
-| **J. Move band** | The 868 MHz ISM band has sub-bands with far more power: the repo's own `docs/frequency-plan-868.md` records 869.4–869.65 MHz at **500 mW ERP with ≤ 10 % duty** and 865.2–867.5 MHz at +14 dBm with no duty cycle (CEPT ERC/REC 70-03 Annex 1 `g` sub-bands). | **Blocked as designed**: ADR-034 D3 forbids 433-TX/868-RX because 2 × 433 = 866 MHz lands inside the 868 receive band — a self-inflicted harmonic collision. It is a *whole-link redesign*, and the 868 bands carry their own duty-cycle/LBT conditions that must be re-derived for whatever schedule is chosen. |
+| **J. Move band** | The 868 MHz ISM band has sub-bands with far more power: the repo's own `docs/link/frequency-plan-868.md` records 869.4–869.65 MHz at **500 mW ERP with ≤ 10 % duty** and 865.2–867.5 MHz at +14 dBm with no duty cycle (CEPT ERC/REC 70-03 Annex 1 `g` sub-bands). | **Blocked as designed**: ADR-034 D3 forbids 433-TX/868-RX because 2 × 433 = 866 MHz lands inside the 868 receive band — a self-inflicted harmonic collision. It is a *whole-link redesign*, and the 868 bands carry their own duty-cycle/LBT conditions that must be re-derived for whatever schedule is chosen. |
 
 **Cross-cutting, and independent of which route is taken:**
 
@@ -800,27 +800,27 @@ the aviation side is out of scope for this document):
   TX policy.
 - `docs/adr/039-licence-exempt-433-design-point.md`,
   `docs/adr/041-rf-frontend-licence-exempt.md`,
-  `docs/LINK-BUDGET-LICENCE-EXEMPT.md`, `docs/licence-exempt-design-point.md` — the
+  `docs/LINK-BUDGET-LICENCE-EXEMPT.md`, `docs/link/licence-exempt-design-point.md` — the
   licence-exempt design point, the per-direction link budget (433 +24.3 dB; 2.4 GHz +16.4 /
   +4.4 dB), the TX-clamp requirement, and the ~1.7 % duty-cycle claim corrected in § 5.1.
 - `docs/bw-code-table.md` — LR2021 LoRa bandwidth codes and Hz constants (sub-GHz 62.5/125/
   250 kHz; narrow codes 7.8125/10.417/15.625/20.833 kHz; 2.4 GHz up to 812 kHz / 1 MHz).
-- `docs/airtime_calc.py`, `docs/lr2021-lora-modulation-params-encoding.md` — the LoRa air-time
+- `docs/airtime_calc.py`, `docs/lr2021/lr2021-lora-modulation-params-encoding.md` — the LoRa air-time
   formula (Semtech AN1200.13) and the SET_LORA_MODULATION_PARAMS encoding.
 - `docs/inventory.md`, `docs/F33-MODULE-PLAN.md`, `tools/link_budget.py` — module
   sensitivities (−143 dBm sub-GHz; −136/−124 dBm at 2.4 GHz; tool LoRa table −137 dBm at
   SF12/BW125) and the FSPL arithmetic (134.7 dB @ 433, 149.6 dB @ 2400, 300 km).
-- `docs/frequency-plan-868.md` — the 868 MHz sub-band power/duty-cycle alternatives
+- `docs/link/frequency-plan-868.md` — the 868 MHz sub-band power/duty-cycle alternatives
   (route J), which are that document's sourced findings, not re-derived here.
 - `docs/analysis/radio_power_limits_model.py` — the companion model for this document;
   every table in § 5.1 and § 6 is its output.
 
 **Corrected in this document (recorded, not silently changed elsewhere):**
 
-- `docs/licence-exempt-design-point.md` § 3 — the **"integral antenna required"** condition at
+- `docs/link/licence-exempt-design-point.md` § 3 — the **"integral antenna required"** condition at
   433 MHz is **not** in Vfg. 91/2025 (44a/44b/45c; D44a/D44b/D45c) or in ERC/REC 70-03
   Annex 1 entry `f` (§ 2.5).
-- `docs/licence-exempt-design-point.md` § 7 vs `docs/adr/041-…` — the **~1.7 % duty-cycle
+- `docs/link/licence-exempt-design-point.md` § 7 vs `docs/adr/041-…` — the **~1.7 % duty-cycle
   claim and the SF12/BW125/255 B link-budget configuration are not the same radio** (§ 5.1).
 - `docs/adr/041-…` D1/D4 and its falsification list — the **100 mW EIRP ground-transmitter
   assumption is not supportable for this modulation**; the ceiling is 10 mW EIRP (57a),

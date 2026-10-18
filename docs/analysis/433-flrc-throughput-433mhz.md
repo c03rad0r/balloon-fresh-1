@@ -33,7 +33,7 @@ Everyone who cares about this band says the same thing about the width:
   band and adds a **≤ 10 % duty cycle** on the 10 mW e.r.p. row.
   `docs/analysis/radio-legal-power-limits.md` lines 126–140, 179.
 - The band **sits inside the German amateur 430–440 MHz allocation**.
-  `docs/REGULATORY-AMATEUR-LICENCE.md` line 57; `docs/analysis/433-lna-substitution-and-amateur-licence.md` §2.2.
+  `docs/link/REGULATORY-AMATEUR-LICENCE.md` line 57; `docs/analysis/433-lna-substitution-and-amateur-licence.md` §2.2.
 
 So there is exactly **1.74 MHz of width** to put an FLRC signal in.
 
@@ -125,7 +125,7 @@ per-rate legal table); `docs/analysis/radio-legal-power-limits.md` §2 (the 1.74
 
 The rate reduction changes **airtime**, and airtime is what a duty-cycle limit counts. Using the
 repo's own FLRC airtime estimator (`flrc_airtime_s`: `(payload·8 + 64)/bitrate + 0.1 ms`, from
-`docs/frequency-plan-868.md` §4):
+`docs/link/frequency-plan-868.md` §4):
 
 ```
 FLRC 2.6 Mbps, 255 B : (255·8 + 64)/2.6e6 + 0.1 ms = 0.909 ms / packet
@@ -142,7 +142,7 @@ FLRC 1.3 Mbps, 255 B : (255·8 + 64)/1.3e6 + 0.1 ms = 1.718 ms / packet   → ai
 | **German amateur footing** (430–440 MHz) | **no duty-cycle limit** | — | bandwidth-limited only (§4) | — |
 
 Sources: `docs/analysis/radio-legal-power-limits.md` lines 126–167 (the three SRD rows and ERC
-Annex 1 Note 1); `docs/frequency-plan-868.md` §4 (the DC definition and the airtime estimator).
+Annex 1 Note 1); `docs/link/frequency-plan-868.md` §4 (the DC definition and the airtime estimator).
 
 **Reading.**
 1. **The duty-cycle penalty of dropping to 1300 kbps is negligible for a telemetry link.** At the
@@ -155,7 +155,7 @@ Annex 1 Note 1); `docs/frequency-plan-868.md` §4 (the DC definition and the air
    route for FLRC on 433 under the SRD footing.
 3. **The real cost of the 1.3 Mbps ceiling is throughput, not availability:** the link carries
    **≈ 0.975 Mbps effective** (and the repo's measured sustained ceiling at the *2.6 Mbps* setting is
-   **1484.9 kbps** — `docs/frequency-plan-868.md` §4 note), i.e. roughly **half** the downlink rate
+   **1484.9 kbps** — `docs/link/frequency-plan-868.md` §4 note), i.e. roughly **half** the downlink rate
    the committed architecture assumed. This must be re-run through the 433 link budget.
 
 ---
@@ -183,7 +183,7 @@ Annex 1 Note 1); `docs/frequency-plan-868.md` §4 (the DC definition and the air
   Table 18-1 (p. 209, bit-rate/bandwidth), Table 18-2 (effective rates), Table 3-12 (FLRC 1% PER
   sensitivities, p. 50). Extract: `pdftotext -layout <pdf> -`.
 - **Band width / duty rows:** `docs/analysis/radio-legal-power-limits.md` lines 126–167;
-  `docs/frequency-plan-868.md` §4.
+  `docs/link/frequency-plan-868.md` §4.
 - **German 70 cm bandwidth cap:** `docs/analysis/433-lna-substitution-and-amateur-licence.md` §2.2
   (AFuV Anlage 1 Lfd. Nr. 18 + Zusatzbestimmung 7).
 - **The live defect this closes:** `docs/adr/073-433-downlink-flrc-max-lora-rejected.md` (fixes the
