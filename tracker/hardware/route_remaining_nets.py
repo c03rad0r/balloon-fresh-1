@@ -220,6 +220,74 @@ def simplify(pts):
     return out
 
 
+
+def plan_dogbone(m, layer, netcode, start_pad, goal_pad, commit, vias_dia=VIA_DIA):
+    """Route between two pads by dogboning onto an inner layer at both ends.
+
+    A track from a 0.5mm-pitch QFN pad cannot reach an inner layer directly; it must first escape on
+    F.Cu to a legal via site, then transition. This helper finds the FIRST legal via site outward from
+    each pad (exhaustive small search, all four layers), routes the F.Cu stubs, routes the inner-layer
+    leg, and commits every piece into the model so later nets see it.
+    """
+    R = vias_dia / 2
+
+    def legal_via(x, y):
+        worst = 1e9
+        for lyr in LAYERS:
+            for s in m.segs[lyr]:
+                if s.code == netcode:
+                    continue
+                if seg_dist(x, y, s.x1, s.y1, s.x2, s.y2) - R < RULE_CLR - 1e-9:
+                    return False
+        for lyr in LAYERS:
+            for pd in m.pads[lyr]:
+                if pd.code == netcode:
+                    continue
+                if rect_dist(x, y, pd.cx, pd.cy, pd.w, pd.h) - R < RULE_CLR - 1e-9:
+                    return False
+        return True
+
+    def find_via(pad):
+        px, py = pad
+        cands = []
+        for r in (0.30, 0.40, 0.50, 0.60, 0.70, 0.85, 1.00, 1.20, 1.40, 1.70, 2.00, 2.40):
+            for ang in range(0, 360, 15):
+                a = math.radians(ang)
+                x, y = px + r * math.cos(a), py + r * math.sin(a)
+                if legal_via(x, y):
+                    cands.append((r, x, y))
+            if cands:
+                break
+        return (cands[0][1], cands[0][2]) if cands else None
+
+    via_a = find_via(start_pad)
+    via_b = find_via(goal_pad)
+    print(f"    via A {via_a}   via B {via_b}")
+    if not via_a or not via_b:
+        print("    FAILED: no legal via site at one end")
+        return False
+
+    ok = True
+    for end, pad, v in (("A", start_pad, via_a), ("B", goal_pad, via_b)):
+        pts = simplify(astar(m, "F.Cu", netcode, pad, v, margin=2.0)[0] or [])
+        if not pts:
+            print(f"    FAILED: F.Cu stub {end}")
+            ok = False
+            break
+        commit("F.Cu", [pad, v])
+    if not ok:
+        return False
+
+    path, err = astar(m, layer, netcode, via_a, via_b, margin=3.0)
+    if not path:
+        print(f"    FAILED on {layer}: {err}")
+        return False
+    pts = simplify(path)
+    print(f"    {layer}: {len(path)} cells -> {len(pts)-1} segments")
+    commit(layer, pts)
+    return True
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--in", dest="inp", required=True)
@@ -267,42 +335,34 @@ def main():
     # ORDER MATTERS. With nets visible to each other, the FIRST routed net wins the contested
     # space. Routing SCK before DIO1 starved DIO1 (the longest span, U4.8 -> U1.33) into "no path".
     # So: longest/most-constrained first.
-    # 0. DIO1 first: U4.8 -> U1.33 (~15mm, crosses the whole board)
-    print("\n--- /SX1280_DIO1  U4.8 -> U1.33  (F.Cu) ---")
-    path, err = astar(m, "F.Cu", codes["/SX1280_DIO1"], u4_8, u1_33)
+    # DIO1 on In1.Cu. It is the longest span (U4.8 -> U1.33, ~15mm) and it was the net that
+    # CROSSED SCK on F.Cu, producing the shorting_items. Moving the long net to the emptiest
+    # inner layer (In1.Cu: 430 objects, 787mm of 3192mm total copper) decouples them.
+    print("\n--- /SX1280_DIO1  U4.8 -> stub -> via -> In1.Cu -> via -> stub -> U1.33 ---")
+    dio_legs = []
+    def _dio_commit(lyr, pts):
+        dio_legs.append((lyr, pts))
+        commit_to_model(m, lyr, codes["/SX1280_DIO1"], pts, "/SX1280_DIO1")
+    if plan_dogbone(m, "In1.Cu", codes["/SX1280_DIO1"], u4_8, u1_33, commit=_dio_commit):
+        for lyr, pts in dio_legs:
+            plan.append(("track", "/SX1280_DIO1", lyr, pts))
+        # vias: the points where a leg changes layer
+        plan.append(("via", "/SX1280_DIO1", None, [dio_legs[1][1][0]]))
+        plan.append(("via", "/SX1280_DIO1", None, [dio_legs[1][1][-1]]))
+    else:
+        plan.append(("fail", "/SX1280_DIO1", None, None))
+
+    # 1. SCK on F.Cu. Run 1 proved this path exists (19 segments) -- the ONLY violations were
+    #    crossings with DIO1, so the fix is to move DIO1 off F.Cu, not to move SCK off F.Cu.
+    print("\n--- /SX1280_SCK  U4.18 -> U1.22  (F.Cu) ---")
+    path, err = astar(m, "F.Cu", codes["/SX1280_SCK"], u4_18, u1_22)
     if path:
         pts = simplify(path)
         print(f"    {len(path)} cells -> {len(pts)-1} segments")
-        plan.append(("track", "/SX1280_DIO1", "F.Cu", pts))
-        commit_to_model(m, "F.Cu", codes["/SX1280_DIO1"], pts, "/SX1280_DIO1")
+        plan.append(("track", "/SX1280_SCK", "F.Cu", pts))
+        commit_to_model(m, "F.Cu", codes["/SX1280_SCK"], pts, "/SX1280_SCK")
     else:
-        print(f"    FAILED on F.Cu: {err}")
-
-    # 1. SCK: U4.18 escapes on F.Cu at y=24.700 (INSIDE its own pad's y-span 24.600..24.900 -- this is
-    #    the move the escape-feasibility card missed: a track may offset within the pad's own height
-    #    and slide out sideways, so 0.5mm pitch does not block it. Run 1 proved this: DRC reported ZERO
-    #    violations at U4.17/U4.18 with exactly this escape).
-    #    Then drop to B.Cu, cross, and come back up at U1.22. B.Cu carries only 463mm of the board's
-    #    3192mm of copper, so this removes ALL F.Cu contention with DIO1/MISO.
-    print("\n--- /SX1280_SCK  U4.18 -> F.Cu stub -> via -> B.Cu -> via -> U1.22 ---")
-    sck_via_a = (55.950, 24.700)
-    sck_via_b = (60.700, 20.900)
-    # the stub the board itself accepts: out of the pad at y=24.700
-    stub_a = [u4_18, sck_via_a]
-    print(f"    F.Cu stub A: ({u4_18[0]:.3f},{u4_18[1]:.3f}) -> {sck_via_a}")
-    print(f"    dogbone via A at {sck_via_a}; via B at {sck_via_b}; F.Cu stub B -> U1.22")
-    plan.append(("track", "/SX1280_SCK", "F.Cu", stub_a))
-    plan.append(("via", "/SX1280_SCK", None, [sck_via_a]))
-    path, err = astar(m, "B.Cu", codes["/SX1280_SCK"], sck_via_a, sck_via_b)
-    if path:
-        pts = simplify(path)
-        print(f"    B.Cu: {len(path)} cells -> {len(pts)-1} segments")
-        plan.append(("track", "/SX1280_SCK", "B.Cu", pts))
-        commit_to_model(m, "B.Cu", codes["/SX1280_SCK"], pts, "/SX1280_SCK")
-        plan.append(("via", "/SX1280_SCK", None, [sck_via_b]))
-        plan.append(("track", "/SX1280_SCK", "F.Cu", [sck_via_b, u1_22]))
-    else:
-        print(f"    FAILED on B.Cu: {err}")
+        print(f"    FAILED: {err}")
         plan.append(("fail", "/SX1280_SCK", None, None))
 
     # 2. MISO restored. MEASURED: MISO's long run already exists on B.Cu
