@@ -278,16 +278,31 @@ def main():
     else:
         print(f"    FAILED on F.Cu: {err}")
 
-    # 1. SCK on F.Cu: U4.18 -> U1.22
-    print("\n--- /SX1280_SCK  U4.18 -> U1.22  (F.Cu) ---")
-    path, err = astar(m, "F.Cu", codes["/SX1280_SCK"], u4_18, u1_22)
+    # 1. SCK: U4.18 escapes on F.Cu at y=24.700 (INSIDE its own pad's y-span 24.600..24.900 -- this is
+    #    the move the escape-feasibility card missed: a track may offset within the pad's own height
+    #    and slide out sideways, so 0.5mm pitch does not block it. Run 1 proved this: DRC reported ZERO
+    #    violations at U4.17/U4.18 with exactly this escape).
+    #    Then drop to B.Cu, cross, and come back up at U1.22. B.Cu carries only 463mm of the board's
+    #    3192mm of copper, so this removes ALL F.Cu contention with DIO1/MISO.
+    print("\n--- /SX1280_SCK  U4.18 -> F.Cu stub -> via -> B.Cu -> via -> U1.22 ---")
+    sck_via_a = (55.950, 24.700)
+    sck_via_b = (60.700, 20.900)
+    # the stub the board itself accepts: out of the pad at y=24.700
+    stub_a = [u4_18, sck_via_a]
+    print(f"    F.Cu stub A: ({u4_18[0]:.3f},{u4_18[1]:.3f}) -> {sck_via_a}")
+    print(f"    dogbone via A at {sck_via_a}; via B at {sck_via_b}; F.Cu stub B -> U1.22")
+    plan.append(("track", "/SX1280_SCK", "F.Cu", stub_a))
+    plan.append(("via", "/SX1280_SCK", None, [sck_via_a]))
+    path, err = astar(m, "B.Cu", codes["/SX1280_SCK"], sck_via_a, sck_via_b)
     if path:
         pts = simplify(path)
-        print(f"    {len(path)} cells -> {len(pts)-1} segments")
-        plan.append(("track", "/SX1280_SCK", "F.Cu", pts))
-        commit_to_model(m, "F.Cu", codes["/SX1280_SCK"], pts, "/SX1280_SCK")
+        print(f"    B.Cu: {len(path)} cells -> {len(pts)-1} segments")
+        plan.append(("track", "/SX1280_SCK", "B.Cu", pts))
+        commit_to_model(m, "B.Cu", codes["/SX1280_SCK"], pts, "/SX1280_SCK")
+        plan.append(("via", "/SX1280_SCK", None, [sck_via_b]))
+        plan.append(("track", "/SX1280_SCK", "F.Cu", [sck_via_b, u1_22]))
     else:
-        print(f"    FAILED: {err}")
+        print(f"    FAILED on B.Cu: {err}")
         plan.append(("fail", "/SX1280_SCK", None, None))
 
     # 2. MISO restored. MEASURED: MISO's long run already exists on B.Cu
@@ -316,12 +331,21 @@ def main():
     for lyr in ("F.Cu", "In1.Cu", "In2.Cu", "B.Cu"):
         m.segs[lyr].append(Seg(MOSI_VIA[0], MOSI_VIA[1], MOSI_VIA[0], MOSI_VIA[1],
                                VIA_DIA / 2 + r_track, "/SX1280_MOSI", codes["/SX1280_MOSI"], lyr))
-    path, err = astar(m, "B.Cu", codes["/SX1280_MOSI"], MOSI_VIA, u1_8)
-    if path:
+    # MOSI needs 8.8mm between the via and U1.8. Try layers in order of measured emptiness, not
+    # in the order that "feels natural". B.Cu now carries SCK's crossing, so it is no longer first.
+    mosi_leg = None
+    for cand in ("In1.Cu", "B.Cu", "In2.Cu"):
+        path, err = astar(m, cand, codes["/SX1280_MOSI"], MOSI_VIA, u1_8)
+        if path:
+            print(f"    {cand}: {len(path)} cells -> {len(simplify(path))-1} segments")
+            mosi_leg = (cand, path)
+            break
+        print(f"    {cand}: no path ({err})")
+    if mosi_leg:
+        cand, path = mosi_leg
         pts = simplify(path)
-        print(f"    B.Cu: {len(path)} cells -> {len(pts)-1} segments")
-        plan.append(("track", "/SX1280_MOSI", "B.Cu", pts))
-        commit_to_model(m, "B.Cu", codes["/SX1280_MOSI"], pts, "/SX1280_MOSI")
+        plan.append(("track", "/SX1280_MOSI", cand, pts))
+        commit_to_model(m, cand, codes["/SX1280_MOSI"], pts, "/SX1280_MOSI")
     else:
         print(f"    FAILED on B.Cu: {err}")
 
