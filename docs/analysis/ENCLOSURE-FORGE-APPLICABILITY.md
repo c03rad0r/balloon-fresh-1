@@ -13,7 +13,7 @@
 | Base | `origin/main` @ `3020f0b` |
 | Author | Hermes Agent (manager), for the operator |
 | Subject repo | `https://github.com/Amperstrand/enclosure-forge` — cloned `--depth 1`, HEAD `0925` series, 512 KB, 41 KB of docs read in full |
-| Repo-side rows referenced | `docs/analysis/GAP-TRACKING-CHECKLIST.md` (main), `docs/BASE-STATION-BOARD-CHECKLIST.md` (branch `design/level-control-architecture`), `docs/analysis/positioner-lowcost-3dprinted.md` (branch `design/positioner-lowcost`) |
+| Repo-side rows referenced | `docs/analysis/GAP-TRACKING-CHECKLIST.md` (main), `docs/base-station/BASE-STATION-BOARD-CHECKLIST.md` (branch `design/level-control-architecture`), `docs/analysis/positioner-lowcost-3dprinted.md` (branch `design/positioner-lowcost`) |
 
 Every claim below is **CITED** (repo path + line, or the forge file it came from),
 **COMPUTED** (arithmetic shown), a labelled **ESTIMATE**, or an explicit
@@ -109,7 +109,7 @@ sufficient** (see `REC-ENV-1`).
 The relevant rows, all from `GAP-TRACKING-CHECKLIST.md` (main) unless stated:
 
 - **`BS-01`** — *"The base-station board does not exist."* No schematic, netlist or gerber on any
-  ref; `docs/BASE-STATION-BOARD-CHECKLIST.md` declares itself *"a document, NOT a KiCad layout."*
+  ref; `docs/base-station/BASE-STATION-BOARD-CHECKLIST.md` declares itself *"a document, NOT a KiCad layout."*
   Blocking: **yes**. → forge **S1 (measure)** has **no repo-local board to measure**.
 - **`MECH-01`** — *"Masthead-vs-shack board-split decision NOT made."* The masthead LNA, DSA, log
   detector, ADC/MCU and bias network all want to be **at the masthead**; the control PC wants to be

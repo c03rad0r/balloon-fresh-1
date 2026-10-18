@@ -108,7 +108,7 @@ constrained side**, and that is where the link budget must be re-derived from.
   direction-split warning).
 - `docs/adr/034-radio-band-split-433-tx-2g4-rx.md` — the open legality item, §213–227.
 - `docs/adr/041-rf-frontend-licence-exempt.md` — the companion ADR.
-- `docs/2G4-LINK-BUDGET-ANALYSIS.md`, `docs/link-budget.md`.
+- `docs/2G4-LINK-BUDGET-ANALYSIS.md`, `docs/link/link-budget.md`.
 - Arithmetic: `10·log10(2000/10) = 23.0 dB` conducted-to-ERP comparison; the **20.9 dB**
   figure above is against the **+12.15 dBm EIRP** equivalent of 10 mW ERP, so it already
   credits a dipole-equivalent balloon antenna.

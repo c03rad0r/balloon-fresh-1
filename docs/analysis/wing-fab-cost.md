@@ -308,7 +308,7 @@ the large cells are in hand and measured. Do **not** order a "universal" wing.
 
 Mixed-series caveat: a mixed string (large + small in one series string) is electrically unsound —
 the string current is set by the weakest cell and the cell voltages differ (0.5 V small vs ≈0.54 V
-large per `docs/component-guide.md` line 108) — so a mixed wing is only sane if the mixing is
+large per `docs/hardware-reference/component-guide.md` line 108) — so a mixed wing is only sane if the mixing is
 **across parallel positions**, which raises the cell count and therefore the joint count.
 
 ---

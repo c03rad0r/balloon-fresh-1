@@ -43,6 +43,13 @@ bent pipe). Status of each:
 | **BASE STATION enclosure** | n/a | ✅ `hardware/ground-station/dish/dish.scad` (dish only) | n/a | n/a | n/a | ✅ `.scad` |
 | Flight hub enclosure | n/a | ✅ STL/SCAD set | n/a | n/a | n/a | ✅ |
 
+> **DATED NOTE (2026-10-17) — the `BASE STATION` row above is stale.** Both values, named: this
+> document's 2026-10-14 reading (*"⛔ DOES NOT EXIST"*) vs. the measured tree (*the board **does**
+> exist* — three base-station `.kicad_pcb` files: `tracker/hardware/base_station/base_station_v1_placed.kicad_pcb`,
+> `..._placed_v2.kicad_pcb`, and `.../output/.bs_v1_scaffold.kicad_pcb`). What is genuinely missing is a
+> **schematic** and a **route**, not the board. Owning record for board presence: `docs/boards/GALLERY.md`
+> (generated). See the supersession header at the top of this file.
+
 ## Gap 1 — the base-station board is DESIGNED BUT NEVER LAID OUT (largest gap)
 
 `docs/BASE-STATION-PCBA-D14-FREEZE.md` freezes the **parts and the network** for *"schematic
@@ -55,7 +62,15 @@ capture"* — and says in its own status line:
 model** for the base station anywhere in the repo. The only related artifacts are
 `hardware/ground-station/dish/dish.scad` (a dish, i.e. mechanical) and ~10 analysis documents.
 
-**So the ground end — half of the "bent pipe" — has no board at all.** The frozen content is
+> **DATED NOTE (2026-10-17).** This paragraph is stale in one clause and correct in another, so both
+> values are named rather than one deleted: *(stale)* "no `.kicad_pcb` ... anywhere in the repo" — there
+> **are** three base-station `.kicad_pcb` files (see the note above the table); *(still true)* no
+> editable `.kicad_sch`, no gerbers, and no assembled 3D model. The gap is **schematic + route**, not the
+> existence of a board.
+
+**So the ground end — half of the "bent pipe" — has no board at all.** *(DATED NOTE 2026-10-17: the
+board files exist; what does not exist is a **schematic** or a **route** — see the note above. Read
+"no board" as "no routed board".)* The frozen content is
 substantial and lays out cleanly (row 7 AD8318 log detector, row 8 RP2040, row 14 bias tee +
 TPS62162 + load switches, row 11/18 DNP), so a layout is **tractable**, but nothing exists yet.
 
@@ -67,6 +82,11 @@ model of a populated board**. The goal explicitly lists *"3d models"*. Two ways 
 1. **KiCad-native:** `kicad-cli pcb export step` produces a STEP of the board with its 3D models
    — needs 3D models assigned to footprints (partly done, via the `.wrl` envelopes).
 2. **STL/STEP from the board** for mechanical fit checks against the enclosure.
+
+> **DATED NOTE (2026-10-17) — this gap is closed for the flight boards.** Both values, named: the
+> 2026-10-14 claim (*"no STEP or assembled 3D model of a populated board"*) and the measured tree
+> (*`docs/fab/hub-v9/3d/hub_v9.step` and `docs/fab/hub-v9/3d/wing_v9.step` both exist*). What remains
+> open is an assembled STEP for the **base station** (no board model yet).
 
 ## Gap 3 — superseded v1/v2/F33 boards are mixed in with the current set
 
@@ -96,10 +116,10 @@ while half the bent pipe has no PCB — and that board is **new design work**, n
 # no BASE-STATION board anywhere -- every .kicad_pcb in tracker/hardware/output is a
 # hub/flight variant (v1..v9, f33, v_c3) or an interposer:
 find . -name '*.kicad_pcb' | wc -l                       # 100+ files, all flight-end
-find . -name '*.kicad_pcb' | grep -icE 'station|basetation|ground'   # -> 0
+find . -name '*.kicad_pcb' | grep -icE 'station|basetation|ground'   # -> 0 (STALE 2026-10-17: now >0)
 grep -n 'not a KiCad layout' docs/BASE-STATION-PCBA-D14-FREEZE.md      # the freeze's own words
 # no assembled STEP for any board:
-find . \( -name '*.step' -o -name '*.stp' \) | grep -v '\.git'         # -> (nothing)
+find . \( -name '*.step' -o -name '*.stp' \) | grep -v '\.git'         # -> (nothing) (STALE 2026-10-17: hub_v9.step, wing_v9.step exist)
 # per-part .wrl envelopes DO exist (8 in tracker/hardware/3dmodels/hub/) but they are
 # component envelopes, not an assembled board model:
 ls tracker/hardware/3dmodels/hub/

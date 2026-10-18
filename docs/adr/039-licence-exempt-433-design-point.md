@@ -19,7 +19,7 @@ That premise is **wrong** for this band:
 - The **"1 W" figure is the US 915 MHz Part 15 rule** — different band, different
   jurisdiction.
 
-In-repo secondary source: `docs/SOLAR-PIN-REGULATORY.md` on branch
+In-repo secondary source: `docs/link/SOLAR-PIN-REGULATORY.md` on branch
 `docs/solar-pin-regulatory` at commit `bc50dacd`. Primary source: **ERC/REC 70-03
 Annex 1** — the exact Annex-1 table row is marked **`TODO(unverified)`** because it has
 not been read in this session.
@@ -34,7 +34,7 @@ Ground-side **receive** gain (a 10–15 dBi 433 Yagi) and receive-side LNAs are
 cap is recovered on the ground. The **2.4 GHz uplink is ground-transmitted**, where
 licence-exempt allows **100 mW EIRP**, so it does not suffer the same cap.
 
-See `docs/licence-exempt-design-point.md` for the full per-band table, link-budget
+See `docs/link/licence-exempt-design-point.md` for the full per-band table, link-budget
 arithmetic and duty-cycle discussion.
 
 ## Consequences

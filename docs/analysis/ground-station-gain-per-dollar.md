@@ -849,7 +849,7 @@ range**, and **the F33 fitted regardless** — it dominates every option on gain
 10. **`TODO(unverified)`** the DE amateur-licence / airborne-SRD position for a +33 dBm
     airborne 433 transmitter (ADR-039 open item (a)) — **inherited; it is the binding
     constraint on the F33 half of this recommendation.**
-11. **Repo contradiction, flagged:** `docs/PAYLOAD-WEIGHT-ESTIMATES.md` §D classifies the F33
+11. **Repo contradiction, flagged:** `docs/archive/PAYLOAD-WEIGHT-ESTIMATES.md` §D classifies the F33
     board as "Ground Station Only … not a pico balloon target" — inherited from `flrc-max`
     REC-6, and it must be resolved by an ADR before the F33 goes on the balloon.
 12. **Not modelled:** the 0.6 m 2.4 GHz dish's own mass/blockage effect on the shared

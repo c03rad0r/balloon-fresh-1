@@ -36,7 +36,7 @@
   `docs/analysis/wing-ladder.md`, `docs/analysis/wing-jettison.md`,
   `docs/analysis/wing-omnidirectional.md`, `docs/analysis/wing-insolation-geometry.md`,
   `docs/analysis/mppt-charge-path-specification.md`, `docs/POWER-BUDGET-V9-D2BE.md`,
-  `docs/SOLAR-PIN-REGULATORY.md`, `docs/balloon-test-results.md` line 253,
+  `docs/link/SOLAR-PIN-REGULATORY.md`, `docs/balloon-test-results.md` line 253,
   `tracker/hardware/schematics/flight_board/v9_flight.kicad_sch` / `.net` / `-erc.rpt`.
 - Companion artefacts of this record (both new, both on this branch):
   `scripts/hub_array_topology_check.py` (the mechanical gate) and
@@ -116,8 +116,8 @@ density = 0.60 W / 30.6 cm² = 19.608 mW/cm²      (face-on, AM0, nameplate)
 **`19.6 mW/cm²` is the LARGE-CELL NAMEPLATE density, not a winter-insolation figure.** The
 brief calls it "winter insolation 19.6 mW/cm²"; the repo has no such insolation number. The
 same value also appears as the ADR-006 implied efficiency: 2.4 W / (1361 W/m² × 0.012 m²) =
-14.7 % (`docs/SOLAR-PIN-REGULATORY.md` line 97) — i.e. **this cell is a ≈14.5 % class cell at
-AM0 with no derate**, whereas `docs/SOLAR-PIN-REGULATORY.md` §1.1 derives an effective
+14.7 % (`docs/link/SOLAR-PIN-REGULATORY.md` line 97) — i.e. **this cell is a ≈14.5 % class cell at
+AM0 with no derate**, whereas `docs/link/SOLAR-PIN-REGULATORY.md` §1.1 derives an effective
 **10.5 mW/cm²** for a 22 % cell *after* the repo's own 0.35 composite derate. **19.608
 mW/cm² is an upper bound**, and §1.6 shows what happens when the derate chain is applied.
 
@@ -172,11 +172,11 @@ power-path derates, applied in the order the repo supplies them:
 | Step | Source | Requirement |
 |---|---|---|
 | nameplate × rotation, no other loss | §1.4 (vertical noon) | 64.9 cm² |
-| × envelope shading 0.9 | `docs/SOLAR-PIN-REGULATORY.md` §1.1 (factor 0.9, "envelope and rigging") | 72.1 cm² |
+| × envelope shading 0.9 | `docs/link/SOLAR-PIN-REGULATORY.md` §1.1 (factor 0.9, "envelope and rigging") | 72.1 cm² |
 | × charge-path efficiency 0.85 | ADR-050 §1 (the **assumed** 85 %; ADR-050 itself marks it `TODO(unverified)`) | **84.8 cm²** |
 | horizontal hub plane, shading + 85 % | §1.4 horizontal day-mean | **138.7 cm²** |
 
-**Basis (B)** — the repo's own composite derate. `docs/SOLAR-PIN-REGULATORY.md` §1.1 defines
+**Basis (B)** — the repo's own composite derate. `docs/link/SOLAR-PIN-REGULATORY.md` §1.1 defines
 `W/cm² = 1361 W/m² × η × 0.35 / 10000`, where the 0.35 already folds in incidence (≈0.5),
 rotation (≈0.8) and envelope shading (≈0.9):
 

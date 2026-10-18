@@ -1,0 +1,53 @@
+You are reviewing TWO 3D renders of the SAME populated printed circuit board: a TOP view and a BOTTOM
+view. The board is a 70 mm x 70 mm square hub board for a high-altitude balloon tracker, carrying two
+sub-GHz/2.4 GHz radio modules, an ESP32-S3 radio module, a GNSS receiver, four coaxial antenna
+connectors, and four "wing" connectors for four removable wing boards.
+
+This review is about PLACEMENT, PRESENCE/ABSENCE and GEOMETRY only. Answer each numbered item
+literally. Say which view you are answering from. If the render does not contain enough information to
+answer an item, write "cannot establish from this render" instead of guessing -- a guess is worse than
+an abstention here.
+
+TOP VIEW  (hub_board_v9_top.png):
+ 1. Are the three radio modules all present as visible component bodies: (a) a LARGE castellated
+    LoRa module (the largest body on the board), (b) a SECOND radio module, an SX1280 in a QFN24
+    package, and (c) an ESP32-S3-WROOM-1U module (a large metal shielded can with a U.FL pigtail)? For
+    each of the three, say whether you can see it, and give its approximate position on the board
+    (e.g. "upper-left", "centre", "right edge").
+ 2. Are FOUR small coaxial antenna connectors present (U.FL / MHF style: small metal body with a round
+    centre contact)? Give an approximate position for each of the four, and say whether each sits NEAR
+    a board edge.
+ 3. Are there FOUR wing-connector edge features -- one centred on EACH of the four board edges (top,
+    bottom, left and right)? For each of the four edges, say whether you see one and whether it sits ON
+    the edge or inset well inside the board outline.
+ 4. Is the board outline a SINGLE closed rectangle? Report any notch, cut, gap, step or missing edge
+    segment you can see.
+ 5. Does any component body, connector, pad or silkscreen feature appear to HANG OFF or overhang the
+    board outline, or to sit in an area with no copper beneath it?
+ 6. Do you see any part that reads as MISSING (an empty silkscreen outline with no component body in
+    it), MIRRORED, ROTATED relative to its own silkscreen outline, or COLLIDING with a neighbouring
+    part?
+
+BOTTOM VIEW  (hub_board_v9_bottom.png):
+ 7. Is the outline still a single closed rectangle seen from this side?
+ 8. Are the four wing-connector edge features still visible at the edges from below, and do they sit AT
+    the edge rather than inset well inside the board?
+ 9. Is the bottom side essentially free of large component bodies (i.e. are all the populated parts on
+    the top side)?
+
+Then answer these two questions EXPLICITLY and SEPARATELY, as two headed lists:
+ A. WHAT THIS RENDER CAN ESTABLISH about this board.
+ B. WHAT THIS RENDER CANNOT ESTABLISH. List at least four distinct items, and be specific about
+    electrical, dimensional and fabrication properties (for example anything involving impedance,
+    copper weight, dielectric, clearances, layer count, or internal structure). Do not hedge: state
+    plainly what a picture of the outside of a board cannot tell you.
+
+Then list every defect you found as a numbered, actionable item.
+
+Finish with EXACTLY one line, and nothing after it:
+VERDICT: CLEAN
+or
+VERDICT: DEFECTS_PRESENT <count>
+or
+VERDICT: WRONG_QUESTION <one line saying what the images actually are, if they are not what this prompt
+assumed>

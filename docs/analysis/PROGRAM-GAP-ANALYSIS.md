@@ -127,15 +127,15 @@ Status words used below: **PLANNED** (intended, nothing designed), **IN FLIGHT**
 | 1 | Ground-station architecture & duplex | **DESIGNED, UNMERGED** | ADR-071…082 on `design/adr-set-groundstation` @ `c07bd868`; `docs/analysis/plan-review-consultant.md` |
 | 2 | Ground 433 RX chain (BPF→LNA→VGA) | **DESIGNED, UNMERGED; one part DISPUTED** | ADR-079, ADR-084 (`design/level-control-architecture` @ `35683a54`); TQP3M9037 433 MHz coverage CONDITIONAL |
 | 3 | Ground 2.45 GHz TX chain | **DESIGNED, UNMERGED; PA MISSING** | ADR-072, ADR-084; `docs/analysis/rf-shopping-list-and-duplex-architecture.md` (`design/rf-shopping-list` @ `eea1cbc`) |
-| 4 | Ground-station BOM / shopping list | **BUILDABLE (partly), UNMERGED** | `docs/BASE-STATION-BOARD-CHECKLIST.md` + `docs/analysis/ground-station-bom-candidates.md` (`design/ground-station-bom` @ `283cad72`) |
+| 4 | Ground-station BOM / shopping list | **BUILDABLE (partly), UNMERGED** | `docs/base-station/BASE-STATION-BOARD-CHECKLIST.md` + `docs/analysis/ground-station-bom-candidates.md` (`design/ground-station-bom` @ `283cad72`) |
 | 5 | Level control (AGC + TX LUT) | **DESIGNED, UNMERGED** | ADR-084 on `design/level-control-architecture` @ `35683a54`; `docs/analysis/ground-station-level-control-design.md` |
 | 6 | Positioner / tracker mechanics | **DESIGNED, UNMERGED** | ADR-076/077/078 on `design/adr-set-groundstation`; `docs/analysis/positioner-lowcost-3dprinted.md` (`design/positioner-lowcost` @ `b74bf5f6`) |
 | 7 | Antenna right-sizing / tier ladder | **DESIGNED, UNMERGED** | ADR-078, ADR-081, ADR-082; `design/gain-per-dollar` @ `f0f1e08a`, `design/gain-per-dollar-cliff` @ `dd4104ad`, `design/tier0-accessible` @ `9fb023e6` |
 | 8 | 2.4 GHz dish / reflector | **DESIGNED, UNMERGED; purchase deferred** | ADR-083 on `design/rf-gaps-harmonics-diy` @ `3dbcdb8c` |
 | 9 | Flight board v9 (hub) | **DESIGNED; fab GATED** | `tracker/hardware/hub_board_v9.kicad_pcb`; ADR-029/034/037/040/041 (main); ADR-063/065 (main) |
 | 10 | Wing boards | **DESIGNED; 3D models UNMERGED** | ADR-046/048/049/065; `feat/3d-models-wing`, `feat/3d-models-hub`, `feat/board-view-renderer` (unmerged) |
-| 11 | Pre-pressurisation / pre-stretch **board** | **PLANNED — NOT DESIGNED** | Protocol + firmware exist on main (`docs/PRE-STRETCHING-PROTOCOL.md`, `docs/PRESSURE-TEST-PLAN.md`, `tools/balloon_pressure_test/`); **no board design anywhere**. Kanban card `t_c561ea2d` could **not** be located in any readable kanban store — see §3a. |
-| 12 | Regulatory / legal basis | **RESOLVED for both bands; cross-border OPEN** | `docs/REGULATORY-AMATEUR-LICENCE.md` (main) |
+| 11 | Pre-pressurisation / pre-stretch **board** | **PLANNED — NOT DESIGNED** | Protocol + firmware exist on main (`docs/prestretch/PRE-STRETCHING-PROTOCOL.md`, `docs/prestretch/PRESSURE-TEST-PLAN.md`, `tools/balloon_pressure_test/`); **no board design anywhere**. Kanban card `t_c561ea2d` could **not** be located in any readable kanban store — see §3a. |
+| 12 | Regulatory / legal basis | **RESOLVED for both bands; cross-border OPEN** | `docs/link/REGULATORY-AMATEUR-LICENCE.md` (main) |
 | 13 | Test / measurement chain | **PLANNED** | No RF bench gear; LiteVNA 62 is a TO-BUY row; Red Pitaya is IF-only (ADR-080) |
 | 14 | Consolidation of the design program | **IN FLIGHT (concurrent task)** | ~16 unmerged `design/*` branches, §5 |
 
@@ -170,8 +170,8 @@ this is done with an ad-hoc bench rig.
 
 **What exists.**
 
-- A full written protocol: `docs/PRE-STRETCHING-PROTOCOL.md` (nine-step Yokohama pre-stretch;
-  circumference is the control variable, **not** pressure) and `docs/PRESSURE-TEST-PLAN.md`.
+- A full written protocol: `docs/prestretch/PRE-STRETCHING-PROTOCOL.md` (nine-step Yokohama pre-stretch;
+  circumference is the control variable, **not** pressure) and `docs/prestretch/PRESSURE-TEST-PLAN.md`.
 - Working firmware: `tools/balloon_pressure_test/` (ESP-IDF project, `main/main.c`) logging
   `BMP280` **or** `MS5611` over USB serial, auto-detected at boot, plus a plot/analysis script
   (`tools/balloon_pressure_test/plot_pressure.py`) that prints the temperature-compensated leak
@@ -203,7 +203,7 @@ this is done with an ad-hoc bench rig.
 
 | | Item | State |
 |---|---|---|
-| exists | protocol (9-step stretch + leak test) | `docs/PRE-STRETCHING-PROTOCOL.md` (main) |
+| exists | protocol (9-step stretch + leak test) | `docs/prestretch/PRE-STRETCHING-PROTOCOL.md` (main) |
 | exists | logging firmware + analysis script | `tools/balloon_pressure_test/` (main) |
 | exists | acceptance thresholds, wiring, equipment list | same docs |
 | missing | **the board** (schematic / layout / BOM) | none anywhere — a real gap |
@@ -221,7 +221,7 @@ this is done with an ad-hoc bench rig.
 
 ### 3b. Base-station RX & TX path — full BOM + assembly plan
 
-This **extends, and does not duplicate**, `docs/BASE-STATION-BOARD-CHECKLIST.md` on
+This **extends, and does not duplicate**, `docs/base-station/BASE-STATION-BOARD-CHECKLIST.md` on
 `design/level-control-architecture` @ `35683a54` (18 rows; OWNED/TO-BUY/TODO; TO-BUY ≈ **€274.58**,
 ≈ **€441.57** with the LiteVNA; **4 owned** items). Prices below are that document's, which cites
 vendor URLs; **I add no new part or price.**
@@ -367,7 +367,7 @@ this.
 > wide beam over big dish / narrow beam** (ADR-078); **XR-613 is a resistive bench tool** (ADR-080);
 > **rate adaptation sized for the minimum useful rate at max range** (ADR-082); and a **printed
 > tracker with metal load path**. **The unfrozen legal power basis is now RESOLVED:** the operator
-> holds an amateur licence and `docs/REGULATORY-AMATEUR-LICENCE.md` establishes that the ISM PSD cap
+> holds an amateur licence and `docs/link/REGULATORY-AMATEUR-LICENCE.md` establishes that the ISM PSD cap
 > **does not apply** — 2 W on 433 MHz is legal (AFuV Anlage 1 entry 18: Klasse A 750 W PEP / Klasse E
 > 75 W PEP), and 2.4 GHz 2400–2450 MHz is **also** licensed (entry 23: Klasse A 75 W PEP / Klasse E
 > 5 W PEP). Bandwidth per rate is therefore "the maximum" (FLRC 2.6 Mbps), and the consultant's

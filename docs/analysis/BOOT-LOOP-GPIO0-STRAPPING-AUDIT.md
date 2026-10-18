@@ -35,7 +35,7 @@ of them GPIO0 carries the **supercap voltage-divider ADC** while something else 
 |---|---|
 | `docs/adr/006-supercapacitor-power.md:84` | *"ADC an GPIO0 misst Supercap-Spannung ueber Spannungsteiler (2x 1MOhm)"* — the supercap divider is on **GPIO0** |
 | `docs/adr/029-dual-band-flight-board.md:544-546` | *"`SUPERCAP_ADC_CHANNEL = ADC1_CHANNEL_0` (= GPIO0) was also assigned to the GPS UART TX, so **the supercap sense and the GPS TX were the same physical pin**"* — recorded as **"a real defect in an earlier plan"** and the **V7 ADC collision** |
-| `docs/PCB-LESSONS-LEARNED-2026-08-05.md:91` | **"FEM_RX moved from GPIO0 (strapping pin) to GPIO8"** — a fix already applied once |
+| `docs/pcb/PCB-LESSONS-LEARNED-2026-08-05.md:91` | **"FEM_RX moved from GPIO0 (strapping pin) to GPIO8"** — a fix already applied once |
 | `docs/STATUS-balloon-pow.md:153` | **"GPIO8 has NO ADC channel (V2-ADC plan was broken, corrected to GPIO0/ADC1_CH0)"** — the *opposite* move, back onto GPIO0 |
 
 **Note the contradiction between the last two rows.** One record moves a signal **off** GPIO0
@@ -58,7 +58,7 @@ presents exactly as a boot loop. Candidates that can do this:
 
 The repo documents the mechanism being noticed and mitigated before, in the same words:
 *"GPIO0 ist Strapping-Pin — GPS TX ist High-Z bei Boot, kein Konflikt"*
-(`docs/component-guide.md:211`, `docs/breadboard-wiring-guide.md:76`) — i.e. the existing
+(`docs/hardware-reference/component-guide.md:211`, `docs/hardware-reference/breadboard-wiring-guide.md:76`) — i.e. the existing
 mitigation is **"the thing on GPIO0 is high-Z at boot"**. That mitigation is **valid only if the
 attached net really is high-Z at reset.** A divider held by a charged supercap is not.
 

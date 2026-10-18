@@ -24,6 +24,14 @@ pad ''   :  9 objects at  9 DISTINCT positions, ALL net=(none), 0.9×0.9 mm
            => NINE FLOATING PADS CONNECTED TO NOTHING  (the genuine electrical gap)
 ```
 
+> **NOTE (2026-10-17) — the "floating pads" reading above is superseded.** Re-measured for
+> `docs/fab/U1-FOOTPRINT-DIAGNOSIS.md`: those 9 unnamed pads carry **`F.Paste` only** — they are
+> solder-paste stencil apertures with **no copper layer at all**, so nothing is "floating" and there is
+> nothing to connect. Both values are recorded here, neither silently deleted: *this file's 2026-10-16
+> reading* ("nine floating pads — the genuine electrical gap") and *the 2026-10-17 measurement*
+> (`F.Paste`-only apertures, no gap). The pad-`41` row above (all thirteen on `GND`) is unchanged and
+> correct. The one genuine footprint defect is on `U4` (footprint ID with no library nickname).
+
 The 0.6×0.6 grid plus the 3.9×3.9 centre is the signature of a **footprint built by replicating a pad
 without renumbering**. This is also why the stitcher reported `U1.41` twelve times as UNRESOLVABLE: it
 was trying to stitch pads already on the plane.
@@ -70,7 +78,10 @@ decision, and the closing analysis adds a constraint (no spare ADC) that whoever
 
 **There are arguably two, and neither is the one the record named:**
 
-1. **nine unnamed pads on `U1` with no net** — real floating copper
+1. ~~**nine unnamed pads on `U1` with no net** — real floating copper~~ **CORRECTED 2026-10-17:** they are
+   `F.Paste`-only stencil apertures — **no copper layer at all**, so they cannot be "floating copper" and
+   have nothing to connect. They are the standard idiom for controlling paste coverage over a large
+   thermal pad. See `U1-FOOTPRINT-DIAGNOSIS.md`.
 2. **thirteen pads sharing number `41`** — duplicated numbering on distinct copper
 
 Plus one genuine but small artefact: the 2-mil dangling wire.

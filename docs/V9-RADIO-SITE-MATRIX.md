@@ -143,7 +143,7 @@ resolved at schematic time, not assumed here.
 
 ## 4. Legal regime per config
 
-Source: `docs/REGULATORY-AMATEUR-LICENCE.md` (branch `docs/regulatory-amateur`, tip
+Source: `docs/link/REGULATORY-AMATEUR-LICENCE.md` (branch `docs/regulatory-amateur`, tip
 `0f02f29d`), `docs/adr/039-*` (licence-exempt 433.05–434.79 MHz ≤ 10 mW ERP, being written
 concurrently), `docs/V9-DUAL-LR-DESIGN-MEMO.md`.
 
@@ -157,13 +157,13 @@ concurrently), `docs/V9-DUAL-LR-DESIGN-MEMO.md`.
 Amateur-licence duties that apply to **any** licensed (i.e. HP-containing) configuration:
 
 1. **Callsign required** — every downlink frame must carry the operator's German callsign;
-   at least hourly (ITU RR Art. 19), ≤ 10 min recommended. `docs/REGULATORY-AMATEUR-LICENCE.md` §4.
+   at least hourly (ITU RR Art. 19), ≤ 10 min recommended. `docs/link/REGULATORY-AMATEUR-LICENCE.md` §4.
 2. **No encryption** — AFuV §16(7)–(8); the LoRa/FLRC framing must be publicly recoverable.
-   `docs/REGULATORY-AMATEUR-LICENCE.md` §5.
+   `docs/link/REGULATORY-AMATEUR-LICENCE.md` §5.
 3. **Secondary status** — must not harm military/radar primaries in 430–440 MHz.
-   `docs/REGULATORY-AMATEUR-LICENCE.md` §3.
+   `docs/link/REGULATORY-AMATEUR-LICENCE.md` §3.
 4. **Cross-border drift** — unsettled for an unmanned airborne auto-transmitter (open item 1).
-   `docs/REGULATORY-AMATEUR-LICENCE.md` §7.
+   `docs/link/REGULATORY-AMATEUR-LICENCE.md` §7.
 
 > The HP leg is therefore **only** legal (and only useful) under the amateur licence or on
 > the ground station, never in the licence-exempt regime the operator selected for flight
