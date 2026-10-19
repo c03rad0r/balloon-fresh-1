@@ -112,3 +112,75 @@ that via can be routed above the GND corridor and both pads stay connected.
 ~/venvs/kicad/bin/python tracker/hardware/stitch_gnd_islands.py --in <board> --out <out>   # island enumeration
 kicad-cli pcb drc --format json --output /tmp/drc.json <board>
 ```
+
+---
+
+## UPDATE 2026-10-18 — the U4.13 fix is NOT a one-segment change. Measured, and the consultant caught a real defect.
+
+### The consultant found a violation my own grid search missed
+
+I rendered the planned geometry to SVG, converted to PNG, and had `gpt-6-astra` inspect it. It flagged:
+
+> *"There is a visible, but small, gap between that vertical cyan section and the via's rightmost edge…
+> the cyan-leg-to-GND-via gap is the key place to verify."*
+
+**It was not small. It was an overlap:**
+
+```
+planned VDD vertical leg (x=56.300)  vs  planned GND via (56.000, 27.250)
+  separation 0.300 mm        need 0.200 + 0.250 + 0.100 = 0.550 mm
+  SHORTFALL  -0.250 mm   -> ILLEGAL
+```
+
+**Root cause of the miss:** my searches checked each NEW element against **existing** copper. Neither
+check compared the two **planned** elements against **each other** — because neither exists on the board
+yet. A picture catches what two independent clearance checks cannot.
+
+### And a second, worse error caught by the same discipline
+
+An earlier candidate `(55.610, 27.636)` had been produced by excluding the whole `/SX1280_VDD` **net**
+from its clearance test. Re-tested with the VDD **pad** counted as foreign copper:
+
+```
+FULL clearance, VDD pad INCLUDED:  -0.2411 mm to F.Cu trk /SX1280_VDD   -> ILLEGAL
+```
+
+**It would have shorted GND to VDD on the radio.** Excluding a net is valid only for *same-net* copper;
+applied to a *foreign* net it silently removes the real obstacle. **Never applied to the board.**
+
+### The corridor is genuinely full — both directions walled
+
+```
+east:  /SX1280_VDD  blocks x=55.70..56.60   (its diagonal + pad 12 + via at 56.300,26.450)
+west:  /SX1280_DCC_SW blocks at x=54.40 (vertical segment y 27.02..28.23) + pad U4.14
+GND via directly east at y=27.250, no VDD rip:  ALL x in 55.70..56.60 return NEGATIVE
+```
+
+Replacing `VDD`'s diagonal leaves **exactly one** legal corridor (`x=56.90`), and a GND via on the
+`y=27.250` lane cannot be placed there while meeting both the clearance rule and the `0.800 mm`
+via-to-via spacing. **No joint-legal combination exists.**
+
+### So what is the correct fix
+
+**Not** a one-segment edit. The options, in ascending risk:
+
+1. **Move `/SX1280_DCC_SW`'s vertical at `x=54.40`** to open the westward path to `U4`'s GND thermal pad
+   at `(52.750, 26.750)` (2.70 × 2.70 mm, same net, ~1.05 mm away). This is the shortest real
+   connection and needs no via at all. `DCC_SW` is a switcher node — a short move, but it is RF-adjacent
+   and needs the same review `C0`/`L1` got.
+2. **Relocate `VDD`'s pad-12 escape to an inner layer**, freeing the whole `y=27.25` lane.
+3. **Hand-route in the KiCad GUI**, where a human can shove `DCC_SW` and `VDD` interactively and see
+   the result immediately.
+
+**Recommendation: option 1, then re-measure.** It avoids placing a via in the densest part of the board
+entirely, and the target is same-net copper 1.05 mm away.
+
+### `U_HUB_CVT.2` — still open, but a passage exists
+
+```
+y=4.00  blocked (-0.10, pad U_HUB_CVT.4/5)
+y=4.40  x=25.68 +0.28   x=25.90 +0.27   <- PASSAGE EXISTS
+y=5.60..5.80  +0.50..+0.90  (wide open toward the GND via at 26.100,5.800)
+```
+
+So this one **is** routable; the earlier `NO PATH` was my search bounds, not geometry. Not yet applied.
