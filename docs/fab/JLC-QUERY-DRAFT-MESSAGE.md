@@ -123,6 +123,53 @@ recommend **via filling / capping** for this single via? What does that cost at 
 4.3 If you recommend filling, please confirm the fill is **non-conductive** (epoxy capped and plated
 over, or capped only), and whether the capped surface remains solderable.
 
+### 4A. Via-in-pad in a 0.50 mm-pitch QFN GND pad — the blocking feasibility question
+
+**This is the question that decides whether our current layout can be released at all.** It is not the
+same feature as 4.x above: the `U1.8` via is in a **large module pad** and is **not** evidence that the
+QFN case below is feasible.
+
+**The feature we need:** a **ground via-in-pad inside `U4.13`**, a GND pin of the SX1280 2.4 GHz radio,
+which is a **QFN24 at 0.50 mm pitch**. The pad is **0.80 mm × 0.30 mm**, on a **0.6 mm, 4-layer** board.
+Adjacent pads (`U4.12` above, `U4.14` below) are at 0.500 mm pitch, so their pad edges leave a
+**0.200 mm** gap, and our clearance rule is also 0.200 mm.
+
+**Our own geometry calculation** (measured from the board, verified two independent ways):
+
+| via copper Ø | clearance to adjacent pad | annular ring with 0.20 mm drill | meets our 0.20 mm rule? |
+|---|---|---|---|
+| 0.60 mm | 0.050 mm | 0.200 mm | **no** |
+| 0.50 mm | 0.100 mm | 0.150 mm | **no** |
+| 0.40 mm | 0.150 mm | 0.100 mm | **no** |
+| 0.35 mm | 0.175 mm | 0.075 mm | **no** |
+| **0.30 mm** | **0.200 mm** | **0.050 mm** | **yes, but ring is tiny** |
+| 0.25 mm | 0.225 mm | 0.025 mm | yes |
+
+So a compliant centred via here would be **≤ 0.30 mm copper diameter with a ≈ 0.050 mm annular ring** —
+well below the **0.50 mm minimum via** our board's design rules currently specify, and far below the
+0.125 mm ring of the 0.50/0.25 mm via asked about in question 5.
+
+We are asking **what construction you can actually support**, not for permission to ignore a rule.
+
+4A.1 On a **0.6 mm, 4-layer** board, can you manufacture a **ground via-in-pad in a 0.80 × 0.30 mm QFN
+     pad at 0.50 mm pitch**, retaining **0.20 mm copper clearance** to the adjacent pads (top copper land
+     no larger than **0.30 mm**)? Please specify an acceptable **through-via or microvia** construction,
+     including: finished hole / drill definition, copper land diameters **on every relevant layer**
+     (including internal lands), **minimum annular ring**, and any **stackup or layer-span restrictions**.
+
+4A.2 What **filling, planarization and capping** treatment do you require or recommend for this pad?
+     Please confirm the resulting **solderable pad surface**, and any **solder-mask or stencil**
+     requirements. If assembly is handled by a third party, state what the assembler must approve.
+
+4A.3 Is that construction available at **0.6 mm board thickness** through your **normal ordering
+     process**? What **process tier, cost and lead-time impact** applies, and what explicit **CAD / DFM
+     rules** should we enter? If it is **not** available, please state the **limiting requirement** so we
+     can revise accordingly.
+
+4A.4 If 4A.1 is not achievable, what is the **smallest via (copper Ø / drill) you would recommend we
+     redesign to** for a GND escape from a 0.50 mm-pitch QFN pad in this position, keeping 0.20 mm
+     clearance?
+
 ### 5. Minimum via size — 0.50 mm / 0.25 mm with 0.125 mm annular ring
 
 The routing at a fine-pitch QFN requires one via at **0.50 mm finished diameter / 0.25 mm drilled**,
@@ -164,7 +211,11 @@ instead and what that would cost), plus the stackup numbers from 1.1, and answer
 (via-in-pad), **5.1–5.3** (0.50/0.25 mm via and its 0.125 mm annular ring), and **6.1–6.3** (ENIG on
 copper newly exposed by routing).
 
-**2.1/2.2 and 2A are the blocking questions.** If the edge interface cannot be built as drawn, or a routed
+**4A is the single blocking question for release.** It decides whether our current layout can be
+manufactured at all: a compliant via-in-pad in that QFN pad needs a copper diameter <= 0.300 mm with a
+~0.050 mm annular ring, well below our 0.50 mm via minimum. Your answer decides between (i) a qualified
+small via-in-pad, and (ii) us revising U4's local escape geometry. **2.1/2.2 and 2A are the blocking
+questions for the wing interface.** If the edge interface cannot be built as drawn, or a routed
 slot cannot carry the lands on its internal faces, the wing-tab design needs revising and that is an
 ADR-046/048 change on our side. **4.x, 5.x and 6.x are blocking for the two unrouted nets and for the
 mating surfaces** — 5.x decides whether the 0.50 mm via at the SX1280 escape is buildable (if not, the
@@ -196,4 +247,15 @@ Thank you.
   newly exposed by routing."*
 - The five items the operator confirmed on 2026-10-18 as the exact question list are **2A, mating fit
   (2A.4), 5.x, 6.x, 4.x** — in that priority order.
+- **4A added 2026-10-18** after the visual/spatial consultant (`gpt-6-astra`) ruled: *"Your instinct is
+  right: stop local routing attempts and ask the fabricator a targeted feasibility question… Set a clear
+  fallback now: if a compliant, assembly-safe small via-in-pad solution is unavailable or unattractive,
+  revise U4's local placement/escape. Do not release with U4.13 open."* Its clearance formula
+  `c = 0.500 - 0.150 - D/2` was independently verified against measured pad edges and agrees to 4 dp at
+  every diameter.
+- **What was tried and failed before asking** (all measured, in `docs/fab/D12-VIALESS-GND-FRAGMENTS.md`):
+  a plain F.Cu escape (10 um exhaustive sweep, zero viable sites), moving `/SX1280_DCC_SW` to an inner
+  layer (no legal via at either end of the vertical within 0.3 mm), and moving `/SX1280_VDD` to an inner
+  layer (-0.400 on In1, In2 and B.Cu). The question is not "please waive your rule" but "what can you
+  actually build".
 - **No order has been placed.** Nothing here authorises one.
