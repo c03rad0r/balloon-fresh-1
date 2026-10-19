@@ -68,10 +68,22 @@ geometry checks, or the process premium is unacceptable, the next step is a deli
 `U_HUB_CVT` is the `BQ25504` energy harvester. **Pad 2 is `GND`** and its only copper is a **0.445 mm²
 fragment with zero vias**; nearest real GND copper is **2.935 mm** away.
 
-The direct vertical is blocked at `y = 3.2…3.3` by pad `U_HUB_CVT.3`, and by `U_HUB_CVT.17` — which is
-the part's GND thermal pad but is **unassigned in the netlist** (`U_HUB_CVT` carries only `PV_P`, `GND`,
-`PV_N`), so it cannot serve as a ground target. **This one is routable** — a passage exists at
-`y = 4.40` (`+0.28`) and opens up by `y = 5.60` — it simply has not been routed yet.
+**This one is also boxed** — the same failure mode as `U4.13`. `U_HUB_CVT.2` is pad 2 in a **column of
+four pads at `x = 25.683`**, so no route may pass between them. Its only legal exit window is
+`yc ∈ [2.820, 2.970]` (**0.150 mm**), west is legal only to `x = 25.35`, and **no via fits at the end of
+that corridor**:
+
+```
+(25.30, 2.895): +0.050 vs In1.Cu trk /HUB_PV_P     need +0.200
+(25.25, 2.895): +0.001 vs via /HUB_PV_N
+```
+
+A via **on the pad itself** is also illegal (`+0.125` against `U_HUB_CVT.1`). **The walls are the vias of
+the very nets this pad is meant to serve**, `/HUB_PV_P` and `/HUB_PV_N`.
+
+*(An earlier version of this snapshot said this pad was "routable at `y=4.40`". That was wrong — those
+points are on the far side of the package, 12 pads away. Corrected in
+`docs/fab/D12-VIALESS-GND-FRAGMENTS.md`.)*
 
 ---
 
@@ -97,7 +109,7 @@ DRC:                  168 → 168 violations, unconnected 4 → 4, no new violat
 | # | issue | state |
 |---|---|---|
 | 1 | **`U4.13` open ground on the SX1280** | **blocking** — question 4A |
-| 2 | `U_HUB_CVT.2` open ground | routable, not yet routed |
+| 2 | `U_HUB_CVT.2` open ground | **boxed** — same failure mode as `U4.13`; covered by question 4A.4 |
 | 3 | Edge-launch slot-face land construction | **UNVERIFIED** — question 2A |
 | 4 | Mating fit across the 0.9 mm slot / 0.6 mm tab | question 2A.4 |
 | 5 | `0.50/0.25 mm` via, 0.125 mm annular ring — standard tier? | question 5 |

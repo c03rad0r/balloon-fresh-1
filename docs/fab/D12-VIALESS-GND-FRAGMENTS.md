@@ -329,3 +329,66 @@ planned-vs-planned overlap).
 - **The five other F.Cu fragments are proven connected** to both main planes through vias.
 - **DRC unchanged at 168 violations / 4 unconnected** — the two GND zone items remain, and they are
   the honest record of these two open grounds.
+
+---
+
+## `U_HUB_CVT.2` — CORRECTED: it is also boxed. My earlier "routable at y=4.40" claim was WRONG.
+
+**Correction first.** I previously wrote that `U_HUB_CVT.2` *"is routable after all — a passage exists at
+`y = 4.40` (`+0.28`) and opens up by `y = 5.60`. The earlier `NO PATH` was my search bounds, not
+geometry."* **That was wrong.**
+
+**`U_HUB_CVT.2` is pad 2 in a column of four pads at `x = 25.683`** (`1@y=2.395`, `2@2.895`,
+`3@3.395`, `4@3.895`). A route may not pass *between* those pads — the `y=4.40`/`5.60` numbers I quoted
+were points **12 pads away** on the far side of the package, not a corridor out of pad 2. I read a
+wide-open region as if it were connected to the pad. It is not.
+
+### Measured, radially then axially
+
+```
+radial sweep from (25.683, 2.895):
+  r=0.25 -> 30/36 angles blocked      r=0.40 -> 33/36
+  r=0.55 -> 33/36                     r=0.70 -> 36/36 ALL BLOCKED
+  r=1.20 -> 29/36
+```
+
+The exit window from pad 2's own `y`-span is **`yc ∈ [2.820, 2.970]` — 0.150 mm** (pad 2 spans
+`2.770…3.020`; neighbours `U_HUB_CVT.1` bottom edge `2.520`, `U_HUB_CVT.3` top edge `3.270`).
+
+**West is legal only to `x = 25.35`:**
+
+```
+x=25.55 +0.200   x=25.45 +0.200   x=25.35 +0.200    <- corridor
+x=25.25 +0.139   x=25.15 +0.050   x=25.05 -0.050    <- /HUB_PV_N via blocks
+```
+
+**But no via fits at the corridor's end:**
+
+```
+(25.30, 2.895): +0.050 vs In1.Cu trk /HUB_PV_P     need +0.200
+(25.25, 2.895): +0.001 vs via /HUB_PV_N
+(25.35, 2.895): -0.000 vs In1.Cu trk /HUB_PV_P
+```
+
+And a via **on the pad itself** is illegal too: `+0.125` against `U_HUB_CVT.1`.
+
+### So the same verdict as `U4.13`
+
+**`U_HUB_CVT.2` is walled by the vias of the very nets it is meant to serve** (`/HUB_PV_P`,
+`/HUB_PV_N`) plus its own package pins. The best achievable clearance at the end of its only legal
+corridor is `+0.050` — **short by 0.150 mm**.
+
+### What that means for the two open grounds
+
+| pad | walled by | best achievable | verdict |
+|---|---|---|---|
+| **`U4.13`** (SX1280 GND) | `/SX1280_VDD` (east), `/SX1280_DCC_SW` (west), QFN pitch | 0 viable sites in 10 µm sweep | **boxed** |
+| **`U_HUB_CVT.2`** (BQ25504 GND) | `/HUB_PV_P`, `/HUB_PV_N` vias + package pins | `+0.050` (need `+0.200`) | **boxed** |
+
+**Both are the same failure mode:** a QFN/QFN-like part whose GND pin sits in a pin column, where the
+neighbouring nets' own vias occupy every legal escape lane.
+
+**This strengthens the case for asking the fabricator rather than revising the board:** the constraint is
+the package pitch plus the surrounding net topology, not one movable track. The question in
+`docs/fab/JLC-QUERY-DRAFT-MESSAGE.md` §4A is written for `U4.13`; **§4A.4 already asks for the smallest
+via they recommend we redesign to, which applies to `U_HUB_CVT.2` as well.**
