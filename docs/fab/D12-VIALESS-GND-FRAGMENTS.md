@@ -392,3 +392,20 @@ neighbouring nets' own vias occupy every legal escape lane.
 the package pitch plus the surrounding net topology, not one movable track. The question in
 `docs/fab/JLC-QUERY-DRAFT-MESSAGE.md` §4A is written for `U4.13`; **§4A.4 already asks for the smallest
 via they recommend we redesign to, which applies to `U_HUB_CVT.2` as well.**
+
+---
+
+## ADDENDUM 2026-10-19 — a THIRD open ground was found and fixed: `C_CAP2.2`
+
+While clearing the `holes_co_located` DRC error, the consultant ruled that the concentric GND via at
+`C_CAP2.2`'s centre was a **CAD fiction** — two drill holes at one point resolve to one 1.0 mm plated
+hole, and the via's 0.60 mm land does not survive drilling. The pad was therefore **not reliably
+connected in the manufactured result already**, despite passing CAD connectivity.
+
+**Fixed in PR #240**: via removed, real 0.49 mm GND track added from the pad's surviving annulus into
+the main F.Cu pour. `holes_co_located 2 → 0`, zero new violations.
+
+**Open-ground count history:** this session opened with "two unrouted nets"; then found the GND zone
+breaks (D7); then the two via-less fragments (D12); and now this — a connected-in-CAD pad that would
+have been **open in copper**. The recurring lesson is unchanged: *CAD connectivity is not manufactured
+connectivity; measure the copper that survives the drill.*
