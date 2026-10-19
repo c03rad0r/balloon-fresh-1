@@ -1,6 +1,6 @@
 {
   "source_board": "/home/c08r4d0r/worktrees/master-check/tracker/hardware/hub_board_v9.kicad_pcb",
-  "source_sha256": "ecd54b762c80c4c2db191f38e1ea7590d986e5e204dabd05e5d4dae0e8860957",
+  "source_sha256": "71bd675f74a003fc361bb6ae53c75b7d4da7a64b05e5bfd1c267a4f9d5adaf88",
   "packaged_board": "hub_v9.kicad_pcb",
   "footprints": 59,
   "bom_rows": 58,
