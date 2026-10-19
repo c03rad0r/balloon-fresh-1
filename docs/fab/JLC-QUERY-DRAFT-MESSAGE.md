@@ -108,6 +108,48 @@ minimum panel size?
 
 3.2 With JLCPCB **assembly**, are there special handling or minimum quantity rules for a 0.6 mm board?
 
+### 4. Via inside an SMD pad (solder-wicking risk)
+
+Our design contains **one via located inside an SMD pad** — via centre to pad centre is **0.0000 mm**
+(the via is drilled exactly at the pad centre; reference `U1.8`, net `/SX1280_MOSI` on an
+ESP32-S3-WROOM module footprint). The board is hand-assembled (no JLC assembly planned for this pad).
+
+4.1 Is an **open (un-filled, un-tented) via inside an SMD pad** within your standard capability, or does
+it need a special note?
+
+4.2 If it is buildable, what is the **solder-wicking risk** during hand soldering, and would you
+recommend **via filling / capping** for this single via? What does that cost at prototype quantity?
+
+4.3 If you recommend filling, please confirm the fill is **non-conductive** (epoxy capped and plated
+over, or capped only), and whether the capped surface remains solderable.
+
+### 5. Minimum via size — 0.50 mm / 0.25 mm with 0.125 mm annular ring
+
+The routing at a fine-pitch QFN requires one via at **0.50 mm finished diameter / 0.25 mm drilled**,
+which gives a **0.125 mm annular ring**.
+
+5.1 Is **0.50 / 0.25 mm** within your standard capability at no surcharge, or does it fall into an
+advanced-drilling tier? Our board design rules record `m_ViasMinSize = 0.500 mm` and
+`m_MinThroughDrill = 0.200 mm`, so we need to know where the real floor is.
+
+5.2 If 0.50/0.25 is **not** standard, what is the smallest standard via (diameter/drill) we should
+design to?
+
+5.3 Is a **0.125 mm annular ring** acceptable, or do you require a larger ring on any layer of a
+0.6 mm 4-layer build?
+
+### 6. ENIG and copper newly exposed by routing
+
+6.1 If we specify **ENIG**, is the finish applied to the **copper faces only** as drawn, or does the
+process also plate the **routed edges / slot walls** where copper terminates at the cut?
+
+6.2 For the edge-launch pads (question 2.1) whose copper **terminates at the routed edge**: after
+routing, the copper at the cut face is **newly exposed bare copper**. What surface will it actually
+have — will ENIG extend onto it, or does it remain bare?
+
+6.3 If it remains bare, is that a **corrosion or contact-resistance concern** for a mating surface
+that will see insertion cycles, and what would you recommend we specify instead?
+
 ---
 
 **What we will supply with the order:** the KiCad project, gerbers (4 copper layers, mask, silkscreen,
@@ -118,11 +160,17 @@ edge, the mating tab and the tolerances, and a note listing the four connector l
 **What we are asking for in return:** written answers to **2.1 and 2.2** (the edge-located copper: is it
 buildable as specified, and is it plain exposed copper or something else) and to **2A.1 and 2A.3** (how, if
 at all, copper exists on the internal faces of a routed slot - and if it does not, what you would recommend
-instead and what that would cost), plus the stackup numbers from 1.1.
+instead and what that would cost), plus the stackup numbers from 1.1, and answers to **4.1–4.3**
+(via-in-pad), **5.1–5.3** (0.50/0.25 mm via and its 0.125 mm annular ring), and **6.1–6.3** (ENIG on
+copper newly exposed by routing).
 
 **2.1/2.2 and 2A are the blocking questions.** If the edge interface cannot be built as drawn, or a routed
 slot cannot carry the lands on its internal faces, the wing-tab design needs revising and that is an
-ADR-046/048 change on our side. **1.x is deferrable** to a follow-up revision.
+ADR-046/048 change on our side. **4.x, 5.x and 6.x are blocking for the two unrouted nets and for the
+mating surfaces** — 5.x decides whether the 0.50 mm via at the SX1280 escape is buildable (if not, the
+fallback is a 0.2 mm shove of a +3V3 track, already designed and measured); 4.x decides whether the
+existing U1.8 via must be filled; 6.x decides what the mating tabs will actually contact. **1.x is
+deferrable** to a follow-up revision.
 
 Thank you.
 
@@ -140,4 +188,12 @@ Thank you.
   without the stackup."*
 - Full supporting measurements: `docs/fab/EDGE-EXEMPTION-MECHANISM.md` and
   `docs/fab/FAB-QUESTIONS-FOLLOWUP-REVISION.md`.
+- Sections **4, 5, 6 added 2026-10-18** from the routing/escape work: the U1.8 via sits **exactly on the
+  pad centre** (measured 0.0000 mm) — a solder-wicking risk that became visible only when the MOSI escape
+  was analysed; the **0.50/0.25 mm via is the board's own `m_ViasMinSize`** and is the difference between
+  routing MOSI legally and shoving a +3V3 power track (D4, `docs/fab/DECISIONS-UNROUTED-NETS.md`); ENIG
+  on routed-edge copper was flagged by Astra as *"ENIG on pad faces doesn't establish a finish on copper
+  newly exposed by routing."*
+- The five items the operator confirmed on 2026-10-18 as the exact question list are **2A, mating fit
+  (2A.4), 5.x, 6.x, 4.x** — in that priority order.
 - **No order has been placed.** Nothing here authorises one.

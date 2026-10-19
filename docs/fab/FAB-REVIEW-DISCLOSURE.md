@@ -105,6 +105,14 @@ F.Cu GND: 6 islands
      0.278 mm²  sliver, centroid (55.21, 27.26)
 ```
 
+**A corrected metric, recorded so it is not repeated:** earlier in this work the board was described
+as "15.9 % copper-utilised". **That figure was wrong for this question** — it is total routed copper
+*length* divided by total copper *area*, i.e. a **routing-density metric** (how much of the board's
+copper budget is spent on tracks), and it says nothing about plane coverage. The correct figure for
+pour coverage is **main-plane area ÷ board footprint = 3543.3 / 5040 = 70.3 %**. The error came from
+using a routing metric to reason about plane continuity; the consultant (`gpt-6-astra`) caught it:
+*"your utilization numbers use different denominators… it should not drive this decision."*
+
 Orphans total **26.5 mm² = 0.74 % of the plane = 0.53 % of the board footprint.** Each is cut off from
 the main plane by exactly one non-GND feature:
 
