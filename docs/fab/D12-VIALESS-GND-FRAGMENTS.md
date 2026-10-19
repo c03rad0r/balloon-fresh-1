@@ -184,3 +184,72 @@ y=5.60..5.80  +0.50..+0.90  (wide open toward the GND via at 26.100,5.800)
 ```
 
 So this one **is** routable; the earlier `NO PATH` was my search bounds, not geometry. Not yet applied.
+
+---
+
+## APPLIED 2026-10-18 — In1.Cu island 1 stitched. U4.13 and U_HUB_CVT.2 remain open, with dead ends measured.
+
+### Applied: In1.Cu island 1 stitching (Astra's chosen fix)
+
+Astra: *"add 2–3 well-placed GND stitching vias from the island to B.Cu main"*, and **do NOT reroute
+`+3V3`** (it runs parallel to the island edge leaving only 0.325 mm of pour, so a nudge cannot restore
+continuity).
+
+Three 0.60/0.30 mm vias added, each re-verified against the loaded board before being written:
+
+```
+(35.00, 43.00)  clearance +0.390  (vs an existing GND via)
+(33.00, 44.00)  clearance +0.200  (vs In1.Cu +3V3 track)
+(34.00, 44.00)  clearance +0.223  (vs an existing GND via)
+```
+
+**Verified improvement — the island's tie count quadrupled:**
+
+```
+BEFORE:  In1 island1 GND vias inside = 1   (33.81, 42.99)   total GND vias 39
+AFTER :  In1 island1 GND vias inside = 4   + (34,44) (33,44) (35,43)
+         all 4 also land inside B.Cu main
+```
+
+**DRC: 168 violations → 168, unconnected 4 → 4. No new violation of any type.** The remaining 4
+unconnected items are unchanged: the two signal nets (pre-existing, separately diagnosed) and the two
+zone-level GND items.
+
+### NOT applied: `U4.13` — every routing avenue is measured closed
+
+| avenue | measurement | verdict |
+|---|---|---|
+| via inside the fragment | fragment is **0.298 mm tall**; a 0.50 via needs a 0.90 mm envelope | impossible |
+| east along `y=27.250` | `/SX1280_VDD` returns **negative at every x in 55.70…56.60** | blocked |
+| west along `y=27.250` | `/SX1280_DCC_SW` vertical at `x=54.40` | blocked |
+| move `DCC_SW` west | thermal pad east edge `x=54.100` (52.750 + 1.35) ⇒ a 0.200 track needs 0.300 ⇒ **minimum legal x IS 54.400** — exactly where it already is | **cannot nudge** |
+| replace `VDD`'s diagonal | **0 legal corridors** found across `x = 56.90…59.50` | failed |
+| joint via + VDD replacement | **no joint-legal combination** (0.200 clearance vs 0.800 via spacing) | failed |
+
+**So `U4.13` is not reachable by nudging an F.Cu neighbour.** It needs `DCC_SW` or `VDD` moved to an
+**inner layer** — a real layer change, not a shove. **Not attempted unattended**, because both of my
+earlier attempts at this pad produced illegal geometry:
+
+1. a via at `(55.610, 27.636)` that would have **shorted GND to VDD at −0.2411 mm** (caused by excluding
+   the whole `VDD` *net* from a clearance test — valid only for same-net copper);
+2. a planned `VDD` leg overlapping a planned GND via at **−0.250 mm** (cause: every check compared new
+   copper against *existing* copper, never the two *planned* items against each other — caught by the
+   visual consultant reading the rendered PNG, not by the numbers).
+
+### NOT applied: `U_HUB_CVT.2` — the direct vertical is blocked by its own pad ring
+
+```
+x=25.90..26.10, y=3.2..3.3  ->  -0.10 / -0.07  (pad U_HUB_CVT.3)
+x=26.30                      ->  blocked by U_HUB_CVT.17
+```
+
+`U_HUB_CVT.17` is the part's **GND thermal pad but it is UNASSIGNED in the netlist** (`U_HUB_CVT` has
+only 3 nets: PV_P, GND on pin 2, PV_N), so it is not a valid GND target. The stub needs a route around
+the pad ring — separate work, not a straight vertical.
+
+### Consequence for the order decision
+
+**Still NOT ORDERABLE, and the reason is now sharper:** one of the two open grounds (`U4.13`, on the
+SX1280 itself) cannot be closed without an inner-layer layer change on `DCC_SW` or `VDD`. That is a
+design change that deserves the same review the hand-matched `C0`/`L1` network got —
+**it is not a routing cleanup.**
