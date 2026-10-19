@@ -253,3 +253,79 @@ the pad ring — separate work, not a straight vertical.
 SX1280 itself) cannot be closed without an inner-layer layer change on `DCC_SW` or `VDD`. That is a
 design change that deserves the same review the hand-matched `C0`/`L1` network got —
 **it is not a routing cleanup.**
+
+---
+
+## FINAL DETERMINATION on `U4.13` — exhausted, and it needs a layer change, not a route
+
+After the In1 stitching was landed, every remaining avenue for `U4.13` was searched exhaustively. The
+pad is **fully boxed**, and the box is not a routing accident — it is the QFN footprint plus three
+neighbouring nets.
+
+### Exhaustive via search: zero viable sites
+
+Searched every via position in `x 55.20…56.20`, `y 26.95…27.55` at **10 µm** resolution, requiring
+**both** the F.Cu stub from `U4.13` and the via's four-layer clearance to pass:
+
+```
+viable sites: 0
+```
+
+### Why — the stub lane and the via footprint never overlap legally
+
+The pad is `0.80 × 0.30 mm` at `(55.150, 27.250)`. Its neighbours (`U4.12` at `y=27.750`, `U4.14` at
+`y=26.750`) leave an exit lane of `y ∈ [27.200, 27.300]` — **0.100 mm**.
+
+```
+stub along y=27.250:   x=55.50 +0.200 (legal, vs U4.14)     <- the ONLY legal station
+                       x=55.60 +0.154
+                       x=55.80 +0.012
+                       x=55.90 -0.059  … x=56.20 -0.200   (blocked by /SX1280_VDD)
+via at x=55.50, y=27.250:  -0.315  (blocked by /SX1280_VDD on In2.Cu)
+```
+
+**The only place the stub is legal, the via is illegal — and vice versa.** No overlap exists.
+
+### Westward is also closed, at every y
+
+```
+x=54.65  y27.25 -0.05 | y27.05 -0.01 | y26.85 -0.15 | y26.65 -0.07   (all blocked by /SX1280_DCC_SW)
+x=54.55  y27.25 -0.05 | y27.05 -0.08 | y26.85 -0.18 | y26.65 -0.03
+```
+
+`/SX1280_DCC_SW` wraps the pad column from `y=26.65` to `y=27.25`. There is no y at which a westward
+stub can bend around it.
+
+### And `DCC_SW` itself cannot be nudged
+
+The thermal pad's east edge is `x = 54.100` (`52.750 + 1.35`). A `0.200` track needs `0.300` clearance,
+so the **minimum legal x for that DCC_SW vertical is `54.400`** — which is exactly where it already is:
+
+```
+x=54.00 +0.020   x=54.05 +0.020   x=54.10 +0.009   x=54.15 -0.027   x=54.20 -0.062
+```
+
+### Conclusion
+
+**`U4.13` (SX1280 GND) cannot be connected by any F.Cu routing.** The fix requires one of:
+
+1. **`/SX1280_DCC_SW` moved to an inner layer** — removes the west wall. `DCC_SW` is the SX1280's
+   DC-DC switcher node; a layer change adds a via pair on a switching node and **must be reviewed the
+   way the hand-matched `C0`/`L1` network was**, not waved through as layout cleanup.
+2. **`/SX1280_VDD` moved to an inner layer** — removes the east wall, at the cost of a via on the
+   radio's supply.
+3. **A board revision that moves `U4` or re-pitches its escape** — out of scope here.
+
+**This is a design decision, not a routing task, and it is the last thing standing between the board
+and an order on the GND question.** It should not be done unattended: both of my unattended attempts at
+this pad already produced illegal geometry (a `−0.2411 mm` GND-to-VDD short, and a `−0.250 mm`
+planned-vs-planned overlap).
+
+### What is settled and landed
+
+- **`In1.Cu` island 1: stitched, 1 → 4 vias, zero new DRC violations.** Astra's chosen fix, verified.
+- **`U_HUB_CVT.2`**: needs a route around its own pad ring (`U_HUB_CVT.3` blocks the vertical;
+  `U_HUB_CVT.17` is the GND thermal pad but is **unassigned in the netlist**). Not a straight segment.
+- **The five other F.Cu fragments are proven connected** to both main planes through vias.
+- **DRC unchanged at 168 violations / 4 unconnected** — the two GND zone items remain, and they are
+  the honest record of these two open grounds.
