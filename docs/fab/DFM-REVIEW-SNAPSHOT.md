@@ -6,10 +6,14 @@
 > answer one blocking feasibility question. It must not be treated as an approved production release.
 
 **Board:** `tracker/hardware/hub_board_v9.kicad_pcb` · 70.15 × 71.65 mm · 0.6 mm · 4 layers · 59 footprints
-**Snapshot date:** 2026-10-18
+**Board sha256:** `71bd675f74a003fc…` (carries the In1 stitch of PR #239 and the C_CAP2 fix of PR #240)
+**Snapshot refreshed:** 2026-10-19
 **Gate state:** netlist **PASS** (14 pass / 0 FAIL / 2 WAIVED, fail-closed) · ERC **19 errors / 36
-warnings, waived with a printed waiver** · DRC **168 violations, 4 unconnected** · `fab_grade.sh`
-**NOT ORDERABLE** (exit 1, verdict-driven)
+warnings, waived with a printed waiver** · **direct DRC (the committed board, fresh refill): 164
+violations, 4 unconnected** · `fab_grade.sh` **NOT ORDERABLE** — but see
+`docs/fab/FAB-GRADE-TOOL-DEFECT.md`: the fab_grade chain re-routes the board with the KRT router before
+grading, and the router **re-introduces the C_CAP2 phantom via** that PR #240 removed. Its numbers are a
+router-capability signal, not the board's state. **Quote the direct DRC for board state.**
 
 ---
 
@@ -89,7 +93,15 @@ points are on the far side of the package, 12 pads away. Corrected in
 
 ## 3. What IS resolved
 
-**`In1.Cu` reference-plane island — FIXED and verified.** A 29.2 mm² island of the inner GND plane had
+**`C_CAP2.2` — FIXED and verified (PR #240, found 2026-10-19).** The `holes_co_located` DRC error was
+pointing at a **third open ground**: the 0.60/0.30 GND via at the pad's exact centre was a **CAD
+fiction** — the drill file carries two holes at one point, a fabricator resolves it to one 1.0 mm hole,
+and the via's land does not survive drilling. And the naive fix (delete the via) would have floated the
+pad (no GND tracks touch it; outside all inner pours). Fixed by deleting the via and adding a **real
+0.49 mm GND track** from the pad's surviving annulus into the main F.Cu pour. `holes_co_located 2 → 0`,
+zero new violations.
+
+**`In1.Cu` reference-plane island — FIXED and verified (PR #239, landed in the canonical board).** A 29.2 mm² island of the inner GND plane had
 **one** via tie, co-located with the 433 MHz LoRa module's ground pad. Three stitching vias were added at
 `(35.00,43.00)`, `(33.00,44.00)`, `(34.00,44.00)`, each re-verified against the loaded board
 (`+0.390`, `+0.200`, `+0.223`):
@@ -115,8 +127,8 @@ DRC:                  168 → 168 violations, unconnected 4 → 4, no new violat
 | 5 | `0.50/0.25 mm` via, 0.125 mm annular ring — standard tier? | question 5 |
 | 6 | Open via at `U1.8` pad centre — solder wicking | question 4 |
 | 7 | ENIG on copper newly exposed by routing | question 6 |
-| 8 | `holes_co_located 2` (via inside `C_CAP2` pad-2 hole) | known, unresolved |
-| 9 | `via_dangling 8` | known routing debris |
+| 8 | `holes_co_located` at `C_CAP2.2` | **FIXED** — phantom via → real track (PR #240) |
+| 9 | `via_dangling 7` | **not debris** — 6 are the unrouted nets' own escape points; resolve in the GUI session |
 | 10 | Six QFN escape nets | two routed (`MOSI`, `SCK`), see `docs/fab/ROUTING-DECISION-STOP.md` |
 
 ---
