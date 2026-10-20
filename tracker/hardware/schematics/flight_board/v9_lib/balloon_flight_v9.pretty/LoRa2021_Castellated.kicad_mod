@@ -1,7 +1,6 @@
 (footprint "balloon_flight_v9:LoRa2021_Castellated"
-		(version 20250114)
+		(version 20240108)
 		(generator "pcbnew")
-		(generator_version "9.0") (version 20250114) (generator "pcbnew")
   (layer "F.Cu")
   (attr smd)
   (descr "NiceRF LoRa2021 Gen4, 18-pin castellated module, 19.81x14.98mm, 1.29mm pitch")

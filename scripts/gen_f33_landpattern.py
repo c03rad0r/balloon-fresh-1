@@ -274,74 +274,78 @@ def decode_vendor(path: str | None = None) -> dict:
 # --------------------------------------------------------------------------
 def footprint_text(libname: str = "custom", leaf: str = "LoRa2021F33_2G4",
                    lands: tuple[float, float] | None = None,
-                   vendor_sha: str = VENDOR_SHA256) -> str:
+                   vendor_sha: str = VENDOR_SHA256,
+                   notes: list | None = None) -> str:
     d = decode_vendor()
+    if notes is None:
+        notes = []
     lx, ly = lands or (LAND_LENGTH_MM, LAND_WIDTH_MM)
     hl, hw = MODULE_LENGTH_MM / 2, MODULE_WIDTH_MM / 2
     L = []
+    pass  # notes supplied by the caller
     L.append('(footprint "%s:%s"' % (libname, leaf))
-    L.append('  (version 20250114)')
+    L.append('  (version 20240108)')
     L.append('  (generator "gen_f33_landpattern.py")')
     L.append('  (layer "F.Cu")')
     L.append('  (attr smd)')
     L.append('  (descr "%s")' % DESCR)
     L.append('  (tags "%s")' % TAGS)
-    L.append('  ;; ================================================================')
-    L.append('  ;; GENERATED FILE - do not hand-edit.')
-    L.append('  ;;   python3 scripts/gen_f33_landpattern.py')
-    L.append('  ;; Pad CENTRES decoded from the VENDOR land file')
-    L.append('  ;;   docs/f33-module/materials/LORA2021F33-2G4 footprint_pads.pcb')
-    L.append('  ;;   sha256 %s' % vendor_sha)
-    L.append('  ;;   (18 x 36-byte records, tag 0x%08X, 1.5e6 units/mm)' % TAG)
-    L.append('  ;; Verified against the vendor file and the datasheet drawing:')
-    L.append('  ;;   pad count 18, names 1..18, 9 per row; rows on the two 39mm')
-    L.append('  ;;   edges at y=+/-10.5000; pitch %.4fmm (drawing 3.93+-0.1);' % d["pitch"])
-    L.append('  ;;   outer pad centre 3.7844mm from the 39mm end (drawing 3.78+-0.1);')
-    L.append('  ;;   closure 2*3.7844 + 8*%.4f = %.4fmm = module length 39.00.' % (d["pitch"], d["closure"]))
-    L.append('  ;; VERIFIED land size - DERIVED from the operator-supplied datum:')
-    L.append('  ;;   pad LAND SIZE %g x %g mm' % (lx, ly))
-    L.append('  ;;     castellation HALF-HOLE diameter D = %g +/- %g mm, the'
+    notes.append(' ================================================================')
+    notes.append(' GENERATED FILE - do not hand-edit.')
+    notes.append('   python3 scripts/gen_f33_landpattern.py')
+    notes.append(' Pad CENTRES decoded from the VENDOR land file')
+    notes.append('   docs/f33-module/materials/LORA2021F33-2G4 footprint_pads.pcb')
+    notes.append('   sha256 %s' % vendor_sha)
+    notes.append('   (18 x 36-byte records, tag 0x%08X, 1.5e6 units/mm)' % TAG)
+    notes.append(' Verified against the vendor file and the datasheet drawing:')
+    notes.append('   pad count 18, names 1..18, 9 per row; rows on the two 39mm')
+    notes.append('   edges at y=+/-10.5000; pitch %.4fmm (drawing 3.93+-0.1);' % d["pitch"])
+    notes.append('   outer pad centre 3.7844mm from the 39mm end (drawing 3.78+-0.1);')
+    notes.append('   closure 2*3.7844 + 8*%.4f = %.4fmm = module length 39.00.' % (d["pitch"], d["closure"]))
+    notes.append(' VERIFIED land size - DERIVED from the operator-supplied datum:')
+    notes.append('   pad LAND SIZE %g x %g mm' % (lx, ly))
+    notes.append('     castellation HALF-HOLE diameter D = %g +/- %g mm, the'
              % (CASTELLATION_D_MM, CASTELLATION_D_TOL_MM))
-    L.append('  ;;       operator\'s reading of the vendor drawing (datasheet s9 p8,')
-    L.append('  ;;       a raster with no text layer). The module presents D of')
-    L.append('  ;;       copper along the edge and penetrates only D/2 inward.')
-    L.append('  ;;     RULE: land = the castellation aperture grown by a uniform')
-    L.append('  ;;       %g mm solder-fillet margin on EVERY side.'
+    notes.append('       operator\'s reading of the vendor drawing (datasheet s9 p8,')
+    notes.append('       a raster with no text layer). The module presents D of')
+    notes.append('       copper along the edge and penetrates only D/2 inward.')
+    notes.append('     RULE: land = the castellation aperture grown by a uniform')
+    notes.append('       %g mm solder-fillet margin on EVERY side.'
              % LAND_FILLET_MARGIN_MM)
-    L.append('  ;;       x: D + 2*%g = %g mm; gap to the next land = %.4f - %g'
+    notes.append('       x: D + 2*%g = %g mm; gap to the next land = %.4f - %g'
              ' = %.4f mm' % (LAND_FILLET_MARGIN_MM, lx, d["pitch"], lx,
                              d["pitch"] - lx))
-    L.append('  ;;       y: D + 2*%g = %g mm, symmetric about the pad centre'
+    notes.append('       y: D + 2*%g = %g mm, symmetric about the pad centre'
              ' (pinned' % (LAND_FILLET_MARGIN_MM, ly))
-    L.append('  ;;          on the module edge, y=+/-10.5, and NOT moved):'
+    notes.append('          on the module edge, y=+/-10.5, and NOT moved):'
              ' inward %g >= D/2 = %g mm;' % (ly / 2, CASTELLATION_D_MM / 2))
-    L.append('  ;;          outward %g = the hand-solder iron\'s access, never'
+    notes.append('          outward %g = the hand-solder iron\'s access, never'
              ' smaller than' % (ly / 2,))
-    L.append('  ;;          the inward half. F33-LANDPATTERN-VERIFICATION.md'
+    notes.append('          the inward half. F33-LANDPATTERN-VERIFICATION.md'
              ' s11.')
-    L.append('  ;; NOT verified (do not read this as verified):')
-    L.append('  ;;   pin-1 ORIENTATION anchor: pads 9/10 (ANT / ANT-2G4) are the')
-    L.append('  ;;     adjacent pair at the +x end; pad 18 (IRQ) sits beside pad 1')
-    L.append('  ;;     (VCC) at the -x end. The vendor file carries no body outline.')
-    L.append('  ;; ================================================================')
+    notes.append(' NOT verified (do not read this as verified):')
+    notes.append('   pin-1 ORIENTATION anchor: pads 9/10 (ANT / ANT-2G4) are the')
+    notes.append('     adjacent pair at the +x end; pad 18 (IRQ) sits beside pad 1')
+    notes.append('     (VCC) at the -x end. The vendor file carries no body outline.')
+    notes.append(' ================================================================')
     L.append('  (property "Reference" "U2" (at 0 -12 0) (layer "F.SilkS")')
     L.append('    (uuid "fp-ref") (effects (font (size 1 1) (thickness 0.15))))')
     L.append('  (property "Value" "%s" (at 0 12.5 0) (layer "F.Fab")' % leaf)
     L.append('    (uuid "fp-val") (effects (font (size 1 1) (thickness 0.15))))')
     L.append('')
-    L.append('  ;; Module outline %g x %g mm, centred on the origin' % (MODULE_LENGTH_MM, MODULE_WIDTH_MM))
+    notes.append(' Module outline %g x %g mm, centred on the origin' % (MODULE_LENGTH_MM, MODULE_WIDTH_MM))
     L.append('  (fp_line (start %g %g) (end %g %g) (stroke (width 0.12) (type solid)) (layer "F.SilkS") (uuid "outline-1"))' % (-hl, -hw, hl, -hw))
     L.append('  (fp_line (start %g %g) (end %g %g) (stroke (width 0.12) (type solid)) (layer "F.SilkS") (uuid "outline-2"))' % (hl, -hw, hl, hw))
     L.append('  (fp_line (start %g %g) (end %g %g) (stroke (width 0.12) (type solid)) (layer "F.SilkS") (uuid "outline-3"))' % (hl, hw, -hl, hw))
     L.append('  (fp_line (start %g %g) (end %g %g) (stroke (width 0.12) (type solid)) (layer "F.SilkS") (uuid "outline-4"))' % (-hl, hw, -hl, -hw))
     L.append('')
-    L.append('  ;; Fab layer outline')
+    notes.append(' Fab layer outline')
     L.append('  (fp_line (start %g %g) (end %g %g) (stroke (width 0.1) (type solid)) (layer "F.Fab") (uuid "fab-1"))' % (-hl, -hw, hl, -hw))
     L.append('  (fp_line (start %g %g) (end %g %g) (stroke (width 0.1) (type solid)) (layer "F.Fab") (uuid "fab-2"))' % (hl, -hw, hl, hw))
     L.append('  (fp_line (start %g %g) (end %g %g) (stroke (width 0.1) (type solid)) (layer "F.Fab") (uuid "fab-3"))' % (hl, hw, -hl, hw))
     L.append('  (fp_line (start %g %g) (end %g %g) (stroke (width 0.1) (type solid)) (layer "F.Fab") (uuid "fab-4"))' % (-hl, hw, -hl, -hw))
     L.append('')
-    L.append('  ;; Courtyard: module + 0.3mm')
+    notes.append(' Courtyard: module + 0.3mm')
     chl, chw = hl + 0.3, hw + 0.3
     L.append('  (fp_line (start %g %g) (end %g %g) (stroke (width 0.05) (type solid)) (layer "F.CrtYd") (uuid "crtyd-1"))' % (-chl, -chw, chl, -chw))
     L.append('  (fp_line (start %g %g) (end %g %g) (stroke (width 0.05) (type solid)) (layer "F.CrtYd") (uuid "crtyd-2"))' % (chl, -chw, chl, chw))
@@ -349,7 +353,7 @@ def footprint_text(libname: str = "custom", leaf: str = "LoRa2021F33_2G4",
     L.append('  (fp_line (start %g %g) (end %g %g) (stroke (width 0.05) (type solid)) (layer "F.CrtYd") (uuid "crtyd-4"))' % (-chl, chw, -chl, -chw))
     L.append('')
     p1x, p1y = d["pads"][1]
-    L.append('  ;; Pin 1 marker (circle beside pad 1 at (%g, %g))' % (p1x, p1y))
+    notes.append(' Pin 1 marker (circle beside pad 1 at (%g, %g))' % (p1x, p1y))
     L.append('  (fp_circle (center %g %g) (end %g %g) (stroke (width 0.12) (type solid)) (fill none) (layer "F.SilkS") (uuid "pin1-mark"))'
              % (p1x - 1.9, p1y + 1.1, p1x - 1.6, p1y + 1.1))
     L.append('')
@@ -522,11 +526,20 @@ def main() -> int:
     if args.out:
         targets = [(os.path.relpath(os.path.abspath(args.out), REPO), args.lib)]
     for rel, lib in targets:
-        body = footprint_text(lib, "LoRa2021F33_2G4", lands, d["sha256"])
+        notes = []
+        body = footprint_text(lib, "LoRa2021F33_2G4", lands, d["sha256"], notes=notes)
         p = rel if os.path.isabs(rel) else os.path.join(REPO, rel)
         os.makedirs(os.path.dirname(p), exist_ok=True)
         with open(p, "w") as fh:
             fh.write(body)
+        note_p = p[:-len(".kicad_mod")] + ".md" if p.endswith(".kicad_mod") else p + ".md"
+        with open(note_p, "w") as fh:
+            fh.write("# LoRa2021F33_2G4 -- generator notes\n\n")
+            fh.write("KiCad S-expressions have no comment syntax; these notes were\n")
+            fh.write("previously emitted as `;;` lines INSIDE the .kicad_mod, which made\n")
+            fh.write("the footprint unloadable (DRC: lib_footprint_issues).\n\n```\n")
+            fh.write("\n".join(notes))
+            fh.write("\n```\n")
         written.append((rel, hashlib.sha256(body.encode()).hexdigest()))
     print("\nwrote:")
     for rel, sha in written:
