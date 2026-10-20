@@ -141,10 +141,18 @@ def main():
         r = subprocess.run([sys.executable, gen, "--check"], cwd=REPO,
                            capture_output=True, text=True, timeout=600)
         if r.returncode != 0:
-            # extract the STALE lines for a precise message
-            stale = [l for l in (r.stdout + r.stderr).splitlines() if "STALE" in l or "MISSING" in l]
-            detail = "\n    ".join(stale[:6]) if stale else "generator --check failed"
-            problems.append(f"STALE IMAGE: {rel} owned by {gen}\n    {detail}")
+            out = r.stdout + r.stderr
+            stale = [l for l in out.splitlines() if "STALE" in l or "MISSING" in l]
+            if stale:
+                # the generator RAN and reported staleness
+                detail = "\n    ".join(stale[:6])
+                problems.append(f"STALE IMAGE: {rel} owned by {gen}\n    {detail}")
+            else:
+                # the generator CRASHED (e.g. no pcbnew in this python). Refusing anyway
+                # is fail-safe, but the message must not claim staleness it did not detect.
+                err = [l for l in out.splitlines() if l.strip()][-2:]
+                problems.append(f"GENERATOR FAILED (cannot verify {rel}): {gen}\n    "
+                                + "\n    ".join(err))
 
     if problems:
         print("pre-commit: markdown-linked images are not up to date\n")
