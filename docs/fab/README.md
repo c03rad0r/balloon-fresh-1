@@ -9,6 +9,16 @@ it**, before any order is placed.
 
 ---
 
+## Image freshness (enforced)
+
+Every board image and figure in this repo is **generated, not hand-edited**, and a pre-commit hook
+(`scripts/git-hooks/pre-commit-image-freshness.py`, install via `python3 scripts/git-hooks/install.py`)
+refuses any commit whose linked renders are stale. If the hook rejects your commit, run the generator
+it names *without* `--check` and commit the re-rendered artefacts. Details:
+`tests/test_image_freshness_hook.py`.
+
+---
+
 ## Read in this order
 
 ### 1. What we are asking you — `JLC-QUERY-DRAFT-MESSAGE.md`

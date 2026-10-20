@@ -12,15 +12,14 @@ table drifts; this one cannot.
 
 | board | render | footprints | nets routed | tracks | vias | outline |
 |---|---|---|---|---|---|---|
-| **hub v9** | ![hub v9](hub-v9.png) | 59 | 57/59 | 834 | 286 | 70.0×70.0 mm |
+| **hub v9** | ![hub v9](hub-v9.png) | 59 | 59/59 | 991 | 290 | 70.0×70.0 mm |
 | **wing v9** | ![wing v9](wing-v9.png) | 15 | 4/6 | 20 | 8 | 184.0×25.0 mm |
 | **base station** | ![base station](base-station.png) | 44 | 0/44 | 0 | 0 | 70.0×50.0 mm |
 
 ## What each board is
 
 - **hub v9** — flight hub: 4 wing sockets, SX1280 FLRC radio, GNSS, solar harvester
-  - ⚠️ **2 net(s) unrouted**
-  - `tracker/hardware/hub_board_v9.kicad_pcb`  sha256 `e55a294628fd38a7…`
+  - `tracker/hardware/hub_board_v9.kicad_pcb`  sha256 `374132814682a432…`
 - **wing v9** — wing solar array + cut driver + hub tab
   - ⚠️ **2 net(s) unrouted**
   - `tracker/hardware/wing_board/wing_board_v9.kicad_pcb`  sha256 `34f103774bfba921…`
