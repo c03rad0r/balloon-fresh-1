@@ -6,11 +6,11 @@
 > answer one blocking feasibility question. It must not be treated as an approved production release.
 
 **Board:** `tracker/hardware/hub_board_v9.kicad_pcb` · 70.15 × 71.65 mm · 0.6 mm · 4 layers · 59 footprints
-**Board sha256:** `71bd675f74a003fc…` (carries the In1 stitch of PR #239 and the C_CAP2 fix of PR #240)
+**Board sha256:** `374132814682a432…` (carries PRs #239 In1 stitch, #240 C_CAP2 fix, #245 MOSI+SCK routing, #247 J_W silk)
 **Snapshot refreshed:** 2026-10-19
 **Gate state:** netlist **PASS** (14 pass / 0 FAIL / 2 WAIVED, fail-closed) · ERC **19 errors / 36
-warnings, waived with a printed waiver** · **direct DRC (the committed board, fresh refill): 164
-violations, 4 unconnected** · `fab_grade.sh` **NOT ORDERABLE** — but see
+warnings, waived with a printed waiver** · **direct DRC (the committed board, fresh refill): 105
+violations, 2 unconnected** · `fab_grade.sh` **NOT ORDERABLE** — but see
 `docs/fab/FAB-GRADE-TOOL-DEFECT.md`: the fab_grade chain re-routes the board with the KRT router before
 grading, and the router **re-introduces the C_CAP2 phantom via** that PR #240 removed. Its numbers are a
 router-capability signal, not the board's state. **Quote the direct DRC for board state.**
@@ -108,7 +108,7 @@ zero new violations.
 
 ```
 In1 island1 tie vias:  1 → 4       all four also land in B.Cu main
-DRC:                  168 → 168 violations, unconnected 4 → 4, no new violation
+DRC at PR #239:       168 → 168 violations, unconnected 4 → 4, no new violation
 ```
 
 **The five other F.Cu GND fragments are proven connected** to both main planes through vias that land in
