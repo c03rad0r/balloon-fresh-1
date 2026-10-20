@@ -560,3 +560,19 @@ Rules:
 - Report runs from `docs/harmonized/HARMONIZED-RUN-REPORT-TEMPLATE.md`; record unrun configs
   as `not run`. Data-handover convention for this branch:
   `docs/data-handover/DATA-HANDOVER-2026-08-17.md`.
+
+
+## FLIGHT BOARD v10 — OPERATOR DIRECTIVES (2026-10-20, ADR-118) — BINDING
+
+1. **Two-sided population is the default.** Parts go on both sides; the outline shrinks to
+   what the two-sided placement needs. The 70x70 v9 outline is not a v10 constraint.
+2. **Four RF sites:** LoRa2021F33 (HP) + TWO bare LoRa2021 LP + **E28-2G4M27SX module**
+   (SX1280+PA+LNA+matching on-module; datasheet at `docs/modules/e28-2g4m27sx/`).
+   The bare-chip SX1280 + self-built match network is ABANDONED (measured fatal scatter,
+   `docs/fab/SX1280-MODULE-DECISION.md`).
+3. **HUMAN PLACEMENT GATE:** placement is shown to the operator (rendered, in Signal) and
+   SIGNED OFF before ANY routing starts. Routing before gate sign-off is a defect.
+4. **VISUAL-FIRST REPORTING:** every substantive board claim to the operator ships with a
+   rendered image in the same message. No text-only board reports.
+5. The E28 module's keep-out rules (nothing under the module but the digital corner; keep
+   away from high-frequency/power traces) apply to BOTH sides of the board at its site.
