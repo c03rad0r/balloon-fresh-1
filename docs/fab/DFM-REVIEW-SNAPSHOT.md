@@ -154,3 +154,112 @@ kicad-cli pcb drc --format json --output /tmp/drc.json <board>
 
 Sources: `docs/fab/D12-VIALESS-GND-FRAGMENTS.md`, `docs/fab/ROUTING-DECISION-STOP.md`,
 `docs/fab/FAB-REVIEW-DISCLOSURE.md`, `docs/fab/JLC-QUERY-DRAFT-MESSAGE.md`.
+
+---
+
+## 1a. Severity of the residual DRC items — and three refuted attempts to clear the silk
+
+**Measured severity at master `baef25a1e`:**
+
+```
+silk_overlap          32   warning      <- cosmetic layer
+silk_over_copper      26   warning
+silk_edge_clearance   12   warning
+via_dangling           5   warning
+copper_edge_clearance  30  ERROR        <- the J_W* castellation geometry: JLC section 2A
+unconnected            2   ERROR        <- the GND zone pairs: JLC question 4A
+```
+
+**Only two ERROR classes remain, and both are fabricator questions.** The 70 silk items are
+warnings on a cosmetic layer: silkscreen that overlaps another line or a mask opening is clipped
+or overprinted by the fabricator and does not affect copper, mask or drill. **Treating them as
+order blockers was wrong.**
+
+### Attempt 1 — REFUTED: unrestricted reference-text re-placement
+
+Search a clean spot per reference, nearest-first with a wide ring. Discarded, not merged: to
+satisfy the checks it walked labels far from their components — `D_HUB1`'s ref moved **16.4 mm**
+— and still could not place `R_MON2`. A board whose designators are scattered across the
+silkscreen passes DRC and is **worse for assembly**.
+
+### Attempt 2 — REFUTED: bounded nudge (<= 1.2 mm)
+
+Rule adopted from attempt 1 (a ref move is acceptable only if the text stays adjacent). Result:
+**7 moves bought 2 fewer overlaps** — 0.29 per move. Churn, not a fix. Worse: the first version's
+predictor EXCLUDED same-footprint silk from its cleanliness test while the grader INCLUDES it, so
+an early run "improved" 32 -> 50 by pushing refs onto their own outlines. **A predictor whose
+rule differs from the grader's manufactures false confidence.**
+
+### Attempt 3 — REFUTED: shrink the ref text
+
+Premise checked and found false: the ref texts are **already 1.00 mm** tall. `U_CUT2`'s text
+measures 5.82 mm wide because **"U_CUT2" is six characters at 1.00 mm pitch plus spacing** — the
+width is string length, not font size. Shrinking further would be unreadable and still not fit.
+
+### The actual cause
+
+```
+U_CUT2 / U_CUT3   texts 5.82 mm wide, the parts are 5.00 mm apart
+R_MON2            6.20 mm wide at x = 68.0
+C_CAP2            5.82 mm wide
+70 x 70 mm board, 59 parts, six-character designators
+```
+
+**The labels are wider than the gaps.** Resolving them means renaming designators, editing
+footprint silk, or accepting the warnings — design choices, not routing cleanup, and **none of
+them an order blocker.** All three scripts were reverted; nothing was shipped.
+
+
+**Measured severity at master `baef25a1e`:**
+
+```
+silk_overlap          32   warning      <- cosmetic layer
+silk_over_copper      26   warning
+silk_edge_clearance   12   warning
+via_dangling           5   warning
+copper_edge_clearance  30  ERROR        <- the J_W* castellation geometry: JLC section 2A
+unconnected            2   ERROR        <- the GND zone pairs: JLC question 4A
+```
+
+**Only two ERROR classes remain, and both are fabricator questions.** The 70 silk items are
+warnings on a cosmetic layer: silkscreen that overlaps another line or a mask opening is clipped
+or overprinted by the fabricator and does not affect copper, mask or drill. **Treating them as
+order blockers was wrong.**
+
+### Attempt 1 — REFUTED: unrestricted reference-text re-placement
+
+Search a clean spot per reference, nearest-first with a wide ring. Discarded, not merged: to
+satisfy the checks it walked labels far from their components — `D_HUB1`'s ref moved **16.4 mm**
+— and still could not place `R_MON2`. A board whose designators are scattered across the
+silkscreen passes DRC and is **worse for assembly**.
+
+### Attempt 2 — REFUTED: bounded nudge (<= 1.2 mm)
+
+Rule adopted from attempt 1 (a ref move is acceptable only if the text stays adjacent). Result:
+**7 moves bought 2 fewer overlaps** — 0.29 per move. Churn, not a fix. Worse: the first version's
+predictor EXCLUDED same-footprint silk from its cleanliness test while the grader INCLUDES it, so
+an early run "improved" 32 -> 50 by pushing refs onto their own outlines. **A predictor whose
+rule differs from the grader's manufactures false confidence.**
+
+### Attempt 3 — REFUTED: shrink the ref text
+
+Premise checked and found false: the ref texts are **already 1.00 mm** tall. `U_CUT2`'s text
+measures 5.82 mm wide because **"U_CUT2" is six characters at 1.00 mm pitch plus spacing** — the
+width is string length, not font size. Shrinking further would be unreadable and still not fit.
+
+### The actual cause
+
+```
+U_CUT2 / U_CUT3   texts 5.82 mm wide, the parts are 5.00 mm apart
+R_MON2            6.20 mm wide at x = 68.0
+C_CAP2            5.82 mm wide
+70 x 70 mm board, 59 parts, six-character designators
+```
+
+**The labels are wider than the gaps.** Resolving them means renaming designators, editing
+footprint silk, or accepting the warnings — design choices, not routing cleanup, and **none of
+them an order blocker.** All three scripts were reverted; nothing was shipped.
+
+---
+
+
