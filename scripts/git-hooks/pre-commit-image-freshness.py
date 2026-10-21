@@ -138,7 +138,14 @@ def main():
         if gen in checked:
             continue
         checked.add(gen)
-        r = subprocess.run([sys.executable, gen, "--check"], cwd=REPO,
+        # generators that import pcbnew need the KiCad python; system python3 lacks it
+        # (measured 2026-10-21: commit refused with GENERATOR FAILED -- ModuleNotFoundError).
+        # Prefer $KICAD_PY, then ~/venvs/kicad/bin/python, then sys.executable.
+        py = os.environ.get("KICAD_PY")
+        if not py:
+            cand = os.path.expanduser("~/venvs/kicad/bin/python")
+            py = cand if os.path.exists(cand) else sys.executable
+        r = subprocess.run([py, gen, "--check"], cwd=REPO,
                            capture_output=True, text=True, timeout=600)
         if r.returncode != 0:
             out = r.stdout + r.stderr
