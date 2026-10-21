@@ -516,6 +516,10 @@ def main():
                 v.SetWidth(int(VIA_D * UM))
                 v.SetDrill(int(VIA_DRILL * UM))
                 b.Add(v)
+    nfps = len(b.GetFootprints())
+    if nfps < 20:
+        raise SystemExit(f"REFUSED: refusing to save a board with only {nfps} footprints "
+                         "(clobber guard -- expected 28)")
     pcbnew.SaveBoard(args.board, b)
     print(f"saved {args.board}")
     return 0

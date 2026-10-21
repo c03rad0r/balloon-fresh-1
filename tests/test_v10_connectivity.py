@@ -23,8 +23,18 @@ HW = os.path.join(REPO, "tracker", "hardware")
 BOARD = os.path.join(HW, "hub_board_v10.kicad_pcb")
 REG = os.path.join(HW, "connectivity", "v10_pinmap.reg")
 
-pcbnew = pytest.importorskip("pcbnew", reason="pcbnew unavailable (CI) -- loud skip")
 UM = 1_000_000.0
+
+
+def _pcbnew():
+    """Lazy import: the STATIC assertions in this file must run in CI (no KiCad there).
+    A module-level importorskip skips the whole file -- including them -- which made the
+    CI suite report "1 skipped" and exit 5 (no tests ran)."""
+    return pytest.importorskip("pcbnew", reason="pcbnew unavailable (CI) -- loud skip")
+
+
+def _load(path):
+    return _pcbnew().LoadBoard(path)
 
 
 def run(script, board=None):
@@ -43,7 +53,7 @@ def _copy(tmp_path):
 
 def _add_track_over(board_path, ref, padnum, net_name, layer):
     """Plant a track straight across a pad -- the U_C.9 defect, reproduced on demand."""
-    import pcbnew
+    pcbnew = _pcbnew()
     b = pcbnew.LoadBoard(board_path)
     fp = b.FindFootprintByReference(ref)
     pad = [p for p in fp.Pads() if p.GetNumber() == padnum][0]
@@ -66,10 +76,11 @@ def _add_track_over(board_path, ref, padnum, net_name, layer):
 
 def test_registry_matches_board():
     """The board and the registry must not drift. Drift = someone changed one and not
-    the other, which is how a wrong pin survives."""
-    rc, out = subprocess.run(
+    the other, which is how a wrong pin survives. Needs pcbnew (it reads the board)."""
+    _pcbnew()
+    rc = subprocess.run(
         [sys.executable, os.path.join(HW, "connectivity", "registry.py"), "check"],
-        capture_output=True, text=True, timeout=300).returncode, ""
+        capture_output=True, text=True, timeout=300).returncode
     assert rc == 0, "registry check failed -- board and v10_pinmap.reg disagree"
 
 
@@ -92,6 +103,7 @@ def test_registry_has_no_unnamed_metal_without_open_item():
 def test_lane_clearance_catches_track_on_unnamed_pad(tmp_path):
     """THE OPERATOR'S DEFECT: a track crossing U_C.9, a pad with no net. The checker
     used to skip unnamed pads and report clean. It must now fail."""
+    pcbnew = _pcbnew()
     board = _copy(tmp_path)
     _add_track_over(board, "U_C", "9", "/ANT3_2G4_RX", pcbnew.B_Cu)
     rc, out = run("check_lane_clearance.py", board)
@@ -101,12 +113,14 @@ def test_lane_clearance_catches_track_on_unnamed_pad(tmp_path):
 
 def test_lane_clearance_clean_board_passes():
     """The same gate must NOT fire on the clean board -- otherwise it is noise."""
+    _pcbnew()
     rc, out = run("check_lane_clearance.py", BOARD)
     assert rc == 0, out
 
 
 def test_lane_integrity_catches_dead_end(tmp_path):
     """The operator's other defect: a lane ending on nothing."""
+    pcbnew = _pcbnew()
     board = _copy(tmp_path)
     _add_track_over(board, "U_C", "9", "/ANT3_2G4_RX", pcbnew.B_Cu)
     rc, out = run("check_lane_integrity.py", board)
@@ -114,6 +128,7 @@ def test_lane_integrity_catches_dead_end(tmp_path):
 
 
 def test_lane_integrity_clean_board_passes():
+    _pcbnew()
     rc, out = run("check_lane_integrity.py", BOARD)
     assert rc == 0, out
 
@@ -122,7 +137,7 @@ def test_back_side_pads_are_checked():
     """B6 regression: pad side must come from GetLayerSet(). Back-side parts (U3, U_C,
     U_E28, ANT2/3) had every clearance verdict skipped when the side came from
     pad.GetLayer(), which reports F_Cu even for back-side pads."""
-    import pcbnew
+    pcbnew = _pcbnew()
     b = pcbnew.LoadBoard(BOARD)
     for ref in ("U3", "U_C", "U_E28", "ANT2", "ANT3"):
         fp = b.FindFootprintByReference(ref)
@@ -137,7 +152,7 @@ def test_back_side_pads_are_checked():
 
 def test_hole_gate_catches_hole_on_pad(tmp_path):
     """The original U3 defect: a tether hole inside a component's pad column."""
-    import pcbnew
+    pcbnew = _pcbnew()
     board = _copy(tmp_path)
     b = pcbnew.LoadBoard(board)
     u3 = b.FindFootprintByReference("U3")
@@ -148,3 +163,25 @@ def test_hole_gate_catches_hole_on_pad(tmp_path):
     pcbnew.SaveBoard(board, b)
     rc, out = run("check_hole_clearance.py", board)
     assert rc != 0, f"hole gate missed a hole planted on U3.1:\n{out}"
+
+
+# ---------------------------------------------------------------- static (no pcbnew)
+
+def test_registry_file_is_parseable_without_pcbnew():
+    """Static half: runs in CI where KiCad is absent. The registry format must stay
+    machine-checkable or the drift check cannot be trusted."""
+    import re
+    lines = [ln for ln in open(REG, encoding="utf-8").read().splitlines()
+             if ln.strip() and not ln.startswith("#")]
+    assert lines, "registry is empty"
+    for ln in lines:
+        body = ln.split("#", 1)[0].strip()
+        assert re.match(r"^[A-Za-z0-9_]+\.\S*\s+\S+$", body), f"bad registry line: {ln!r}"
+
+
+def test_open_items_ledger_exists_and_names_the_open_blockers():
+    """Static half: the ledger of undecided pins must exist and mention the two known
+    blockers (they were guessed once and the guess was wrong)."""
+    txt = open(os.path.join(HW, "connectivity", "OPEN-ITEMS.md"), encoding="utf-8").read()
+    assert "OPEN-16" in txt, "OPEN-16 (GPIO0 pad) must stay tracked"
+    assert "RX_EN" in txt and "TX_EN" in txt, "E28 enables must stay tracked"

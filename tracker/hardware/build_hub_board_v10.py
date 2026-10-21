@@ -297,6 +297,13 @@ def main():
     print(f"net assignments: {n_assigned} netlist pins")
     print(f"placed: {len(list(b.GetFootprints()))} footprints "
           f"(front parts, back radios, 4 wing seats, HW1-4 wing holes, H1-4 tether)")
+    # CLOBBER GUARD (2026-10-21): a stray probe script overwrote this board three times
+    # with a near-empty file (1 footprint / 8.6KB), silently invalidating measurements.
+    # Refuse to write a board whose footprint count is implausible.
+    nfps = len(b.GetFootprints())
+    if nfps < 20:
+        raise SystemExit(f"REFUSED: refusing to save a board with only {nfps} footprints "
+                         "(clobber guard -- expected 28)")
     pcbnew.SaveBoard(out, b)
     print("wrote", out)
     return 0
