@@ -15,7 +15,9 @@ import sys
 
 import pcbnew
 
-BOARD = "/home/c08r4d0r/worktrees/master-check/tracker/hardware/hub_board_v10.kicad_pcb"
+import argparse, os
+HERE = os.path.dirname(os.path.abspath(__file__))
+BOARD = os.path.join(HERE, "hub_board_v10.kicad_pcb")
 UM = 1_000_000.0
 HOLE_PREFIXES = ("H", "HW")
 
@@ -36,7 +38,10 @@ def seg_rect_overlap_len(x0, y0, x1, y1, bb):
 
 
 def main():
-    b = pcbnew.LoadBoard(BOARD)
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--board", default=BOARD)
+    args = ap.parse_args()
+    b = pcbnew.LoadBoard(args.board)
     if not b:
         print("REFUSED: board load failed")
         return 3

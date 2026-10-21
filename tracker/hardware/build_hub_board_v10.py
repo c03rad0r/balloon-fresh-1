@@ -175,7 +175,11 @@ def assign_nets(b):
     u3 = b.FindFootprintByReference("U3")
     uc = b.FindFootprintByReference("U_C")
     if u3 is not None and uc is not None:
-        for p3, pc in zip(u3.Pads(), uc.Pads()):
+        by_num = {p.GetNumber(): p for p in uc.Pads()}
+        for p3 in u3.Pads():
+            pc = by_num.get(p3.GetNumber())
+            if pc is None:
+                continue
             n = p3.GetNet()
             if n is not None and n.GetNetCode() != 0:
                 name = n.GetNetname()
@@ -184,6 +188,16 @@ def assign_nets(b):
                     if b.FindNet(name) is None:
                         b.Add(pcbnew.NETINFO_ITEM(b, name))
                 pc.SetNet(b.FindNet(name))
+    # E28 module GND pads (sidecar authority: E28-2G4M27SX.md pins 2,7,10,16 = GND).
+    # The netlist carried only the pins that existed on the bare QFN24, so these four
+    # grounded module pads arrived UNASSIGNED -- floating metal. Found by the registry
+    # (connectivity/v10_pinmap.reg) on 2026-10-21.
+    e28 = b.FindFootprintByReference("U_E28")
+    if e28 is not None:
+        gnd = b.FindNet("GND")
+        for pad in e28.Pads():
+            if pad.GetNumber() in ("2", "7", "10", "16"):
+                pad.SetNet(gnd)
     # U_C antenna: its own U.FL (ANT_C, ADR-119 site C) -- do NOT short to U3's /ANT3_2G4_RX
     uc = b.FindFootprintByReference("U_C")
     if uc is not None:

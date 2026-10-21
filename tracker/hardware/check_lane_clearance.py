@@ -15,7 +15,9 @@ import sys
 
 import pcbnew
 
-BOARD = "/home/c08r4d0r/worktrees/master-check/tracker/hardware/hub_board_v10.kicad_pcb"
+import argparse, os
+HERE = os.path.dirname(os.path.abspath(__file__))
+BOARD = os.path.join(HERE, "hub_board_v10.kicad_pcb")
 UM = 1_000_000.0
 CLEAR = 0.200
 TIGHT = 0.500
@@ -66,7 +68,10 @@ def _intersect(ax, ay, bx, by, cx, cy, dx, dy):
 
 
 def main():
-    b = pcbnew.LoadBoard(BOARD)
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--board", default=BOARD)
+    args = ap.parse_args()
+    b = pcbnew.LoadBoard(args.board)
     if not b:
         print("REFUSED: board load failed")
         return 3
@@ -77,7 +82,7 @@ def main():
             n = p.GetNet()
             pos, sz = p.GetPosition(), p.GetSize()
             pads.append((fp.GetReference(), p.GetNumber(), n.GetNetname() if n else "",
-                         n.GetNetCode() if n else 0, p.GetLayer(),
+                         n.GetNetCode() if n else 0, p.GetLayerSet(),
                          (pos.x / UM - sz.x / UM / 2, pos.y / UM - sz.y / UM / 2,
                           pos.x / UM + sz.x / UM / 2, pos.y / UM + sz.y / UM / 2)))
     bad, tight = [], []
@@ -89,10 +94,17 @@ def main():
         x0, y0 = t.GetStart().x / UM, t.GetStart().y / UM
         x1, y1 = t.GetEnd().x / UM, t.GetEnd().y / UM
         for ref, num, pname, pcode, player, bb in pads:
-            if pcode == code or pcode == 0:
+            if pcode == code:
                 continue
-            if player != t.GetLayer():
+            # B6 (2026-10-21): pad side MUST come from GetLayerSet(); pad.GetLayer() returns
+            # a stale primary-layer value (0/F_Cu) even for back-side pads, which silently
+            # skipped every B.Cu pad -- all back-side clearance verdicts before this fix
+            # were hollow.
+            if not player.Contains(t.GetLayer()):
                 continue
+            # B5 (2026-10-21): a pad with NO net is still METAL. The first version skipped
+            # pcode == 0, which is exactly how a track came to sit on U_C.9 (unnamed pad,
+            # 0.000mm clearance) and every checker stayed green. Unnamed pads are obstacles.
             d = seg_rect_dist(x0, y0, x1, y1, bb) - half
             if d < CLEAR - 0.001:
                 bad.append(f"UNDER-CLEARANCE {d:+.3f}mm: {name} track vs pad {ref}.{num} "
