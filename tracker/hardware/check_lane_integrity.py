@@ -17,7 +17,9 @@ import sys
 
 import pcbnew
 
-BOARD = "/home/c08r4d0r/worktrees/master-check/tracker/hardware/hub_board_v10.kicad_pcb"
+import argparse, os
+HERE = os.path.dirname(os.path.abspath(__file__))
+BOARD = os.path.join(HERE, "hub_board_v10.kicad_pcb")
 UM = 1_000_000.0
 CONTACT_TOL = 0.02   # mm -- copper considered touching at this gap
 ENDPOINT_TOL = 0.05  # mm -- endpoint considered connected to another track's endpoint
@@ -56,7 +58,10 @@ def seg_touches_bbox(x0, y0, x1, y1, bb):
 
 
 def main():
-    b = pcbnew.LoadBoard(BOARD)
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--board", default=BOARD)
+    args = ap.parse_args()
+    b = pcbnew.LoadBoard(args.board)
     if not b:
         print("REFUSED: board load failed")
         return 3
@@ -66,7 +71,7 @@ def main():
         for p in fp.Pads():
             n = p.GetNet()
             pads.append((fp.GetReference(), p.GetNumber(), n.GetNetname() if n else "",
-                         n.GetNetCode() if n else 0, pad_bbox_mm(p)))
+                         n.GetNetCode() if n else 0, p.GetLayerSet(), pad_bbox_mm(p)))
 
     illegal, dangling = [], []
     for t in tracks:
@@ -78,8 +83,10 @@ def main():
         half = t.GetWidth() / UM / 2
 
         # 1. illegal contact: any pad of a DIFFERENT net inside the track's swept box
-        for ref, num, pname, pcode, bb in pads:
-            if pcode == code or pcode == 0:
+        for ref, num, pname, pcode, player, bb in pads:
+            if pcode == code:
+                continue
+            if not player.Contains(t.GetLayer()):
                 continue
             grown = (bb[0] - half - CONTACT_TOL, bb[1] - half - CONTACT_TOL,
                      bb[2] + half + CONTACT_TOL, bb[3] + half + CONTACT_TOL)
@@ -89,8 +96,9 @@ def main():
 
         # 2. dead ends: each endpoint must touch a pad of its own net, or another track's end
         for (ex, ey) in ((x0, y0), (x1, y1)):
-            touches_pad = any(pcode == code and point_in_bbox(ex, ey, bb, half + 0.05)
-                              for _r, _n, _pn, pcode, bb in pads)
+            touches_pad = any(pcode == code and player.Contains(t.GetLayer())
+                              and point_in_bbox(ex, ey, bb, half + 0.05)
+                              for _r, _n, _pn, pcode, player, bb in pads)
             touches_track = False
             for o in tracks:
                 if o is t:
