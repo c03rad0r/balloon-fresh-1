@@ -23,8 +23,8 @@
   header, or a supersede pointer inside a committed record), this index says
   `UNRESOLVED - needs an operator decision`. It never guesses.
 
-Generated from `docs/adr/`: **109** distinct
-numbers, **109** numbered files, **1** non-conforming filenames.
+Generated from `docs/adr/`: **110** distinct
+numbers, **110** numbered files, **1** non-conforming filenames.
 
 ## Collisions
 
@@ -143,6 +143,7 @@ None.
 | 121 | `121-programming-interface.md` | Programming/debug interface: 6-pin J_PROG header on every flight board | ACCEPTED — operator question and direction, 2026-10-21 |
 | 122 | `122-v10-esp32-radio-bus.md` | v10 ESP32-S3 ↔ four-radio interconnect: one shared SPI bus, four CS, 29-GPIO budget | SUPERSEDED by ADR-123 |
 | 123 | `123-v10-two-spi-buses.md` | v10 radio interconnect v2: TWO SPI buses, partitioned by band (bent-pipe capable) | ACCEPTED — operator instruction, 2026-10-21: *"make sure that one of the low power LR2021 is on one SPI bus and the F33 … on the other SPI bus so that we can have a real time bent pipe without being forced to do TDMA if we want to."* |
+| 124 | `124-tether-holes.md` | Tether holes: four NPTH line-attachment holes on the flight hub | ACCEPTED — operator instruction, 2026-10-21: *"include holes in the board so that a string can be attached for tying it to the balloon."* |
 | ≥044 | *(reserved)* | next free: `scripts/adr_next_number.py` → 086 | — |
 
 ## Non-conforming filenames (not `NNN-description.md`)
