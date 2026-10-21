@@ -20,6 +20,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 BOARD = os.path.join(HERE, "hub_board_v10.kicad_pcb")
 UM = 1_000_000.0
 HOLE_PREFIXES = ("H", "HW")
+# only modules whose DATASHEET forbids routing beneath them (E28 manual 4.1 / ADR-118).
+# Copper under U1/U2/U3/U_C/U5 is normal practice; flagging it would be noise.
+KEEPOUT_REFS = ("U_E28",)
 
 
 def seg_rect_overlap_len(x0, y0, x1, y1, bb):
@@ -59,12 +62,14 @@ def main():
     fps = []
     for fp in b.GetFootprints():
         ref = fp.GetReference()
-        if ref.startswith(HOLE_PREFIXES):
+        if ref.startswith(HOLE_PREFIXES) or ref not in KEEPOUT_REFS:
             continue
         bb = fp.GetBoundingBox(False, True)
-        fps.append((ref, fp.GetLayer(),
-                    (bb.GetX() / UM, bb.GetY() / UM,
-                     (bb.GetX() + bb.GetWidth()) / UM, (bb.GetY() + bb.GetHeight()) / UM)))
+        rect = (bb.GetX() / UM, bb.GetY() / UM,
+                (bb.GetX() + bb.GetWidth()) / UM, (bb.GetY() + bb.GetHeight()) / UM)
+        # ADR-118 / v10 directive 5: the E28 keep-out binds BOTH sides of the board
+        for lay in ((F_CU, B_CU) if ref in KEEPOUT_REFS else (fp.GetLayer(),)):
+            fps.append((ref, lay, rect))
     tracks = [t for t in b.GetTracks() if "TRACK" in str(type(t)) and "VIA" not in str(type(t))]
     bad = []
     for t in tracks:
