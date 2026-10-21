@@ -372,6 +372,31 @@ def _pt_seg(px, py, x0, y0, x1, y1):
     return math.hypot(px - (x0 + t * dx), py - (y0 + t * dy))
 
 
+def _pt_seg_dist(px, py, x0, y0, x1, y1):
+    dx, dy = x1 - x0, y1 - y0
+    L2 = dx * dx + dy * dy
+    if L2 == 0:
+        return math.hypot(px - x0, py - y0)
+    t = max(0.0, min(1.0, ((px - x0) * dx + (py - y0) * dy) / L2))
+    return math.hypot(px - (x0 + t * dx), py - (y0 + t * dy))
+
+
+def _seg_seg_dist(ax0, ay0, ax1, ay1, bx0, by0, bx1, by1, res=0.05):
+    """Approximate segment-to-segment distance (sample the shorter one)."""
+    La = math.hypot(ax1 - ax0, ay1 - ay0)
+    Lb = math.hypot(bx1 - bx0, by1 - by0)
+    if Lb < La:
+        ax0, ay0, ax1, ay1, bx0, by0, bx1, by1 = bx0, by0, bx1, by1, ax0, ay0, ax1, ay1
+        La = Lb
+    n = max(2, int(La / res) + 2)
+    best = 1e9
+    for i in range(n + 1):
+        t = i / n
+        best = min(best, _pt_seg_dist(ax0 + t * (ax1 - ax0), ay0 + t * (ay1 - ay0),
+                                      bx0, by0, bx1, by1))
+    return best
+
+
 def validate_plan(world, pitch, plan, own_keys, own_rects, code):
     """In-memory gate check on a planned route BEFORE any copper is written.
 
@@ -442,6 +467,36 @@ def validate_plan(world, pitch, plan, own_keys, own_rects, code):
                 inside += 1
             if L * inside / steps > 0.5:
                 return False, f"traverses {ref}"
+    # 4. B24 (2026-10-21): ISOLATION against copper already routed by earlier nets.
+    # Measured: 5 violations appeared once more nets were placed -- /F33_BUSY running
+    # straight through /F33_RESET_N's via (-0.350mm) and through /F33_RESET_N track
+    # (-0.200mm), /SPI2_MISO x via. The router marked routed copper as a grid OBSTACLE but
+    # never validated its own output against it, so a path that grazed a via was accepted.
+    # Same rules as check_lane_isolation.py: track-vs-track (same layer), track-vs-via,
+    # via-vs-via, all >= CLEAR between copper edges.
+    for layer, p0, p1 in segs:
+        for rnet, rlayer, q0, q1, rw in world.get("routed_segs", []):
+            if rnet == code or rlayer != layer:
+                continue
+            if _seg_seg_dist(p0[0], p0[1], p1[0], p1[1], q0[0], q0[1], q1[0], q1[1]) - half - rw / 2 < CLEAR - 0.001:
+                return False, f"isolation vs routed {rnet}"
+    for layer, p0, p1 in segs:
+        for rnet, rp, rw in world.get("routed_vias", []):
+            if rnet == code:
+                continue
+            if _pt_seg_dist(rp[0], rp[1], p0[0], p0[1], p1[0], p1[1]) - half - rw / 2 < CLEAR - 0.001:
+                return False, f"isolation vs routed via {rnet}"
+    for (vx, vy) in vias:
+        for rnet, rlayer, q0, q1, rw in world.get("routed_segs", []):
+            if rnet == code:
+                continue
+            if _pt_seg_dist(vx, vy, q0[0], q0[1], q1[0], q1[1]) - VIA_D / 2 - rw / 2 < CLEAR - 0.001:
+                return False, f"isolation vs routed {rnet} (via)"
+        for rnet, rp, rw in world.get("routed_vias", []):
+            if rnet == code:
+                continue
+            if math.hypot(vx - rp[0], vy - rp[1]) - VIA_D / 2 - rw / 2 < CLEAR - 0.001:
+                return False, f"isolation vs routed via {rnet} (via)"
     return True, ""
 
 
@@ -455,6 +510,8 @@ def main():
     args = ap.parse_args()
 
     world = load_world(args.board)
+    world["routed_segs"] = []   # copper placed by already-accepted nets (B24)
+    world["routed_vias"] = []
     b = world["board"]
     existing = [t for t in b.GetTracks() if "TRACK" in str(type(t)) and "VIA" not in str(type(t))]
     if existing and not args.dry_run:
@@ -534,6 +591,13 @@ def main():
             failed.append((name, f"self-check: {why}"))
             continue
         routed.append((name, plan))
+        # record this net's copper so LATER nets are validated against it (B24)
+        for path in plan:
+            s2, v2 = path_to_copper(world, args.pitch, path)
+            for layer, p0, p1 in s2:
+                world["routed_segs"].append((name, layer, p0, p1, TRACK_W))
+            for (vx, vy) in v2:
+                world["routed_vias"].append((name, (vx, vy), VIA_D))
         # B14 fix (2026-10-21): a routed net must become an OBSTACLE for the next net.
         # Without this the router placed 152 different-net under-clearances on B.Cu --
         # /F33_IRQ crossed /F33_RESET_N, /U3_CS_N, USB, GNSS lines (measured -0.19mm).
