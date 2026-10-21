@@ -23,6 +23,9 @@ HOLE_PREFIXES = ("H", "HW")
 # only modules whose DATASHEET forbids routing beneath them (E28 manual 4.1 / ADR-118).
 # Copper under U1/U2/U3/U_C/U5 is normal practice; flagging it would be noise.
 KEEPOUT_REFS = ("U_E28",)
+# ADR-118 / v10 directive 5: the E28 keep-out binds BOTH sides of the board.
+F_CU = pcbnew.F_Cu
+B_CU = pcbnew.B_Cu
 
 
 def seg_rect_overlap_len(x0, y0, x1, y1, bb):
