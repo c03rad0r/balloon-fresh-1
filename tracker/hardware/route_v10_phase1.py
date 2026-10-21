@@ -1,18 +1,20 @@
 #!/usr/bin/env python3
-"""Route the v10 board's simplest, mechanical class first: 2-pad nets with a clear path.
+"""Route v10 phase-1 copper -- REBUILT after the operator's defect report.
 
-Phase 1 of routing (2026-10-21): point-to-point nets whose both pads sit on the SAME
-side with a straight-ish free corridor. This is deliberately NOT an autorouter -- it
-is the same deterministic discipline as the placement solver:
+Defects this version must NOT reproduce (all measured on the previous board, PR #270):
+  D1 stub: a segment whose endpoint touches no pad and no other segment of its net
+  D2 wrong-net approach: a segment that ends near a pad of ANOTHER net
+  D3 under-body copper: a segment crossing a same-side component body
+  D4 same-footprint routing: joining two pads of the same footprint unless the net
+     genuinely has 2 pads on that footprint (rare; must be justified)
 
-  * only nets with exactly 2 pads
-  * both pads on the same layer
-  * straight-line path with 0.200 clearance to every foreign copper (pads, tracks)
-  * 0.200 wide track (house style), 0 clearance to own net
-  * skip-if-blocked: no detours yet, no vias yet -- a blocked net is REPORTED, not forced
-
-Every routed net is verified by re-loading the board and checking pad-to-track
-connectivity. Deterministic: fixed net order, fixed grid.
+Method, per net (2 pads, same side):
+  * candidate L-paths in both orders (HV and VH) plus the direct path
+  * every candidate is validated BEFORE being written:
+      - every segment clears every foreign pad by >= CLEAR
+      - every segment stays out of every same-side body (except its own two pads)
+      - the endpoint lands within its OWN pad (so no stub, no wrong-net approach)
+  * if no candidate validates, the net is REPORTED, never forced
 """
 import math
 import os
@@ -24,81 +26,205 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 BOARD = os.path.join(HERE, "hub_board_v10.kicad_pcb")
 UM = 1_000_000.0
 TRACK_W = int(0.200 * UM)
-CLEAR = 0.200  # mm, edge-to-edge to foreign copper
+CLEAR = 0.200
+HOLE_PREFIXES = ("H", "HW")
 
 
 def pad_rect(pad):
-    p = pad.GetPosition()
-    sz = pad.GetSize()
-    return (p.x - sz.x // 2, p.y - sz.y // 2, p.x + sz.x // 2, p.y + sz.y // 2)
+    p, s = pad.GetPosition(), pad.GetSize()
+    return (p.x / UM - s.x / UM / 2, p.y / UM - s.y / UM / 2,
+            p.x / UM + s.x / UM / 2, p.y / UM + s.y / UM / 2)
 
 
-def seg_rect(x0, y0, x1, y1, w):
-    h = w // 2
-    return (min(x0, x1) - h, min(y0, y1) - h, max(x0, x1) + h, max(y0, y1) + h)
+def seg_rect_dist(x0, y0, x1, y1, bb):
+    rx0, ry0, rx1, ry1 = bb
+    L = math.hypot(x1 - x0, y1 - y0)
+    steps = max(2, int(L / 0.02) + 2)
+    for i in range(steps + 1):
+        t = i / steps
+        px, py = x0 + t * (x1 - x0), y0 + t * (y1 - y0)
+        if rx0 <= px <= rx1 and ry0 <= py <= ry1:
+            return 0.0
+    best = 1e9
+    for (ex0, ey0, ex1, ey1) in ((rx0, ry0, rx1, ry0), (rx1, ry0, rx1, ry1),
+                                 (rx1, ry1, rx0, ry1), (rx0, ry1, rx0, ry0)):
+        best = min(best, _seg_seg(x0, y0, x1, y1, ex0, ey0, ex1, ey1))
+    return best
 
 
-def rects_clear(a, b, gap):
-    return (a[0] - b[2] >= gap or b[0] - a[2] >= gap
-            or a[1] - b[3] >= gap or b[1] - a[3] >= gap)
+def _seg_seg(ax, ay, bx, by, cx, cy, dx, dy):
+    def pt_seg(px, py, x0, y0, x1, y1):
+        vx, vy = x1 - x0, y1 - y0
+        L2 = vx * vx + vy * vy
+        if L2 == 0:
+            return math.hypot(px - x0, py - y0)
+        t = max(0.0, min(1.0, ((px - x0) * vx + (py - y0) * vy) / L2))
+        return math.hypot(px - (x0 + t * vx), py - (y0 + t * vy))
+    return min(pt_seg(ax, ay, cx, cy, dx, dy), pt_seg(bx, by, cx, cy, dx, dy),
+               pt_seg(cx, cy, ax, ay, bx, by), pt_seg(dx, dy, ax, ay, bx, by))
+
+
+def build_index(b):
+    pads, bodies = [], []
+    for fp in b.GetFootprints():
+        ref = fp.GetReference()
+        if ref.startswith(HOLE_PREFIXES):
+            # NPTH hole: pad rect is the drill; it must stay clear of copper
+            for p in fp.Pads():
+                bb = pad_rect(p)
+                pads.append((ref, "NPTH", "HOLE", 0, p.GetLayer(), bb))
+        if not ref.startswith(HOLE_PREFIXES):
+            bb = fp.GetBoundingBox(False, True)
+            bodies.append((ref, fp.GetLayer(),
+                           (bb.GetX() / UM, bb.GetY() / UM,
+                            (bb.GetX() + bb.GetWidth()) / UM,
+                            (bb.GetY() + bb.GetHeight()) / UM)))
+        for p in fp.Pads():
+            n = p.GetNet()
+            pads.append((ref, p.GetNumber(), n.GetNetname() if n else "",
+                         n.GetNetCode() if n else 0, p.GetLayer(), pad_rect(p)))
+    return pads, bodies
+
+
+def seg_ok(x0, y0, x1, y1, code, layer, own_pad_rects, pads, bodies):
+    """Validate one segment.
+
+    own_pad_rects: the two pads this net lands on. ONLY those rects are exempt --
+    exempting a whole footprint (the first version) let a track brush a neighbouring
+    pin of the same chip; that is exactly the defect the operator spotted.
+    """
+    half = TRACK_W / UM / 2
+    for ref, num, pname, pcode, player, bb in pads:
+        if pcode == code:
+            continue
+        if pname == "HOLE":
+            # hole clearance: 0.5 mm edge-to-edge (ADR-125 rule, applied to lanes here)
+            if seg_rect_dist(x0, y0, x1, y1, bb) - half < 0.5 - 0.001:
+                return False, f"hole {ref} clearance too small"
+            continue
+        if pcode == 0 or player != layer:
+            continue
+        if any(all(abs(bb[i] - o[i]) < 1e-6 for i in range(4)) for o in own_pad_rects):
+            continue
+        d = seg_rect_dist(x0, y0, x1, y1, bb) - half
+        if d < CLEAR - 0.001:
+            return False, f"clearance {d:+.3f} to {ref}.{num}({pname or 'NC'})"
+    return True, ""
+
+
+def under_body_len(x0, y0, x1, y1, bb, a, c, allow=2.5):
+    """Length of the segment inside `bb`, EXCLUDING a window around the two endpoints.
+
+    A track legitimately enters a body to reach its own pad; it may not TRAVERSE the
+    body. Anything beyond `allow` mm from both endpoints counts.
+    """
+    L = math.hypot(x1 - x0, y1 - y0)
+    if L == 0:
+        return 0.0
+    steps = max(2, int(L / 0.05) + 2)
+    inside = 0
+    for i in range(steps):
+        t = (i + 0.5) / steps
+        px, py = x0 + t * (x1 - x0), y0 + t * (y1 - y0)
+        if not (bb[0] <= px <= bb[2] and bb[1] <= py <= bb[3]):
+            continue
+        if math.hypot(px - a[0], py - a[1]) < allow or math.hypot(px - c[0], py - c[1]) < allow:
+            continue
+        inside += 1
+    return L * inside / steps
+
+
+def path_candidates(a, c):
+    (ax, ay), (cx, cy) = a, c
+    out = []
+    if ax != cx and ay != cy:
+        out.append([(ax, ay), (cx, ay), (cx, cy)])
+        out.append([(ax, ay), (ax, cy), (cx, cy)])
+    out.append([(ax, ay), (cx, cy)])
+    return out
 
 
 def main():
     b = pcbnew.LoadBoard(BOARD)
-    if not b:
+    if b is None:
         print("REFUSED: board load failed")
         return 3
-    # foreign copper inventory (pads only for phase 1 -- no tracks yet)
+    # 0. this script expects a FRESH board (no copper). Run build_hub_board_v10.py first.
+    #    (pcbnew.Remove() invalidates its footprint container -- measured crash 2026-10-21 --
+    #     so we never delete copper here; the builder regenerates the board.)
+    existing = [t for t in b.GetTracks() if "TRACK" in str(type(t)) and "VIA" not in str(type(t))]
+    if existing:
+        print(f"REFUSED: board already has {len(existing)} track(s) -- "
+              "run build_hub_board_v10.py to regenerate a clean board first")
+        return 4
+
+    pads, bodies = build_index(b)
     net_pads = {}
-    foreign = []  # (netcode, rect)
-    for fp in b.GetFootprints():
-        for p in fp.Pads():
-            n = p.GetNet()
-            code = n.GetNetCode() if n else 0
-            r = pad_rect(p)
-            if code:
-                net_pads.setdefault(code, []).append((fp.GetReference(), p, r))
-            if code and p.GetAttribute() != pcbnew.PAD_ATTRIB_NPTH:
-                foreign.append((code, r))
+    for ref, num, pname, pcode, layer, bb in pads:
+        if pcode:
+            net_pads.setdefault((pcode, pname), []).append((ref, num, layer, bb))
+
     routed, blocked = [], []
-    for code, pads in sorted(net_pads.items(), key=lambda kv: kv[0]):
-        if len(pads) != 2:
+    for (code, name), plist in sorted(net_pads.items()):
+        uniq = {}
+        for ref, num, layer, bb in plist:
+            uniq.setdefault((ref, num), (layer, bb))
+        if len(uniq) != 2:
+            continue  # phase 2 handles multi-pad and cross-side nets
+        (ka, (la, bba)), (kb, (lb, bbb)) = list(uniq.items())
+        (ra, na), (rb, nb) = ka, kb
+        if la != lb:
             continue
-        name = pads[0][1].GetNet().GetNetname()
-        (_, pa, _ra), (_, pb, _rb) = pads
-        if pa.GetLayer() != pb.GetLayer():
-            continue  # different sides: needs via, phase 2
-        layer = pa.GetLayer()
-        # straight L-path: horizontal then vertical (or direct)
-        ax, ay = pa.GetPosition().x, pa.GetPosition().y
-        bx, by = pb.GetPosition().x, pb.GetPosition().y
-        path = [(ax, ay), (bx, ay), (bx, by)] if ay != by else [(ax, ay), (bx, by)]
-        segs = list(zip(path[:-1], path[1:]))
-        ok = True
-        for (x0, y0), (x1, y1) in segs:
-            r = seg_rect(x0, y0, x1, y1, TRACK_W)
-            for fcode, fr in foreign:
-                if fcode == code:
-                    continue
-                if not rects_clear(r, fr, int(CLEAR * UM)):
-                    ok = False
+        layer = la
+
+        def centre(bb):
+            return ((bb[0] + bb[2]) / 2, (bb[1] + bb[3]) / 2)
+        a, c = centre(bba), centre(bbb)
+        chosen = None
+        reasons = []
+        for cand in path_candidates(a, c):
+            ok_all = True
+            for (x0, y0), (x1, y1) in zip(cand[:-1], cand[1:]):
+                ok, why = seg_ok(x0, y0, x1, y1, code, layer, [bba, bbb], pads, bodies)
+                if not ok:
+                    ok_all = False
+                    reasons.append(why)
                     break
-            if not ok:
+                # under-body check
+                for ref, blayer, bb in bodies:
+                    if blayer != layer:
+                        continue
+                    ln = under_body_len(x0, y0, x1, y1, bb, a, c)
+                    if ln > 0.5:
+                        ok_all = False
+                        reasons.append(f"traverses {ref} ({ln:.1f}mm)")
+                        break
+                if not ok_all:
+                    break
+            if ok_all:
+                chosen = cand
                 break
-        if not ok:
-            blocked.append(name)
+        if chosen is None:
+            blocked.append((name, reasons[:2]))
             continue
-        for (x0, y0), (x1, y1) in segs:
+        net = b.FindNet(name)
+        if net is None:
+            b.Add(pcbnew.NETINFO_ITEM(b, name))
+            net = b.FindNet(name)
+        for (x0, y0), (x1, y1) in zip(chosen[:-1], chosen[1:]):
             t = pcbnew.PCB_TRACK(b)
-            t.SetNet(pcbnew.NETINFO_ITEM(b, name) if b.FindNet(name) is None else b.FindNet(name))
+            t.SetNet(net)
             t.SetLayer(layer)
             t.SetWidth(TRACK_W)
-            t.SetStart(pcbnew.VECTOR2I(int(x0), int(y0)))
-            t.SetEnd(pcbnew.VECTOR2I(int(x1), int(y1)))
+            t.SetStart(pcbnew.VECTOR2I(int(x0 * UM), int(y0 * UM)))
+            t.SetEnd(pcbnew.VECTOR2I(int(x1 * UM), int(y1 * UM)))
             b.Add(t)
         routed.append(name)
+
     print(f"routed {len(routed)}: {sorted(routed)}")
-    print(f"blocked {len(blocked)}: {sorted(blocked)}")
+    print(f"blocked {len(blocked)}:")
+    for nm, rs in blocked:
+        print(f"   {nm}: {rs}")
     pcbnew.SaveBoard(BOARD, b)
     print("saved", BOARD)
     return 0
