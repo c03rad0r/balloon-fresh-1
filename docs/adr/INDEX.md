@@ -23,8 +23,8 @@
   header, or a supersede pointer inside a committed record), this index says
   `UNRESOLVED - needs an operator decision`. It never guesses.
 
-Generated from `docs/adr/`: **106** distinct
-numbers, **106** numbered files, **1** non-conforming filenames.
+Generated from `docs/adr/`: **107** distinct
+numbers, **107** numbered files, **1** non-conforming filenames.
 
 ## Collisions
 
@@ -140,6 +140,7 @@ None.
 | 118 | `118-flight-board-v10-directives.md` | Flight board v10: two-sided population, three LR2021 sites, E28-2G4M27SX ranging module, minimal outline, human placement gate, visual-first reporting | ACCEPTED — operator instruction, 2026-10-20 |
 | 119 | `119-v10-radio-sites.md` | v10 radio sites: three LR2021 slots (2× LP + 1× F33) + E28-2G4M27SX ranging module | ACCEPTED — operator instruction, 2026-10-20 |
 | 120 | `120-v10-placement-process.md` | v10 placement process: two-sided population, minimal outline, human placement gate, visual-first reporting | ACCEPTED — operator instruction, 2026-10-20 |
+| 121 | `121-programming-interface.md` | Programming/debug interface: 6-pin J_PROG header on every flight board | ACCEPTED — operator question and direction, 2026-10-21 |
 | ≥044 | *(reserved)* | next free: `scripts/adr_next_number.py` → 086 | — |
 
 ## Non-conforming filenames (not `NNN-description.md`)
