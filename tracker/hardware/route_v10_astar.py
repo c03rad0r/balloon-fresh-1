@@ -246,7 +246,10 @@ def astar(blocked, nx, ny, start, goal, pitch, allow_layers):
                 continue
             # a via occupies both layers; require a small free disc
             ok = True
-            r = int(math.ceil((VIA_D / 2) / pitch)) + 1
+            # B16 (2026-10-21): the free-disc check for a via must keep CLEAR to routed
+            # copper too, not just VIA_D/2 (measured: vias landed 0.150mm from other
+            # nets' tracks -- 54 isolation violations). Grow the disc by the clearance.
+            r = int(math.ceil((VIA_D / 2 + CLEAR + TRACK_W / 2) / pitch)) + 1
             for dj in range(-r, r + 1):
                 for di in range(-r, r + 1):
                     ni, nj = i + di, j + dj
@@ -429,10 +432,17 @@ def main():
     blocked, nx, ny = build_grid(world, args.pitch)
     want = set(n for n in args.nets.split(",") if n)
 
-    routed, failed = [], []
+    routed, failed, railed = [], [], []
+    # Rails (GND / +3V3) are POUR territory (ADR-118 two-sided planes; v9 practice):
+    # thin 0.2mm tracks are the wrong tool for a 580mA TX peak supply. They are skipped
+    # here and poured in the next phase -- reported, never hidden.
+    RAILS = ("GND", "+3V3")
     items = sorted(world["net_pads"].items())
     for (code, name), plist in items:
         if want and name not in want:
+            continue
+        if name in RAILS and not want:
+            railed.append(name)
             continue
         uniq = {}
         for ref, num, sides, rect in plist:
@@ -452,7 +462,15 @@ def main():
             # (U1 front-only -> U3 back-only) ended on a layer where the goal pad has no
             # copper: measured as dead ends at U1.24 / U1.25 / U1.26. The via the path
             # needs is inserted by astar() itself.
-            allow = sorted(a_sides | c_sides)
+            #
+            # B14 (2026-10-21): allow was the UNION OF THE TWO PADS' sides -- for a
+            # same-side net that locked the whole route onto one layer, so a front->front
+            # net (e.g. U2.14 -> U1.12) could not via down to the EMPTY BACK to detour
+            # around front bodies. Measured: every cross-side net routed, every same-side
+            # F33/SPI2/antenna net failed. The route may use BOTH layers; only the
+            # endpoints must sit on their own pads' layers (enforced by the start/goal
+            # layer loop and validate_plan).
+            allow = [F, B]
             all_rects = [pr[5] for pr in world["pads"]]
             saved = unblock_own(blocked, world, args.pitch, [a_rect, c_rect], set(allow),
                                 all_rects)
@@ -483,10 +501,44 @@ def main():
             failed.append((name, f"self-check: {why}"))
             continue
         routed.append((name, plan))
+        # B14 fix (2026-10-21): a routed net must become an OBSTACLE for the next net.
+        # Without this the router placed 152 different-net under-clearances on B.Cu --
+        # /F33_IRQ crossed /F33_RESET_N, /U3_CS_N, USB, GNSS lines (measured -0.19mm).
+        # Mark every segment + via of this net into the shared grid, grown by CLEAR+half.
+        for path in plan:
+            s2, v2 = path_to_copper(world, args.pitch, path)
+            for layer, p0, p1 in s2:
+                if abs(p1[0]-p0[0]) < 1e-9 and abs(p1[1]-p0[1]) < 1e-9:
+                    continue
+                r = (min(p0[0],p1[0]), min(p0[1],p1[1]), max(p0[0],p1[0]), max(p0[1],p1[1]))
+                ox, oy = world["origin"]
+                nx = len(blocked[0][0]); ny = len(blocked[0])
+                g = CLEAR + TRACK_W/2
+                i0 = max(0, int((r[0]-g-ox)/args.pitch)-1); i1 = min(nx-1, int((r[2]+g-ox)/args.pitch)+1)
+                j0 = max(0, int((r[1]-g-oy)/args.pitch)-1); j1 = min(ny-1, int((r[3]+g-oy)/args.pitch)+1)
+                for j in range(j0, j1+1):
+                    for i in range(i0, i1+1):
+                        mx, my = ox+i*args.pitch, oy+j*args.pitch
+                        d = _seg_rect_dist(mx, my, mx, my, (r[0], r[1], r[2], r[3]))
+                        if d <= g + args.pitch:
+                            blocked[layer][j][i] = 1
+            for (vx, vy) in v2:
+                ox, oy = world["origin"]
+                nx = len(blocked[0][0]); ny = len(blocked[0])
+                g = CLEAR + VIA_D/2 + TRACK_W/2
+                i0 = max(0, int((vx-g-ox)/args.pitch)); i1 = min(nx-1, int((vx+g-ox)/args.pitch))
+                j0 = max(0, int((vy-g-oy)/args.pitch)); j1 = min(ny-1, int((vy+g-oy)/args.pitch))
+                for lay in (F, B):
+                    for j in range(j0, j1+1):
+                        for i in range(i0, i1+1):
+                            mx, my = ox+i*args.pitch, oy+j*args.pitch
+                            if math.hypot(mx-vx, my-vy) <= g:
+                                blocked[lay][j][i] = 1
         if args.limit and len(routed) >= args.limit:
             break
 
     print(f"routed {len(routed)} net(s): {[n for n, _ in routed]}")
+    print(f"rails deferred to pours: {railed}")
     print(f"failed {len(failed)}: {failed[:12]}")
     if args.dry_run:
         return 0

@@ -31,7 +31,8 @@ PINMAP = os.path.join(HW, "connectivity", "v10_pinmap.reg")
 OPEN_ITEMS = os.path.join(HW, "connectivity", "OPEN-ITEMS.md")
 
 GATES = ["check_lane_clearance.py", "check_lane_integrity.py",
-         "check_copper_under_body.py", "check_hole_clearance.py"]
+         "check_copper_under_body.py", "check_lane_isolation.py",
+         "check_hole_clearance.py"]
 
 
 def read(path):
@@ -90,7 +91,7 @@ def test_banned_router_is_marked():
         "route_v10_phase1.py must be marked as banned/negative-reference"
 
 
-def test_all_four_routing_gates_exist():
+def test_all_five_routing_gates_exist():
     for g in GATES:
         assert os.path.exists(os.path.join(HW, g)), f"missing routing gate: {g}"
 

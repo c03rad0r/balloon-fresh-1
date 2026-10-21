@@ -594,6 +594,9 @@ Rules:
    `check_lane_clearance.py` (track vs every foreign pad — **unnamed pads are metal**),
    `check_lane_integrity.py` (dead ends, copper touching a foreign net),
    `check_copper_under_body.py` (copper traversing a module body; own-pad entry exempt),
+   `check_lane_isolation.py` (**different nets must not touch** — track vs track, track vs
+   via, via vs via, all same-layer pairs; this is the class the operator flagged first and
+   NO gate covered it until 2026-10-21),
    `check_hole_clearance.py` (holes vs pads, lanes, vias, zones, edge).
    A run with any violation is NOT committed. Nets that cannot be placed are REPORTED, never
    forced. Hand-drawn copper requires a `ROUTE-EXCEPTION` entry in `docs/fab/v10/GATE-LOG.md`
