@@ -37,7 +37,13 @@ FRONT = {  # solver: 72x80, TRUE seat margins (west/east x>=10, north/south y>=8
 BACK = {  # solver: 72x80, TRUE seat margins (west/east x>=10, north/south y>=8.9)
     "U3": (20.9, 16.7, 0, "balloon_flight_v9:LoRa2021_Castellated"),
     "U_C": (43.7, 16.7, 0, "balloon_flight_v9:LoRa2021_Castellated"),
-    "U_E28": (18.6, 36.5, 0, "e28:E28-2G4M27SX"),
+    # B22 (2026-10-21): was (18.6, 36.5, 0) -- placed DIRECTLY on top of U1 (front),
+    # 260.58mm2 of shared area and 13 measured pad-to-pad shorts. An exhaustive scan of
+    # every 0.5mm position x 4 rotations, with the footprint actually transformed, found
+    # only SIX legal placements on the whole board, all in the top-right back corner.
+    # This is the best of them: 2.38mm from the edge, 0.8mm from every other part.
+    # CONSEQUENCE (accepted, recorded): 42mm from U1, so the E28 SPI/control runs are long.
+    "U_E28": (53.0, 69.0, 90, "e28:E28-2G4M27SX"),
     "ANT2": (30.7, 28.0, 0, "Connector_Coaxial:U.FL_Molex_MCRF_73412-0110_Vertical"),
     "ANT3": (36.7, 28.0, 0, "Connector_Coaxial:U.FL_Molex_MCRF_73412-0110_Vertical"),
 }
