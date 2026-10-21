@@ -7,6 +7,8 @@
 
 ## The answer to the operator's question
 
+> **SUPERSEDED SECTION (ADR-123):** the single-bus topology below is **no longer the v10 design**. Two buses partitioned by band are (ADR-123), bought deliberately for the real-time bent pipe. This section is retained as the historical reasoning.
+
 **One SPI bus is enough — that is the standard topology and v9 already runs it for two radios.**
 
 The ESP32-S3 has two general-purpose SPI masters (GPSPI2, GPSPI3). SPI is a **multi-drop bus**: SCK/MOSI/MISO are shared; each slave gets a private **CS** (chip select). The v9 board already wires `U2` (F33) and `U3` (LP) on one shared bus — `/F33_SCK`, `/F33_MOSI`, `/F33_MISO` with separate `/F33_CS_N` and `/U3_CS_N` (measured in the v9 netlist). v10 extends the identical pattern to four slaves.
@@ -39,9 +41,13 @@ ESP32-S3 GPSPI2 (one shared bus):
 
 ## Why not two buses
 
+> **OVERRULED by ADR-123 (2026-10-21, operator instruction).** Two buses ARE the design now — the bent pipe's parallelism is worth the second driver. The argument below is retained as the reasoning that held until the operator's ruling.
+
 Two SPI masters would "dedicate" GPSPI3 to the ranging radio — but ADR-035's TDM arbiter means **only one radio transmits at a time anyway**, so bus contention is never simultaneous; and a second bus buys nothing except 3 more spare pins at the cost of firmware complexity (two drivers, two DMA channels). One bus + four CS is simpler, proven on v9, and the arbiter already serialises access.
 
 ## Consequences
+
+> **SUPERSEDED SECTION (ADR-123):** the netlist no longer derives from this table. ADR-123's two-bus budget (32 GPIOs) is authoritative.
 
 - ADR-108's pin table is superseded by this budget for v10 (108 remains the v9 record).
 - The v10 netlist derives from this table; the build script names nets per site: `/F33_*`, `/U3_*`, `/UC_*`, `/E28_*`.
