@@ -35,16 +35,25 @@ FRONT = {  # ref: (x, y, rot)
     "J_W4": (26.5, 0.0, 0),     # south seat
 }
 BACK = {
-    "U3": (13.9, 10.8, 0),      # LP Site B
-    "U_C": (37.9, 10.8, 0),     # LP Site C (NEW)
-    "U_E28": (11.25, 32.75, 0), # E28 ranging module (Site D)
+    "U3": (17.0, 10.8, 0),      # LP Site B (right edge column reserved for tether holes)
+    "U_C": (39.5, 10.8, 0),     # LP Site C (NEW; shifted right to clear U3)
+    "U_E28": (14.0, 32.75, 0),  # E28 ranging module (Site D; moved right, same reason)
     "J_W1": (0.0, 31.0, 0),     # west seat
     "J_W3": (53.0, 31.0, 0),    # east seat
 }
 TETHER = [  # (x, y) D2.5 NPTH (ADR-124) -- left of the centre line, clear of the F33
     # courtyard and the J_W2/J_W4 edge seats (which sit at x=26.5). 8mm pair spacing.
-    (4.0, H - 4.5), (4.0, H - 12.5),    # H1 H2 top-left, VERTICAL pair 8mm apart (F33 starts x 9.2)
-    (4.0, 4.5), (4.0, 12.5),             # H3 H4 bottom-left, vertical pair
+    # VERTICAL pairs on the RIGHT edge column x=50.0 -- free on BOTH sides:
+    # front: F33 courtyard ends x 48.8; back: U_C ends x 48.8, E28 ends x 19.9.
+    # (First attempt put them in U3's pad column on the left -- operator caught it:
+    #  H3 was 1.14mm from U3.1, H4 0.41mm from U3.6. The courtyard bbox check cannot
+    #  see a hole INSIDE a footprint's own courtyard; pad-distance is the real test.)
+    # LEFT-EDGE COLUMN, reserved exclusively for the tether (operator caught the
+    # first two attempts sitting in U3/U_C pad columns). U3 shifted right so its
+    # pads clear x>6; E28 likewise; U_C physically cannot move (courtyard ends x 48.8)
+    # so the BOTTOM pair shares the left column: clearance verified pad-by-pad.
+    (3.3, 58.5), (3.3, 50.5),            # H1 H2 top-left vertical pair
+    (3.3, 3.5), (3.3, 11.5),             # H3 H4 bottom-left vertical pair
 ]
 
 
