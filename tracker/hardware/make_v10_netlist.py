@@ -67,6 +67,41 @@ def drop_nodes(text, refs):
     return text
 
 
+
+# E28 module pin translation (footprint sidecar + Ebyte manual ch.3):
+# the v9 netlist carries U4 = SX1280 QFN24 pin numbers; U_E28 is the pre-matched
+# MODULE with 16 pads and a different pin map. On-module internals (XTA/XTB, VR_PA,
+# VBAT_IO, DCC_SW, RFIO) are DROPPED -- the module carries its own crystal, match,
+# and IPEX antenna.
+E28_PIN_XLATE = {
+    "15": "1",   # VBAT -> VCC
+    "16": "3",   # MISO
+    "17": "4",   # MOSI
+    "18": "5",   # SCK
+    "19": "6",   # NSS -> CS
+    "3": "11",   # NRESET
+    "7": "12",   # BUSY
+    "8": "13",   # DIO1
+    "9": "14",   # DIO2
+    "10": "15",  # DIO3
+}
+E28_DROP_PINS = {"22", "4", "6", "2", "14", "11", "12", "13", "20", "21", "23", "24", "1", "5"}
+
+
+def translate_e28(s):
+    import re
+    # 1. drop internal-pin nodes
+    for pin in E28_DROP_PINS:
+        s = re.sub(r'\n\s*\(node \(ref "U_E28"\) \(pin "%s"\)[^\n]*' % pin, "", s)
+    # 2. renumber surviving nodes
+    def sub_pin(m):
+        pin = m.group(2)
+        new = E28_PIN_XLATE.get(pin, pin)
+        return m.group(1) + new + m.group(3)
+    s = re.sub(r'(\(node \(ref "U_E28"\) \(pin ")(\d+)("[^\n]*\)\s*\(pinfunction)', sub_pin, s)
+    return s
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--in", dest="inp", required=True)
@@ -88,6 +123,7 @@ def main():
     #  and new nets at the end -- the builder reads comps + nets leniently)
     after = s.count("(comp ")
     print(f"v9 comps: {n0} -> after drops: {after}")
+    s = translate_e28(s)
     open(a.out, "w", encoding="utf-8").write(s)
     print("wrote", a.out, "-- U_C/J_PROG/R_EN/C_EN comps and new nets are added by the "
           "v10 builder (they are not in this transform; see build script)")
