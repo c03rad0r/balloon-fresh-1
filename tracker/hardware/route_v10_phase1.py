@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
-"""Route v10 phase-1 copper -- REBUILT after the operator's defect report.
+"""BANNED ROUTING METHOD -- NEGATIVE REFERENCE ONLY (ADR-126).
+
+Do NOT use this to place copper on any board. It has no model of obstacles: it draws
+straight segments between pad centres and can only work by luck. Measured on the v10
+board it produced a lane at 0.000mm over U_C.9, two dead-end stubs, and 21.66mm of copper
+through the F33 body. With the corrected gates it could place 0 legal nets.
+Use tracker/hardware/route_v10_astar.py instead (grid A*, via support, gate-bound).
+
+Route v10 phase-1 copper -- REBUILT after the operator's defect report.
 
 Defects this version must NOT reproduce (all measured on the previous board, PR #270):
   D1 stub: a segment whose endpoint touches no pad and no other segment of its net

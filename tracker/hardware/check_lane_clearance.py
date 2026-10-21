@@ -80,11 +80,12 @@ def main():
     for fp in b.GetFootprints():
         for p in fp.Pads():
             n = p.GetNet()
-            pos, sz = p.GetPosition(), p.GetSize()
+            bb2 = p.GetBoundingBox()   # B10: rotation-aware
             pads.append((fp.GetReference(), p.GetNumber(), n.GetNetname() if n else "",
                          n.GetNetCode() if n else 0, p.GetLayerSet(),
-                         (pos.x / UM - sz.x / UM / 2, pos.y / UM - sz.y / UM / 2,
-                          pos.x / UM + sz.x / UM / 2, pos.y / UM + sz.y / UM / 2)))
+                         (bb2.GetX() / UM, bb2.GetY() / UM,
+                          (bb2.GetX() + bb2.GetWidth()) / UM,
+                          (bb2.GetY() + bb2.GetHeight()) / UM)))
     bad, tight = [], []
     for t in tracks:
         n = t.GetNet()

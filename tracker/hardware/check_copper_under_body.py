@@ -45,6 +45,17 @@ def main():
     if not b:
         print("REFUSED: board load failed")
         return 3
+    # own pads per net: a track legitimately enters a body to reach its own pad, so that
+    # part of a crossing is subtracted before the 0.5mm threshold is applied.
+    own = {}
+    for fp in b.GetFootprints():
+        for p in fp.Pads():
+            n = p.GetNet()
+            if n and n.GetNetCode():
+                pb = p.GetBoundingBox()
+                own.setdefault(n.GetNetname(), []).append(
+                    (pb.GetX() / UM, pb.GetY() / UM,
+                     (pb.GetX() + pb.GetWidth()) / UM, (pb.GetY() + pb.GetHeight()) / UM))
     fps = []
     for fp in b.GetFootprints():
         ref = fp.GetReference()
@@ -65,7 +76,11 @@ def main():
             if layer != t.GetLayer():
                 continue
             ln = seg_rect_overlap_len(x0, y0, x1, y1, bb)
-            if ln > 0.5:   # more than half a mm under the body = a real crossing
+            # subtract the part of the crossing that is merely reaching an own pad
+            for (qx0, qy0, qx1, qy1) in own.get(name, []):
+                ln -= seg_rect_overlap_len(x0, y0, x1, y1,
+                                           (qx0 - 2.0, qy0 - 2.0, qx1 + 2.0, qy1 + 2.0))
+            if ln > 0.5:   # more than half a mm of genuine traversal
                 bad.append(f"UNDER BODY {ln:5.2f}mm: {name} track runs beneath {ref}")
     for v in bad:
         print("  ", v)

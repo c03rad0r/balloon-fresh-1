@@ -35,10 +35,9 @@ def seg_point_dist(px, py, x0, y0, x1, y1):
 
 
 def pad_bbox_mm(pad):
-    p = pad.GetPosition()
-    s = pad.GetSize()
-    return (p.x / UM - s.x / UM / 2, p.y / UM - s.y / UM / 2,
-            p.x / UM + s.x / UM / 2, p.y / UM + s.y / UM / 2)
+    bb = pad.GetBoundingBox()   # B10: rotation-aware
+    return (bb.GetX() / UM, bb.GetY() / UM,
+            (bb.GetX() + bb.GetWidth()) / UM, (bb.GetY() + bb.GetHeight()) / UM)
 
 
 def point_in_bbox(px, py, bb, grow=0.0):
