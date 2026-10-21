@@ -141,6 +141,26 @@ jobs:
             || python3 -m pip install --quiet --break-system-packages pytest
           python3 -m pytest tests/test_pcb_pipeline_gates.py -v --tb=short
 
+      # ── Suite 10: v10 connectivity registry + routing gates (ADR-125/126) ─
+      # The operator found a lane at 0.000mm over U_C.9, two dead-end stubs and 21.7mm of
+      # copper through the F33's body. Each is now a test: the registry must match the
+      # board, every unassigned pad must be justified in OPEN-ITEMS.md, and each gate is
+      # exercised against a POISONED board carrying the defect (a gate that cannot fail is
+      # not a gate). The pcbnew half loud-skips on a runner without KiCad.
+      - name: Run v10 connectivity + routing gate tests
+        run: |
+          python3 -m pip install --quiet pytest \
+            || python3 -m pip install --quiet --break-system-packages pytest
+          python3 -m pytest tests/test_v10_connectivity.py -v --tb=short
+
+      # ── Suite 11: ADR-126 routing method is mandatory ─────────────
+      # Static assertions: the banned straight/L router is marked as such, the A* router
+      # exists and carries the via + obstacle rules, and AGENTS.md binds both. These run
+      # anywhere (no pcbnew needed).
+      - name: Assert the routing method is the ADR-126 A* router
+        run: |
+          python3 -m pytest tests/test_routing_method_binding.py -v --tb=short
+
       # ── Suite 9: PCB Phase 1 track-import spec (t_877751ec) ──────
       # The import defect that cost 181 track_dangling violations: a hand-rolled
       # DSN parser with no Y inversion and no degenerate-segment collapse.  The

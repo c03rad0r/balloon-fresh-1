@@ -581,3 +581,30 @@ Rules:
    (image-freshness pre-commit hook, PR #250).
 5. The E28 module's keep-out rules (nothing under the module but the digital corner; keep
    away from high-frequency/power traces) apply to BOTH sides of the board at its site.
+
+## FLIGHT BOARD v10 — ROUTING (2026-10-21) — BINDING
+
+6. **ADR-126: grid A* routing with via support is the ONLY permitted routing method.**
+   All copper is placed by `tracker/hardware/route_v10_astar.py`. The straight/L router
+   (`route_v10_phase1.py`) is BANNED and kept only as a negative reference. It has no model
+   of obstacles and can only work by luck: measured on this board it produced a lane at
+   0.000 mm over `U_C.9`, two dead-end stubs, and 21.66 mm of copper through the F33's body.
+   With the corrected gates it could place 0 legal nets.
+7. **No copper ships unless all four routing gates pass on the resulting board:**
+   `check_lane_clearance.py` (track vs every foreign pad — **unnamed pads are metal**),
+   `check_lane_integrity.py` (dead ends, copper touching a foreign net),
+   `check_copper_under_body.py` (copper traversing a module body; own-pad entry exempt),
+   `check_hole_clearance.py` (holes vs pads, lanes, vias, zones, edge).
+   A run with any violation is NOT committed. Nets that cannot be placed are REPORTED, never
+   forced. Hand-drawn copper requires a `ROUTE-EXCEPTION` entry in `docs/fab/v10/GATE-LOG.md`
+   naming the nets and the reason.
+8. **Every routing run is followed by a rendered image in the same Signal message** (ADR-120
+   R4), and the board's routed/unrouted counts are stated as measured numbers.
+9. **Pin→net truth lives in ONE registry:** `tracker/hardware/connectivity/v10_pinmap.reg`,
+   one line per pin, in git, with the deciding ADR as the authority column.
+   `registry.py check` FAILS on drift between board and registry. A pin that is UNASSIGNED
+   must be justified in `connectivity/OPEN-ITEMS.md` — an unassigned pad with no OPEN-ITEMS
+   entry is a test failure. Never hand-type pin maps in a builder; assign from the registry.
+10. **Regression tests bind every gate:** `tests/test_v10_connectivity.py` runs each gate
+   TWICE — against a clean board (must pass) and against a poisoned board carrying the defect
+   (must fail). A gate that cannot fail is not a gate. Any new gate needs both halves.
