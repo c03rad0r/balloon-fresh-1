@@ -1,6 +1,7 @@
 # ADR-122 — v10 ESP32-S3 ↔ four-radio interconnect: one shared SPI bus, four CS, 29-GPIO budget
 
-- **Status:** ACCEPTED — design under standing authority, answering the operator's 2026-10-21 question ("How is the ESP32-S3 going to connect to all three radios? Does it have enough SPI connections?"); recorded per ADR-first.
+- **Status:** SUPERSEDED by **ADR-123** (2026-10-21, operator instruction: two buses partitioned by band for real-time bent pipe). The GPIO accounting and strapping-pin rules below CARRY FORWARD; the single-bus topology does not.
+- *(Original status line: ACCEPTED — design under standing authority, answering the operator's 2026-10-21 question)* ("How is the ESP32-S3 going to connect to all three radios? Does it have enough SPI connections?"); recorded per ADR-first.
 - **Decision owner:** Felix (operator) — question; topology decision under standing authority.
 - **Related:** ADR-108 (v9 pin plan — 2-radio version of this same topology), ADR-119 (four RF sites), ADR-121 (J_PROG), ADR-035 (TDM — why bus sharing is safe).
 
