@@ -48,3 +48,19 @@ Why a header and not a USB-C socket: the payload is a pico-balloon; a 2.54 mm he
 ```
 ~/venvs/kicad/bin/python -c "import pcbnew; b=pcbnew.LoadBoard('tracker/hardware/hub_board_v9.kicad_pcb'); print([p.GetNetname() for p in b.FindFootprintByReference('U1').Pads() if p.GetNumber() in ('3','13','14')])"
 ```
+
+
+## OPEN-16 (2026-10-21, routing phase): IO0 pad identity UNVERIFIED — do not assign
+
+The v10 netlist maps **U1 pad 25 = IO48** (and v9 wires pad 25 to `/U3_RESET_N`). During
+net-assignment an agent set pad 25 = `/IO0` as a *guess*; the netlist contradicted it, and the
+assignment was **retracted the same day** (correcting commit on top, pad 25 restored to
+`/U3_RESET_N`). The WROOM-1U datasheet is not vendored in-repo and no in-repo source names the
+module pad that carries GPIO0.
+
+**Consequence:** J_PROG pin 6 (`/IO0`) and R_EN are netted but currently *dangle* — no U1 pad.
+Flashing via USB-Serial-JTAG still works (EN + USB D± are enough); IO0 is only needed for
+ROM bootloader entry when USB download fails.
+
+**To close:** obtain the Espressif WROOM-1/1U datasheet (pin table), identify the GPIO0 pad
+number, assign, and verify against the loaded footprint's pad count (41 + shield pads).

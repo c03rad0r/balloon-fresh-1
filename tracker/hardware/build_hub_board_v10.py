@@ -100,6 +100,102 @@ def lib_path(lib):
     raise SystemExit("lib not found: " + lib)
 
 
+
+# ------------------------------------------------------------------ netlist nets
+NETLIST = os.path.join(HERE, "schematics", "flight_board", "v10_flight.net")
+EXTRA_PINMAPS = {
+    "J_PROG": {"1": "GND", "2": "+3V3", "3": "/EN", "4": "/USB_DN", "5": "/USB_DP", "6": "/IO0"},
+    "R_EN": {"1": "/EN", "2": "+3V3"},
+    "C_EN": {"1": "/EN", "2": "GND"},
+}
+
+
+def read_netlist_nets(path):
+    import re
+    t = open(path, encoding="utf-8", errors="replace").read()
+    net_sec = re.search(r"\(nets(.*)", t, re.S).group(1)
+    out = []
+    for b in re.split(r"\n    \(net ", net_sec)[1:]:
+        name = re.search(r'\(name "([^"]+)"\)', b).group(1)
+        nodes = re.findall(r'\(node \(ref "([^"]+)"\) \(pin "([^"]+)"\)', b)
+        out.append((name, nodes))
+    return out
+
+
+def assign_nets(b):
+    nets = read_netlist_nets(NETLIST)
+    for name, _nodes in nets:
+        if name and b.FindNet(name) is None:
+            b.Add(pcbnew.NETINFO_ITEM(b, name))
+    pin_net = {}
+    for _n, nodes in nets:
+        for r, p in nodes:
+            pin_net[(r, p)] = _n
+    for fp in b.GetFootprints():
+        ref = fp.GetReference()
+        for pad in fp.Pads():
+            nm = pin_net.get((ref, pad.GetNumber()))
+            if nm:
+                pad.SetNet(b.FindNet(nm))
+    for ref, pmap in EXTRA_PINMAPS.items():
+        fp = b.FindFootprintByReference(ref)
+        if fp is None:
+            continue
+        for pad in fp.Pads():
+            nm = pmap.get(pad.GetNumber())
+            if nm:
+                if b.FindNet(nm) is None:
+                    b.Add(pcbnew.NETINFO_ITEM(b, nm))
+                pad.SetNet(b.FindNet(nm))
+    # U1 programming pads (ADR-121: pad3=EN, pad13=USB_DN, pad14=USB_DP; WROOM-1 pad25=IO0)
+    u1 = b.FindFootprintByReference("U1")
+    if u1 is not None:
+        # IO0 intentionally NOT assigned: its U1 pad identity is UNVERIFIED (the netlist
+        # maps pad 25 = IO48, not IO0). ADR-121 OPEN item. /IO0 stays on J_PROG pin 6 + R_EN.
+        for pad_no, nm in (("3", "/EN"), ("13", "/USB_DN"), ("14", "/USB_DP")):
+            if b.FindNet(nm) is None:
+                b.Add(pcbnew.NETINFO_ITEM(b, nm))
+            for pad in u1.Pads():
+                if pad.GetNumber() == pad_no:
+                    pad.SetNet(b.FindNet(nm))
+    # ADR-123 bus partition: U3+U_C+E28 on SPI-1 (2.4GHz); F33 alone on SPI-2 (433MHz).
+    # v9 netlist had U3 on the shared bus (now /SPI2_*); move the LP radios to /SPI1_*.
+    for ref in ("U3", "U_C"):
+        fp = b.FindFootprintByReference(ref)
+        if fp is None:
+            continue
+        for pad in fp.Pads():
+            n = pad.GetNet()
+            if n is None or n.GetNetCode() == 0:
+                continue
+            nm = n.GetNetname()
+            if nm in ("/SPI2_MISO", "/SPI2_MOSI", "/SPI2_SCK"):
+                pad.SetNet(b.FindNet(nm.replace("SPI2", "SPI1")))
+    # U_C: copy U3's pad nets; bus nets are shared (/SPI1_*), control nets get U_C names
+    u3 = b.FindFootprintByReference("U3")
+    uc = b.FindFootprintByReference("U_C")
+    if u3 is not None and uc is not None:
+        for p3, pc in zip(u3.Pads(), uc.Pads()):
+            n = p3.GetNet()
+            if n is not None and n.GetNetCode() != 0:
+                name = n.GetNetname()
+                if any(k in name for k in ("CS", "IRQ", "BUSY", "RESET")) and "U3" in name:
+                    name = name.replace("U3", "U_C")
+                    if b.FindNet(name) is None:
+                        b.Add(pcbnew.NETINFO_ITEM(b, name))
+                pc.SetNet(b.FindNet(name))
+    # U_C antenna: its own U.FL (ANT_C, ADR-119 site C) -- do NOT short to U3's /ANT3_2G4_RX
+    uc = b.FindFootprintByReference("U_C")
+    if uc is not None:
+        for pad in uc.Pads():
+            n = pad.GetNet()
+            if n is not None and n.GetNetname() == "/ANT3_2G4_RX":
+                if b.FindNet("/ANT_C_2G4") is None:
+                    b.Add(pcbnew.NETINFO_ITEM(b, "/ANT_C_2G4"))
+                pad.SetNet(b.FindNet("/ANT_C_2G4"))
+    return len(pin_net)
+
+
 def pool_load(specs):
     """Load every footprint ONCE into a pool BEFORE any board mutation.
 
@@ -183,6 +279,8 @@ def main():
         m.SetValue("TETHER_NPTH_D2.5")
         m.SetPosition(pcbnew.VECTOR2I(int(hx * UM), int(hy * UM)))
         b.Add(m)
+    n_assigned = assign_nets(b)
+    print(f"net assignments: {n_assigned} netlist pins")
     print(f"placed: {len(list(b.GetFootprints()))} footprints "
           f"(front parts, back radios, 4 wing seats, HW1-4 wing holes, H1-4 tether)")
     pcbnew.SaveBoard(out, b)

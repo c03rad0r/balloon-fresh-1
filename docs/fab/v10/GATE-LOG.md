@@ -9,3 +9,5 @@ Routing is authorised to begin only after the TRUE-FOOTPRINT placement render is
 real-board build, not routing.
 
 | 2026-10-21 | v10 REAL placement, solver + both gates (front+back renders in Signal) | **72 × 80 mm** | front+back, 3D+technical (28 footprints, 4 seats, 8 holes) | geometry 0 violations · holes 0 violations · poison test still fails gate | **PENDING OPERATOR SIGN-OFF — amendment: 72×80 replaces the approved ~53×62.** Reasons + trade-offs in PR body. |
+
+| 2026-10-21 | Operator sign-off (Signal): "looks good, please continue" on the 72×80 renders | 72 × 80 mm | front+back 3D + technical | both gates 0/0 | **APPROVED — routing phase begins** |
