@@ -23,8 +23,8 @@
   header, or a supersede pointer inside a committed record), this index says
   `UNRESOLVED - needs an operator decision`. It never guesses.
 
-Generated from `docs/adr/`: **103** distinct
-numbers, **103** numbered files, **1** non-conforming filenames.
+Generated from `docs/adr/`: **106** distinct
+numbers, **106** numbered files, **1** non-conforming filenames.
 
 ## Collisions
 
@@ -137,6 +137,9 @@ None.
 | 115 | `115-tooling-sourcing-policy.md` | Tooling Sourcing Policy for Board Production | Accepted |
 | 116 | `116-simulation-gate-ngspice.md` | Simulation Gate — ngspice Testbenches as a Blocking Pre-Order Check | Accepted |
 | 117 | `117-wing-airframe-foam-selection.md` | The wing airframe is a bought XPS/Depron sheet, end-mounted, 3 mm first build | Accepted by operator |
+| 118 | `118-flight-board-v10-directives.md` | Flight board v10: two-sided population, three LR2021 sites, E28-2G4M27SX ranging module, minimal outline, human placement gate, visual-first reporting | ACCEPTED — operator instruction, 2026-10-20 |
+| 119 | `119-v10-radio-sites.md` | v10 radio sites: three LR2021 slots (2× LP + 1× F33) + E28-2G4M27SX ranging module | ACCEPTED — operator instruction, 2026-10-20 |
+| 120 | `120-v10-placement-process.md` | v10 placement process: two-sided population, minimal outline, human placement gate, visual-first reporting | ACCEPTED — operator instruction, 2026-10-20 |
 | ≥044 | *(reserved)* | next free: `scripts/adr_next_number.py` → 086 | — |
 
 ## Non-conforming filenames (not `NNN-description.md`)

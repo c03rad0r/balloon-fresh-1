@@ -3,6 +3,7 @@
 - **Status:** **ACCEPTED — operator instruction, 2026-10-20** (verbatim directives below; this ADR records them as binding design rules for the next flight-board revision, `v10`).
 - **Decision owner:** Felix (operator)
 - **Supersedes (in part):** the v9 single-sided placement posture and the bare-chip SX1280 site (`docs/fab/SX1280-MODULE-DECISION.md`, PR #251 — its recommendation is hereby adopted); does **not** supersede ADR-034 (band split), ADR-035 (TDM), ADR-040 (site optionality — extended by the three-slot ruling), or the three-slot consolidation ruling (`docs/fab/V9-RADIO-SLOT-CONSOLIDATION.md`, 2026-10-14).
+- **Split into:** ADR-119 (radio sites decision), ADR-120 (placement process + gates). This file remains the umbrella record of the operator's verbatim directives.
 - **Reference:** `docs/modules/e28-2g4m27sx/E28-2G4M27SX_UserManual_v1.0.pdf` (merged to the default branch as the qualification source for the ranging module).
 
 ## The operator's directives, verbatim in substance (2026-10-20)

@@ -562,7 +562,8 @@ Rules:
   `docs/data-handover/DATA-HANDOVER-2026-08-17.md`.
 
 
-## FLIGHT BOARD v10 — OPERATOR DIRECTIVES (2026-10-20, ADR-118) — BINDING
+## FLIGHT BOARD v10 — OPERATOR DIRECTIVES (2026-10-20) — BINDING
+### ADR-118 (umbrella) · ADR-119 (radio sites) · ADR-120 (placement process + gates)
 
 1. **Two-sided population is the default.** Parts go on both sides; the outline shrinks to
    what the two-sided placement needs. The 70x70 v9 outline is not a v10 constraint.
@@ -570,9 +571,13 @@ Rules:
    (SX1280+PA+LNA+matching on-module; datasheet at `docs/modules/e28-2g4m27sx/`).
    The bare-chip SX1280 + self-built match network is ABANDONED (measured fatal scatter,
    `docs/fab/SX1280-MODULE-DECISION.md`).
-3. **HUMAN PLACEMENT GATE:** placement is shown to the operator (rendered, in Signal) and
-   SIGNED OFF before ANY routing starts. Routing before gate sign-off is a defect.
-4. **VISUAL-FIRST REPORTING:** every substantive board claim to the operator ships with a
-   rendered image in the same message. No text-only board reports.
+3. **HUMAN PLACEMENT GATE (ADR-120 R3):** placement is rendered from MEASURED courtyard
+   sizes, checked programmatically (overlap/bounds/wing seats), shown to the operator in
+   Signal, and SIGNED OFF before ANY routing starts. Routing begun on an ungated placement
+   is DISCARDED and the gate re-run. Gate verdicts are logged (date, operator, outcome).
+4. **VISUAL-FIRST REPORTING (ADR-120 R4):** every substantive board claim ships with a
+   rendered image (3D / copper / annotated crop) IN THE SAME MESSAGE, in Signal. Text-only
+   board reports are a process violation. Committed renders must match the board on disk
+   (image-freshness pre-commit hook, PR #250).
 5. The E28 module's keep-out rules (nothing under the module but the digital corner; keep
    away from high-frequency/power traces) apply to BOTH sides of the board at its site.
