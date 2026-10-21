@@ -45,6 +45,13 @@ VIA_DRILL = 0.250
 VIA_COST = 25            # in grid steps -- a via is worth ~2.5 mm of detour
 BEND_COST = 2
 HOLE_PREFIXES = ("H", "HW")
+# B17 (2026-10-21): ONLY the E28 has a datasheet rule against routing beneath the module
+# (E28 manual 4.1; ADR-118 line 22). U1/U2/U3/U_C/U5 have NO such rule -- copper under a
+# castellated/shielded module is normal practice and KiCad's DRC does not flag it.
+# Blocking every footprint's courtyard box blocked the whole board: measured, every F33 net
+# failed and U1's start row had 404/722 cells blocked, because U1's own courtyard is 19.5 x
+# 19.2 mm of solid terrain.
+KEEPOUT_REFS = ("U_E28",)
 F, B = 0, 1              # layer indices -> pcbnew F_Cu / B_Cu
 
 
@@ -75,12 +82,34 @@ def load_world(board_path):
     for fp in b.GetFootprints():
         ref = fp.GetReference()
         front = fp.GetLayer() == pcbnew.F_Cu
-        if not ref.startswith(HOLE_PREFIXES):
-            fbb = fp.GetBoundingBox(False, True)
-            bodies.append((ref, F if front else B,
-                           (fbb.GetX() / UM, fbb.GetY() / UM,
-                            (fbb.GetX() + fbb.GetWidth()) / UM,
-                            (fbb.GetY() + fbb.GetHeight()) / UM)))
+        if not ref.startswith(HOLE_PREFIXES) and ref in KEEPOUT_REFS:
+            # B17 (2026-10-21): GetBoundingBox(False, True) returns the COURTYARD box --
+            # for U1/U2 that is a 40x22mm slab covering most of the board, so the router
+            # could not route anywhere near the two biggest parts (measured: every F33 net
+            # failed, U1's start row 404/722 cells blocked). What must stay clear on the
+            # part's own side is the PAD FIELD, not the outline: the module is soldered to
+            # its pads and copper beneath the rest of the body is normal practice (KiCad's
+            # own DRC has no "copper under footprint" rule for this reason).
+            # We therefore block the footprint's PAD-FIELD bounding box, grown slightly,
+            # and let check_copper_under_body.py remain the gate for genuine traversals.
+            pbbs = [p.GetBoundingBox() for p in fp.Pads()]
+            if pbbs:
+                x0 = min(b.GetX() for b in pbbs) / UM
+                y0 = min(b.GetY() for b in pbbs) / UM
+                x1 = max(b.GetX() + b.GetWidth() for b in pbbs) / UM
+                y1 = max(b.GetY() + b.GetHeight() for b in pbbs) / UM
+                fbb = None
+                body_rect = (x0, y0, x1, y1)
+            else:
+                fbb = fp.GetBoundingBox(False, True)
+                body_rect = None
+            if body_rect is None:
+                body_rect = (fbb.GetX() / UM, fbb.GetY() / UM,
+                             (fbb.GetX() + fbb.GetWidth()) / UM,
+                             (fbb.GetY() + fbb.GetHeight()) / UM)
+            b_layers = (F, B) if ref in KEEPOUT_REFS else ((F if front else B),)
+            for bl in b_layers:
+                bodies.append((ref, bl, body_rect))
         for p in fp.Pads():
             n = p.GetNet()
             ls = p.GetLayerSet()
@@ -179,16 +208,20 @@ def unblock_own(blocked, world, pitch, own_pads, sides_union, all_pads, reach=0.
             for j in range(j0, j1 + 1):
                 for i in range(i0, i1 + 1):
                     mx, my = ox + i * pitch, oy + j * pitch
-                    # never clear a cell that belongs to ANOTHER pad: the first version
-                    # cleared a 1.2mm halo, which at U1's 1.27mm pin pitch reached the
-                    # neighbouring pins (measured: 5 hard SHORTs through U1.2..U1.7)
-                    # the neighbouring pad's CLEARANCE RING (rect grown by CLEAR + half)
-                    # is what must stay blocked -- guarding only its bare rect let the
-                    # route run 0.03mm from U1.38 (measured SHORT through /I2C_SCL)
-                    g = CLEAR + TRACK_W / 2
-                    if any(p2[0] - g <= mx <= p2[2] + g and p2[1] - g <= my <= p2[3] + g
-                           for p2 in all_pads if p2 != rect):
-                        continue
+                    # B18 (2026-10-21): the pad's OWN INTERIOR is always reachable.
+                    # Without this the goal cell stayed blocked -- measured: /F33_CS_N's
+                    # goal cell blocked=1 and every F33 net was unroutable, because at
+                    # U2's 1.27mm pad pitch each neighbour's clearance ring overlaps this
+                    # pad's centre, so the guard below vetoed clearing the pad's middle.
+                    inside_own = (rect[0] <= mx <= rect[2] and rect[1] <= my <= rect[3])
+                    if not inside_own:
+                        # In the HALO only: never clear another pad's clearance ring
+                        # (rect grown by CLEAR + half). Guarding only the bare rect let a
+                        # route run 0.03mm from U1.38 (measured SHORT through /I2C_SCL).
+                        g = CLEAR + TRACK_W / 2
+                        if any(p2[0] - g <= mx <= p2[2] + g and p2[1] - g <= my <= p2[3] + g
+                               for p2 in all_pads if p2 != rect):
+                            continue
                     if blocked[layer][j][i]:
                         saved.append((layer, j, i))
                         blocked[layer][j][i] = 0
