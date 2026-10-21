@@ -44,7 +44,12 @@ BACK = {  # solver: 72x80, TRUE seat margins (west/east x>=10, north/south y>=8.
     # This is the best of them: 2.38mm from the edge, 0.8mm from every other part.
     # CONSEQUENCE (accepted, recorded): 42mm from U1, so the E28 SPI/control runs are long.
     "U_E28": (53.0, 69.0, 90, "e28:E28-2G4M27SX"),
-    "ANT2": (30.7, 28.0, 0, "Connector_Coaxial:U.FL_Molex_MCRF_73412-0110_Vertical"),
+    # B23 (2026-10-21): was (30.7, 28.0) -- its GND shield tab (pad 2, back) overlapped
+    # U2.13 /F33_CS_N (front) by 0.25 x 0.05mm, a real cross-side pad short. Moved 0.5mm
+    # south: verified against U2.13 AND against every cross-side pad on the board (0
+    # overlaps). NOTE: ANT2's three pads numbered "2" are the U.FL connector's three GND
+    # shield legs, all GND -- standard for this part, NOT a defect.
+    "ANT2": (30.7, 27.5, 0, "Connector_Coaxial:U.FL_Molex_MCRF_73412-0110_Vertical"),
     "ANT3": (36.7, 28.0, 0, "Connector_Coaxial:U.FL_Molex_MCRF_73412-0110_Vertical"),
 }
 # wing seats: ADR-085 CORRECTED rotations (slot reaches its own edge; detector EXIT=0).

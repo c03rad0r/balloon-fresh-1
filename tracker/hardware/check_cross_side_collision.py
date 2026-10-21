@@ -12,12 +12,21 @@ Measured shorted pairs: U1.1/E28.7, U1.2/E28.6, U1.3/E28.5, U1.4/E28.4, U1.5/E28
 U1.6/E28.2, U1.7/E28.1 -- every one of U1's first seven pins through overlapping copper.
 
 WHY NO GATE CAUGHT IT: check_board_geometry.py compares courtyards but only within one
-side. Every gate was single-sided. A two-sided board needs cross-side checks:
-  * component-to-component: a front part and a back part may not share footprint area
-    (they physically collide, and their pads short through the board)
-  * pad-to-pad: no pad may physically overlap a pad on the opposite side
+side. Every gate was single-sided. A two-sided board needs cross-side checks -- but the two
+checks have DIFFERENT severities, corrected 2026-10-21 after over-claiming:
 
-An overlap of ZERO area is fine -- parts may be adjacent. Only positive overlap fails.
+  * PAD vs PAD across sides -- HARD DEFECT. Both pads are copper; if their rectangles
+    overlap they are the same node through the board. This is what caught U1/U_E28 (13
+    shorts).
+  * COURTYARD vs COURTYARD across sides -- INFORMATIONAL, NOT a defect. Parts on opposite
+    faces sit at different Z. Sharing X-Y area is exactly what two-sided population MEANS:
+    a module on the front over a module on the back is normal, assembles fine, and is how
+    the v10 layout is specified (ADR-118 two-sided default). An earlier version of this
+    gate failed on courtyard overlap and produced five FALSE positives -- e.g. U2 (F33,
+    39x21mm per the vendor datasheet) over U3/U_C, which are on the opposite face.
+
+Exit 0 = no PAD overlap. Exit 1 = at least one pad overlap. Courtyard overlaps are printed
+as INFO and never fail the build.
 
 Exit 0 = no cross-side collision. Exit 1 = collisions named with measured overlap.
 """
@@ -94,8 +103,9 @@ def main():
                           (pb.GetY() + pb.GetHeight()) / UM)))
 
     problems = []
+    info = []
 
-    # 1. component courtyard vs component courtyard, DIFFERENT sides
+    # 1. component courtyard vs component courtyard, DIFFERENT sides -- INFORMATIONAL
     for i in range(len(comps)):
         for j in range(i + 1, len(comps)):
             ra, la, ra_rect = comps[i]
@@ -104,12 +114,9 @@ def main():
                 continue                      # same-side handled by check_board_geometry
             dx, dy, area = rect_overlap(ra_rect, rb_rect)
             if area >= args.min_area:
-                problems.append(
-                    f"STACKED {area:.2f}mm2: {ra}({la}) over {rb}({lb}) "
-                    f"overlap {dx:.2f} x {dy:.2f} mm")
-    # A courtyard overlap is a WARNING only if no pad actually collides: two parts may
-    # share silhouette on opposite sides when only their courtyards graze. A PAD overlap
-    # is a hard short and is always reported (section 2 below).
+                info.append(
+                    f"INFO     {area:.1f}mm2 shared X-Y: {ra}({la}) over {rb}({lb}) "
+                    f"{dx:.2f} x {dy:.2f} mm (opposite faces, no pad contact)")
 
     # 2. pad vs pad, DIFFERENT sides (these are literal shorts through the board)
     for i in range(len(pads)):
@@ -124,9 +131,13 @@ def main():
                     f"SHORTED {area:.3f}mm2: {ra}.{na}({la}) overlaps {rb}.{nb}({lb}) "
                     f"{dx:.2f} x {dy:.2f} mm")
 
+    for msg in info[:12]:
+        print("   " + msg)
+    if len(info) > 12:
+        print(f"   ... and {len(info) - 12} more shared-area pairs")
     for msg in problems[:40]:
         print("   " + msg)
-    print(f"CROSS-SIDE COLLISIONS: {len(problems)}")
+    print(f"PAD SHORTS ACROSS SIDES: {len(problems)}   (shared-area pairs: {len(info)}, informational)")
     return 1 if problems else 0
 
 
