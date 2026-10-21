@@ -52,7 +52,7 @@ def main():
     holes = []
     others = []
     for fp in b.GetFootprints():
-        if fp.GetReference().startswith(("H", "HW")) and "TETHER" in (fp.GetValue() or "") + (fp.GetValue() or ""):
+        if fp.GetReference().startswith(("H", "HW")):
             holes.append(fp)
         else:
             others.append(fp)
