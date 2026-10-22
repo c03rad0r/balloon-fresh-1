@@ -148,8 +148,51 @@ def load_world(board_path):
     for ref, num, name, code, sides, rect in pads:
         if code:
             net_pads[(code, name)].append((ref, num, sides, rect))
+
+    # B43 (2026-10-22): EDGE CUTS INSIDE THE OUTLINE.
+    # The grid modelled only the four OUTER strips of the board rectangle. It had no model of
+    # Edge.Cuts graphics owned by FOOTPRINTS -- and the four wing seats J_W1..J_W4 each carry a
+    # slot cut into their footprint (4 Edge.Cuts items each; measured, e.g. J_W2's slot is
+    # x 35.55..36.45, y 74.00..80.00). /E28_BUSY was routed straight ACROSS that slot at
+    # (28.75,74.60)->(39.65,74.60): distance 0.000mm to two of J_W2's edge segments, i.e. the
+    # track crosses an edge cutout. kicad-cli reported it as
+    #   "copper_edge_clearance: Segment of J_W2 on Edge.Cuts | Track [/E28_BUSY] on B.Cu ..."
+    # and NONE of the custom gates covered copper-vs-edge, so only DRC caught it.
+    # Edge graphics bind BOTH copper layers: an edge cut goes through the whole board.
+    edge_rects = []
+    for fp in b.GetFootprints():
+        for g in fp.GraphicalItems():
+            if g.GetLayer() == pcbnew.Edge_Cuts:
+                gb = g.GetBoundingBox()
+                edge_rects.append((fp.GetReference(),
+                                   (gb.GetX() / UM, gb.GetY() / UM,
+                                    (gb.GetX() + gb.GetWidth()) / UM,
+                                    (gb.GetY() + gb.GetHeight()) / UM)))
+    for d in b.GetDrawings():
+        # The board's OWN outline is deliberately NOT added here. Two reasons, both measured:
+        #  1. the four outer strips already model the board rectangle's boundary, so it would be
+        #     redundant; and
+        #  2. this board's outline drawing is a DIAGONAL (0,0)->(72,80) whose BOUNDING BOX is the
+        #     entire 72x80 board. Growing that box by EDGE_KEEP blocked every cell and the router
+        #     placed ZERO nets (measured 2026-10-22). A bbox is only a valid obstacle for an
+        #     axis-aligned shape, which the footprint slots are and the outline is not.
+        if d.GetLayer() != pcbnew.Edge_Cuts:
+            continue
+        gb = d.GetBoundingBox()
+        rw = gb.GetWidth() / UM
+        rh = gb.GetHeight() / UM
+        if rw > 0.5 * w or rh > 0.5 * h:
+            print(f"[edges] SKIPPING outline-sized Edge.Cuts drawing "
+                  f"({rw:.1f}x{rh:.1f}mm) -- not an interior cutout", file=sys.stderr)
+            continue
+        edge_rects.append(("<board>",
+                           (gb.GetX() / UM, gb.GetY() / UM,
+                            (gb.GetX() + gb.GetWidth()) / UM,
+                            (gb.GetY() + gb.GetHeight()) / UM)))
+
     return {"board": b, "origin": (ox, oy), "size": (w, h),
-            "pads": pads, "bodies": bodies, "net_pads": net_pads}
+            "pads": pads, "bodies": bodies, "net_pads": net_pads,
+            "edges": edge_rects}
 
 
 def build_via_ok(blocked, nx, ny, pitch):
@@ -229,6 +272,12 @@ def build_grid(world, pitch):
     mark(B, (ox, oy - EDGE_KEEP, ox + w, oy), 0)
     mark(F, (ox, oy + h, ox + w, oy + h + EDGE_KEEP), 0)
     mark(B, (ox, oy + h, ox + w, oy + h + EDGE_KEEP), 0)
+    # B43: interior edge cuts (footprint-owned Edge.Cuts slots). An edge cut passes through the
+    # WHOLE board, so it binds both copper layers, and copper must keep EDGE_CLEARANCE from it.
+    # Before this, /E28_BUSY was routed across J_W2's slot at distance 0.000mm.
+    for eref, erect in world.get("edges", []):
+        mark(F, erect, EDGE_KEEP)
+        mark(B, erect, EDGE_KEEP)
     return blocked, nx, ny
 
 
