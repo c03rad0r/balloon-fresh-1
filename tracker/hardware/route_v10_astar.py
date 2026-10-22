@@ -43,6 +43,8 @@ EDGE_KEEP = 0.300        # mm
 VIA_D = 0.500            # mm measured legal minimum (m_ViasMinSize)
 VIA_DRILL = 0.250
 VIA_COST = 25            # in grid steps -- a via is worth ~2.5 mm of detour
+                         # overridable with --via-cost: LOWER makes the router drop to the
+                         # back layer EARLIER (lever (b) for the congested U1 corridor)
 BEND_COST = 2
 HOLE_PREFIXES = ("H", "HW")
 # B17 (2026-10-21): ONLY the E28 has a datasheet rule against routing beneath the module
@@ -271,7 +273,7 @@ def restore(blocked, saved):
 
 
 def astar(blocked, nx, ny, start, goal, pitch, allow_layers, via_ok=None, hweight=2.0,
-          max_exp=2000000):
+          max_exp=2000000, via_cost=None):
     """A* over (i, j, layer). start/goal are (i, j, layer) tuples."""
     if start[2] not in allow_layers or goal[2] not in allow_layers:
         return None
@@ -351,7 +353,7 @@ def astar(blocked, nx, ny, start, goal, pitch, allow_layers, via_ok=None, hweigh
             # validate_plan on the finished route -- this is a fast necessary condition.
             ok = bool(via_ok[l][j * nx + i])
             if ok:
-                ng = g + VIA_COST
+                ng = g + (via_cost if via_cost is not None else VIA_COST)
                 nidx = idx(i, j, nl)
                 if not closed[nidx] and ng < best_g[nidx]:
                     best_g[nidx] = ng
@@ -567,6 +569,10 @@ def main():
                     choices=["alpha", "constrained", "reverse", "longest"],
                     help="net ordering: 'constrained' (fewest pads first -- standard PCB "
                          "practice) or 'alpha'. See --promote for rip-up-and-reroute.")
+    ap.add_argument("--via-cost", type=int, default=None,
+                    help="A* cost of one via in grid steps (default 25 = ~2.5mm of detour). "
+                         "Lower values bias the router to escape to the back layer EARLY, "
+                         "which is the lever for a congested single-layer corridor.")
     ap.add_argument("--promote", default="",
                     help="comma-separated nets forced to the FRONT of the route order. This is "
                          "the rip-up-and-reroute lever: a net that failed because an earlier "
