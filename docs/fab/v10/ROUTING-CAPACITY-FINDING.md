@@ -3,6 +3,19 @@
 **Date:** 2026-10-21/22. **Method:** deterministic, reproducible. Every number below came from
 running `tracker/hardware/route_v10_astar.py` and the eight gates; nothing here is estimated.
 
+## *** CONCLUSION WITHDRAWN 2026-10-22 ***
+
+The interpretation below -- that the unrouted nets are a LAYOUT limit -- is **withdrawn**. It
+was reached while the router carried a bug (B34) that marked routed copper 0.10mm too tightly
+into the A* grid, so the search found paths that `validate_plan` then rejected
+("self-check: isolation vs routed ..."). The router was discarding its own valid work, which
+produced evidence that looked like a hard capacity limit.
+
+**The measured FACTS below still hold** (U1's two-column geometry, the 2.63mm west corridor,
+grid pitch 0.05 gaining one net, rotation being net-neutral, every failing net routing alone).
+**The CONCLUSION that the limit is layout does not.** Re-measure before acting on the 4-layer
+recommendation. After the B34 fix the router places 12 nets (was 11) with all eight gates zero.
+
 ## Result
 
 On the approved **72 x 80 mm, 2-layer** board with the approved placement, the router places
@@ -52,7 +65,7 @@ north/south edges. **Rotation buys nothing.**
 | via cost 25 / 12 / 6 / 3 / 1 | **identical 11 nets at every value** |
 | grid pitch 0.05 vs 0.10 | +1 net only |
 
-## What would actually fix it
+## What might fix it (UNVERIFIED after B34)
 
 The board is **2-layer with 4 RF modules and 38 signal nets**; the pin fields are dense and the
 wing seats consume the perimeter. The two real options:
