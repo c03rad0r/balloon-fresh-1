@@ -238,4 +238,112 @@ U_HUB_CVT.16  UNASSIGNED  # SEE connectivity/OPEN-ITEMS.md
 U_HUB_CVT.17  UNASSIGNED  # SEE connectivity/OPEN-ITEMS.md
 U_HUB_CVT.""  UNASSIGNED  # SEE connectivity/OPEN-ITEMS.md
 
-# UNASSIGNED pins on this board: 41 -> U1.15, U1.16, U1.26, U1.27, U1.28, U1.29, U1.30, U1.35, U1."", U2.10, U3.9, U3.16, U3.17, U5.5, U5.13, U5.14, U5.15, U5.16, U5.17, U5.18, U7.4, U_C.9, U_C.16, U_C.17, U_E28.8, U_E28.9, U_HUB_CVT.4, U_HUB_CVT.5, U_HUB_CVT.6, U_HUB_CVT.7, U_HUB_CVT.8, U_HUB_CVT.9, U_HUB_CVT.10, U_HUB_CVT.11, U_HUB_CVT.12, U_HUB_CVT.13, U_HUB_CVT.14, U_HUB_CVT.15, U_HUB_CVT.16, U_HUB_CVT.17, U_HUB_CVT.""
+# --- C10
+C10.1  +3V3  # ADR-129 D1 (3V3 bulk at the LDO output)
+C10.2  GND  # ADR-129 D1
+
+# --- C4
+C4.1  /GNSS_VCC  # ADR-129 D1 / ADR-029 s2(d) (GNSS filtered-rail bulk)
+C4.2  GND  # ADR-129 D1 / ADR-029 s2(d)
+
+# --- C_BULK
+C_BULK.1  /F33_VCC  # ADR-129 D1 / ADR-047 s4 (bulk AT the F33 module pin)
+C_BULK.2  GND  # ADR-129 D1 / ADR-047 s4
+
+# --- C_HF
+C_HF.1  /F33_VCC  # ADR-129 D1 / ADR-047 s4 (HF bypass at the module pin)
+C_HF.2  GND  # ADR-129 D1 / ADR-047 s4
+
+# --- C_MON
+C_MON.1  /F33_VSENSE  # ADR-129 D1 / ADR-047 s6 (ADC sample-and-hold, tau 23.5ms)
+C_MON.2  GND  # ADR-129 D1 / ADR-047 s6
+
+# --- D1
+D1.1  /VSCAP  # ADR-129 D1 / ADR-006 (solar series blocking: cathode to storage)
+D1.2  /W1_SOLAR_P  # ADR-129 D1 / ADR-006 (anode to solar; blocks night back-feed)
+
+# --- D_BP1
+D_BP1.1  /W1_SOLAR_P  # ADR-129 D2 / ADR-051 s2.7 (SS24 hub-side wing bypass, cathode)
+D_BP1.2  /W1_SOLAR_N  # ADR-129 D2 / ADR-051 s2.7 (anode)
+
+# --- D_BP2
+D_BP2.1  /W1_SOLAR_N  # ADR-129 D2 / ADR-051 s2.7 (cathode; W1_N IS the W2_P hub link)
+D_BP2.2  /W2_SOLAR_N  # ADR-129 D2 / ADR-051 s2.7 (anode)
+
+# --- D_BP3
+D_BP3.1  /W2_SOLAR_N  # ADR-129 D2 / ADR-051 s2.7 (cathode)
+D_BP3.2  /W3_SOLAR_N  # ADR-129 D2 / ADR-051 s2.7 (anode)
+
+# --- D_BP4
+D_BP4.1  /W3_SOLAR_N  # ADR-129 D2 / ADR-051 s2.7 (cathode)
+D_BP4.2  GND  # ADR-129 D2 / ADR-051 s2.7 (anode; W4_SOLAR_N IS stack bottom = GND)
+
+# --- D_HUB1
+D_HUB1.1  /HUB_PV_P  # ADR-129 D2/D3 (hub-panel bypass, cathode to cell 1 +)
+D_HUB1.2  /HUB_PV_MID1  # ADR-129 D2/D3 (anode; interior node of the hub string)
+
+# --- D_HUB2
+D_HUB2.1  /HUB_PV_MID1  # ADR-129 D2/D3 (cathode)
+D_HUB2.2  /HUB_PV_N  # ADR-129 D2/D3 (anode)
+
+# --- J_HUB_PV
+J_HUB_PV.1  /HUB_PV_P  # ADR-129 D3 (hub panel connector, 5-pin: PV_P)
+J_HUB_PV.2  /HUB_PV_MID1  # ADR-129 D3 (PV_MID1 -- cell 1/2 node, observability)
+J_HUB_PV.3  UNASSIGNED  # ADR-129 D3 spare (3-cell H3 sizing); SEE connectivity/OPEN-ITEMS.md
+J_HUB_PV.4  /HUB_PV_N  # ADR-129 D3 (PV_N -- hub string negative)
+J_HUB_PV.5  GND  # ADR-129 D3 (GND -- the one node shared with the wing system)
+
+# --- J_VCC
+J_VCC.1  /VSCAP  # ADR-129 D1 / ADR-029 D8 (F33 PA rail selector, pin 1 = raw supercap)
+J_VCC.2  /F33_VCC  # ADR-129 D1 / ADR-029 D8 (COM -> F33 PA rail)
+J_VCC.3  +3V3  # ADR-129 D1 / ADR-029 D8 (nested bare LoRa2021 position)
+
+# --- R_BAL1
+R_BAL1.1  /VSCAP  # ADR-129 D1 / ADR-006 (2-cell supercap balancing, upper)
+R_BAL1.2  /SCAP_MID  # ADR-129 D1 / ADR-006 (balancing mid-node)
+
+# --- R_BAL2
+R_BAL2.1  /SCAP_MID  # ADR-129 D1 / ADR-006 (balancing mid-node)
+R_BAL2.2  GND  # ADR-129 D1 / ADR-006 (2-cell supercap balancing, lower)
+
+# --- R_DIV1
+R_DIV1.1  /VSCAP  # ADR-129 D1 / ADR-006 (supercap ADC divider, upper)
+R_DIV1.2  /SCAP_ADC  # ADR-129 D1 / ADR-006
+
+# --- R_DIV2
+R_DIV2.1  /SCAP_ADC  # ADR-129 D1 / ADR-006
+R_DIV2.2  GND  # ADR-129 D1 / ADR-006 (supercap ADC divider, lower)
+
+# --- R_F1
+R_F1.1  +3V3  # ADR-129 D1 / ADR-029 s2(d) (GNSS rail RC filter, series)
+R_F1.2  /GNSS_VCC  # ADR-129 D1 / ADR-029 s2(d)
+
+# --- R_MON1
+R_MON1.1  /F33_VCC  # ADR-129 D1 / ADR-047 s6 (F33 rail monitor, upper 4.7M)
+R_MON1.2  /F33_VSENSE  # ADR-129 D1 / ADR-047 s6
+
+# --- R_MON2
+R_MON2.1  /F33_VSENSE  # ADR-129 D1 / ADR-047 s6
+R_MON2.2  GND  # ADR-129 D1 / ADR-047 s6 (F33 rail monitor, lower 4.7M)
+
+# --- U_CUT1
+U_CUT1.1  /VSCAP  # ADR-129 D5 / ADR-047 s2.1 (cut 1 drive from raw supercap, PRE-LDO)
+U_CUT1.2  GND  # ADR-129 D5 / ADR-051 s2.5 (cut 1 return)
+U_CUT1.3  /CUT_SENSE_W1  # ADR-129 D5 / ADR-051 s2.6 (cut 1 drive+sense; J_W1 pad 3 RF_FEED)
+
+# --- U_CUT2
+U_CUT2.1  /VSCAP  # ADR-129 D5 / ADR-047 s2.1 (cut 2 drive from raw supercap, PRE-LDO)
+U_CUT2.2  GND  # ADR-129 D5 / ADR-051 s2.5 (cut 2 return)
+U_CUT2.3  /CUT_SENSE_W2  # ADR-129 D5 / ADR-051 s2.6 (cut 2 drive+sense; J_W2 pad 3 RF_FEED)
+
+# --- U_CUT3
+U_CUT3.1  /VSCAP  # ADR-129 D5 / ADR-047 s2.1 (cut 3 drive from raw supercap, PRE-LDO)
+U_CUT3.2  GND  # ADR-129 D5 / ADR-051 s2.5 (cut 3 return)
+U_CUT3.3  /CUT_SENSE_W3  # ADR-129 D5 / ADR-051 s2.6 (cut 3 drive+sense; J_W3 pad 3 RF_FEED)
+
+# --- U_CUT4
+U_CUT4.1  /VSCAP  # ADR-129 D5 / ADR-047 s2.1 (cut 4 drive from raw supercap, PRE-LDO)
+U_CUT4.2  GND  # ADR-129 D5 / ADR-051 s2.5 (cut 4 return)
+U_CUT4.3  /CUT_SENSE_W4  # ADR-129 D5 / ADR-051 s2.6 (cut 4 drive+sense; J_W4 pad 3 RF_FEED)
+
+# UNASSIGNED pins on this board: 42 -> U1.15, U1.16, U1.26, U1.27, U1.28, U1.29, U1.30, U1.35, U1."", U2.10, U3.9, U3.16, U3.17, U5.5, U5.13, U5.14, U5.15, U5.16, U5.17, U5.18, U7.4, U_C.9, U_C.16, U_C.17, U_E28.8, U_E28.9, U_HUB_CVT.4, U_HUB_CVT.5, U_HUB_CVT.6, U_HUB_CVT.7, U_HUB_CVT.8, U_HUB_CVT.9, U_HUB_CVT.10, U_HUB_CVT.11, U_HUB_CVT.12, U_HUB_CVT.13, U_HUB_CVT.14, U_HUB_CVT.15, U_HUB_CVT.16, U_HUB_CVT.17, U_HUB_CVT."", J_HUB_PV.3

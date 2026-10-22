@@ -119,10 +119,23 @@ def registry_nets(path):
 # over a documented open item is a gate people learn to bypass, which is worse than no gate --
 # the same lesson as G3. Anything beyond these counts, or any class not listed, still fails.
 ERC_OPEN_ITEMS = {
-    "label_dangling": 17,          # registry nets with exactly one endpoint (undriven)
-    "power_pin_not_driven": 2,     # U5.8 /GNSS_VCC, U2.1 /F33_VCC -- rail has no defined source
+    # MEASURED 2026-10-22 after ADR-129: 11 errors total. The 17 label_dangling this table used to
+    # allow fell to 7 because ADR-129 closed ten of them (see the list below). The allowance is
+    # tightened to the real number so it cannot mask a regression -- an inflated allowance is the
+    # same failure as a gate that cannot fail.
+    "label_dangling": 7,           # see LABEL_DANGLING_OPEN -- each is a documented open item
+    "power_pin_not_driven": 2,     # U5.8 /GNSS_VCC, U2.1 /F33_VCC -- rail has no PWR_FLAG source
     "pin_not_driven": 2,           # U_C.6 /U_C_CS_N, U_C.14 /U_C_RESET_N -- no driver exists yet
 }
+
+# WHICH 7 label_dangling remain, and why each is correct to leave (measured, not assumed):
+#   /ANT2_2G4_RANGE, /ANT_C_2G4  -- text-transform artefacts; they attach to module pads that exist
+#   /IO0                         -- OPEN-16: needs the ESP32 GPIO0 pad from the datasheet
+#   /U_C_BUSY, /U_C_IRQ          -- U_C control lines with no assigned driver
+#   /SCAP_ADC                    -- OPEN-17/OPEN-25: the last-ADC-input contest
+#   /CUT_SENSE_W1..W4            -- same contest; landed on U_CUT<n>.3 but with no U1 pin
+# (The count above is what the gate checks; this list is the human audit trail. If a NEW dangling
+#  label appears it changes the count and the gate fails -- which is the point.)
 
 
 def _erc(path):

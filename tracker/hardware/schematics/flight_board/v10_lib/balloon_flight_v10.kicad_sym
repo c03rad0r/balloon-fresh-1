@@ -2031,4 +2031,246 @@
 			)
 		)
 	)
+	(symbol "F33_VCC_SEL"
+		(pin_names
+			(offset 1.016)
+			(hide no)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "U"
+			(at 0 6.35 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "F33_VCC_SEL (VSCAP | +3V3)"
+			(at 0 -6.35 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Jumper:SolderJumper-3_P1.3mm_Open_RoundedPad1.0x1.5mm"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "ADR-029 D8 pin-1 rail selector (operator-RATIFIED 2026-10-05), restored to v10 by ADR-129 D1: a 3-pad solder jumper. pin 2 COMMON -> /F33_VCC; pin 1 -> /VSCAP (raw supercap node, PRE-LDO) to fly the F33 2 W PA; pin 3 -> +3V3 (TPS7A02 OUT) to fly the nested bare LoRa2021. All pins passive: a solder jumper is a hand-made connection, not a driven port."
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "F33_VCC_SEL_0_1"
+			(rectangle
+				(start -12.7 3.81)
+				(end 12.7 -3.81)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
+		)
+		(symbol "F33_VCC_SEL_1_1"
+			(pin passive line
+				(at -15.24 1.27 0)
+				(length 2.54)
+				(name "A_VSCAP"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -15.24 -1.27 0)
+				(length 2.54)
+				(name "COM"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 15.24 1.27 180)
+				(length 2.54)
+				(name "B_3V3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+	)
+	(symbol "CUT_CHANNEL"
+		(pin_names
+			(offset 1.016)
+			(hide no)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "U"
+			(at 0 6.35 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "latched cut driver + cut-sense (part TODO(unverified))"
+			(at 0 -6.35 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-23-6"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Per-wing nichrome cutter channel (ADR-051 s2.5 item 5 + s2.6), restored to v10 by ADR-129 D5. pin 1 = /VSCAP (raw supercap node, post-BAT54, PRE-LDO, so a cut works with the converter dead -- ADR-047 s2.1), pin 2 = GND, pin 3 = the wing's RF_FEED land (cut DRIVE and continuity SENSE on one conductor plus the shared ground). THE DRIVE MUST BE A LATCHED ONE-SHOT (ADR-051 s2.5.1). Exact part, sense divider and latch topology TODO(unverified) -- OPEN-31."
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "CUT_CHANNEL_0_1"
+			(rectangle
+				(start -12.7 3.81)
+				(end 12.7 -3.81)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
+		)
+		(symbol "CUT_CHANNEL_1_1"
+			(pin passive line
+				(at -15.24 1.27 0)
+				(length 2.54)
+				(name "VSCAP"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -15.24 -1.27 0)
+				(length 2.54)
+				(name "GND"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 15.24 1.27 180)
+				(length 2.54)
+				(name "CUT_W"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+	)
 )

@@ -33,6 +33,27 @@ FRONT = {  # solver: 72x80, TRUE seat margins (west/east x>=10, north/south y>=8
     "U6": (54.4, 56.8, 0, "Package_LGA:LGA-8_3x5mm_P1.25mm"),
     "ANT1": (12.5, 67.6, 0, "Connector_Coaxial:U.FL_Molex_MCRF_73412-0110_Vertical"),
     "ANT4": (18.5, 67.6, 0, "Connector_Coaxial:U.FL_Molex_MCRF_73412-0110_Vertical"),
+    # --- ADR-129 (D1/D2/D3/D5): the 25 refs the v9->v10 netlist text transform
+    #     dropped. Coordinates are NOT hand-tuned: they are the output of
+    #     solve_v10_placement.py, and each was accepted only after BOTH
+    #     check_board_geometry.py and check_hole_clearance.py returned 0.
+    #     Do not hand-nudge these -- hand-nudging has failed twice here.
+    "C10":       (9.500, 42.500, 90, "Capacitor_SMD:C_0402_1005Metric"),
+    "C4":        (22.500, 57.000, 90, "Capacitor_SMD:C_0402_1005Metric"),
+    "C_BULK":    (18.000, 7.500, 0, "Capacitor_SMD:C_1206_3216Metric"),
+    "C_HF":      (21.000, 7.500, 90, "Capacitor_SMD:C_0402_1005Metric"),
+    "C_MON":     (14.000, 7.500, 90, "Capacitor_SMD:C_0402_1005Metric"),
+    "D1":        (3.000, 46.000, 0, "Diode_SMD:D_SOD-123"),
+    "D_HUB1":    (43.000, 52.000, 0, "Diode_SMD:D_SMA"),
+    "D_HUB2":    (38.500, 57.500, 90, "Diode_SMD:D_SMA"),
+    "J_HUB_PV":  (69.000, 64.000, 0, "Connector_PinHeader_2.54mm:PinHeader_1x05_P2.54mm_Vertical"),
+    "R_BAL1":    (41.000, 43.500, 0, "Resistor_SMD:R_0402_1005Metric"),
+    "R_BAL2":    (39.000, 43.500, 0, "Resistor_SMD:R_0402_1005Metric"),
+    "R_DIV1":    (43.000, 43.500, 0, "Resistor_SMD:R_0402_1005Metric"),
+    "R_DIV2":    (41.000, 44.500, 0, "Resistor_SMD:R_0402_1005Metric"),
+    "R_F1":      (22.500, 59.000, 90, "Resistor_SMD:R_0402_1005Metric"),
+    "R_MON1":    (15.000, 7.500, 90, "Resistor_SMD:R_0402_1005Metric"),
+    "R_MON2":    (22.000, 7.500, 90, "Resistor_SMD:R_0402_1005Metric"),
 }
 BACK = {  # solver: 72x80, TRUE seat margins (west/east x>=10, north/south y>=8.9)
     "U3": (20.9, 16.7, 0, "balloon_flight_v9:LoRa2021_Castellated"),
@@ -51,6 +72,16 @@ BACK = {  # solver: 72x80, TRUE seat margins (west/east x>=10, north/south y>=8.
     # shield legs, all GND -- standard for this part, NOT a defect.
     "ANT2": (30.7, 27.5, 0, "Connector_Coaxial:U.FL_Molex_MCRF_73412-0110_Vertical"),
     "ANT3": (36.7, 28.0, 0, "Connector_Coaxial:U.FL_Molex_MCRF_73412-0110_Vertical"),
+    # --- ADR-129 (sides from the same gate-verified solver run; see FRONT) ---
+    "D_BP1":     (4.000, 33.000, 0, "Diode_SMD:D_SMA"),
+    "D_BP2":     (29.000, 76.000, 90, "Diode_SMD:D_SMA"),
+    "D_BP3":     (68.000, 33.000, 0, "Diode_SMD:D_SMA"),
+    "D_BP4":     (29.000, 4.000, 90, "Diode_SMD:D_SMA"),
+    "J_VCC":     (18.000, 5.000, 0, "Jumper:SolderJumper-3_P1.3mm_Open_RoundedPad1.0x1.5mm"),
+    "U_CUT1":    (7.500, 47.000, 0, "Package_TO_SOT_SMD:SOT-23-6"),
+    "U_CUT2":    (36.000, 70.500, 180, "Package_TO_SOT_SMD:SOT-23-6"),
+    "U_CUT3":    (62.500, 40.000, 90, "Package_TO_SOT_SMD:SOT-23-6"),
+    "U_CUT4":    (43.000, 2.000, 0, "Package_TO_SOT_SMD:SOT-23-6"),
 }
 # wing seats: ADR-085 CORRECTED rotations (slot reaches its own edge; detector EXIT=0).
 # seat_rotation_deg: west 0, north 90, east 180, south 270 -- the FIXED rule.
@@ -112,12 +143,47 @@ def lib_path(lib):
 
 
 
+# ADR-129 part values -- kept identical to the schematic generator's
+# V10_COMPONENTS table so board and schematic cannot drift.
+VALUES = {
+    'J_VCC':   'F33_VCC_SEL (VSCAP | +3V3)',
+    'D1':      'BAT54',
+    'R_BAL1':  '10k',
+    'R_BAL2':  '10k',
+    'C10':     '10uF',
+    'C_BULK':  '100uF',
+    'C_HF':    '100nF',
+    'R_F1':    '100R',
+    'C4':      '10uF',
+    'R_DIV1':  '1M',
+    'R_DIV2':  '1M',
+    'R_MON1':  '4.7M',
+    'R_MON2':  '4.7M',
+    'C_MON':   '10nF',
+    'D_BP1':   'SS24',
+    'D_BP2':   'SS24',
+    'D_BP3':   'SS24',
+    'D_BP4':   'SS24',
+    'D_HUB1':  'SS24',
+    'D_HUB2':  'SS24',
+    'J_HUB_PV': 'HUB_PV_PANEL_5P (P | MID1 | spare | N | GND)',
+    'U_CUT1':  'latched cut driver + cut-sense (part TODO(unverified))',
+    'U_CUT2':  'latched cut driver + cut-sense (part TODO(unverified))',
+    'U_CUT3':  'latched cut driver + cut-sense (part TODO(unverified))',
+    'U_CUT4':  'latched cut driver + cut-sense (part TODO(unverified))',
+}
+
+
 # ------------------------------------------------------------------ netlist nets
 NETLIST = os.path.join(HERE, "schematics", "flight_board", "v10_flight.net")
 EXTRA_PINMAPS = {
     "J_PROG": {"1": "GND", "2": "+3V3", "3": "/EN", "4": "/USB_DN", "5": "/USB_DP", "6": "/IO0"},
     "R_EN": {"1": "/EN", "2": "+3V3"},
     "C_EN": {"1": "/EN", "2": "GND"},
+    # ADR-129 D3: the 5-pin hub-panel connector is schematic-only, so its pad->net
+    # map is stated here. Pin 3 is the ADR-129 spare, deliberately UNASSIGNED
+    # (connectivity/OPEN-ITEMS.md).
+    "J_HUB_PV": {"1": "/HUB_PV_P", "2": "/HUB_PV_MID1", "4": "/HUB_PV_N", "5": "GND"},
 }
 
 
@@ -265,7 +331,7 @@ def main():
             fp = src.Duplicate() if src else None
             if fp is None:
                 raise SystemExit(f"pool copy failed: {lib_id}")
-            place(b, fp, ref, value or ref, x, y, rot, side)
+            place(b, fp, ref, value or VALUES.get(ref, ref), x, y, rot, side)
 
     put(FRONT, "F")
     put(BACK, "B")
@@ -315,6 +381,44 @@ def main():
     if nfps < 20:
         raise SystemExit(f"REFUSED: refusing to save a board with only {nfps} footprints "
                          "(clobber guard -- expected 28)")
+    # ---------------------------------------------------------------------------------------
+    # REFERENCE-FIELD PLACEMENT (2026-10-22). KiCad DRC 'silk_edge_clearance' fires when a
+    # footprint's Reference text is clipped by the board edge. This is NOT the outline's fault
+    # and NOT cosmetic-of-no-account: a designator the operator cannot read on the physical board
+    # is a real assembly defect. Measured cause: J_HUB_PV at x=69.0 on a 72.0mm board put its
+    # reference at x=69.0 with ~3mm of text running past the edge.
+    #
+    # Deterministic rule: for every footprint, keep the reference field INSIDE the board with a
+    # 0.30mm silk-to-edge margin. Text is centred on the field position, so the allowed centre is
+    # inset by half the rendered width. Rather than measure text extents for every part (which
+    # depends on font metrics), move any field whose centre falls inside the edge keep-out to the
+    # nearest legal centre and, for parts near an edge, place the reference on the INBOARD side.
+    SILK_MARGIN = 0.30
+    for fp in b.GetFootprints():
+        p = fp.GetPosition()
+        px, py = p.x / UM, p.y / UM
+        ref_field = fp.Reference()
+        bb = ref_field.GetBoundingBox()
+        bx0, by0 = bb.GetX() / UM, bb.GetY() / UM
+        bx1, by1 = bx0 + bb.GetWidth() / UM, by0 + bb.GetHeight() / UM
+        if bx0 >= SILK_MARGIN and by0 >= SILK_MARGIN and bx1 <= W - SILK_MARGIN and by1 <= H - SILK_MARGIN:
+            continue
+        # Shift the field by exactly the amount its MEASURED bounding box overhangs.
+        dx = dy = 0.0
+        if bx0 < SILK_MARGIN:
+            dx = SILK_MARGIN - bx0
+        if bx1 > W - SILK_MARGIN:
+            dx = (W - SILK_MARGIN) - bx1
+        if by0 < SILK_MARGIN:
+            dy = SILK_MARGIN - by0
+        if by1 > H - SILK_MARGIN:
+            dy = (H - SILK_MARGIN) - by1
+        fp0 = ref_field.GetPosition()
+        nx, ny = fp0.x / UM + dx, fp0.y / UM + dy
+        ref_field.SetPosition(pcbnew.VECTOR2I(int(round(nx * UM)), int(round(ny * UM))))
+        print(f"[ref-field] {fp.GetReference()}: bbox ({bx0:.2f},{by0:.2f})-({bx1:.2f},{by1:.2f}) "
+              f"shift ({dx:+.2f},{dy:+.2f})", file=sys.stderr)
+
     pcbnew.SaveBoard(out, b)
     print("wrote", out)
     return 0

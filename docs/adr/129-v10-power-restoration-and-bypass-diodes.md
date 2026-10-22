@@ -124,16 +124,31 @@ that DO exist on v10 (`ANT2.1` and `U_C.10`); the net simply has one visible end
 the v9 side of the pair was on `U4`/`U3`. They close when the schematic draws the module pads
 they attach to.
 
-### D5 — WING CUTTERS: `U_CUT1..U_CUT4` — DEFERRED, PENDING OPERATOR DECISION
+### D5 — WING CUTTERS: `U_CUT1..U_CUT4` — **INCLUDED** (operator decision, 2026-10-22)
 
-Not decided by this ADR. The four cut channels are absent from v10 and are the sole reason
-`CUT_SENSE_W1..W4` are dangling. Each carries a nichrome drive **and** cut-sense on its wing's
-one reserved `RF_FEED` conductor, fed from **`VSCAP` pre-LDO** so a cut works with the converter
-dead (ADR-047 §2.1). The drive is **mandated to be a latched one-shot** (ADR-051 §2.5.1):
-cutting is irreversible and a level-sensitive driver can re-fire on reset, brown-out, retry or a
-floating gate, each fire costing ~2.59 J of the bank's 16.63 J. Firmware must serialise cuts
-(4 simultaneous fires = 9.9 A = 2.4× the IRLML2502 class rating). Part is `TODO(unverified)`
-(OPEN-25, OPEN-28).
+*"Yes please include the nichrome cutoff."*
+
+Four cut channels, restored. Each carries a nichrome drive **and** cut-sense on its wing's one
+reserved `RF_FEED` conductor, fed from **`VSCAP` pre-LDO** so a cut works with the converter dead
+(ADR-047 §2.1):
+
+```
+U_CUT<n>  pin 1 = /VSCAP          (raw supercap, post-BAT54, PRE-LDO)
+          pin 2 = GND
+          pin 3 = /CUT_SENSE_W<n> = J_W<n> pad 3 (RF_FEED)
+```
+
+**The drive is MANDATED to be a latched one-shot (ADR-051 §2.5.1).** Cutting is irreversible and
+a level-sensitive driver can re-fire on reset, brown-out, retry or a floating gate — each fire
+costing ~2.59 J of the bank's 16.63 J, at the exact moment the bank matters. Firmware must also
+serialise cuts: 4 simultaneous fires = 9.9 A = **2.4× the IRLML2502 class rating**.
+
+**Still `TODO(unverified)`:** the driver part, the sense divider and the latch's exact topology
+(OPEN-25, OPEN-28). Restoring the channel lands the **net and the pads**; the part is chosen when
+OPEN-25/OPEN-28 close. This is deliberate — the pads cost no respin and the cut path is
+load-bearing for a cutter flight.
+
+**Closes** the `CUT_SENSE_W1..W4` dangling nets.
 
 ### D6 — `D_CLAMP`: LAND IT, LEAVE IT DNP
 
