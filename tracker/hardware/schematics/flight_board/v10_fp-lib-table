@@ -1,0 +1,5 @@
+(fp_lib_table
+	(version 7)
+	(lib (name "Tracker_Mechanical")(type "KiCad")(uri "${KIPRJMOD}/../../footprints/tracker_mechanical.pretty")(options "")(descr "Repo-local mechanical footprints: Wing_Tab_4P - ADR-046/ADR-048"))
+	(lib (name "balloon_flight_v10")(type "KiCad")(uri "${KIPRJMOD}/v10_lib/balloon_flight_v10.pretty")(options "")(descr "v10 flight board footprints"))
+)

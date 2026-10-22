@@ -47,6 +47,42 @@ FROZEN_SHA256 = "638de56387721460100cd3048fb23229294f510f0a2d89795026c7e6c0cfd0e
 
 POWER_NETS = ("+3V3", "GND")
 
+def merge_lib_table(path, kind, entries):
+    """Additively merge `(lib ...)` rows into a KiCad library table.
+
+    The v_c3 / v9 / v10 targets all write into the SAME shared project-local
+    table files (sym-lib-table, fp-lib-table).  Rewriting them outright from
+    one target would leave the OTHER two sheets with dangling
+    lib_symbol_issues / footprint_link_issues warnings, so merge instead:
+    keep every row already present, append only the missing ones.  Idempotent.
+    """
+    lines = []
+    have = set()
+    if os.path.exists(path):
+        with open(path, encoding="utf-8", errors="replace") as fh:
+            lines = fh.read().splitlines()
+        for ln in lines:
+            m = re.match(r'\s*\(lib \(name "([^"]+)"\)', ln)
+            if m:
+                have.add(m.group(1))
+    while lines and lines[-1].strip() == ")":
+        lines.pop()
+    if not lines:
+        lines = ["(%s" % kind, "\t(version 7)"]
+    added = []
+    for (name, uri, descr) in entries:
+        if name in have:
+            continue
+        lines.append('\t(lib (name "%s")(type "KiCad")(uri "%s")(options "")'
+                     '(descr "%s"))' % (name, uri, descr))
+        added.append(name)
+    lines.append(")")
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write("\n".join(lines) + "\n")
+    return added
+
+
+
 # footprint lib-id -> schematic symbol lib-id.  Identity where the KiCad v9
 # libraries carry a symbol for the same part.
 PART_MAP = {
@@ -2645,34 +2681,31 @@ def v9_emit():
     # either generator leaves the other's libs resolvable.
     union = sorted({k.split(":")[0] for k in lib_blocks}
                    | {"balloon_flight", "Sensor_Pressure", "Diode"})
-    with open(OUT_LIBTABLE, "w") as fh:
-        fh.write('(sym_lib_table\n\t(version 7)\n')
-        for lib in union:
-            uri = (os.path.join(SYMDIR, lib + ".kicad_sym")
-                   if lib not in ("balloon_flight", V9_LIBNAME)
-                   else ("${KIPRJMOD}/balloon_flight.kicad_sym"
-                         if lib == "balloon_flight"
-                         else "${KIPRJMOD}/v9_lib/%s.kicad_sym" % V9_LIBNAME))
-            fh.write('\t(lib (name "%s")(type "KiCad")(uri "%s")(options "")'
-                     '(descr ""))\n' % (lib, uri))
-        fh.write(")\n")
-    with open(OUT_FPTABLE, "w") as fh:
-        fh.write('(fp_lib_table\n\t(version 7)\n'
-                 '\t(lib (name "balloon_flight")(type "KiCad")'
-                 '(uri "${KIPRJMOD}/balloon_flight.pretty")(options "")'
-                 '(descr "Flight board footprints exported from the frozen PCB"))\n'
-                 # ADR-048: the repo's own mechanical library, so the wing socket
-                 # land set resolves in the v9 project without reusing a generic
-                 # pin-header footprint.  Written by the v9 target only.
-                 '\t(lib (name "Tracker_Mechanical")(type "KiCad")'
-                 '(uri "${KIPRJMOD}/../../footprints/tracker_mechanical.pretty")'
-                 '(options "")(descr "Repo-local mechanical footprints for the v9 '
-                 'hub/wing assembly; holds the real hub-side wing socket land set '
-                 'Wing_Tab_4P - ADR-046/ADR-048"))\n'
-                 '\t(lib (name "%s")(type "KiCad")'
-                 '(uri "${KIPRJMOD}/v9_lib/%s.pretty")(options "")'
-                 '(descr "v9 flight board footprints"))\n)\n'
-                 % (V9_LIBNAME, V9_LIBNAME))
+    # MERGED, not rewritten: the v10 target writes its rows into these same
+    # shared tables.  Rewriting here would strip balloon_flight_v10 and make
+    # the v10 sheet ERC with `does not include the symbol library` warnings.
+    v9_sym_entries = []
+    for lib in union:
+        uri = (os.path.join(SYMDIR, lib + ".kicad_sym")
+               if lib not in ("balloon_flight", V9_LIBNAME)
+               else ("${KIPRJMOD}/balloon_flight.kicad_sym"
+                     if lib == "balloon_flight"
+                     else "${KIPRJMOD}/v9_lib/%s.kicad_sym" % V9_LIBNAME))
+        v9_sym_entries.append((lib, uri, ""))
+    merge_lib_table(OUT_LIBTABLE, "sym_lib_table", v9_sym_entries)
+    merge_lib_table(OUT_FPTABLE, "fp_lib_table", [
+        ("balloon_flight", "${KIPRJMOD}/balloon_flight.pretty",
+         "Flight board footprints exported from the frozen PCB"),
+        # ADR-048: the repo's own mechanical library, so the wing socket land
+        # set resolves in the v9 project without reusing a generic pin-header
+        # footprint.
+        ("Tracker_Mechanical",
+         "${KIPRJMOD}/../../footprints/tracker_mechanical.pretty",
+         "Repo-local mechanical footprints for the v9 hub/wing assembly; holds "
+         "the real hub-side wing socket land set Wing_Tab_4P - ADR-046/ADR-048"),
+        (V9_LIBNAME, "${KIPRJMOD}/v9_lib/%s.pretty" % V9_LIBNAME,
+         "v9 flight board footprints"),
+    ])
 
     libs = sorted({k.split(":")[0] for k in lib_blocks})
     with open(V9_SYMTABLE, "w") as fh:
@@ -2712,6 +2745,898 @@ def main_v9():
     print("                ", V9_FPLIB)
 
 
+# =====================================================================
+# v10 FLIGHT BOARD -- DESIGN-INTENT schematic (ADR-128).
+#
+# The DIRECTION OF TRUTH is INVERTED with respect to the C3 generator at the
+# top of this file.  The C3 sheet MIRRORS a frozen PCB.  The v10 sheet is built
+# from the CONNECTIVITY REGISTRY,
+#
+#     tracker/hardware/connectivity/v10_pinmap.reg
+#
+# which is the source of truth for which physical pad carries which net.  Every
+# net below is read out of that file at generation time; parse_pcb() is
+# deliberately NEVER called anywhere in this section.  hub_board_v10.kicad_pcb is
+# a BUILD PRODUCT of the registry, so check_schematic_parity.py reading the
+# board back is a CHECK on the registry, never an author of it.
+#
+# Registry line format:   REF.PIN  NET  # authority
+# `UNASSIGNED` = the pin has no net; connectivity/OPEN-ITEMS.md records why.
+# Those pins are collected into V10_NC and NEVER turned into a net.
+#
+# Reference designators adopted from v9 unchanged (ADR-119):
+#   U1    ESP32-S3-WROOM-1U-N8R8     MCU
+#   U2    LoRa2021F33-2G4            433 MHz TX                (site A)
+#   U3    LoRa2021_Castellated       2.4 GHz RX                (site B)
+#   U_C   LoRa2021_Castellated       2.4 GHz                   (site C, ADR-119)
+#   U_E28 E28-2G4M27SX               2.4 GHz ranging           (site D, ADR-118)
+#   U5    MAX-M10S                   GNSS L1
+#   U6    MS5611-01BA                barometer (I2C)
+#   U7    TPS7A02                    3.3 V LDO (ADR-006)
+#   C_CAP1 / C_CAP2                  supercap bank
+#   J_PROG                           6-pin programming / USB header (ADR-121)
+#   J_W1..J_W4                       hub wing sockets (ADR-046 / ADR-048)
+#   ANT1..ANT4                       U.FL feeds
+# =====================================================================
+
+V10_OUT_SCH = os.path.join(HERE, "v10_flight.kicad_sch")
+V10_LIBDIR = os.path.join(HERE, "v10_lib")
+V10_FPLIB = os.path.join(V10_LIBDIR, "balloon_flight_v10.pretty")
+V10_SYMLIB = os.path.join(V10_LIBDIR, "balloon_flight_v10.kicad_sym")
+V10_FPTABLE = os.path.join(HERE, "v10_fp-lib-table")
+V10_SYMTABLE = os.path.join(HERE, "v10_sym-lib-table")
+V10_PROJECT = "v10_flight"
+V10_LIBNAME = "balloon_flight_v10"
+V10_REG = os.path.join(REPO, "tracker", "hardware", "connectivity",
+                       "v10_pinmap.reg")
+V10_E28_FP = os.path.join(REPO, "tracker", "hardware", "footprints", "e28",
+                          "E28-2G4M27SX.kicad_mod")
+
+# Tokens the registry uses for "this pin has no net".
+V10_NETLESS_TOKENS = ("NC", "UNASSIGNED", "-", "N/A", "NONE")
+
+# --- E28-2G4M27SX (Ebyte): SX1280 + PA + LNA + RF switch, 16 castellated
+# pads.  AUTHORITATIVE PIN MAP, from the sidecar derivation record
+# tracker/hardware/footprints/e28/E28-2G4M27SX.md (its "Pin map (datasheet ch.3
+# table)" section), which transcribes
+# docs/modules/e28-2g4m27sx/E28-2G4M27SX_UserManual_v1.0.pdf (Ebyte, Rev 1.0,
+# 2021-11-15) chapter 3, read via a vision pass over the rendered page.
+# Pads 8 (RX_EN, LNA enable, active high) and 9 (TX_EN, PA enable, active high)
+# are NEW versus the bare SX1280 and are registered UNASSIGNED - see
+# connectivity/OPEN-ITEMS.md OPEN-E28-EN.  They are NOT guessed here; leaving
+# a PA/LNA enable unasserted is a wiring decision, not a schematic default.
+V10_E28_PINS = [
+    ("1", "VCC", "power_in"),
+    ("2", "GND", "power_in"),
+    ("3", "MISO_TX", "tri_state"),
+    ("4", "MOSI_RX", "input"),
+    ("5", "SCK_RTSN", "input"),
+    ("6", "NSS_CTS", "input"),
+    ("7", "GND", "power_in"),
+    ("8", "RX_EN", "input"),
+    ("9", "TX_EN", "input"),
+    ("10", "GND", "power_in"),
+    ("11", "NRESET", "input"),
+    ("12", "BUSY", "output"),
+    ("13", "DIO1", "bidirectional"),
+    ("14", "DIO2", "bidirectional"),
+    ("15", "DIO3", "bidirectional"),
+    ("16", "GND", "power_in"),
+]
+
+# --- U_HUB_CVT: the hub array's OWN converter / harvester input provision
+# (ADR-051 s2.1 decision 1).  Footprint Package_DFN_QFN:VQFN-16-1EP_3x3mm_P0.5mm
+# _EP1.1x1.1mm; only pins 1/2/3 are netted (HUB_PV_P / GND / HUB_PV_N), every
+# other pin of the land pattern is UNASSIGNED in the registry.  The pins are
+# drawn anyway so the unassigned pads are VISIBLE on the sheet, which is the
+# whole point of ADR-128: an open question must be legible, not hidden.
+V10_HUB_CVT_PINS = (
+    [("1", "PV_P", "passive"), ("2", "GND", "power_in"),
+     ("3", "PV_N", "passive")]
+    + [("%d" % _p, "NC%d" % _p, "passive") for _p in range(4, 17)]
+    + [("17", "EP", "passive")])
+
+
+def v10_read_registry(path=None):
+    """Parse the v10 connectivity registry.  Returns (nets, netless).
+
+      nets : [(net, [(ref, pin), ...], source_note), ...]   sorted by net name
+      netless : [(ref, pin, authority), ...]                in file order
+
+    This is the ONLY place v10 connectivity enters the generator.  `UNASSIGNED`
+    rows never become nets - they are the board's recorded open questions.
+    """
+    path = path or V10_REG
+    buckets, sources, netless = {}, {}, []
+    with open(path, encoding="utf-8", errors="replace") as fh:
+        for line in fh:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            parts = line.split()
+            if len(parts) < 2 or "." not in parts[0]:
+                continue
+            ref, pin = parts[0].split(".", 1)
+            net = parts[1]
+            authority = " ".join(parts[2:]).strip()
+            if authority.startswith("#"):
+                authority = authority[1:].strip()
+            if pin == '""':              # the module shield / exposed pad
+                pin = ""
+            if net.upper() in V10_NETLESS_TOKENS:
+                netless.append((ref, pin, authority))
+                continue
+            buckets.setdefault(net, []).append((ref, pin))
+            sources.setdefault(net, set()).add(authority)
+    nets = []
+    for net in sorted(buckets):
+        nodes = sorted(set(buckets[net]),
+                       key=lambda rp: (rp[0], int(rp[1]) if rp[1].isdigit()
+                                       else 1 << 30, rp[1]))
+        nets.append((net, nodes, "; ".join(sorted(sources[net]))))
+    return nets, netless
+
+
+# Nets + open pins, straight out of the registry.
+# Import-safe: check_sch_gates.py imports this module for the C3 path, so a
+# missing registry must not explode at import time (it will instead fail loudly
+# in v10_emit(), where the v10 target is actually asked for).
+if os.path.exists(V10_REG):
+    V10_NETS, V10_NC = v10_read_registry()
+else:
+    V10_NETS, V10_NC = [], []
+# V10_NC is the sheet's explicit no-connect list: exactly the UNASSIGNED rows,
+# nothing added and nothing dropped.  It is bound HERE rather than aliased from
+# the token tuple below -- the two used to share one name, so a second
+# v10_read_registry() call inside one process silently reclassified every
+# UNASSIGNED pin as a real net (the tokens had been overwritten by the parsed
+# rows).  Keep the names disjoint.
+
+# NOTE ON THE INSTANCE PATH (v9_emit's style, reproduced on purpose).
+# Every placed symbol gets its OWN uid() as its `(path ...)`, exactly as
+# v9_emit() does - it is NOT the sheet root uuid.  This is load-bearing, not an
+# oversight: measured on this host (kicad-cli 9.0.9), KiCad only synthesises
+# `unconnected-(REF-PINNAME-PadN)` placeholder nets when the instance path
+# RESOLVES to the sheet root.  Those placeholder nets are KiCad's, not declared
+# connectivity, and check_schematic_parity.py's G3 counts them as schematic-only
+# nets (39 of them on this sheet, one per UNASSIGNED pin).  Emitting the sheet in
+# the v9 style makes the exporter report exactly the nets the sheet declares,
+# which is what G3 is meant to compare - and it keeps v10 readable by the same
+# gate, in the same way, as the v9 sheet it succeeds.
+def inst_path():
+    return uid()
+
+# Land numbers a symbol expresses differently from the registry.  The registry
+# addresses the exposed pad as `REF.""` (that is what the .kicad_pcb pad is
+# literally called); a symbol cannot have an empty pin number, so the EP is
+# drawn as the conventional pad 17.  Mapped explicitly rather than silently
+# dropped: an UNASSIGNED pin the sheet cannot show would be invisible.
+V10_PIN_ALIAS = {("U_HUB_CVT", ""): "17"}
+
+# --- component table -------------------------------------------------------
+# ref, lib_id, value, footprint, dnp, note.
+# Symbol pin tables are REUSED verbatim from v9 wherever the part is unchanged
+# (V9_F33_PINS for U2, V9_BARE_PINS for U3 and U_C, V9_TPS7A02_PINS for U7);
+# only the parts v10 ADDS get new tables (E28, the 17-land hub converter).
+V10_COMPONENTS = [
+    ("U1", "RF_Module:ESP32-S3-WROOM-1", "ESP32-S3-WROOM-1U-N8R8",
+     "RF_Module:ESP32-S3-WROOM-1U", False,
+     "ADR-029 D1 / ADR-037 D1: octal-PSRAM -N8R8, U.FL variant. 41 pins; "
+     "pin 15/16/26..30/35 and the shield land are UNASSIGNED "
+     "(connectivity/OPEN-ITEMS.md)."),
+    ("U2", "balloon_flight_v10:F33_2G4", "LoRa2021F33-2G4",
+     "balloon_flight_v9:LoRa2021F33_2G4", False,
+     "ADR-034 D1/D2 + ADR-040 D1: 433 MHz TX on the 2 W sub-GHz port "
+     "(pin 9). Pin table reused from v9 unchanged."),
+    ("U3", "balloon_flight_v10:LR2021_BARE", "LoRa2021_Castellated",
+     "balloon_flight_v9:LoRa2021_Castellated", False,
+     "ADR-034 D1: separate bare LoRa2021 = the 2.4 GHz RX chip. "
+     "Pin table reused from v9 unchanged."),
+    ("U_C", "balloon_flight_v10:LR2021_BARE", "LoRa2021_Castellated",
+     "balloon_flight_v9:LoRa2021_Castellated", False,
+     "ADR-119 site C: a THIRD bare LoRa2021 on the same castellated land. "
+     "Identical part to U3, so it REUSES the v9 U3 symbol (per ADR-128 task "
+     "note); only its per-site control nets differ (/U_C_CS_N, /U_C_BUSY, "
+     "/U_C_RESET_N, /U_C_IRQ) - see ADR-119."),
+    ("U_E28", "balloon_flight_v10:E28_2G4M27SX", "E28-2G4M27SX",
+     "balloon_flight_v10:E28-2G4M27SX", False,
+     "ADR-118: Ebyte E28-2G4M27SX (SX1280 + PA + LNA, 27 dBm) at site D. "
+     "NEW part - symbol built here from the sidecar pin map; the E28's UART "
+     "control pins are NOT used (module default), and pads 8/9 (RX_EN/TX_EN) "
+     "are UNASSIGNED (OPEN-E28-EN)."),
+    ("U5", "RF_GPS:MAX-M10S", "MAX-M10S", "RF_GPS:ublox_MAX", False,
+     "ADR-029 D2b: GNSS L1, UART (not I2C) - pins 5 and 13..18 UNASSIGNED."),
+    ("U6", "balloon_flight_v10:MS5611_BARO", "MS5611-01BA",
+     "Package_LGA:LGA-8_3x5mm_P1.25mm", False,
+     "ADR-029: barometer on I2C (GPIO1/2). Symbol = the stock "
+     "Sensor_Pressure:MS5611-01BA geometry re-homed into this sheet's own "
+     "library, with pin 6 (SDO) retyped passive exactly as v9 did for the "
+     "same reason."),
+    ("U7", "balloon_flight_v10:TPS7A0233", "TPS7A02",
+     "Package_TO_SOT_SMD:SOT-23-5", False,
+     "ADR-006: TPS7A02 3.3 V LDO. Pin 4 is NC ON THE PART (TI SBVS277C "
+     "Table 5-1) - registered UNASSIGNED, not tied off."),
+    ("U_HUB_CVT", "balloon_flight_v10:HUB_CONVERTER",
+     "HUB_PV input (part TODO(unverified))",
+     "Package_DFN_QFN:VQFN-16-1EP_3x3mm_P0.5mm_EP1.1x1.1mm", False,
+     "ADR-051 s2.1 decision 1: the hub array feeds its OWN converter input "
+     "on its OWN nets and is never in series with the wing chain. Pins 1/2/3 "
+     "only; the remaining 14 lands are UNASSIGNED."),
+    ("C_CAP1", "Device:C_Polarized", "3.3F 2.7V (AVX SCC)",
+     "Capacitor_THT:CP_Radial_D10.0mm_P5.00mm", False,
+     "ADR-006/ADR-047: supercap cell A, positive at VSCAP."),
+    ("C_CAP2", "Device:C_Polarized", "3.3F 2.7V (AVX SCC)",
+     "Capacitor_THT:CP_Radial_D10.0mm_P5.00mm", False,
+     "ADR-006/ADR-047: supercap cell B, from SCAP_MID to GND."),
+    # --- ADR-121: the programming / USB header ----------------------------
+    ("J_PROG", "Connector_Generic:Conn_01x06",
+     "PROG/USB (GND 3V3 EN D- D+ IO0)",
+     "Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical", False,
+     "ADR-121: 1 GND, 2 +3V3, 3 /EN, 4 /USB_DN, 5 /USB_DP, 6 /IO0. This "
+     "header is what FINALLY nets U1 pins 3/13/14, which were the last three "
+     "pin_not_connected errors on the v9 sheet."),
+    ("ANT1", "Connector:Conn_Coaxial", "U.FL_433_TX",
+     "Connector_Coaxial:U.FL_Molex_MCRF_73412-0110_Vertical", False,
+     "ADR-119 site A: 433 MHz TX feed, straight off U2 pin 9."),
+    ("ANT2", "Connector:Conn_Coaxial", "U.FL_2G4_RANGE",
+     "Connector_Coaxial:U.FL_Molex_MCRF_73412-0110_Vertical", False,
+     "ADR-119 site D: the E28's U.FL. NOTE - the E28 carries an ON-MODULE "
+     "IPEX connector and the board carries NO RF network for it "
+     "(E28-2G4M27SX.md keep-outs); the ANT2 feed is the site-D "
+     "provision."),
+    ("ANT3", "Connector:Conn_Coaxial", "U.FL_2G4_RX",
+     "Connector_Coaxial:U.FL_Molex_MCRF_73412-0110_Vertical", False,
+     "ADR-119 site B: 2.4 GHz RX feed of the bare LoRa2021 U3 (pin 10)."),
+    ("ANT4", "Connector:Conn_Coaxial", "U.FL_GNSS_L1",
+     "Connector_Coaxial:U.FL_Molex_MCRF_73412-0110_Vertical", False,
+     "ADR-119: GNSS L1 feed off U5 pin 11."),
+    # --- ADR-046 / ADR-048: the FOUR wing-mount interfaces ----------------
+    ("J_W1", "balloon_flight_v10:WING_SOCKET_4P",
+     "WING_SOCKET_4P (hub wing interface 1)", "Tracker_Mechanical:Wing_Tab_4P",
+     False, "ADR-046 + ADR-048, west seat, rotation 0 deg (ADR-085)."),
+    ("J_W2", "balloon_flight_v10:WING_SOCKET_4P",
+     "WING_SOCKET_4P (hub wing interface 2)", "Tracker_Mechanical:Wing_Tab_4P",
+     False, "ADR-046 + ADR-048, north seat, rotation 90 deg (ADR-085)."),
+    ("J_W3", "balloon_flight_v10:WING_SOCKET_4P",
+     "WING_SOCKET_4P (hub wing interface 3)", "Tracker_Mechanical:Wing_Tab_4P",
+     False, "ADR-046 + ADR-048, east seat, rotation 180 deg (ADR-085)."),
+    ("J_W4", "balloon_flight_v10:WING_SOCKET_4P",
+     "WING_SOCKET_4P (hub wing interface 4)", "Tracker_Mechanical:Wing_Tab_4P",
+     False, "ADR-046 + ADR-048, south seat, rotation 270 deg (ADR-085); "
+            "its SOLAR_N (pad 4) is the stack bottom and ties to GND."),
+]
+
+# --- sheet layout ---------------------------------------------------------
+V10_COLUMNS = [
+    ["U5", "U6", "U7"],
+    ["U1"],
+    ["U2"],
+    ["U3"],
+    ["U_C"],
+    ["U_E28"],
+    ["C_CAP1", "C_CAP2"],
+    ["J_PROG"],
+    ["ANT1", "ANT2", "ANT3", "ANT4"],
+    ["J_W1", "J_W2", "J_W3", "J_W4"],
+    ["U_HUB_CVT"],
+]
+V10_COL_TITLES = [
+    "GNSS / BARO / 3V3 LDO",
+    "U1 ESP32-S3-WROOM-1U-N8R8",
+    "U2 LoRa2021F33-2G4 (433 MHz TX, site A)",
+    "U3 bare LoRa2021 (2.4 GHz RX, site B)",
+    "U_C bare LoRa2021 (site C, ADR-119)",
+    "U_E28 E28-2G4M27SX (2.4 GHz ranging, site D, ADR-118)",
+    "SUPERCAP BANK (2 x 3.3 F in series)",
+    "J_PROG programming / USB header (ADR-121)",
+    "U.FL ANTENNAS (4 feeds: ANT1 433 TX / ANT2 2.4 ranging / ANT3 2.4 RX "
+    "/ ANT4 GNSS L1) - ADR-119",
+    "FOUR WING INTERFACES at 90 deg (ADR-046 / ADR-048 / ADR-085)",
+    "INDEPENDENT HUB ARRAY CONVERTER INPUT (ADR-051 s2.1)",
+]
+
+# --- explicit TODO(unverified) open questions, never guessed ---------------
+V10_TODO = [
+    ("ADR-128 DIRECTION OF TRUTH",
+     "This sheet is DESIGN INTENT, not a mirror. Connectivity is read from "
+     "tracker/hardware/connectivity/v10_pinmap.reg (sha256 recorded in the "
+     "sheet header below); hub_board_v10.kicad_pcb is a BUILD PRODUCT of that "
+     "registry and is NOT read here. Any disagreement between the registry "
+     "and the board is a FINDING about the board, not licence to edit the "
+     "schematic to match it."),
+    ("OPEN-16 J_PROG pin 6 (/IO0)",
+     "J_PROG pin 6 carries /IO0 but NOTHING at the U1 end is connected to "
+     "it: no U1 pad is assigned to /IO0 on v10. Cause: the WROOM-1U GPIO0 "
+     "pad number is named by no in-repo source (an earlier guess of pad 25 "
+     "was WRONG - pad 25 is IO48 and carries /U3_RESET_N - and was reverted "
+     "in PR #266). Workaround in force: flashing works over USB-Serial-JTAG "
+     "via EN + USB D+-, which needs no GPIO0. Closes when the Espressif pin "
+     "table is read off a physical module."),
+    ("OPEN-E28-EN U_E28 pads 8 (RX_EN) / 9 (TX_EN)",
+     "These are the E28 module's LNA / PA enables - NEW versus the bare "
+     "SX1280, so no v9 pin carried over. ADR-123 budgeted two spare GPIOs "
+     "but named no pads, so they are registered UNASSIGNED and drawn "
+     "floating. Leaving a PA/LNA enable unasserted is a deliberate "
+     "non-decision, not an omission."),
+    ("U_C SITE-C CONTROL NETS",
+     "/U_C_CS_N, /U_C_BUSY, /U_C_RESET_N and /U_C_IRQ are single-ended nets: "
+     "they leave U_C and have NO destination on v10, because no U1 GPIO is "
+     "assigned to them yet (ADR-119 site C). They are drawn as labelled "
+     "stubs so the missing MCU side is legible rather than silently absent. "
+     "Same class as OPEN-E28-EN."),
+    ("U_HUB_CVT 14 UNASSIGNED LANDS",
+     "Only pins 1/2/3 (HUB_PV_P / GND / HUB_PV_N) are netted. The land "
+     "pattern is a VQFN-16 + EP placeholder for the harvester the hub array "
+     "is supposed to feed; the PART is unresolved (ADR-051 s4 items 3/5/6, "
+     "OPEN-26), hence 14 unassigned lands. Drawn, not hidden."),
+    ("MECHANICAL FEATURES ARE NOT ON THIS SHEET",
+     "The v10 board also carries H1..H4 (ADR-124 tether, NPTH D2.5) and "
+     "HW1..HW4 (ADR-125 wing-string holes, NPTH D2.5). They are NPTH "
+     "mounting holes with NO electrical net, so they are correctly absent "
+     "from the netlist and from this sheet; they live in "
+     "build_hub_board_v10.py (TETHER / WING_HOLES) and in the board's "
+     "mechanical layer. The netlist parity gate can never see them."),
+]
+
+
+def v10_custom_symbols():
+    """The repo-local symbols the v10 sheet needs (written to v10_lib/).
+
+    Two of these are REUSES: the F33 and bare-LoRa2021 (x2: U3 and U_C)
+    symbols are rebuilt here from the SAME v9 pin tables (V9_F33_PINS /
+    V9_BARE_PINS) and the same _v9_symbol() builder, so they are pin-for-pin
+    identical to the v9 sheet's symbols - the v10 design carries these parts
+    over unchanged (ADR-119).  E28 and the 17-land hub converter are new.
+    """
+    return {
+        "balloon_flight_v10:F33_2G4": _v9_symbol(
+            V10_LIBNAME, "F33_2G4", "LoRa2021F33-2G4",
+            "balloon_flight_v9:LoRa2021F33_2G4",
+            "NiceRF LoRa2021F33-2G4 (SEMTECH LR2021, 18-pad castellated, "
+            "built-in +30 dBm PA / 0.5 ppm TCXO). Pin table reused from v9 "
+            "(docs/DUAL-VARIANT-DESIGN.md); part unchanged on v10.",
+            "https://www.nicerf.com/pdf/lora2021f33-2g4-2w-high-power-high-"
+            "speed-multi-band-lr2021-wireless-communication-module-v1.1.pdf",
+            V9_F33_PINS),
+        "balloon_flight_v10:LR2021_BARE": _v9_symbol(
+            V10_LIBNAME, "LR2021_BARE", "LoRa2021_Castellated",
+            "balloon_flight_v9:LoRa2021_Castellated",
+            "NiceRF LoRa2021 castellated (SEMTECH LR2021, 18-pad, chip-only "
+            "2.4 GHz). Pin table reused from v9 UNCHANGED; instantiated "
+            "twice on v10 - U3 (site B) and U_C (site C, ADR-119).",
+            "", V9_BARE_PINS),
+        "balloon_flight_v10:E28_2G4M27SX": _v9_symbol(
+            V10_LIBNAME, "E28_2G4M27SX", "E28-2G4M27SX",
+            "e28:E28-2G4M27SX",
+            "Ebyte E28-2G4M27SX: SX1280 + PA + LNA + antenna switch, "
+            "+27 dBm, 2.4 GHz, 16 castellated pads at 1.27 mm, 15 x 20 mm. "
+            "Antenna is an ON-MODULE IPEX, so the board carries no RF network "
+            "for this radio. Pin map from "
+            "tracker/hardware/footprints/e28/E28-2G4M27SX.md (datasheet ch.3); "
+            "pads 8/9 UNASSIGNED (OPEN-E28-EN).",
+            "", V10_E28_PINS),
+        "balloon_flight_v10:TPS7A0233": _v9_symbol(
+            V10_LIBNAME, "TPS7A0233", "TPS7A02",
+            "Package_TO_SOT_SMD:SOT-23-5",
+            "TI TPS7A02 3.3 V ultra-low-Iq LDO (25 nA), SOT-23-5 - ADR-006 "
+            "3.3 V rail. Pin table reused from v9. Pin 4 is NC on the part.",
+            "", V9_TPS7A02_PINS),
+        # A repo-local wing-socket symbol, deliberately NOT a generic pin
+        # header: the hub side is a hand-soldered LAND SET, and the net of
+        # each land is fixed per interface by the socket spec (ADR-046 / ADR-048).
+        "balloon_flight_v10:WING_SOCKET_4P": _v9_symbol(
+            V10_LIBNAME, "WING_SOCKET_4P", "WING_SOCKET_4P (hub wing interface)",
+            "Tracker_Mechanical:Wing_Tab_4P",
+            "Hub-side wing interface / socket land set: 4 lands per face on "
+            "BOTH outer layers = 8 copper lands, 4.0 x 1.2 mm, pitch 1.8 mm, "
+            "insertion depth 6.0 mm, 90 deg attach. 1 SOLAR_P / 2 GND / "
+            "3 RF_FEED (CUT_SENSE_W<n>) / 4 SOLAR_N. All pins typed passive "
+            "on purpose - no driver, so no ERC power/PA/RF assertion.",
+            "", [("1", "SOLAR_P", "passive"), ("2", "GND", "passive"),
+                 ("3", "RF_FEED", "passive"), ("4", "SOLAR_N", "passive")]),
+        # --- ADR-051 s2.1 decision 1: the hub string's OWN converter input.
+        # A PROVISION - which part (sub-uA harvester H2/H3 vs the main
+        # converter M5/M6) is unresolved (ADR-051 s4 items 3 and 5; ADR-054
+        # s1.3).  Drawn as the full 17-land pattern it occupies so the
+        # unassigned lands are VISIBLE rather than hidden - the ADR-128 rule.
+        "balloon_flight_v10:HUB_CONVERTER": _v9_symbol(
+            V10_LIBNAME, "HUB_CONVERTER",
+            "HUB_PV input (part TODO(unverified))",
+            "Package_DFN_QFN:VQFN-16-1EP_3x3mm_P0.5mm_EP1.1x1.1mm",
+            "The hub array's OWN converter / harvester input provision "
+            "(ADR-051 s2.1 decision 1). Pin 1 = HUB_PV_P, pin 2 = GND (the ONE "
+            "node this string may share with the wing system), pin 3 = HUB_PV_N; "
+            "pins 4..17 are UNUSED LANDS. Part OPEN (OPEN-26).",
+            "", V10_HUB_CVT_PINS),
+        # --- the barometer, re-homed (same reason as v9, see OPEN-7 / ADR-058):
+        # the MS5611 runs in I2C mode, so SDO (pin 6) is not a data output.
+        # Stock types it `output`; an `output` on GND - which carries a PWR_FLAG,
+        # i.e. a synthetic `power output` - makes ERC report "Pins of type Output
+        # and Power output are connected": an artefact of the flag, not a defect.
+        # Geometry is copied VERBATIM (no pin moves); only the TYPE changes.
+        "balloon_flight_v10:MS5611_BARO": _v9_baro_symbol(),
+    }
+
+
+def _v9_baro_symbol(libname=None):
+    """Stock Sensor_Pressure:MS5611-01BA geometry, pin 6 retyped, re-homed."""
+    libname = libname or V10_LIBNAME
+    dst = libname + ":MS5611_BARO"
+    blk = load_lib_symbol("Sensor_Pressure", "MS5611-01BA")
+    hits = [m for m in PIN_RE.finditer(blk)
+            if m.group(6) == "6" and m.group(1) == "output"]
+    if not hits:
+        sys.exit("MS5611 SDO pin-type correction: no `output` pin 6 in the "
+                 "stock symbol - re-check OPEN-7")
+    m = hits[0]
+    blk = blk[:m.start(1)] + "passive" + blk[m.end(1):]
+    blk = blk.replace('(symbol "Sensor_Pressure:MS5611-01BA"',
+                      '(symbol "%s"' % dst, 1)
+    blk = blk.replace('"MS5611-01BA_0_1"', '"MS5611_BARO_0_1"')
+    blk = blk.replace('"MS5611-01BA_1_1"', '"MS5611_BARO_1_1"')
+    assert '(symbol "%s"' % dst in blk, "baro symbol rename failed"
+    return blk
+
+
+def v10_emit():
+    sch_path = V10_OUT_SCH
+    libdir = V10_LIBDIR
+    fplib = V10_FPLIB
+    os.makedirs(libdir, exist_ok=True)
+    os.makedirs(fplib, exist_ok=True)
+
+    custom = v10_custom_symbols()
+    comps = list(V10_COMPONENTS)
+    nets = [n for n in V10_NETS if n[1]]
+
+    lib_blocks = dict(custom)
+    for (ref, lib_id, value, footprint, dnp, note) in comps:
+        if lib_id in lib_blocks:
+            continue
+        lib, name = lib_id.split(":")
+        lib_blocks[lib_id] = load_lib_symbol(lib, name)
+
+    pins_of = {lid: symbol_pins(lib_blocks[lid]) for lid in lib_blocks}
+    by_ref = {c[0]: c for c in comps}
+
+    # ---- validation (same two checks v9_emit applies) --------------------
+    problems = []
+    for (net, nodes, src) in nets:
+        for (ref, pin) in nodes:
+            if ref not in by_ref:
+                problems.append("net %s names unknown ref %s" % (net, ref))
+                continue
+            if pin not in pins_of[by_ref[ref][1]]:
+                problems.append("net %s: %s has no pin %s" % (net, ref, pin))
+    # a (ref,pin) may belong to exactly ONE net; a duplicate is a silent short
+    owner = {}
+    for (net, nodes, src) in nets:
+        for nd in nodes:
+            if nd in owner and owner[nd] != net:
+                problems.append("pin %s.%s is in TWO nets: %s and %s"
+                                % (nd[0], nd[1], owner[nd], net))
+            owner[nd] = net
+    if problems:
+        print("V10 VALIDATION FAILURES:")
+        for p in problems:
+            print("  -", p)
+        sys.exit(3)
+
+    # UNASSIGNED pins: flagged no-connect when the symbol carries the pin, and
+    # reported when it does not (a pad the sheet cannot show is a finding).
+    nc = []
+    undrawn = []
+    for (ref, pin, why) in V10_NC:
+        if ref not in by_ref:
+            undrawn.append((ref, pin, "no such ref on the sheet"))
+            continue
+        sym_pin = V10_PIN_ALIAS.get((ref, pin), pin)
+        if sym_pin in pins_of[by_ref[ref][1]]:
+            nc.append((ref, sym_pin, why))
+        else:
+            undrawn.append((ref, pin, "no symbol pin for this land"))
+
+    # ---- footprints actually placed on the v10 board ---------------------
+    fp_sources = [
+        (os.path.join(V9_FPLIB, "LoRa2021F33_2G4.kicad_mod"),
+         "LoRa2021F33_2G4"),
+        (os.path.join(V9_FPLIB, "LoRa2021_Castellated.kicad_mod"),
+         "LoRa2021_Castellated"),
+        (V10_E28_FP, "E28-2G4M27SX"),
+    ]
+    written = []
+    for src, leaf in fp_sources:
+        if not os.path.exists(src):
+            sys.exit("v10: missing footprint source %s" % src)
+        body = open(src).read()
+        body = re.sub(r'\(footprint\s+"[^"]*"',
+                      '(footprint "%s:%s"\n\t\t(version 20250114)\n'
+                      '\t\t(generator "pcbnew")\n\t\t(generator_version "9.0")'
+                      % (V10_LIBNAME, leaf), body, count=1)
+        with open(os.path.join(fplib, leaf + ".kicad_mod"), "w") as fh:
+            fh.write(clean(body) + "\n")
+        written.append(leaf)
+    with open(V10_FPTABLE, "w") as fh:
+        fh.write('(fp_lib_table\n\t(version 7)\n'
+                 '\t(lib (name "Tracker_Mechanical")(type "KiCad")'
+                 '(uri "${KIPRJMOD}/../../footprints/tracker_mechanical.pretty")'
+                 '(options "")(descr "Repo-local mechanical footprints: '
+                 'Wing_Tab_4P - ADR-046/ADR-048"))\n'
+                 '\t(lib (name "%s")(type "KiCad")'
+                 '(uri "${KIPRJMOD}/v10_lib/%s.pretty")(options "")'
+                 '(descr "v10 flight board footprints"))\n)\n'
+                 % (V10_LIBNAME, V10_LIBNAME))
+
+    # ---- placement --------------------------------------------------------
+    placed_refs = [r for col in V10_COLUMNS for r in col]
+    missing = [c[0] for c in comps if c[0] not in placed_refs]
+    if missing:
+        sys.exit("v10 layout missing refs: %s" % missing)
+
+    sizes = {c[0]: ((lambda e: (e[2] - e[0], e[3] - e[1]))(
+        symbol_extent(lib_blocks[c[1]]))) for c in comps}
+    col_x, x = [], 30.48
+    for col in V10_COLUMNS:
+        col_x.append(x)
+        x += max(sizes[r][0] for r in col) + 45.72
+    pos, y_bottom = {}, 0.0
+    for ci, col in enumerate(V10_COLUMNS):
+        y = 50.8
+        for ref in col:
+            pos[ref] = (round(col_x[ci] / 1.27) * 1.27, round(y / 1.27) * 1.27)
+            y += sizes[ref][1] + 25.4
+        y_bottom = max(y_bottom, y)
+
+    # ---- sheet text ------------------------------------------------------
+    reg_sha = hashlib.sha256(open(V10_REG, "rb").read()).hexdigest()
+    body = ['\t(text "BALLOON v10 HUB FLIGHT BOARD - DESIGN-INTENT schematic. '
+            'Connectivity is taken from the connectivity registry, NOT from the '
+            'PCB. (ADR-128)"\n\t\t(exclude_from_sim no)\n'
+            '\t\t(at 30.48 20.32 0)\n\t\t(effects\n\t\t\t(font\n\t\t\t\t'
+            '(size 2.54 2.54)\n\t\t\t)\n\t\t\t(justify left bottom)\n'
+            '\t\t)\n\t\t(uuid "%s")\n\t)' % uid(),
+            '\t(text "SOURCE OF TRUTH (pins): '
+            'tracker/hardware/connectivity/v10_pinmap.reg   sha256 %s   '
+            '(%d net(s), %d UNASSIGNED pin(s)).  hub_board_v10.kicad_pcb is a '
+            'BUILD PRODUCT of that registry; the parity gate reads it back to '
+            'CHECK, never to author."\n\t\t(exclude_from_sim no)\n'
+            '\t\t(at 30.48 24.13 0)\n\t\t(effects\n\t\t\t(font\n\t\t\t\t'
+            '(size 1.27 1.27)\n\t\t\t)\n\t\t\t(justify left bottom)\n'
+            '\t\t)\n\t\t(uuid "%s")\n\t)' % (reg_sha[:16], len(nets),
+                                             len(V10_NC), uid()),
+            '\t(text "PARTS (ADR-118/119/121/123): U1 ESP32-S3-WROOM-1U-N8R8; '
+            'U2 LoRa2021F33-2G4 = 433 MHz TX (site A); U3 bare LoRa2021 = '
+            '2.4 GHz RX (site B); U_C bare LoRa2021 (site C); U_E28 '
+            'E28-2G4M27SX = 2.4 GHz ranging (site D); U5 MAX-M10S GNSS; '
+            'U6 MS5611 baro; U7 TPS7A02 LDO; C_CAP1/C_CAP2 supercap bank; '
+            'J_PROG prog+USB header; J_W1..J_W4 wing sockets; ANT1..ANT4 U.FL."'
+            '\n\t\t(exclude_from_sim no)\n'
+            '\t\t(at 30.48 26.67 0)\n\t\t(effects\n\t\t\t(font\n\t\t\t\t'
+            '(size 1.27 1.27)\n\t\t\t)\n\t\t\t(justify left bottom)\n'
+            '\t\t)\n\t\t(uuid "%s")\n\t)' % uid(),
+            ]
+    for ci, title in enumerate(V10_COL_TITLES):
+        body.append('\t(text "%s"\n\t\t(exclude_from_sim no)\n'
+                    '\t\t(at %s 43.18 0)\n\t\t(effects\n\t\t\t(font\n\t\t\t\t'
+                    '(size 1.524 1.524)\n\t\t\t)\n\t\t\t(justify left bottom)\n'
+                    '\t\t)\n\t\t(uuid "%s")\n\t)'
+                    % (title.replace('"', "'"),
+                       fmt(round(col_x[ci] / 1.27) * 1.27), uid()))
+
+    todo_y = round((y_bottom + 10.16) / 1.27) * 1.27
+    for (title, txt) in V10_TODO:
+        body.append('\t(text "TODO(unverified) %s -- %s"\n'
+                    '\t\t(exclude_from_sim no)\n\t\t(at %s %s 0)\n'
+                    '\t\t(effects\n\t\t\t(font\n\t\t\t\t(size 1.27 1.27)\n'
+                    '\t\t\t)\n\t\t\t(justify left bottom)\n\t\t)\n'
+                    '\t\t(uuid "%s")\n\t)'
+                    % (title.replace('"', "'"), txt.replace('"', "'"),
+                       fmt(30.48), fmt(todo_y), uid()))
+        todo_y += 3.81
+
+    net_of, net_src = {}, {}
+    for (net, nodes, src) in nets:
+        net_src[net] = src
+        for nd in nodes:
+            net_of[nd] = net
+    nc_of = {(r, p): why for (r, p, why) in nc}
+
+    power_syms, wires, labels, ncs = [], [], [], []
+    stats = dict(pins=0, nets=set(), labels=0, power=0, nc=0,
+                 power_out=set())
+
+    for (ref, lib_id, value, footprint, dnp, note) in comps:
+        block = lib_blocks[lib_id]
+        sx, sy = pos[ref]
+        pins = pins_of[lib_id]
+        pin_txt = "".join('\t\t(pin "%s"\n\t\t\t(uuid "%s")\n\t\t)\n'
+                          % (n, uid())
+                          for n in sorted(pins, key=lambda k: (len(k), k)))
+        body.append(
+            "\t(symbol\n\t\t(lib_id \"%s\")\n\t\t(at %s %s 0)\n\t\t(unit 1)\n"
+            "\t\t(exclude_from_sim no)\n\t\t(in_bom yes)\n\t\t(on_board yes)\n"
+            "\t\t(dnp %s)\n\t\t(uuid \"%s\")\n"
+            "\t\t(property \"Reference\" \"%s\"\n\t\t\t(at %s %s 0)\n"
+            "\t\t\t(effects\n\t\t\t\t(font\n\t\t\t\t\t(size 1.27 1.27)\n"
+            "\t\t\t\t)\n\t\t\t\t(justify left)\n\t\t\t)\n\t\t)\n"
+            "\t\t(property \"Value\" \"%s\"\n\t\t\t(at %s %s 0)\n"
+            "\t\t\t(effects\n\t\t\t\t(font\n\t\t\t\t\t(size 1.27 1.27)\n"
+            "\t\t\t\t)\n\t\t\t\t(justify left)\n\t\t\t)\n\t\t)\n"
+            "\t\t(property \"Footprint\" \"%s\"\n\t\t\t(at %s %s 0)\n"
+            "\t\t\t(effects\n\t\t\t\t(font\n\t\t\t\t\t(size 1.27 1.27)\n"
+            "\t\t\t\t)\n\t\t\t\t(hide yes)\n\t\t\t)\n\t\t)\n"
+            "%s\t\t(instances\n\t\t\t(project \"%s\"\n"
+            "\t\t\t\t(path \"/%s\"\n\t\t\t\t\t(reference \"%s\")\n"
+            "\t\t\t\t\t(unit 1)\n\t\t\t\t)\n\t\t\t)\n\t\t)\n\t)\n"
+            % (lib_id, fmt(sx), fmt(sy), "yes" if dnp else "no", uid(),
+               ref, fmt(sx + 2.54), fmt(sy - 7.62), value, fmt(sx + 2.54),
+               fmt(sy + 2.54), footprint, fmt(sx), fmt(sy), pin_txt,
+               V10_PROJECT, inst_path(), ref))
+
+        for pnum in sorted(pins, key=lambda k: (len(k), k)):
+            pin = pins[pnum]
+            px, py = pin_point(sx, sy, pin)
+            stats["pins"] += 1
+            key = (ref, pnum)
+            if key in net_of:
+                net = net_of[key]
+                ex, ey = stub_end(sx, sy, pin, 5.08)
+                wires.append((px, py, ex, ey))
+                if net in POWER_NETS:
+                    power_syms.append((net, ex, ey))
+                    stats["power"] += 1
+                else:
+                    # A KiCad LOCAL label must NOT carry a leading "/": `/` is
+                    # the hierarchy-path separator, so a label "/SPI1_SCK" is
+                    # read as an absolute path, exports as "/{slash}SPI1_SCK"
+                    # and does not attach at all (ERC: label_dangling).  The
+                    # registry writes nets as "/SPI1_SCK" because that is what
+                    # the PCB calls them; KiCad re-adds the leading "/" itself
+                    # for a root-sheet local label, which is exactly how the v9
+                    # sheet's "SPI1_SCK" label exports as "/SPI1_SCK".
+                    labels.append((net.lstrip("/"), ex, ey))
+                    stats["labels"] += 1
+                stats["nets"].add(net)
+                if pin["type"] == "power_out":
+                    stats["power_out"].add(net)
+            elif key in nc_of:
+                ncs.append((px, py))
+                stats["nc"] += 1
+            # else: deliberately left floating; covered by a V10_TODO note
+
+    # ---- PWR_FLAGs (same placement search v9 uses) ------------------------
+    flag_pts = {}
+    for (net, x, y) in power_syms:
+        flag_pts.setdefault(net, (x, y))
+    for (net, x, y) in labels:
+        flag_pts.setdefault(net, (x, y))
+    pin_type = {}
+    for (ref, lib_id, value, footprint, dnp, note) in comps:
+        for pn, pin in pins_of[lib_id].items():
+            pin_type[(ref, pn)] = pin["type"]
+    power_in_nets = {net for (net, nodes, src) in nets
+                     if any(pin_type.get(nd) == "power_in" for nd in nodes)}
+    flag_nets = ({n for (n, _, _) in power_syms} - stats["power_out"])
+    flag_nets |= {n for (n, _, _) in labels
+                  if n.startswith("V") or n == "SOLAR_IN"}
+    flag_nets |= (power_in_nets - stats["power_out"])
+
+    occ = set()
+    for (net, x, y) in power_syms:
+        occ.add((round(x, 2), round(y, 2)))
+    for (txt, x, y) in labels:
+        occ.add((round(x, 2), round(y, 2)))
+    for (x1, y1, x2, y2) in wires:
+        occ.add((round(x1, 2), round(y1, 2)))
+        occ.add((round(x2, 2), round(y2, 2)))
+
+    def flag_offset(fx, fy):
+        fx, fy = round(fx, 2), round(fy, 2)
+        for dx, dy in ((-5.08, 0), (-7.62, 0), (-10.16, 0), (-12.7, 0),
+                       (5.08, 0), (7.62, 0), (10.16, 0), (12.7, 0),
+                       (0, -5.08), (0, -7.62), (0, -10.16),
+                       (0, 5.08), (0, 7.62), (0, 10.16)):
+            tx, ty = round(fx + dx, 2), round(fy + dy, 2)
+            if (tx, ty) in occ:
+                continue
+            clash = False
+            if dy == 0:
+                lo, hi = sorted((fx, tx))
+                clash = any(oy == fy and lo < ox < hi for (ox, oy) in occ)
+            else:
+                lo, hi = sorted((fy, ty))
+                clash = any(ox == fx and lo < oy < hi for (ox, oy) in occ)
+            if not clash:
+                return dx, dy
+        return None
+
+    flags = []
+    for net in sorted(flag_nets):
+        if net not in flag_pts:
+            continue
+        x, y = flag_pts[net]
+        off = flag_offset(x, y)
+        if off is None:
+            sys.exit("v10: no free PWR_FLAG stub direction for net %s at "
+                     "(%s, %s)" % (net, fmt(x), fmt(y)))
+        dx, dy = off
+        wires.append((x, y, x + dx, y + dy))
+        occ.add((round(x + dx, 2), round(y + dy, 2)))
+        flags.append((net, x + dx, y + dy))
+
+    for (x1, y1, x2, y2) in wires:
+        body.append('\t(wire\n\t\t(pts\n\t\t\t(xy %s %s) (xy %s %s)\n\t\t)\n'
+                    '\t\t(stroke\n\t\t\t(width 0)\n\t\t\t(type default)\n'
+                    '\t\t)\n\t\t(uuid "%s")\n\t)\n'
+                    % (fmt(x1), fmt(y1), fmt(x2), fmt(y2), uid()))
+    for (txt, x, y) in labels:
+        body.append('\t(label "%s"\n\t\t(at %s %s 0)\n\t\t(effects\n'
+                    '\t\t\t(font\n\t\t\t\t(size 1.27 1.27)\n\t\t\t)\n'
+                    '\t\t\t(justify left bottom)\n\t\t)\n\t\t(uuid "%s")\n\t)\n'
+                    % (txt, fmt(x), fmt(y), uid()))
+
+    for i, (net, x, y) in enumerate(power_syms):
+        pref = "#PWR0%03d" % (i + 1)
+        body.append(('\t(symbol\n\t\t(lib_id "power:%s")\n\t\t(at %s %s 0)\n'
+                     '\t\t(unit 1)\n\t\t(exclude_from_sim no)\n\t\t(in_bom yes)\n'
+                     '\t\t(on_board yes)\n\t\t(dnp no)\n\t\t(uuid "%s")\n'
+                     '\t\t(property "Reference" "#PWR"\n\t\t\t(at %s %s 0)\n'
+                     '\t\t\t(effects\n\t\t\t\t(font\n\t\t\t\t\t(size 1.27 1.27)\n'
+                     '\t\t\t\t)\n\t\t\t\t(hide yes)\n\t\t\t)\n\t\t)\n'
+                     '\t\t(property "Value" "%s"\n\t\t\t(at %s %s 0)\n'
+                     '\t\t\t(effects\n\t\t\t\t(font\n\t\t\t\t\t(size 1.27 1.27)\n'
+                     '\t\t\t\t)\n\t\t\t\t(hide yes)\n\t\t\t)\n\t\t)\n'
+                     '\t\t(property "Footprint" ""\n\t\t\t(at %s %s 0)\n'
+                     '\t\t\t(effects\n\t\t\t\t(font\n\t\t\t\t\t(size 1.27 1.27)\n'
+                     '\t\t\t\t)\n\t\t\t\t(hide yes)\n\t\t\t)\n\t\t)\n'
+                     '\t\t(pin "1"\n\t\t\t(uuid "%s")\n\t\t)\n'
+                     '\t\t(instances\n\t\t\t(project "%s"\n'
+                     '\t\t\t\t(path "/%s"\n\t\t\t\t\t(reference "#PWR")\n'
+                     '\t\t\t\t\t(unit 1)\n\t\t\t\t)\n\t\t\t)\n\t\t)\n\t)\n'
+                     % (net, fmt(x), fmt(y), uid(), fmt(x + 2.54),
+                        fmt(y + 2.54), net, fmt(x + 2.54), fmt(y - 2.54),
+                        fmt(x), fmt(y), uid(), V10_PROJECT, inst_path()))
+                     .replace('#PWR', pref))
+    for i, (net, x, y) in enumerate(flags):
+        body.append('\t(symbol\n\t\t(lib_id "power:PWR_FLAG")\n'
+                     '\t\t(at %s %s 0)\n\t\t(unit 1)\n'
+                     '\t\t(exclude_from_sim no)\n\t\t(in_bom yes)\n'
+                     '\t\t(on_board yes)\n\t\t(dnp no)\n\t\t(uuid "%s")\n'
+                     '\t\t(property "Reference" "#FLG0%d"\n\t\t\t(at %s %s 0)\n'
+                     '\t\t\t(effects\n\t\t\t\t(font\n\t\t\t\t\t(size 1.27 1.27)\n'
+                     '\t\t\t\t)\n\t\t\t\t(hide yes)\n\t\t\t)\n\t\t)\n'
+                     '\t\t(property "Value" "PWR_FLAG"\n\t\t\t(at %s %s 0)\n'
+                     '\t\t\t(effects\n\t\t\t\t(font\n\t\t\t\t\t(size 1.27 1.27)\n'
+                     '\t\t\t\t)\n\t\t\t\t(hide yes)\n\t\t\t)\n\t\t)\n'
+                     '\t\t(property "Footprint" ""\n\t\t\t(at %s %s 0)\n'
+                     '\t\t\t(effects\n\t\t\t\t(font\n\t\t\t\t\t(size 1.27 1.27)\n'
+                     '\t\t\t\t)\n\t\t\t\t(hide yes)\n\t\t\t)\n\t\t)\n'
+                     '\t\t(pin "1"\n\t\t\t(uuid "%s")\n\t\t)\n'
+                     '\t\t(instances\n\t\t\t(project "%s"\n'
+                     '\t\t\t\t(path "/%s"\n\t\t\t\t\t(reference "#FLG0%d")\n'
+                     '\t\t\t\t\t(unit 1)\n\t\t\t\t)\n\t\t\t)\n\t\t)\n\t)\n'
+                     % (fmt(x), fmt(y), uid(), i + 1, fmt(x + 2.54),
+                        fmt(y + 2.54), fmt(x + 2.54), fmt(y - 2.54),
+                        fmt(x), fmt(y), uid(), V10_PROJECT, inst_path(), i + 1))
+    for (x, y) in ncs:
+        body.append('\t(no_connect\n\t\t(at %s %s)\n\t\t(uuid "%s")\n\t)\n'
+                    % (fmt(x), fmt(y), uid()))
+
+    # power symbol definitions used
+    for net in sorted({n for (n, _, _) in power_syms}):
+        key = "power:" + net
+        if key not in lib_blocks:
+            lib_blocks[key] = load_lib_symbol("power", net)
+    if flags:
+        lib_blocks["power:PWR_FLAG"] = load_lib_symbol("power", "PWR_FLAG")
+
+    libdefs = "\n".join(lib_blocks[k] for k in lib_blocks)
+    sch = ('(kicad_sch\n\t(version 20250114)\n\t(generator "eeschema")\n'
+           '\t(generator_version "9.0")\n\t(uuid "%s")\n\t(paper "A2")\n'
+           '\t(title_block\n\t\t(title "Balloon v10 Hub Flight Board")\n'
+           '\t\t(date "2026-10-22")\n\t\t(rev "v10-design-intent")\n'
+           '\t\t(company "Balloon Relay")\n'
+           '\t\t(comment 1 "DESIGN-INTENT schematic. Pin-level connectivity '
+           'from connectivity/v10_pinmap.reg sha256 %s; NOT derived from the '
+           'PCB. Unassigned pins are drawn floating and listed as '
+           'TODO(unverified).")\n'
+           '\t)\n\t(lib_symbols\n%s\n\t)\n%s'
+           '\t(sheet_instances\n\t\t(path "/"\n\t\t\t(page "1")\n\t\t)\n\t)\n)\n'
+           % (uid(), reg_sha[:32], libdefs, "".join(body)))
+    with open(sch_path, "w") as fh:
+        fh.write(clean(sch))
+
+    # standalone symbol library
+    with open(V10_SYMLIB, "w") as fh:
+        fh.write('(kicad_symbol_lib\n\t(version 20241209)\n'
+                 '\t(generator "kicad_symbol_editor")\n'
+                 '\t(generator_version "9.0")\n')
+        for k, blk in lib_blocks.items():
+            if k.startswith(V10_LIBNAME + ":"):
+                fh.write("\t" + blk.replace('(symbol "%s:' % V10_LIBNAME,
+                                            '(symbol "', 1) + "\n")
+        fh.write(")\n")
+
+    # project file so kicad-cli resolves the shared library tables
+    pro_src = os.path.join(HERE, "v_c3_flight.kicad_pro")
+    if os.path.exists(pro_src):
+        pro = open(pro_src).read().replace("v_c3_flight", V10_PROJECT)
+        with open(os.path.join(HERE, V10_PROJECT + ".kicad_pro"), "w") as fh:
+            fh.write(pro)
+
+    # Register the v10 symbol/footprint libraries in the SHARED project-local
+    # tables.  Without this, ERC reports `The current configuration does not
+    # include the symbol library 'balloon_flight_v10'` for every v10 custom
+    # part.  Merged, not rewritten: the v_c3 + v9 sheets read the same tables.
+    sym_libs = sorted({k.split(":")[0] for k in lib_blocks})
+    _v10_sym_entries = []
+    for lib in sym_libs:
+        if lib == V10_LIBNAME:
+            uri = "${KIPRJMOD}/v10_lib/%s.kicad_sym" % V10_LIBNAME
+            descr = "v10 flight board symbols (design-intent, ADR-128)"
+        elif lib == V9_LIBNAME:
+            uri = "${KIPRJMOD}/v9_lib/%s.kicad_sym" % V9_LIBNAME
+            descr = "v9 flight board symbols"
+        elif lib == "balloon_flight":
+            uri = "${KIPRJMOD}/balloon_flight.kicad_sym"
+            descr = ""
+        else:
+            uri = os.path.join(SYMDIR, lib + ".kicad_sym")
+            descr = ""
+        _v10_sym_entries.append((lib, uri, descr))
+    added_sym = merge_lib_table(OUT_LIBTABLE, "sym_lib_table",
+                                    _v10_sym_entries)
+
+    fp_entries = [
+        (V10_LIBNAME,
+         "${KIPRJMOD}/v10_lib/%s.pretty" % V10_LIBNAME,
+         "v10 flight board footprints (E28 built from the sidecar pin map)"),
+        (V9_LIBNAME,
+         "${KIPRJMOD}/v9_lib/%s.pretty" % V9_LIBNAME,
+         "v9 flight board footprints"),
+        ("balloon_flight", "${KIPRJMOD}/balloon_flight.pretty",
+         "Flight board footprints exported from the frozen PCB"),
+        ("Tracker_Mechanical",
+         "${KIPRJMOD}/../../footprints/tracker_mechanical.pretty",
+         "Repo-local mechanical footprints: Wing_Tab_4P - ADR-046/ADR-048"),
+    ]
+    added_fp = merge_lib_table(OUT_FPTABLE, "fp_lib_table", fp_entries)
+
+    stats["added_lib"] = added_sym
+    stats["added_fplib"] = added_fp
+    stats["comp"] = len(comps)
+    stats["fp"] = written
+    stats["undrawn"] = undrawn
+    stats["netless"] = len(V10_NC)
+    return stats
+
+
+def main_v10():
+    print("v10 schematic variant (design-intent, from the CONNECTIVITY REGISTRY)")
+    print("registry     :", V10_REG)
+    print("registry sha :", hashlib.sha256(open(V10_REG, "rb").read())
+          .hexdigest())
+    print("board        : NOT read -- hub_board_v10.kicad_pcb is a build "
+          "PRODUCT of the registry (ADR-128)")
+    stats = v10_emit()
+    print("components   :", stats["comp"])
+    print("symbol pins  :", stats["pins"])
+    print("net labels   :", stats["labels"])
+    print("power pins   :", stats["power"])
+    print("no_connect   :", stats["nc"], "of", stats["netless"],
+          "UNASSIGNED registry pin(s)")
+    if stats["undrawn"]:
+        print("registry pins with NO symbol pin (not drawn):")
+        for (r, p, why) in stats["undrawn"]:
+            print("   - %s.%s : %s" % (r, p, why))
+    print("TODO(unverified) notes:", len(V10_TODO))
+    print("distinct nets:", len(stats["nets"]), sorted(stats["nets"]))
+    print("footprints   :", stats["fp"])
+    print("wrote        :", V10_OUT_SCH)
+    print("             ", V10_SYMLIB)
+    print("             ", V10_FPLIB)
+
+
 def main():
     sha = hashlib.sha256(open(PCB, "rb").read()).hexdigest()
     print("PCB           :", PCB)
@@ -2737,7 +3662,10 @@ def main():
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1] == "v9":
+    _target = sys.argv[1] if len(sys.argv) > 1 else ""
+    if _target == "v9":
         main_v9()
+    elif _target == "v10":
+        main_v10()
     else:
         main()
