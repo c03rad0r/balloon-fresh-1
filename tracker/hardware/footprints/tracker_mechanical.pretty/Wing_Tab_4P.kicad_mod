@@ -21,10 +21,10 @@
   (pad "3" smd rect (at 3.0 0.9) (size 4.0 1.2) (layers "B.Cu" "B.Paste" "B.Mask") (uuid "9f0a1b2c-0203-4000-8000-00000000c203"))
   (pad "4" smd rect (at 3.0 2.7) (size 4.0 1.2) (layers "B.Cu" "B.Paste" "B.Mask") (uuid "9f0a1b2c-0204-4000-8000-00000000c204"))
 
-  (fp_line (start 0.0 -0.45) (end 6.0 -0.45) (stroke (width 0.05) (type solid)) (layer "Edge.Cuts") (uuid "9f0a1b2c-0301-4000-8000-00000000d301"))
-  (fp_line (start 6.0 -0.45) (end 6.0 0.45) (stroke (width 0.05) (type solid)) (layer "Edge.Cuts") (uuid "9f0a1b2c-0302-4000-8000-00000000d302"))
-  (fp_line (start 6.0 0.45) (end 0.0 0.45) (stroke (width 0.05) (type solid)) (layer "Edge.Cuts") (uuid "9f0a1b2c-0303-4000-8000-00000000d303"))
-  (fp_line (start 0.0 0.45) (end 0.0 -0.45) (stroke (width 0.05) (type solid)) (layer "Edge.Cuts") (uuid "9f0a1b2c-0304-4000-8000-00000000d304"))
+  (fp_line (start 0.0 -0.25) (end 6.0 -0.25) (stroke (width 0.05) (type solid)) (layer "Edge.Cuts") (uuid "9f0a1b2c-0301-4000-8000-00000000d301"))
+  (fp_line (start 6.0 -0.25) (end 6.0 0.25) (stroke (width 0.05) (type solid)) (layer "Edge.Cuts") (uuid "9f0a1b2c-0302-4000-8000-00000000d302"))
+  (fp_line (start 6.0 0.25) (end 0.0 0.25) (stroke (width 0.05) (type solid)) (layer "Edge.Cuts") (uuid "9f0a1b2c-0303-4000-8000-00000000d303"))
+  (fp_line (start 0.0 0.25) (end 0.0 -0.25) (stroke (width 0.05) (type solid)) (layer "Edge.Cuts") (uuid "9f0a1b2c-0304-4000-8000-00000000d304"))
 
   (fp_line (start -1.0 -1.45) (end 7.0 -1.45) (stroke (width 0.05) (type dash)) (layer "Dwgs.User") (uuid "9f0a1b2c-0401-4000-8000-00000000e401"))
   (fp_line (start 7.0 -1.45) (end 7.0 1.45) (stroke (width 0.05) (type dash)) (layer "Dwgs.User") (uuid "9f0a1b2c-0402-4000-8000-00000000e402"))
