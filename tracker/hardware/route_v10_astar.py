@@ -746,15 +746,26 @@ def main():
         # search kept routing straight over a placed via and validate_plan rejected it with
         # "self-check: isolation vs routed via /ANT1_433_TX" -- measured in pass 2 of the
         # escalating route, which failed /USB_DN, /GNSS_RX, /GNSS_TX and others on exactly that.
-        # A via is copper on BOTH layers, so it must block BOTH, grown by CLEAR + TRACK_W/2.
-        g_via = CLEAR + TRACK_W / 2
+        # A via is copper on BOTH layers, so it must block BOTH.
+        #
+        # B47 (2026-10-22): the reach was VIA_D/2 + (CLEAR + TRACK_W/2) = 0.55mm, which is exactly
+        # right for TRACK-vs-via but 0.15mm SHORT for VIA-vs-via, because the validator demands
+        #     via-to-via      centre >= CLEAR + VIA_D/2 + VIA_D/2 = CLEAR + VIA_D     = 0.70mm
+        #     track-to-via    centre >= CLEAR + TRACK_W/2 + VIA_D/2                  = 0.55mm
+        # Measured: /U3_BUSY, /USB_DN, /GNSS_RX and /F33_RESET_N were refused with
+        # "self-check: isolation vs routed via <net> (via)" -- the search found a path and the
+        # validator threw it away, which is why they could never route at any pitch or ordering.
+        # Same shape as B34/B37/B40: the grid was less strict than the check. Mark at the STRICTER
+        # of the two (via-vs-via), so the grid can never permit what the validator will refuse.
+        g_via_track = CLEAR + TRACK_W / 2
+        g_via_via = CLEAR + VIA_D
         for t in b.GetTracks():
             if "VIA" not in str(type(t)):
                 continue
             c = t.GetPosition()
             cx, cy = c.x / UM, c.y / UM
             rad = t.GetWidth(pcbnew.F_Cu) / UM / 2
-            reach = rad + g_via
+            reach = rad + max(g_via_track, g_via_via)
             for lay in (F, B):
                 i0 = max(0, int((cx - reach - ox0) / args.pitch) - 1)
                 i1 = min(nx - 1, int((cx + reach - ox0) / args.pitch) + 1)
@@ -908,7 +919,13 @@ def main():
             for (vx, vy) in v2:
                 ox, oy = world["origin"]
                 nx = len(blocked[0][0]); ny = len(blocked[0])
-                g = CLEAR + VIA_D/2 + TRACK_W/2
+                # B47 (2026-10-22): CLEAR + VIA_D/2 + TRACK_W/2 = 0.55mm is right for
+                # TRACK-vs-via and 0.15mm SHORT for VIA-vs-via (the validator wants
+                # CLEAR + VIA_D = 0.70mm between via centres). Using the track figure here meant
+                # the NEXT net could place its via inside the band the validator refuses, and
+                # validate_plan then discarded a route A* had already found. Mark at the STRICTER
+                # of the two so the grid can never permit what the validator will refuse.
+                g = CLEAR + VIA_D
                 i0 = max(0, int((vx-g-ox)/args.pitch)); i1 = min(nx-1, int((vx+g-ox)/args.pitch))
                 j0 = max(0, int((vy-g-oy)/args.pitch)); j1 = min(ny-1, int((vy+g-oy)/args.pitch))
                 for lay in (F, B):
