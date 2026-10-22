@@ -1,0 +1,84 @@
+{
+ "board": "tracker/hardware/hub_board_v9.kicad_pcb",
+ "rules": {
+  "clearance": 0.2,
+  "track_w": 0.2,
+  "via_dia": 0.6,
+  "via_drill": 0.3,
+  "hole_to_hole": 0.25
+ },
+ "pads": [
+  {
+   "ref": "U1.8",
+   "net": "/SX1280_MOSI",
+   "layers": [
+    "F.Cu",
+    "F.Mask",
+    "F.Paste"
+   ],
+   "ring_r": 1.0746427842267952,
+   "reach": {
+    "escaped": true,
+    "reach": 3.5355
+   },
+   "verdict": "STUB_VIA",
+   "verdict_text": "ESCAPABLE via layer transition -- existing in-pad via is a STUB",
+   "detail": null,
+   "problems": []
+  },
+  {
+   "ref": "U1.22",
+   "net": "/SX1280_SCK",
+   "layers": [
+    "F.Cu",
+    "F.Mask",
+    "F.Paste"
+   ],
+   "ring_r": 1.0746427842267952,
+   "reach": {
+    "escaped": true,
+    "reach": 3.5355
+   },
+   "verdict": "STUB_VIA",
+   "verdict_text": "ESCAPABLE via layer transition -- existing in-pad via is a STUB",
+   "detail": null,
+   "problems": []
+  },
+  {
+   "ref": "U4.17",
+   "net": "/SX1280_MOSI",
+   "layers": [
+    "F.Cu",
+    "F.Mask",
+    "F.Paste"
+   ],
+   "ring_r": 0.6272001872658766,
+   "reach": {
+    "escaped": false,
+    "reach": 1.408
+   },
+   "verdict": "VIA",
+   "verdict_text": "ESCAPABLE only via layer transition (F.Cu -> In1/In2/B.Cu)",
+   "detail": "legal via at R=0.70 @0 deg dia 0.50, cu=0.2110 h2h=0.9816",
+   "problems": []
+  },
+  {
+   "ref": "U4.18",
+   "net": "/SX1280_SCK",
+   "layers": [
+    "F.Cu",
+    "F.Mask",
+    "F.Paste"
+   ],
+   "ring_r": 0.6272001872658766,
+   "reach": {
+    "escaped": false,
+    "reach": 0.7826
+   },
+   "verdict": "BLOCKED",
+   "verdict_text": "NOT ESCAPABLE at current rules",
+   "detail": "best dogbone dia 0.50 R=0.80@15 misses by 0.0655 mm on F.Cu pad-to-via approach (0.200 required, 0.1345 achieved); neighbour ('pad', 'U4.17')",
+   "problems": []
+  }
+ ]
+}

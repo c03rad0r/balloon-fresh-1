@@ -219,6 +219,10 @@ measuring rather than assuming:
 7. **a 100× dimension error in my own task instruction**, caught by the worker
 8. **my own verification script produced a false refutation** of the wing defect, from two bugs (last-item-
    wins on the slot bbox; equivalence tested at only 0°/180° when the tabs sit at 90° spacing)
+9. **the "B.Cu escape is clear" conclusion** — produced by a pad-escape gate that contradicted its own
+   obstacle list: it read B.Cu for F.Cu-only SMD pads, compared mm to nm, and used the trace-centreline
+   threshold instead of the pad-edge ring. The corrected, layer-aware measurement reverses three of four
+   verdicts and finds **U4.18 is not escapable at all**: `docs/fab/FCU-ESCAPE-MAP.md`
 
 **Generating an artefact is not the same as keeping it current. Reviewing one is not the same as concluding
 it. And a measurement that is wrong is worse than no measurement when it contradicts a correct report.**
@@ -235,8 +239,15 @@ verdict.
 - **Item 3 is not CLEAN** — 5 defects, 3 being fixed, 2 requiring JLCPCB's answer or a design decision.
 - **Item 5 is not merged** — blocked on item 3's disposition.
 - **`/SX1280_MOSI` and `/SX1280_SCK` remain unrouted** (2 of 59). Each holds one via and zero tracks.
-  **B.Cu escape is clear (12 mm, 7 directions).** Operator will hand-route in the KiCad GUI. **Clear the
-  `/SX1280_MOSI` escape via at `(49.95, 11.84)` first — it sits exactly where that route must start.**
+  **The earlier "B.Cu escape is clear (12 mm, 7 directions)" conclusion is WITHDRAWN (2026-10-19).** It
+  was measured with a gate that read B.Cu for F.Cu-only SMD pads, compared mm to nm, and used the
+  trace-centreline threshold instead of the pad-edge ring. The corrected layer-aware measurement
+  (`tracker/hardware/pad_reachability.py`, all self-checks pass; map:
+  `docs/fab/FCU-ESCAPE-MAP.md`) says: **U1.8 / U1.22 escape on F.Cu to 3.54 mm**, but each carries an
+  **in-pad STUB via** — **clear/replace the `/SX1280_MOSI` one at `(49.95, 11.84)` first**, it sits
+  exactly where that route must start; **U4.18 is NOT escapable at current rules** (clearance binds,
+  short 0.0655 mm) and needs a placement change. Escapable ≠ routable; no endpoint-to-endpoint path has
+  been proven, and no fabrication order is authorised.
 - **`holes_co_located 2`** — a via drilled inside `C_CAP2` pad-2's hole at `(56.792502, 47.292502)`. **An
   ERROR-class fabrication fault.** Card `t_e4d0f437`.
 - **`via_dangling 8`** — routing debris, same card.
