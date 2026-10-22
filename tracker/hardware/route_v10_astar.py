@@ -541,24 +541,45 @@ def validate_plan(world, pitch, plan, own_keys, own_rects, code):
     if not segs:
         return False, "no segments"
     # 1. endpoints must land inside their own pads, on a layer the pad owns
+    #
+    # B46 (2026-10-22) -- THE REAL CAUSE of "end not on pad U_E28.x". `plan` is a LIST OF LEGS
+    # (one per consecutive pad pair), not one path, and this function read only plan[0][0] and
+    # plan[-1][-1]. For a 2-pad net that coincides with the leg's own endpoints, so it looked
+    # right; for a MULTI-PAD net it does not. Measured on /SPI1_SCK, which has FOUR pads
+    # (U1.22, U3.5, U_C.5, U_E28.5 -> three legs): legs 1 and 2 were never checked at all, and
+    # leg 3 was validated against own_keys[0] = U1.22 while it actually ends at U_E28.5. The
+    # route was legal the whole time; the check was comparing a leg's end to the wrong pad.
+    # /SPI2_SCK passed only because its net has exactly TWO pads (one leg), where the bug is
+    # invisible. Every leg is now checked against ITS OWN two pads.
+    #
+    # B45 (2026-10-22): the endpoint is the FIRST/LAST CELL OF THE LEG, not the first/last
+    # SEGMENT. path_to_copper emits a cell pair that changes layer as a VIA and `continue`s, so
+    # when a route arrives by vias -- i.e. its final step is a layer change -- segs[-1] ends at
+    # the SECOND-TO-LAST cell, which sits outside the goal pad. Checking the path cell fixes the
+    # cross-side case (U1 front -> U_E28 back) that the segment-based read could not see.
     own = {}
     for key, sides, rect in own_rects:
         own[key] = (sides, rect)
-    first = segs[0]
-    last = segs[-1]
     def in_pad(pt, key):
         sides, rect = own[key]
         return (rect[0] - 0.05 <= pt[0] <= rect[2] + 0.05
                 and rect[1] - 0.05 <= pt[1] <= rect[3] + 0.05)
-    ka, kc = own_keys[0], own_keys[1]
-    if not in_pad(first[1], ka):
-        return False, f"start not on pad {ka[0]}.{ka[1]}"
-    if not in_pad(last[2], kc):
-        return False, f"end not on pad {kc[0]}.{kc[1]}"
-    if first[0] not in own[ka][0]:
-        return False, f"start on layer without pad {ka[0]}.{ka[1]}"
-    if last[0] not in own[kc][0]:
-        return False, f"end on layer without pad {kc[0]}.{kc[1]}"
+    for leg_i, path in enumerate(plan):
+        if leg_i + 1 >= len(own_keys):
+            return False, f"more legs ({len(plan)}) than pad pairs ({len(own_keys) - 1})"
+        ka, kc = own_keys[leg_i], own_keys[leg_i + 1]
+        ep_first = to_mm(world, pitch, path[0][0], path[0][1])
+        ep_last = to_mm(world, pitch, path[-1][0], path[-1][1])
+        lyr_first = path[0][2]
+        lyr_last = path[-1][2]
+        if not in_pad(ep_first, ka):
+            return False, f"leg{leg_i} start not on pad {ka[0]}.{ka[1]}"
+        if not in_pad(ep_last, kc):
+            return False, f"leg{leg_i} end not on pad {kc[0]}.{kc[1]}"
+        if lyr_first not in own[ka][0]:
+            return False, f"leg{leg_i} start on layer without pad {ka[0]}.{ka[1]}"
+        if lyr_last not in own[kc][0]:
+            return False, f"leg{leg_i} end on layer without pad {kc[0]}.{kc[1]}"
     # 2. clearance against every foreign pad and every hole
     for layer, p0, p1 in segs:
         for ref, num, name, pcode, sides, rect in world["pads"]:
