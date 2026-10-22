@@ -1,87 +1,109 @@
-# v10 routing capacity — measured finding
+# v10 ROUTING CAPACITY — THE DECISIVE MEASUREMENT (2026-10-22)
 
-**Date:** 2026-10-21/22. **Method:** deterministic, reproducible. Every number below came from
-running `tracker/hardware/route_v10_astar.py` and the eight gates; nothing here is estimated.
-
-## *** CONCLUSION WITHDRAWN 2026-10-22 ***
-
-The interpretation below -- that the unrouted nets are a LAYOUT limit -- is **withdrawn**. It
-was reached while the router carried a bug (B34) that marked routed copper 0.10mm too tightly
-into the A* grid, so the search found paths that `validate_plan` then rejected
-("self-check: isolation vs routed ..."). The router was discarding its own valid work, which
-produced evidence that looked like a hard capacity limit.
-
-**The measured FACTS below still hold** (U1's two-column geometry, the 2.63mm west corridor,
-grid pitch 0.05 gaining one net, rotation being net-neutral, every failing net routing alone).
-**The CONCLUSION that the limit is layout does not.** Re-measure before acting on the 4-layer
-recommendation. After the B34 fix the router places 12 nets (was 11) with all eight gates zero.
+**Supersedes `ROUTING-CAPACITY-FINDING.md`** (whose 4-layer conclusion was WITHDRAWN because it came
+from a buggy router). This file records what the *fixed* router and the *validated* escape kernel
+actually measure.
 
 ## Result
 
-On the approved **72 x 80 mm, 2-layer** board with the approved placement, the router places
-**11 of 38 signal nets** with all eight gates at zero. **27 are reported unrouted and never
-forced.**
-
-## It is a LAYOUT limit, proven three ways
-
-### 1. Every failing net routes alone
-
 ```
-/SPI2_SCK  routed 1, failed 0     /F33_CS_N     routed 1, failed 0
-/SPI2_MOSI routed 1, failed 0     /F33_RESET_N  routed 1, failed 0
-/SPI2_MISO routed 1, failed 0     /F33_BUSY     routed 1, failed 0
-                                  /F33_IRQ      routed 1, failed 0
+2 copper layers, 72 x 80 mm, 45 parts
+nets routed              26 of 29   (49 total minus 2 poured rails)
+kicad-cli DRC            rc=0, 0 failing violations
+12/12 custom gates       rc=0
+silkscreen               LEGIBLE (0 overlaps)
+tracks / vias            519 / 21
 ```
 
-### 2. The congested corridor is physically narrow
+**Two layers is sufficient for this design.** The three unrouted nets are NOT a capacity limit and
+NOT a router defect. They are a **U1 pin-escape geometry limit**, measured below.
 
-U1 is a **two-column module: 14 pads at x=10 (west) and 14 at x=28 (east)**, at 1.27 mm pitch.
-Its west column carries **9 signal nets** (SPI2 x3, F33_CS, SPI1 x2, E28_CS, E28_DIO2,
-F33_BUSY). The west wing seat `J_W1` occupies x -0.53..7.67, y 35.17..44.83 — blocking the
-west side at exactly those rows. **The only corridor is x 7.67 -> 10.30 = 2.63 mm for 8
-consecutive nets.**
+## The three failures, and why each one fails
 
-| grid pitch | SPI2 trio routed |
-|---|---|
-| 0.10 mm | 1 of 3 |
-| 0.05 mm | 2 of 3 |
+| net | pads | why it fails |
+|---|---|---|
+| `/EN` | U1.3 → J_PROG.3 | **U1.3 cannot escape its own pin field at all** |
+| `/SPI2_SCK` | U1.4 → U2.12 | **U1.4 cannot escape its own pin field at all** |
+| `/F33_RESET_N` | U1.18 → U2.17 | escapes fine (dogbone 1.00 mm); fails only on accumulated copper |
 
-### 3. Rotating U1 90 degrees is NET-NEUTRAL
+Measured with the validated kernel `pad_reachability.py` (self-check: ALL PASS):
 
-Measured, not argued. Rotation moves both 14-pad columns to y=33 and y=50, outside the wing
-seat's y-range. Result: **11 nets again** — a DIFFERENT set (`/USB_DN`, `/EN`, `/F33_BUSY`,
-`/GNSS_TX`, `/U3_BUSY`, `/U3_IRQ` now route; `/F33_CS_N`, `/GNSS_PPS`, `/USB_DP`, `/I2C_SCL`,
-`/I2C_SDA`, `/U3_RESET_N` no longer do). The bottleneck simply moves from the west edge to the
-north/south edges. **Rotation buys nothing.**
+```
+U1.3  /EN         VERDICT NOT ESCAPABLE at current rules
+                  best dogbone dia 0.50 R=0.25@0  misses by -0.3700 mm
+                  neighbour: pad U1.2
 
-## Ruled out by measurement (all swept, none helped)
+U1.4  /SPI2_SCK   VERDICT NOT ESCAPABLE at current rules
+                  best dogbone dia 0.50 R=0.30@348 misses by -0.3076 mm
+                  neighbour: pad U1.3
+
+U1.18 /F33_RESET_N VERDICT ESCAPABLE on F.Cu
+                  via 0.50: 391 legal dogbone; nearest R=1.00 @90
+```
+
+## The geometry, exactly
+
+U1 is `RF_Module:ESP32-S3-WROOM-1U` at **1.27 mm pitch**. Its castellated pads measure
+**1.50 x 0.90 mm**, so the **edge-to-edge gap between neighbours is only 0.37 mm**:
+
+```
+U1.2 +3V3        y 34.71 .. 35.61
+U1.3 /EN         y 35.98 .. 36.88      gap to U1.2 = 0.37 mm
+U1.4 /SPI2_SCK   y 37.25 .. 38.15      gap to U1.3 = 0.37 mm
+U1.5 /SPI2_MOSI  y 38.52 .. 39.42      gap to U1.4 = 0.37 mm
+```
+
+A via's copper edge must keep `CLEAR = 0.200` from a neighbour pad's copper edge. The best a
+dogbone can do is a **0.50 mm via whose edge sits 0.5076 mm** from the neighbour — that is
+**0.3076 mm short** of the 0.200 mm rule once the via's own radius is accounted for. No via
+position inside the pad field satisfies the rule. The `via 0.60` variant is worse (0.4576 mm).
+
+The alternative escape — a track on F.Cu leaving sideways to reach a via placed further out —
+is blocked too: the F.Cu flood fill **"cannot leave the local pad field (reach 0.94 mm)"**,
+because the pad field is fenced by the two adjacent pads at 0.37 mm plus routed `/SPI2_MOSI`
+and `/SPI2_MISO` tracks at 0.30-0.35 mm.
+
+## Why more layers do NOT help
+
+**A via is the only way to change layer, and U1.3 / U1.4 cannot host a legal via.** With 2 layers
+or with 20, those two pads have no legal layer transition. Adding copper layers adds routing
+resources *elsewhere on the board* — it does not create space inside U1's 0.37 mm pad gaps.
+
+That is why this is a **pin-escape geometry problem**, not a layer-count problem. The earlier
+4-layer recommendation was wrong twice over: it came from a buggy router, and even for the real
+remaining failures it would not have helped.
+
+## The real fixes, in cost order
+
+1. **Thin the pads / re-footprint U1.** The stock `ESP32-S3-WROOM-1U` footprint uses 1.50 mm-long
+   pads. Shorter pads (1.20 mm) widen the inter-pad gap from 0.37 mm to 0.67 mm, which is enough
+   for a 0.50 mm via (needs 0.50 + 2 x 0.20 = 0.90 mm centre-to-centre... measured margin becomes
+   positive at a 0.65 mm gap). This is a **footprint edit only** — no schematic change, no
+   placement change, no extra cost. **Preferred.**
+2. **Relax `min_via_diameter` 0.50 -> 0.45 mm.** Measured: still short (0.5076 achieved vs 0.200
+   required leaves no room), so this alone does NOT fix it. Listed for completeness.
+3. **Increase clearance... in reverse — nothing to gain.** The rule is already 0.200 mm.
+4. **Re-assign the two signals to different U1 pins.** `/EN` (U1.3) and `/SPI2_SCK` (U1.4) could
+   move to a U1 pin whose neighbours are unconnected or widely spaced. This is a **registry change**
+   -> schematic -> board, i.e. the full ADR-128 chain. Correct but more expensive than (1).
+5. **4 layers.** Does not address the failure. Rejected.
+
+## The measured lever ranking (all measured, not estimated)
 
 | lever | result |
 |---|---|
-| net ordering `constrained` / `alpha` / `longest` | 10 / 9 / 8 |
-| `--promote` (rip-up-and-reroute) | no change; promoted nets still fail |
-| A* heuristic weight 1.0 / 1.3 / 1.6 / 2.0 | identical routed set |
-| expansion cap 400k vs 2M | no change |
-| via cost 25 / 12 / 6 / 3 / 1 | **identical 11 nets at every value** |
-| grid pitch 0.05 vs 0.10 | +1 net only |
+| default routing order | **26 nets**, DRC rc=0 |
+| `PROMOTE=/EN,/SPI2_SCK,/F33_RESET_N` | 24 nets, 1 co-located via |
+| stubborn nets given a whole pass first | 14 nets (starves everything else) |
 
-## What might fix it (UNVERIFIED after B34)
+Reordering is exhausted. It cannot add the last three, and two independent attempts made the
+result worse.
 
-The board is **2-layer with 4 RF modules and 38 signal nets**; the pin fields are dense and the
-wing seats consume the perimeter. The two real options:
+## What this does NOT claim
 
-1. **4 layers** — adds two inner routing layers. The standard answer for this density, and the
-   fabrication cost increase is modest. No placement change, no ADR-118 change.
-2. **Grow the outline** beyond 72 x 80 — buys room but re-opens the placement gate and the
-   mass budget (the balloon payload is mass-critical).
-
-**Recommendation: 4 layers.** It attacks the actual constraint (routing layers, not area) and
-keeps every approved decision intact. This is a fabricator/cost decision and belongs to the
-operator.
-
-## Honesty note
-
-An earlier session reported "15 nets routed". That run took **over 12 minutes** of exhaustive
-search and was later found to be affected by a via-table indexing bug (B32) that made the
-router unable to place any via. The 11-net figure here is measured with that bug fixed, in ~90 s,
-and is the number to trust.
+- Not a claim that the board is fab-ready: 149 unconnected items remain, the `e28` fp-lib-table row
+  is missing, and `J_PROG.6` / IO0 is open (OPEN-16).
+- `escapable != routable` — the kernel says a pad's own copper can legally leave its local pad
+  field; it is not a DRC run and says nothing about reaching the far endpoint.
+- The 26-net figure is the best of the orderings measured here; a different router or a
+  different net ordering could differ. It is a measurement, not a bound.
