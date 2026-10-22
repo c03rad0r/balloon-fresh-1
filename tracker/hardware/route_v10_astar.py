@@ -264,14 +264,25 @@ def build_grid(world, pitch):
     for ref, layer, rect in world["bodies"]:
         mark(layer, rect, 0.0)
     # edge keep-out
-    mark(F, (ox - EDGE_KEEP, oy - EDGE_KEEP, ox, oy + h + EDGE_KEEP), 0)
-    mark(B, (ox - EDGE_KEEP, oy - EDGE_KEEP, ox, oy + h + EDGE_KEEP), 0)
-    mark(F, (ox + w, oy - EDGE_KEEP, ox + w + EDGE_KEEP, oy + h + EDGE_KEEP), 0)
-    mark(B, (ox + w, oy - EDGE_KEEP, ox + w + EDGE_KEEP, oy + h + EDGE_KEEP), 0)
-    mark(F, (ox, oy - EDGE_KEEP, ox + w, oy), 0)
-    mark(B, (ox, oy - EDGE_KEEP, ox + w, oy), 0)
-    mark(F, (ox, oy + h, ox + w, oy + h + EDGE_KEEP), 0)
-    mark(B, (ox, oy + h, ox + w, oy + h + EDGE_KEEP), 0)
+    #
+    # B48 (2026-10-22) -- THE OUTER OUTLINE WAS MARKED OUTWARD ONLY. These four strips cover
+    # o-EDGE_KEEP..o and o+w..o+w+EDGE_KEEP, i.e. the band OUTSIDE the board. A cell just INSIDE
+    # the outline was therefore considered legal, and the router happily put /CUT_SENSE_W1..W4 on
+    # top of the wing-seat edge cutouts. kicad-cli caught all six with copper_edge_clearance
+    # (min_copper_edge_clearance = 0.500, error severity) while our own gates were silent -- the
+    # same shape as B34/B37/B38/B40/B44/B46: the router's model disagreed with the authority.
+    #
+    # The band is now INWARD (o-EDGE_KEEP..o+EDGE_KEEP), which covers both sides. Interior cuts
+    # below already did this correctly (mark(..., EDGE_KEEP) grows both ways); only the outer
+    # outline was one-sided.
+    mark(F, (ox - EDGE_KEEP, oy - EDGE_KEEP, ox + EDGE_KEEP, oy + h + EDGE_KEEP), 0)
+    mark(B, (ox - EDGE_KEEP, oy - EDGE_KEEP, ox + EDGE_KEEP, oy + h + EDGE_KEEP), 0)
+    mark(F, (ox + w - EDGE_KEEP, oy - EDGE_KEEP, ox + w + EDGE_KEEP, oy + h + EDGE_KEEP), 0)
+    mark(B, (ox + w - EDGE_KEEP, oy - EDGE_KEEP, ox + w + EDGE_KEEP, oy + h + EDGE_KEEP), 0)
+    mark(F, (ox, oy - EDGE_KEEP, ox + w, oy + EDGE_KEEP), 0)
+    mark(B, (ox, oy - EDGE_KEEP, ox + w, oy + EDGE_KEEP), 0)
+    mark(F, (ox, oy + h - EDGE_KEEP, ox + w, oy + h + EDGE_KEEP), 0)
+    mark(B, (ox, oy + h - EDGE_KEEP, ox + w, oy + h + EDGE_KEEP), 0)
     # B43: interior edge cuts (footprint-owned Edge.Cuts slots). An edge cut passes through the
     # WHOLE board, so it binds both copper layers, and copper must keep EDGE_CLEARANCE from it.
     # Before this, /E28_BUSY was routed across J_W2's slot at distance 0.000mm.
@@ -916,6 +927,26 @@ def main():
                         d = _seg_rect_dist(mx, my, mx, my, (r[0], r[1], r[2], r[3]))
                         if d <= g + args.pitch:
                             blocked[layer][j][i] = 1
+                # B55 (2026-10-22) -- A VIA IS BIGGER THAN A TRACK, so the SAME track already on
+                # the board needs a WIDER keep-out for a via than for another track:
+                #     track-vs-track centre >= CLEAR + TRACK_W/2 + TRACK_W/2 = 0.30mm
+                #     via  -vs-track centre >= CLEAR + VIA_D/2  + TRACK_W/2 = 0.55mm
+                # Marking only the track figure left a 0.25mm band around every piece of routed
+                # copper where A* believed a via was legal. validate_plan then refused, because
+                # for a VIA position it correctly tests `_pt_seg_dist - VIA_D/2 - rw/2 < CLEAR`
+                # (line ~668). Measured: this is the exact cause of the four remaining failures
+                # worded "isolation vs routed <net> (via)" -- /GNSS_TX, /GNSS_RX and friends.
+                # Same shape as B34/B44/B47: the grid permitted what the validator forbade.
+                gv = CLEAR + VIA_D / 2 + TRACK_W / 2
+                vi0 = max(0, int((r[0]-gv-ox)/args.pitch)-1); vi1 = min(nx-1, int((r[2]+gv-ox)/args.pitch)+1)
+                vj0 = max(0, int((r[1]-gv-oy)/args.pitch)-1); vj1 = min(ny-1, int((r[3]+gv-oy)/args.pitch)+1)
+                for lay in (F, B):
+                    for j in range(vj0, vj1+1):
+                        for i in range(vi0, vi1+1):
+                            mx, my = ox+i*args.pitch, oy+j*args.pitch
+                            d = _seg_rect_dist(mx, my, mx, my, (r[0], r[1], r[2], r[3]))
+                            if d <= gv + args.pitch:
+                                blocked[lay][j][i] = 1
             for (vx, vy) in v2:
                 ox, oy = world["origin"]
                 nx = len(blocked[0][0]); ny = len(blocked[0])

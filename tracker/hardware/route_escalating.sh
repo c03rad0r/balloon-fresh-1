@@ -15,8 +15,13 @@ WT=/home/c08r4d0r/worktrees/master-check
 PY=/home/c08r4d0r/venvs/kicad/bin/python
 cd "$WT" || exit 1
 
-echo "=== pass 1: build + route at pitch 0.10"
+echo "=== pass 1: build + fix silk + route at pitch 0.10"
 "$PY" tracker/hardware/build_hub_board_v10.py >/dev/null 2>&1 || { echo "BUILD FAILED"; exit 1; }
+# SILK (2026-10-22): the builder writes the spec-only board, so the silk repair must be re-applied
+# here or routing would run on a board whose silkscreen fails the hard gate. Silk is PRE-ROUTE work
+# (AGENTS.md 24), so it belongs in this script ahead of pass 1.
+"$PY" tracker/hardware/fix_silk.py >/dev/null 2>&1 || { echo "FIX-SILK FAILED"; exit 1; }
+"$PY" tracker/hardware/check_silk.py >/dev/null 2>&1 || { echo "SILK GATE FAILED"; exit 1; }
 "$PY" tracker/hardware/route_v10_astar.py --max-expansions 2000000 > /tmp/esc_p1.log 2>&1
 echo "pass1 exit=$?"
 grep -E '^routed|^failed' /tmp/esc_p1.log | cut -c1-400
