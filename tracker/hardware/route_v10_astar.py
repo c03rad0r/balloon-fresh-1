@@ -266,7 +266,8 @@ def restore(blocked, saved):
         blocked[layer][j][i] = 1
 
 
-def astar(blocked, nx, ny, start, goal, pitch, allow_layers, via_ok=None):
+def astar(blocked, nx, ny, start, goal, pitch, allow_layers, via_ok=None, hweight=2.0,
+          max_exp=2000000):
     """A* over (i, j, layer). start/goal are (i, j, layer) tuples."""
     if start[2] not in allow_layers or goal[2] not in allow_layers:
         return None
@@ -300,7 +301,7 @@ def astar(blocked, nx, ny, start, goal, pitch, allow_layers, via_ok=None):
     DIRS = ((1, 0), (-1, 0), (0, 1), (0, -1))
     closed = bytearray(ncell)
     expansions = 0
-    MAX_EXP = 400000          # hard stop; returns None (net reported unrouted) instead of hanging
+    MAX_EXP = max_exp
     while openq:
         expansions += 1
         if expansions > MAX_EXP:
