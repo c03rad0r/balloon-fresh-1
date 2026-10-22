@@ -611,3 +611,63 @@ Rules:
 10. **Regression tests bind every gate:** `tests/test_v10_connectivity.py` runs each gate
    TWICE — against a clean board (must pass) and against a poisoned board carrying the defect
    (must fail). A gate that cannot fail is not a gate. Any new gate needs both halves.
+
+## FLIGHT BOARD v10 — SCHEMATIC IS THE SOURCE OF TRUTH (2026-10-22) — BINDING
+
+Operator directive: *"I want the board to be derived from a schematic at all times."*
+Operator directive: *"Please include it in your git hooks and run it before showing me the
+images in future so that you catch and fix such errors before showing me your progress."*
+
+11. **ADR-128: the schematic defines connectivity; the board is DERIVED from it.**
+    Direction is one-way: `schematic → ERC → netlist → board → DRC`. A Python builder may
+    PLACE components and ROUTE copper, but it may NOT invent connectivity. `build_hub_board_v10.py`
+    assigns nets from `connectivity/v10_pinmap.reg`; that is legal **only** because
+    `check_schematic_parity.py` proves the registry equals the schematic. If they disagree, the
+    schematic wins and the builder is wrong.
+    **Measured 2026-10-22: v10 had NO schematic.** It was derived by transforming v9's NETLIST
+    (`make_v10_netlist.py`), so the E28, U_C, the ADR-123 bus split and J_PROG never went
+    through ERC. ADR-028 banned this workflow on 2026-08-05 — with this exact diagnosis ("No
+    schematic = no ERC = netlist errors propagate undetected into PCB layout", after 527 DRC
+    violations) — but was left status *Proposed* and never enforced. ADR-128 makes it binding.
+12. **Every board commit must pass `check_schematic_parity.py`:** G1 schematic exists,
+    G2 `kicad-cli sch erc` clean, G3 net parity BOTH WAYS, G4 node parity per net,
+    G5 registry agreement, G6 REFUSAL (missing schematic / missing kicad-cli = non-zero,
+    never green). A gate that cannot run must not look green.
+13. **Every board commit must pass `check_drc.py`:** `kicad-cli pcb drc`, classified by type.
+    `clearance` and `shorting_items` are HARD failures — **this is the short check the operator
+    asked for on 2026-10-22**, and it was missing: the eight custom gates reported all-zero while
+    kicad-cli found 48 violations on the same board.
+    Allow-lists must be **SCOPED and justified in writing**, never blanket. Current entries:
+    `silk_over_copper` / `silk_overlap` (cosmetic), and `copper_edge_clearance` scoped to
+    `J_W1..J_W4` **pads only** (the wing seats are edge connectors sitting on Edge.Cuts by
+    design; measured 16 items, all J_W* pads, ZERO tracks) — a TRACK near the edge still fails,
+    which is exactly why the scope exists rather than a blanket allow.
+14. **KiCad's DRC is the authority for copper-vs-copper, copper-vs-edge, silk and parity.**
+    The custom gates encode project-specific rules (registry, E28 keep-out, layer semantics).
+    BOTH must pass; neither replaces the other. When a custom gate and kicad-cli DISAGREE, that
+    disagreement is a bug in the custom gate until proven otherwise — it was 4 times on
+    2026-10-22 (B34/B37/B38/B40), and a 5th time in `check_lane_crossing.py` (B42a/B42b), where
+    the custom check invented 165 crossings and 2948 via-near hits against a board with ZERO
+    clearance violations.
+15. **Same-layer crossings are checked explicitly:** `check_lane_crossing.py` reports CROSSING /
+    OVERLAP / TOUCH / NEAR / VIA-NEAR between DIFFERENT nets on the SAME layer. Same-net
+    self-crossings are legal and counted separately. `tests/poison_lane_crossing.py` must keep
+    passing: it plants a real same-layer crossing and requires exit 1 (verified clean rc=0,
+    poisoned rc=1). A gate that once reported 165 FALSE defects must be able to report a REAL one.
+16. **Gates run BEFORE any render is shown to the operator.** Pipeline order:
+    route → 8 custom gates → `check_drc.py` → `check_schematic_parity.py` → render → Signal.
+    Showing an image of a board that fails a gate is a process defect.
+17. **Renders must make LAYER IDENTITY unambiguous.** The operator flagged two same-coloured
+    lanes crossing and could not tell whether it was a short — because the old renderer drew ONE
+    layer at a time in ONE colour, so a front-over-back crossing looked identical to a
+    front-front one. Use `render_layers_distinct.py`: FRONT = SOLID ORANGE, BACK = DASHED CYAN,
+    VIA = white circle, and any same-layer different-net crossing drawn in RED with the verdict
+    and crossing count printed ON the image. A render is evidence only if it can show the defect
+    it is used to rule out.
+18. **Hooks enforce 12 + 13:** `scripts/git-hooks/pre-commit-board-gates.py` (wired into the
+    fleet global `~/.git-hooks/pre-commit`) runs both gates whenever a `.kicad_pcb` /
+    `.kicad_sch` / `.kicad_mod` / the registry / `OPEN-ITEMS.md` is staged, so ordinary commits
+    pay nothing. Verified both ways: a non-board commit passes through, a real board commit is
+    BLOCKED with both gates naming their failures and the change left unstaged. Bypass only with
+    `--no-verify` AND a stated reason in the commit message. A gate that cannot run REFUSES
+    (exit non-zero) rather than passing silently.
