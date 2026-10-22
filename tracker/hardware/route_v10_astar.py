@@ -160,7 +160,11 @@ def build_via_ok(blocked, nx, ny, pitch):
                     if not good:
                         break
                 if good:
-                    row[i] = 1
+                    # B32 (2026-10-21): MUST be the flat index j*nx+i. Writing row[i] made
+                    # every row overwrite the same nx slots, so the table only held the LAST
+                    # row's values while A* read j*nx+i -- measured: via_ok reported 0.0%
+                    # across the ENTIRE board and the router placed ZERO vias (down from 16).
+                    row[j * nx + i] = 1
     return ok
 
 
