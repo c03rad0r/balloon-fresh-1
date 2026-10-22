@@ -507,6 +507,12 @@ def validate_plan(world, pitch, plan, own_keys, own_rects, code):
             if _seg_rect_dist(p0[0], p0[1], p1[0], p1[1], rect) - half < CLEAR - 0.001:
                 return False, f"clearance to {ref}.{num}"
     # 3. no traversal of a foreign body (own-pad entry exempt)
+    # B38 (2026-10-22): this check was PER SEGMENT -- `L * inside / steps > 0.5` -- so at a
+    # fine grid pitch each zigzag segment is ~0.05mm long and EVERY segment passed while the
+    # route tunnelled through the keep-out. Measured: /E28_BUSY ran 5.71mm beneath U_E28 and
+    # validate_plan accepted it; the gate caught it afterwards. Now the inside-length is
+    # ACCUMULATED over the whole plan and compared once.
+    total_inside = 0.0
     for layer, p0, p1 in segs:
         for ref, blayer, rect in world["bodies"]:
             if blayer != layer:
@@ -514,19 +520,28 @@ def validate_plan(world, pitch, plan, own_keys, own_rects, code):
             L = math.hypot(p1[0] - p0[0], p1[1] - p0[1])
             if L == 0:
                 continue
-            steps = max(2, int(L / 0.05) + 2)
+            steps = max(2, int(L / 0.02) + 2)
             inside = 0
             for i in range(steps):
                 t = (i + 0.5) / steps
                 px, py = p0[0] + t * (p1[0] - p0[0]), p0[1] + t * (p1[1] - p0[1])
                 if not (rect[0] <= px <= rect[2] and rect[1] <= py <= rect[3]):
                     continue
-                if any(r2[0] - 2.0 <= px <= r2[2] + 2.0 and r2[1] - 2.0 <= py <= r2[3] + 2.0
+                # B39 (2026-10-22): the own-pad exemption was a 2.0mm halo around EVERY own
+                # pad. For a pad on the keep-out module's BOUNDARY (E28 pads sit on the
+                # module edge, opening outward) that halo reaches INSIDE the module, so a
+                # route could cross the keep-out along the pad row and be exempted the whole
+                # way: measured /E28_BUSY crossing 5.71mm. The exemption is now a tight
+                # 0.6mm reach -- enough to touch the pad and its immediate escape, not enough
+                # to tunnel along the boundary.
+                if any(r2[0] - 0.6 <= px <= r2[2] + 0.6 and r2[1] - 0.6 <= py <= r2[3] + 0.6
                        for _k, _sd, r2 in own_rects):
                     continue
                 inside += 1
-            if L * inside / steps > 0.5:
-                return False, f"traverses {ref}"
+            total_inside += L * inside / steps
+    if total_inside > 0.5:
+        return False, f"traverses a keep-out module ({total_inside:.2f}mm under body)"
+
     # 4. B24 (2026-10-21): ISOLATION against copper already routed by earlier nets.
     # Measured: 5 violations appeared once more nets were placed -- /F33_BUSY running
     # straight through /F33_RESET_N's via (-0.350mm) and through /F33_RESET_N track
@@ -610,9 +625,35 @@ def main():
                     t.GetNetname() or "?", t.GetLayer(),
                     (t.GetStart().x / UM, t.GetStart().y / UM),
                     (t.GetEnd().x / UM, t.GetEnd().y / UM), t.GetWidth() / UM))
-        print(f"APPEND: loaded {len(existing)} existing track(s) as obstacles + isolation set")
+
 
     blocked, nx, ny = build_grid(world, args.pitch)
+    if existing and args.append:
+        # B37 (2026-10-22): loading existing copper for VALIDATION is not enough -- it must
+        # also be marked into the A* GRID as an obstacle, or the search routes straight
+        # through it and validate_plan rejects every candidate. Measured: pass 2 of the
+        # escalating route retried 12 nets and routed 0, every one failing with
+        # "self-check: isolation vs routed <net>". Same failure class as B34, different site.
+        ox0, oy0 = world["origin"]
+        g_mark = CLEAR + TRACK_W
+        for t in b.GetTracks():
+            if "TRACK" not in str(type(t)) or "VIA" in str(type(t)):
+                continue
+            lay = F if t.GetLayer() == pcbnew.F_Cu else B
+            x0, y0 = t.GetStart().x / UM, t.GetStart().y / UM
+            x1, y1 = t.GetEnd().x / UM, t.GetEnd().y / UM
+            rx0, rx1 = min(x0, x1), max(x0, x1)
+            ry0, ry1 = min(y0, y1), max(y0, y1)
+            i0 = max(0, int((rx0 - g_mark - ox0) / args.pitch) - 1)
+            i1 = min(nx - 1, int((rx1 + g_mark - ox0) / args.pitch) + 1)
+            j0 = max(0, int((ry0 - g_mark - oy0) / args.pitch) - 1)
+            j1 = min(ny - 1, int((ry1 + g_mark - oy0) / args.pitch) + 1)
+            for j in range(j0, j1 + 1):
+                for i in range(i0, i1 + 1):
+                    mx, my = ox0 + i * args.pitch, oy0 + j * args.pitch
+                    if _seg_rect_dist(mx, my, mx, my, (rx0, ry0, rx1, ry1)) <= g_mark + args.pitch:
+                        blocked[lay][j][i] = 1
+        
     via_ok = build_via_ok(blocked, nx, ny, args.pitch)
     want = set(n for n in args.nets.split(",") if n)
 
