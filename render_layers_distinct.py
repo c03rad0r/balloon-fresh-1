@@ -35,6 +35,7 @@ BOARD = os.path.join(HERE, "tracker", "hardware", "hub_board_v10.kicad_pcb")
 F_COL = (255, 140, 0)
 B_COL = (0, 200, 255)
 BAD_COL = (255, 40, 40)
+THT_COL = (200, 90, 220)   # magenta: copper on BOTH layers (through-hole / plated hole)
 
 
 def seg_cross(p, q, r, s):
@@ -76,7 +77,15 @@ def main():
 
     d.rectangle([T(X0, Y0), T(X0 + W_, Y0 + H_)], outline=(200, 200, 200), width=2)
 
-    # ---- pads -------------------------------------------------------------
+    # ---- pads, PER LAYER ---------------------------------------------------
+    # Operator (2026-10-22): "Please make sure each layer has its own color."
+    # Every copper layer therefore gets its OWN colour on pads as well as tracks:
+    #   F.Cu only        -> ORANGE fill
+    #   B.Cu only        -> CYAN fill
+    #   BOTH (THT/plated) -> MAGENTA fill with an orange top edge and cyan bottom edge,
+    #                        so a through-hole pad reads as "copper on both" at a glance
+    #                        instead of looking like either single layer
+    #   no copper here   -> thin grey outline only
     for fp in b.GetFootprints():
         for p in fp.Pads():
             r = p.GetBoundingBox()
@@ -84,10 +93,15 @@ def main():
                   T((r.GetX() + r.GetWidth()) / UM, (r.GetY() + r.GetHeight()) / UM)]
             ls = p.GetLayerSet()
             onF, onB = ls.Contains(pcbnew.F_Cu), ls.Contains(pcbnew.B_Cu)
-            if onF or onB:
-                net = p.GetNetname() or ""
-                fill = (60, 60, 120) if net else (110, 60, 60)
-                d.rectangle(rr, fill=fill, outline=(235, 235, 120))
+            if onF and onB:
+                d.rectangle(rr, fill=THT_COL, outline=(240, 240, 240))
+                # mark the two layers explicitly on the same pad
+                d.line([rr[0], (rr[1][0], rr[0][1])], fill=F_COL, width=3)
+                d.line([(rr[0][0], rr[1][1]), rr[1]], fill=B_COL, width=3)
+            elif onF:
+                d.rectangle(rr, fill=(120, 62, 0), outline=F_COL)
+            elif onB:
+                d.rectangle(rr, fill=(0, 70, 95), outline=B_COL)
             else:
                 d.rectangle(rr, outline=(70, 70, 70))
 
@@ -146,7 +160,8 @@ def main():
     y = 16
     d.text((75, y), "FRONT copper = SOLID ORANGE      BACK copper = DASHED CYAN      "
                     "VIA = white circle", fill=(255, 255, 255)); y += 22
-    d.text((75, y), "pads: filled = copper on that layer;  thin outline = no copper there",
+    d.text((75, y), "PADS  orange = F.Cu only   cyan = B.Cu only   MAGENTA = BOTH layers "
+                    "(through-hole)   grey outline = no copper",
            fill=(170, 170, 170)); y += 22
     verdict = (f"SAME-LAYER CROSSINGS BETWEEN DIFFERENT NETS: {len(bad)}"
                + ("   <-- DEFECT (drawn in RED)" if bad else "   (none -- no same-layer short)"))
