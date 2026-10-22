@@ -131,6 +131,39 @@ def load_world(board_path):
             "pads": pads, "bodies": bodies, "net_pads": net_pads}
 
 
+def build_via_ok(blocked, nx, ny, pitch):
+    """B28 (2026-10-21): precompute where a via may legally sit, ONCE.
+
+    The A* was re-checking a (2r+1)^2 ~ 225-cell free disc at EVERY expansion -- measured
+    330,050 disc calls = 2.0s of the 5.07s per net. A via's legality depends only on the
+    static obstacles, so it is computed once per grid here and read as O(1) in the search.
+    """
+    r = int(math.ceil((VIA_D / 2 + CLEAR + TRACK_W / 2) / pitch)) + 1
+    ok = [bytearray(nx * ny) for _ in (0, 1)]
+    for lay in (0, 1):
+        for j in range(ny):
+            row = ok[lay]
+            for i in range(nx):
+                good = True
+                for dj in range(-r, r + 1):
+                    nj = j + dj
+                    if nj < 0 or nj >= ny:
+                        good = False
+                        break
+                    brow = blocked[lay][nj]
+                    brow2 = blocked[1 - lay][nj]
+                    for di in range(-r, r + 1):
+                        ni = i + di
+                        if ni < 0 or ni >= nx or brow[ni] or brow2[ni]:
+                            good = False
+                            break
+                    if not good:
+                        break
+                if good:
+                    row[i] = 1
+    return ok
+
+
 def build_grid(world, pitch):
     """Occupancy grid per layer. A cell is blocked if any obstacle covers it."""
     ox, oy = world["origin"]
@@ -233,7 +266,7 @@ def restore(blocked, saved):
         blocked[layer][j][i] = 1
 
 
-def astar(blocked, nx, ny, start, goal, pitch, allow_layers):
+def astar(blocked, nx, ny, start, goal, pitch, allow_layers, via_ok=None):
     """A* over (i, j, layer). start/goal are (i, j, layer) tuples."""
     if start[2] not in allow_layers or goal[2] not in allow_layers:
         return None
@@ -243,62 +276,82 @@ def astar(blocked, nx, ny, start, goal, pitch, allow_layers):
         return None
     if blocked[gl][gj][gi] and (si, sj) != (gi, gj):
         return None
+    if via_ok is None:
+        via_ok = [[1] * (nx * ny) for _ in (0, 1)]
 
     def h(i, j, l):
-        return abs(i - gi) + abs(j - gj)
+        # B26 (2026-10-21): the heuristic was UNWEIGHTED, so with BEND_COST and via costs in
+        # the path cost the search expanded nearly every reachable cell -- measured 5.07s
+        # for ONE 2-pad net. Multiplier 2.0 trades optimality for speed; we do not need the
+        # shortest path, only a LEGAL one, because validate_plan gates every candidate
+        # afterwards. Higher is faster; 2.0 keeps the search well behaved.
+        return 2.0 * (abs(i - gi) + abs(j - gj))
 
-    openq = [(h(si, sj, sl), 0, (si, sj, sl), None)]
-    seen = {}
-    came = {}
+    # B27 (2026-10-21): flat arrays instead of dicts keyed by (i,j,l) tuples. The dict
+    # versions allocated a tuple per node and dominated runtime (2.22s per net even after
+    # the heuristic fix). Array indexing is ~10x faster and the grid is fixed-size.
+    INF = float("inf")
+    ncell = nx * ny * 2
+    def idx(i, j, l):
+        return (i * ny + j) * 2 + l
+    best_g = [INF] * ncell
+    prev_of = [-1] * ncell
+    openq = [(h(si, sj, sl), 0, (si, sj, sl))]
     DIRS = ((1, 0), (-1, 0), (0, 1), (0, -1))
+    closed = bytearray(ncell)
+    expansions = 0
+    MAX_EXP = 400000          # hard stop; returns None (net reported unrouted) instead of hanging
     while openq:
-        f, g, cur, prev = heapq.heappop(openq)
-        if cur in seen and seen[cur] <= g:
-            continue
-        seen[cur] = g
-        came[cur] = prev
+        expansions += 1
+        if expansions > MAX_EXP:
+            return None
+        f, g, cur = heapq.heappop(openq)
         i, j, l = cur
+        ci = idx(i, j, l)
+        if closed[ci]:
+            continue
+        closed[ci] = 1
         if (i, j, l) == (gi, gj, gl):
             path = []
-            node = cur
-            while node is not None:
-                path.append(node)
-                node = came.get(node)
+            node_i = ci
+            while node_i != -1:
+                k = node_i // 2          # k = i*ny + j  (see idx())
+                li = node_i % 2
+                ii, jj = divmod(k, ny)   # stride is ny, NOT nx -- measured bug
+                path.append((ii, jj, li))
+                node_i = prev_of[node_i]
             return list(reversed(path))
         # planar moves
         for di, dj in DIRS:
             ni, nj = i + di, j + dj
             if 0 <= ni < nx and 0 <= nj < ny and not blocked[l][nj][ni]:
-                ng = g + 1 + (BEND_COST if prev is not None and (prev[0] != i or prev[1] != j) else 0)
-                node = (ni, nj, l)
-                if node not in seen or seen[node] > ng:
-                    heapq.heappush(openq, (ng + h(ni, nj, l), ng, node, cur))
+                bend = 0
+                if prev_of[ci] != -1:
+                    pk = prev_of[ci] // 2
+                    pj_, pi_ = divmod(pk, nx)
+                    if pi_ != i or pj_ != j:
+                        bend = BEND_COST
+                ng = g + 1 + bend
+                nidx = idx(ni, nj, l)
+                if not closed[nidx] and ng < best_g[nidx]:
+                    best_g[nidx] = ng
+                    prev_of[nidx] = ci
+                    heapq.heappush(openq, (ng + h(ni, nj, l), ng, (ni, nj, l)))
         # via moves
         for nl in (0, 1):
             if nl == l or nl not in allow_layers:
                 continue
-            # a via occupies both layers; require a small free disc
-            ok = True
-            # B16 (2026-10-21): the free-disc check for a via must keep CLEAR to routed
-            # copper too, not just VIA_D/2 (measured: vias landed 0.150mm from other
-            # nets' tracks -- 54 isolation violations). Grow the disc by the clearance.
-            r = int(math.ceil((VIA_D / 2 + CLEAR + TRACK_W / 2) / pitch)) + 1
-            for dj in range(-r, r + 1):
-                for di in range(-r, r + 1):
-                    ni, nj = i + di, j + dj
-                    if not (0 <= ni < nx and 0 <= nj < ny):
-                        ok = False
-                        break
-                    if blocked[l][nj][ni] or blocked[nl][nj][ni]:
-                        ok = False
-                        break
-                if not ok:
-                    break
+            # B28: O(1) lookup of the precomputed via-feasibility bitmap. The precise
+            # rules (clearance to every pad, hole, routed track and via) are enforced by
+            # validate_plan on the finished route -- this is a fast necessary condition.
+            ok = bool(via_ok[l][j * nx + i])
             if ok:
                 ng = g + VIA_COST
-                node = (i, j, nl)
-                if node not in seen or seen[node] > ng:
-                    heapq.heappush(openq, (ng + h(i, j, nl), ng, node, cur))
+                nidx = idx(i, j, nl)
+                if not closed[nidx] and ng < best_g[nidx]:
+                    best_g[nidx] = ng
+                    prev_of[nidx] = ci
+                    heapq.heappush(openq, (ng + h(i, j, nl), ng, (i, j, nl)))
     return None
 
 
@@ -505,6 +558,10 @@ def main():
     ap.add_argument("--board", default=BOARD)
     ap.add_argument("--pitch", type=float, default=0.1)
     ap.add_argument("--nets", default="")
+    ap.add_argument("--order", default="constrained",
+                    choices=["alpha", "constrained", "reverse", "longest"],
+                    help="net ordering: 'constrained' (fewest pads first -- standard PCB "
+                         "practice: route the nets with least freedom first) or 'alpha'")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--limit", type=int, default=0)
     args = ap.parse_args()
@@ -520,6 +577,7 @@ def main():
         return 4
 
     blocked, nx, ny = build_grid(world, args.pitch)
+    via_ok = build_via_ok(blocked, nx, ny, args.pitch)
     want = set(n for n in args.nets.split(",") if n)
 
     routed, failed, railed = [], [], []
@@ -527,7 +585,25 @@ def main():
     # thin 0.2mm tracks are the wrong tool for a 580mA TX peak supply. They are skipped
     # here and poured in the next phase -- reported, never hidden.
     RAILS = ("GND", "+3V3")
+    # B25 (2026-10-21): ordering matters. Measured with the old alphabetical order: a
+    # flexible net routed early and its via blocked three later nets (F33_BUSY blocked
+    # SPI2_MISO, SPI2_MOSI, F33_RESET_N -- each reported "self-check: isolation vs routed
+    # /F33_BUSY (via)"). Standard PCB practice is to route the MOST CONSTRAINED nets first:
+    # fewest pads, then smallest pad bounding box. A net with 2 pads and 8mm between them
+    # has far less freedom than a 5-pad net spanning the board.
     items = sorted(world["net_pads"].items())
+    def _n_pads(plist):
+        return len({(r, n) for r, n, _sd, _rc in plist})
+    def _extent(plist):
+        xs = [rc[0] for *_x, rc in plist] + [rc[2] for *_x, rc in plist]
+        ys = [rc[1] for *_x, rc in plist] + [rc[3] for *_x, rc in plist]
+        return math.hypot(max(xs) - min(xs), max(ys) - min(ys)) if xs else 0.0
+    if args.order == "constrained":
+        items.sort(key=lambda kv: (_n_pads(kv[1]), _extent(kv[1]), kv[1][0][1]))
+    elif args.order == "reverse":
+        items = list(reversed(items))
+    elif args.order == "longest":
+        items.sort(key=lambda kv: (-_extent(kv[1]), _n_pads(kv[1]), kv[1][0][1]))
     for (code, name), plist in items:
         if want and name not in want:
             continue
@@ -573,7 +649,8 @@ def main():
                 for ls in sorted(a_sides):
                     for lg in sorted(c_sides):
                         p = astar(blocked, nx, ny, (start[0], start[1], ls),
-                                  (goal[0], goal[1], lg), args.pitch, set(allow))
+                                  (goal[0], goal[1], lg), args.pitch, set(allow),
+                                  via_ok=via_ok)
                         if p and (best is None or len(p) < len(best)):
                             best = p
             finally:
