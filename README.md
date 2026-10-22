@@ -14,6 +14,24 @@ test bench further down is the bench instrumentation used to characterise the ra
 
 ---
 
+## 💬 Discussion & community
+
+Questions, design review and build reports are welcome in the **Pico-Balloon Signal group**:
+
+**https://signal.group/#CJQKIPXPvMIsyJiDb-IwW7FDIM21SUhsRrSs1VqZI30MCaenEhDGbhyyJSvjaXNYMcUDeXGj**
+
+Signal is used deliberately: it needs only a phone number (no email, no account to create) and the
+group is end-to-end encrypted, which suits a hardware project where measurements and part choices get
+discussed before anything is public. If the invite link has expired, open an issue and ask for a
+fresh one.
+
+*New here?* The honest current state of the board — what works, what is open, and what is explicitly
+not yet done — is in the **⚠️ Honest state** section just below. Please read it before asking
+"is it ready to fly?", because the answer there is kept current and this README is the canonical
+place for it.
+
+---
+
 ## 🛰 The relay system
 
 ### Board status
