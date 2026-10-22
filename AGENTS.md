@@ -743,3 +743,18 @@ it gets checked & enforced automatically in future."*
     minimum. That is the smallest text that still prints legibly, not a cosmetic shrink; the board
     is dense enough (45 parts on 72×80mm) that a free-space sweep found only the left/right
     margins empty, so the fab minimum is what makes the labels fit at all.
+
+27. **A ROUTER CHANGE MUST PROVE SEARCH/VALIDATOR AGREEMENT BEFORE IT LANDS.** The pre-commit hook
+    runs `tests/test_router_grid_validator_agreement.py` whenever a staged file touches
+    `route_v10_astar.py` / `route_escalating.sh` / `route_priority.sh`, and **refuses** on failure.
+    This exists because **16 bugs in one session** (B34, B37, B44, B46, B47, B48, B55, B56 and the
+    earlier eight) shared ONE shape: the A* grid, or the `--append` loader, permitted a move that
+    `validate_plan` then refused, or that `kicad-cli` flagged. Every board gate was green while all
+    16 were live.
+    The gate had to fire on the **router file**, not on a board: patching the router does not touch
+    any `.kicad_pcb`, so a board-triggered hook never ran on the commits that introduced them.
+    The tests are **geometric, not textual** — one of them builds the real grid from the committed
+    board and asserts a cell inside the edge keep-out is blocked, which is the exact check that
+    catches B48. A comment-matching test was tried first and a poison test proved it did NOT fail
+    when the bug was reintroduced; it was replaced.
+    **Never relax these tests to make a commit pass.** If a test fails, the router is wrong.
