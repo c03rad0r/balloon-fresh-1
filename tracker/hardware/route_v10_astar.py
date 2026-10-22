@@ -562,7 +562,11 @@ def main():
     ap.add_argument("--order", default="constrained",
                     choices=["alpha", "constrained", "reverse", "longest"],
                     help="net ordering: 'constrained' (fewest pads first -- standard PCB "
-                         "practice: route the nets with least freedom first) or 'alpha'")
+                         "practice) or 'alpha'. See --promote for rip-up-and-reroute.")
+    ap.add_argument("--promote", default="",
+                    help="comma-separated nets forced to the FRONT of the route order. This is "
+                         "the rip-up-and-reroute lever: a net that failed because an earlier "
+                         "net's via blocked it can be routed first, then the rest follow.")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--limit", type=int, default=0)
     args = ap.parse_args()
@@ -603,6 +607,17 @@ def main():
         items.sort(key=lambda kv: (_n_pads(kv[1]), _extent(kv[1]), kv[1][0][1]))
     elif args.order == "reverse":
         items = list(reversed(items))
+    promote = [n for n in args.promote.split(",") if n]
+    if promote:
+        # B31 (2026-10-21): rip-up-and-reroute, done as a deterministic re-order. The
+        # router is greedy: whichever net runs first keeps its copper. Promoting a
+        # previously-blocked net to the front IS the rip-up -- the promoted net places
+        # first, and the nets that used to block it re-route around it (or report failed).
+        # Measured: different orderings route DIFFERENT net sets (constrained gets
+        # SPI2_MISO/I2C/VTCXO; alpha gets F33_BUSY/F33_IRQ), so the order is a real lever.
+        rank = {n: i for i, n in enumerate(promote)}
+        items.sort(key=lambda kv: (rank.get(kv[1][0][1], len(promote)),
+                                   _n_pads(kv[1]), _extent(kv[1]), kv[1][0][1]))
     elif args.order == "longest":
         items.sort(key=lambda kv: (-_extent(kv[1]), _n_pads(kv[1]), kv[1][0][1]))
     for (code, name), plist in items:
