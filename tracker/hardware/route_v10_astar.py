@@ -577,6 +577,10 @@ def main():
                     help="comma-separated nets forced to the FRONT of the route order. This is "
                          "the rip-up-and-reroute lever: a net that failed because an earlier "
                          "net's via blocked it can be routed first, then the rest follow.")
+    ap.add_argument("--append", action="store_true",
+                    help="route onto a board that already has copper (incremental routing). "
+                         "Existing tracks become obstacles AND are loaded as routed copper so "
+                         "the isolation checks apply. Without this the router refuses (exit 4).")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--limit", type=int, default=0)
     args = ap.parse_args()
@@ -586,10 +590,25 @@ def main():
     world["routed_vias"] = []
     b = world["board"]
     existing = [t for t in b.GetTracks() if "TRACK" in str(type(t)) and "VIA" not in str(type(t))]
-    if existing and not args.dry_run:
+    if existing and not args.dry_run and not args.append:
         print(f"REFUSED: board already has {len(existing)} track(s) -- "
-              "run build_hub_board_v10.py for a clean board first")
+              "run build_hub_board_v10.py for a clean board first, or pass --append")
         return 4
+    if existing and args.append:
+        # B33 (2026-10-22): incremental routing. Load the existing copper as routed copper so
+        # the isolation self-check applies to it, and mark it as grid obstacles so new nets
+        # route around it. This is what makes cumulative routing possible.
+        for t in b.GetTracks():
+            if "VIA" in str(type(t)):
+                p = t.GetPosition()
+                world["routed_vias"].append((t.GetNetname() or "?", (p.x / UM, p.y / UM),
+                                             t.GetWidth() / UM))
+            elif "TRACK" in str(type(t)):
+                world["routed_segs"].append((
+                    t.GetNetname() or "?", t.GetLayer(),
+                    (t.GetStart().x / UM, t.GetStart().y / UM),
+                    (t.GetEnd().x / UM, t.GetEnd().y / UM), t.GetWidth() / UM))
+        print(f"APPEND: loaded {len(existing)} existing track(s) as obstacles + isolation set")
 
     blocked, nx, ny = build_grid(world, args.pitch)
     via_ok = build_via_ok(blocked, nx, ny, args.pitch)
@@ -713,7 +732,16 @@ def main():
                 r = (min(p0[0],p1[0]), min(p0[1],p1[1]), max(p0[0],p1[0]), max(p0[1],p1[1]))
                 ox, oy = world["origin"]
                 nx = len(blocked[0][0]); ny = len(blocked[0])
-                g = CLEAR + TRACK_W/2
+                # B34 (2026-10-22): MUST be CLEAR + TRACK_W, not CLEAR + TRACK_W/2.
+                # A grid cell is a candidate CENTRELINE for the new track, so keeping CLEAR
+                # between copper EDGES needs
+                #     centre-to-centre >= CLEAR + (other half) + (own half) = CLEAR + TRACK_W
+                # Marking only CLEAR + TRACK_W/2 under-marked by 0.10mm, so A* happily routed
+                # paths that validate_plan then rejected: measured
+                # "self-check: isolation vs routed /SPI2_MISO" on both /SPI2_MOSI and
+                # /SPI2_SCK -- the router found a path and threw it away, which is why those
+                # nets could never route together no matter the ordering or via cost.
+                g = CLEAR + TRACK_W
                 i0 = max(0, int((r[0]-g-ox)/args.pitch)-1); i1 = min(nx-1, int((r[2]+g-ox)/args.pitch)+1)
                 j0 = max(0, int((r[1]-g-oy)/args.pitch)-1); j1 = min(ny-1, int((r[3]+g-oy)/args.pitch)+1)
                 for j in range(j0, j1+1):
