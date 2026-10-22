@@ -94,17 +94,30 @@ def load_world(board_path):
             # own DRC has no "copper under footprint" rule for this reason).
             # We therefore block the footprint's PAD-FIELD bounding box, grown slightly,
             # and let check_copper_under_body.py remain the gate for genuine traversals.
-            pbbs = [p.GetBoundingBox() for p in fp.Pads()]
-            if pbbs:
-                x0 = min(b.GetX() for b in pbbs) / UM
-                y0 = min(b.GetY() for b in pbbs) / UM
-                x1 = max(b.GetX() + b.GetWidth() for b in pbbs) / UM
-                y1 = max(b.GetY() + b.GetHeight() for b in pbbs) / UM
-                fbb = None
-                body_rect = (x0, y0, x1, y1)
-            else:
+            # B40 (2026-10-22): for a KEEP-OUT module the body must be its COURTYARD, not its
+            # pad field. Measured: the E28 pad field is (48.06,60.40)-(57.95,77.60) but its
+            # courtyard is (41.92,64.08)-(60.38,77.62) -- the pad-field rect left an uncovered
+            # strip x 41.92..48.06, and /E28_BUSY's 8.00mm run at y=76.5 sat exactly in that
+            # strip. validate_plan never saw it (body_rect too small) while the GATE did
+            # (courtyard) -- so the router emitted a keep-out violation and the gate caught it
+            # afterwards. A keep-out means the whole MODULE, so use the courtyard there.
+            if ref in KEEPOUT_REFS:
                 fbb = fp.GetBoundingBox(False, True)
-                body_rect = None
+                body_rect = (fbb.GetX() / UM, fbb.GetY() / UM,
+                             (fbb.GetX() + fbb.GetWidth()) / UM,
+                             (fbb.GetY() + fbb.GetHeight()) / UM)
+            else:
+                pbbs = [p.GetBoundingBox() for p in fp.Pads()]
+                if pbbs:
+                    x0 = min(b.GetX() for b in pbbs) / UM
+                    y0 = min(b.GetY() for b in pbbs) / UM
+                    x1 = max(b.GetX() + b.GetWidth() for b in pbbs) / UM
+                    y1 = max(b.GetY() + b.GetHeight() for b in pbbs) / UM
+                    fbb = None
+                    body_rect = (x0, y0, x1, y1)
+                else:
+                    fbb = fp.GetBoundingBox(False, True)
+                    body_rect = None
             if body_rect is None:
                 body_rect = (fbb.GetX() / UM, fbb.GetY() / UM,
                              (fbb.GetX() + fbb.GetWidth()) / UM,
