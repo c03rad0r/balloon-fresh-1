@@ -581,6 +581,8 @@ def main():
                     help="route onto a board that already has copper (incremental routing). "
                          "Existing tracks become obstacles AND are loaded as routed copper so "
                          "the isolation checks apply. Without this the router refuses (exit 4).")
+    ap.add_argument("--max-expansions", type=int, default=2000000,
+                    help="per-net A* expansion cap; exceeded -> net reported UNROUTED, not hung")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--limit", type=int, default=0)
     args = ap.parse_args()
