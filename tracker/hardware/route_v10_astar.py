@@ -715,7 +715,20 @@ def main():
         # B33 (2026-10-22): incremental routing. Load the existing copper as routed copper so
         # the isolation self-check applies to it, and mark it as grid obstacles so new nets
         # route around it. This is what makes cumulative routing possible.
+        #
+        # B56 (2026-10-22) -- BUT ONLY LOAD IT FOR NETS WE ARE NOT RE-ROUTING. `--append` with no
+        # `--nets` means "continue with the whole netlist", and the work list still contains nets
+        # that ALREADY have copper on the board. Loading that copper as an obstacle for the very
+        # net that owns it makes the net collide with ITSELF: measured, every one of those nets
+        # failed with "self-check: isolation vs routed <own name>" (/SCAP_ADC vs /SCAP_ADC), the
+        # pass produced only 13 nets instead of 26, and it left two co-located vias.
+        #
+        # So: when re-routing a net, its own copper must NOT be an obstacle or an isolation
+        # reference. It is still considered for the OTHER nets being routed in this pass.
+        reroute = {n for n in args.nets.split(",") if n} if args.nets else None
         for t in b.GetTracks():
+            if reroute and t.GetNetname() in reroute:
+                continue  # this net is being re-routed -- its old copper must not block it
             if "VIA" in str(type(t)):
                 p = t.GetPosition()
                 world["routed_vias"].append((t.GetNetname() or "?", (p.x / UM, p.y / UM),

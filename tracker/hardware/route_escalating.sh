@@ -22,7 +22,13 @@ echo "=== pass 1: build + fix silk + route at pitch 0.10"
 # (AGENTS.md 24), so it belongs in this script ahead of pass 1.
 "$PY" tracker/hardware/fix_silk.py >/dev/null 2>&1 || { echo "FIX-SILK FAILED"; exit 1; }
 "$PY" tracker/hardware/check_silk.py >/dev/null 2>&1 || { echo "SILK GATE FAILED"; exit 1; }
-"$PY" tracker/hardware/route_v10_astar.py --max-expansions 2000000 > /tmp/esc_p1.log 2>&1
+# PROMOTE (optional): a comma-separated net list given first pick of the corridors while every
+# other net still routes normally. Measured 2026-10-22: giving the stubborn nets a WHOLE PASS to
+# themselves starves the rest (14 nets instead of 26), because they take central corridors and
+# everything else then has to fit around them. --promote only reorders; nothing is starved.
+PROMOTE_ARGS=""
+if [ -n "${PROMOTE:-}" ]; then PROMOTE_ARGS="--promote $PROMOTE"; fi
+"$PY" tracker/hardware/route_v10_astar.py --max-expansions 2000000 $PROMOTE_ARGS > /tmp/esc_p1.log 2>&1
 echo "pass1 exit=$?"
 grep -E '^routed|^failed' /tmp/esc_p1.log | cut -c1-400
 
