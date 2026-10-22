@@ -106,10 +106,17 @@ def registry_nets(path):
 
 
 def _erc(path):
-    """Run ERC. Returns (ok, message)."""
-    r = subprocess.run(["kicad-cli", "sch", "erc", "--exit-code-violations",
-                        "--severity-error", path],
-                       capture_output=True, text=True, timeout=600)
+    """Run ERC. Returns (ok, message).
+
+    NOTE: kicad-cli writes <name>-erc.rpt into the CWD unless -o is given. An earlier version
+    omitted it and dropped `junk-erc.rpt` / `v9_flight-erc.rpt` into the repo root on every run
+    -- a gate must not litter the tree it is checking.
+    """
+    with tempfile.TemporaryDirectory() as td:
+        rpt = os.path.join(td, "erc.rpt")
+        r = subprocess.run(["kicad-cli", "sch", "erc", "--exit-code-violations",
+                            "--severity-error", "-o", rpt, path],
+                           capture_output=True, text=True, timeout=600)
     if r.returncode == 0:
         return True, "ERC clean (0 errors)"
     # kicad-cli returns non-zero when errors exist; distinguish that from a crash

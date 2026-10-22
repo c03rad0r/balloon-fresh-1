@@ -39,7 +39,13 @@ UM = 1_000_000.0
 TRACK_W = 0.200          # mm
 CLEAR = 0.200            # mm copper-to-copper
 HOLE_CLEAR = 0.500       # mm (ADR-125, applied to lanes)
-EDGE_KEEP = 0.300        # mm
+# B41 (2026-10-22): EDGE_KEEP was 0.300, but KiCad's board rule requires 0.500mm from
+# Edge.Cuts to COPPER. A cell is a candidate CENTRELINE, so the keep-out must be
+#     EDGE_CLEARANCE + TRACK_W/2 = 0.500 + 0.100 = 0.600
+# At 0.300 a centreline 0.3mm from the edge put the track EDGE 0.2mm away -- measured as
+# "copper_edge_clearance ... Track [/E28_BUSY] on B.Cu, length 10.9000 mm, actual 0.0000 mm".
+# kicad-cli DRC caught it; none of the custom gates covered copper-vs-edge.
+EDGE_KEEP = 0.600        # mm = EDGE_CLEARANCE(0.500) + TRACK_W/2(0.100)
 VIA_D = 0.500            # mm measured legal minimum (m_ViasMinSize)
 VIA_DRILL = 0.250
 VIA_COST = 25            # in grid steps -- a via is worth ~2.5 mm of detour

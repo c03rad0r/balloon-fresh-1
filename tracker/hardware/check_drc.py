@@ -41,6 +41,12 @@ BOARD = os.path.join(HERE, "hub_board_v10.kicad_pcb")
 # Violation types that DO NOT fail the build, each with a reason. Copper matters: nothing
 # copper-related is allowed here without a measured justification.
 ALLOW = {
+    # SCOPED, not blanket: the wing-seat connectors J_W1..J_W4 are EDGE CONNECTORS -- their pads
+    # sit ON Edge.Cuts by design (measured 2026-10-22: 16 items, all J_W* pads, ZERO tracks).
+    # Blanket-allowing copper_edge_clearance would hide a TRACK running along the edge, which is
+    # a real defect class on this board (/E28_BUSY did exactly that). So the entry names the refs.
+    "copper_edge_clearance": "SCOPED to J_W1..J_W4 wing-seat edge-connector pads only "
+                             "(by design on Edge.Cuts; 0 tracks). Any other ref fails.",
     # silkscreen crossing over copper is cosmetic; it never changes connectivity and is
     # routinely accepted. Recorded 2026-10-22: 18 instances, all on the board's own silk.
     "silk_over_copper": "cosmetic only; no electrical effect (32 such items recorded on v9 too)",
@@ -100,7 +106,22 @@ def main():
 
     failing, allowed = [], []
     for vtype, n in sorted(counts.items()):
-        if vtype in ALLOW:
+        if vtype in ALLOW and vtype == "copper_edge_clearance":
+            # SCOPED allow: pass only entries whose two objects are J_W* pads. A track, or any
+            # other ref, still fails -- the allow-list must not swallow the real defect class.
+            scoped_ok, scoped_bad = 0, []
+            for blk in re.finditer(r"^\[copper_edge_clearance\]:.*?(?=^\[|\Z)", txt, re.M | re.S):
+                body = blk.group(0)
+                objs = re.findall(r"@\([^)]*\):\s*(.+)", body)
+                if objs and all("J_W" in o for o in objs):
+                    scoped_ok += 1
+                else:
+                    scoped_bad.append(" | ".join(o.strip() for o in objs)[:140])
+            if scoped_ok:
+                allowed.append((vtype, scoped_ok, ALLOW[vtype]))
+            for b in scoped_bad:
+                failing.append((vtype, b))
+        elif vtype in ALLOW:
             allowed.append((vtype, n, ALLOW[vtype]))
         elif vtype == "unconnected_items" and not args.allow_unconnected:
             allowed.append((vtype, n, "warning during routing; --allow-unconnected to enforce"))
