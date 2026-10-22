@@ -73,6 +73,13 @@ if PY is None:
 GATES = [
     ("check_drc.py", []),
     ("check_schematic_parity.py", []),
+    # SILK LEGIBILITY (2026-10-22). Operator: "please make sure that the silk screen is legible
+    # and doesn't overlap with parts or other silk screens before you start routing the board.
+    # Please make sure this is part of the quality gates that have git hooks and please make sure
+    # its part of agents.md so that it gets checked & enforced automatically in future."
+    # Hard gate, no allow-list: a designator the assembler cannot read is how a part gets fitted
+    # in the wrong place. Runs BEFORE routing work by design -- silk is pre-routing work.
+    ("check_silk.py", []),
 ]
 
 

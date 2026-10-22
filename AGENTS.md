@@ -699,3 +699,47 @@ make the board. Please make sure its part of the git hooks and agents.md."*
     absence of a net, not a net. G3 now excludes synthetic single-pin names and REPORTS how many
     it ignored. A gate that cries wolf on correct input trains everyone to ignore it, which is
     worse than no gate.
+
+## FLIGHT BOARD v10 — SILKSCREEN LEGIBILITY (2026-10-22) — BINDING
+
+Operator directive, verbatim: *"please make sure that the silk screen is legible and doesn't
+overlap with parts or other silk screens before you start routing the board. Please make sure this
+is part of the quality gates that have git hooks and please make sure its part of agents.md so that
+it gets checked & enforced automatically in future."*
+
+23. **THE SILKSCREEN MUST BE LEGIBLE, AND IT IS A HARD GATE.** `check_silk.py` runs in
+    `scripts/git-hooks/pre-commit-board-gates.py` and must report **zero** of:
+    `silk_overlap`, `silk_over_copper`, `silk_edge_clearance`.
+    **There is no allow-list, and that is deliberate.** Every other gate in this repo has a scoped
+    allow-list because copper sometimes has a legitimate reason to sit close. Silk does not: two
+    designators printed on top of each other is never correct, and ink clipped by a mask opening
+    means the marking is absent exactly where it is needed. A designator the assembler cannot read
+    is how a part gets fitted in the wrong place.
+    A gate that cannot run must not look green: missing `kicad-cli`, missing report, or an
+    unparseable report all **REFUSE** (rc=2) rather than pass.
+
+24. **SILK IS PRE-ROUTING WORK.** Per §23 the operator's instruction is explicitly *"before you
+    start routing"*. Do not begin routing on a board whose silkscreen fails the gate — the fix may
+    move parts, and moving a part invalidates routing done before it. Sequence:
+    `build → fix_silk → check_silk 0 → placement gate → route`.
+
+25. **THE SILK REPAIR IS A SEPARATE STEP FROM THE BUILDER, ON PURPOSE.** `build_hub_board_v10.py`
+    must stay a pure function of its spec: same spec in, byte-identical board out. Folding silk
+    repair into it broke that (measured: two consecutive builds differed by 12,242 lines) because
+    the repair needs `kicad-cli` feedback, making the builder's output a function of a DRC run
+    instead of its spec. The pipeline is therefore three commands:
+    `build_hub_board_v10.py` → `fix_silk.py` → `check_silk.py`.
+    `fix_silk.py` itself must be deterministic: it sorts the DRC report before acting on it,
+    because `kicad-cli` runs DRC multi-threaded and the violation ORDER in the report is not
+    stable between runs (measured: that alone changed designator positions for 3 refs).
+
+26. **WHAT THE SILK FIX MAY AND MAY NOT TOUCH.** It may move **reference text** and move
+    **silk graphics to the Fab layer**. It must never touch pads, tracks, vias, zones, courtyards,
+    the board outline, or connectivity. The Fab layer is the correct home for a component body
+    outline (that is what F.Fab/B.Fab exist for), so moving an outline there is **lossless** —
+    preferred over trimming it, which was measured to make things WORSE (9 → 12 violations,
+    because each trim creates a new crossing at the cut).
+    Designators are rendered at **0.80mm height / 0.15mm line width** — the JLCPCB silkscreen
+    minimum. That is the smallest text that still prints legibly, not a cosmetic shrink; the board
+    is dense enough (45 parts on 72×80mm) that a free-space sweep found only the left/right
+    margins empty, so the fab minimum is what makes the labels fit at all.
