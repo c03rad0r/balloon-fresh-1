@@ -721,6 +721,29 @@ def main():
                     mx, my = ox0 + i * args.pitch, oy0 + j * args.pitch
                     if _seg_rect_dist(mx, my, mx, my, (rx0, ry0, rx1, ry1)) <= g_mark + args.pitch:
                         blocked[lay][j][i] = 1
+        # B44 (2026-10-22): existing VIAS were still not marked. B37 marked tracks only, so the
+        # search kept routing straight over a placed via and validate_plan rejected it with
+        # "self-check: isolation vs routed via /ANT1_433_TX" -- measured in pass 2 of the
+        # escalating route, which failed /USB_DN, /GNSS_RX, /GNSS_TX and others on exactly that.
+        # A via is copper on BOTH layers, so it must block BOTH, grown by CLEAR + TRACK_W/2.
+        g_via = CLEAR + TRACK_W / 2
+        for t in b.GetTracks():
+            if "VIA" not in str(type(t)):
+                continue
+            c = t.GetPosition()
+            cx, cy = c.x / UM, c.y / UM
+            rad = t.GetWidth(pcbnew.F_Cu) / UM / 2
+            reach = rad + g_via
+            for lay in (F, B):
+                i0 = max(0, int((cx - reach - ox0) / args.pitch) - 1)
+                i1 = min(nx - 1, int((cx + reach - ox0) / args.pitch) + 1)
+                j0 = max(0, int((cy - reach - oy0) / args.pitch) - 1)
+                j1 = min(ny - 1, int((cy + reach - oy0) / args.pitch) + 1)
+                for j in range(j0, j1 + 1):
+                    for i in range(i0, i1 + 1):
+                        mx, my = ox0 + i * args.pitch, oy0 + j * args.pitch
+                        if math.hypot(mx - cx, my - cy) <= reach + args.pitch:
+                            blocked[lay][j][i] = 1
         
     via_ok = build_via_ok(blocked, nx, ny, args.pitch)
     want = set(n for n in args.nets.split(",") if n)
