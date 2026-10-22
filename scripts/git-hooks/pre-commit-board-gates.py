@@ -75,6 +75,77 @@ GATES = [
     ("check_schematic_parity.py", []),
 ]
 
+# ---------------------------------------------------------------------------------------------
+# SCHEMATIC-SAFETY GATE (operator, 2026-10-22): "please make sure the schematic always exists and
+# is fully tested before we make the board. Please make sure its part of the git hooks and
+# agents.md."
+#
+# TWO checks, in the order the design flow says they must happen:
+#
+#   ORDER      A board may not be committed unless its schematic exists AND is ERC-clean. This
+#              is the mechanical form of "schematic before board". Without it the board can be
+#              re-routed freely while the schematic rots, which is exactly how v10 reached the
+#              state where 16 nets of copper existed with no schematic behind them at all.
+#
+#   TESTED     The schematic must be proven TESTED, not merely present. "Exists" is trivially
+#              satisfiable by an empty file, so the check is: ERC actually ran on it and returned
+#              zero violations. A missing file, a missing kicad-cli, or an unparseable report all
+#              REFUSE rather than pass.
+#
+# The check is skipped ONLY when the staged set touches no board and no schematic -- editing a
+# README must not require a KiCad install.
+# ---------------------------------------------------------------------------------------------
+SCHEM = os.path.join(HW, "schematics", "flight_board", "v10_flight.kicad_sch")
+touch_board = any(f.endswith(".kicad_pcb") for f in staged)
+touch_sch = any(f.endswith(".kicad_sch") for f in staged)
+
+if touch_board or touch_sch:
+    # ---- ORDER: the schematic must exist before/with the board ------------------------------
+    if not os.path.exists(SCHEM):
+        print("board-gates: FAIL SCHEMATIC EXISTS -- no v10 schematic at")
+        print(f"    {SCHEM}")
+        print("    ADR-128: the board is DERIVED from the schematic. A board committed with no")
+        print("    schematic has never been ERC-checked. Refusing.")
+        sys.exit(1)
+
+    import tempfile
+    with tempfile.TemporaryDirectory() as td:
+        rpt = os.path.join(td, "erc.rpt")
+        try:
+            r = subprocess.run(
+                ["kicad-cli", "sch", "erc", "--exit-code-violations", "-o", rpt, SCHEM],
+                capture_output=True, text=True, timeout=600,
+                cwd=os.path.dirname(SCHEM),
+            )
+        except Exception as e:
+            print(f"board-gates: REFUSED -- ERC could not run on the schematic ({e})")
+            sys.exit(1)
+        txt = ""
+        try:
+            with open(rpt, encoding="utf-8", errors="replace") as fh:
+                txt = fh.read()
+        except Exception:
+            pass
+        m = re.search(r"ERC messages:\s*(\d+)\s*Errors\s*(\d+)\s*Warnings\s*(\d+)", txt or "")
+        if r.returncode != 0 or not m or int(m.group(1)) != 0:
+            if m:
+                n, e, w = int(m.group(1)), int(m.group(2)), int(m.group(3))
+                print(f"board-gates: FAIL SCHEMATIC FULLY TESTED -- ERC reports "
+                      f"{n} violation(s): {e} error(s), {w} warning(s)")
+                tys = {}
+                for t in re.findall(r"\[([a-z_]+)\]", txt):
+                    tys[t] = tys.get(t, 0) + 1
+                if tys:
+                    print("    " + ", ".join(f"{k}:{v}" for k, v in
+                                             sorted(tys.items(), key=lambda kv: -kv[1])[:8]))
+            else:
+                print(f"board-gates: FAIL SCHEMATIC FULLY TESTED -- ERC rc={r.returncode} and no "
+                      f"parseable report")
+                print("    A gate that cannot prove it ran must not look green.")
+            print("    Fix the schematic (ADR-128 direction: schematic -> ERC -> netlist -> board).")
+            sys.exit(1)
+        print("board-gates: PASS SCHEMATIC FULLY TESTED -- ERC 0 violations before the board")
+
 failed = []
 for script, extra in GATES:
     path = os.path.join(HW, script)

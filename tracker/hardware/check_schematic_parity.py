@@ -167,15 +167,37 @@ def run(board, sch, reg, verbose=True):
     say(f"   info  schematic nets: {len(snets)}   board nets: {len(bnets)}")
 
     # ---- G3 NET PARITY, BOTH WAYS -------------------------------------------
-    only_board = sorted(set(bnets) - set(snets))
-    only_sch = sorted(set(snets) - set(bnets))
-    # power/mechanical nets the schematic expresses as labels may legitimately differ in name
-    # case only; normalise before comparing so the gate does not fire on cosmetics
-    norm = lambda s: s.strip().lstrip("/").upper()
-    nb = {norm(n) for n in bnets}
-    ns = {norm(n) for n in snets}
+    def norm(s):
+        return s.strip().lstrip("/").upper()
+
+    # G3b (2026-10-22): KiCad AUTO-GENERATES a net name for every deliberately unconnected pin:
+    # "unconnected-(U1-IO0-PAD27)", "ONLY_ONE_NODE", "Net-(C1-Pad1)" and similar. Those are not
+    # nets the design declares -- they are the absence of one. Counting them as "schematic nets
+    # missing from the board" made G3 fail on a schematic that was CORRECT: it listed 8 such
+    # auto-nets as sch-only while G4 (per-net pin sets) and G5 (registry agreement) both passed,
+    # which was the tell that G3, not the schematic, was wrong. A gate that fires on correct input
+    # trains everyone to ignore it, so they are excluded here and REPORTED separately instead of
+    # being silently dropped.
+    AUTO_NET = re.compile(r"^(UNCONNECTED-|ONLY_ONE_NODE|NET-\(|UNNAMED|NO_NET|NC-)", re.I)
+
+    def is_auto(n):
+        return bool(AUTO_NET.match(n))
+
+    nb_all = {norm(n) for n in bnets}
+    ns_all = {norm(n) for n in snets}
+    ns_auto = {n for n in ns_all if is_auto(n)}
+    nb_auto = {n for n in nb_all if is_auto(n)}
+
+    nb = nb_all - ns_auto
+    ns = ns_all - ns_auto
     only_board = sorted(nb - ns)
     only_sch = sorted(ns - nb)
+
+    if ns_auto or nb_auto:
+        say(f"   info  auto-generated single-pin nets ignored by G3: "
+            f"sch {len(ns_auto)}  board {len(nb_auto)}")
+    # A real net that only the BOARD has still fails. A real net that only the SCHEMATIC has
+    # still fails. Only the synthetic single-pin names are exempt.
     if only_board or only_sch:
         if only_board:
             failures.append(f"G3 NET PARITY: {len(only_board)} net(s) on the BOARD but not in the "

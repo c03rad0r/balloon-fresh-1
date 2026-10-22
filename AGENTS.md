@@ -671,3 +671,31 @@ images in future so that you catch and fix such errors before showing me your pr
     BLOCKED with both gates naming their failures and the change left unstaged. Bypass only with
     `--no-verify` AND a stated reason in the commit message. A gate that cannot run REFUSES
     (exit non-zero) rather than passing silently.
+
+## FLIGHT BOARD v10 — SCHEMATIC FIRST, PROVEN TESTED (2026-10-22) — BINDING
+
+Operator directive: *"please make sure the schematic always exists and is fully tested before we
+make the board. Please make sure its part of the git hooks and agents.md."*
+
+19. **ORDER IS ENFORCED, NOT ADVISED.** A commit that stages a `.kicad_pcb` is REFUSED unless
+    `tracker/hardware/schematics/flight_board/v10_flight.kicad_sch` exists. This is the mechanical
+    form of "schematic before board". It is not a convention: it is a hook that exits non-zero.
+    Rationale — v10 reached a state with 16 routed nets and **no schematic at all**, because the
+    board could be rebuilt and re-routed freely while nothing checked that a schematic stood
+    behind it.
+20. **"EXISTS" IS NOT "TESTED".** An empty file satisfies existence, so the hook additionally
+    requires `kicad-cli sch erc` to have **actually run and returned zero violations**, with the
+    report parsed to prove it. 21 errors do NOT pass because the file is present. A missing
+    kicad-cli, a missing report, or an unparseable report all **REFUSE** (non-zero) rather than
+    pass — a gate that cannot prove it ran must never look green.
+21. **The full pre-board sequence, in this order:**
+    `schematic → ERC 0 violations → netlist → board → kicad-cli DRC 0 → 9 custom gates → render`.
+    A board commit is legitimate only when every step BEFORE it is green. Rendering or routing
+    ahead of a clean schematic is how connectivity gets invented.
+22. **When a gate fires on correct input, the GATE is wrong — fix the gate, never the input.**
+    Measured 2026-10-22: G3 flagged 8 `UNCONNECTED-(U1-IOxx-PADnn)` nets as "schematic nets
+    missing from the board", while G4 (per-net pin sets) and G5 (registry agreement) both passed.
+    Those names are KiCad's **auto-generated** labels for deliberately unconnected pins — the
+    absence of a net, not a net. G3 now excludes synthetic single-pin names and REPORTS how many
+    it ignored. A gate that cries wolf on correct input trains everyone to ignore it, which is
+    worse than no gate.
