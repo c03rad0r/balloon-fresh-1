@@ -155,7 +155,17 @@ def main():
                                     max_exp=args.max_expansions, append=True)
             blk = blockers_of(f, raw)
             if not blk:
-                print(f"RIPUP: {f}: no named blocker (hard A* failure or geometry) -- skip")
+                # No named blocker means the ROUTER found no path at all (a hard A* failure).
+                # Distinguish that from "a blocker exists but my parser missed it": print the
+                # router's own reason verbatim. Measured 2026-10-22: all three targets return
+                # "/EN: U1.3 -> J_PROG.3", i.e. a plain no-path failure -- there is no copper
+                # to strip, so rip-up has nothing to act on for them.
+                reason = ""
+                m = re.search(r"failed \d+: \[(.*)\]", raw)
+                if m:
+                    reason = m.group(1)[:200]
+                print(f"RIPUP: {f}: NO NAMED BLOCKER -- router reason: {reason}")
+                print(f"RIPUP:   (a hard no-path failure: no copper to strip, rip-up cannot help)")
                 continue
             for bname in blk:
                 shutil.copy(board, work)

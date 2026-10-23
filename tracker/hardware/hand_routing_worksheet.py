@@ -6,7 +6,7 @@ number here comes from pcbnew on the canonical board, not from a previous report
 
 import pcbnew
 
-BOARD = "tracker/hardware/hub_board_v9.kicad_pcb"
+BOARD = "tracker/hardware/hub_board_v10.kicad_pcb"  # v10 is the live board (was v9)
 UM = 1_000_000.0  # KiCad internal units per mm
 
 
