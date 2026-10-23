@@ -116,6 +116,30 @@ def test_b46_validator_checks_every_leg():
     )
 
 
+def test_b58_append_deletes_rerouted_nets_copper():
+    """B58: --append with --nets must DELETE the old copper, not merely hide it from the model.
+
+    Hiding it (B56) stopped a net colliding with itself, but left the old copper on the BOARD,
+    so the net ended up with two routes. Measured: 16 kicad-cli clearance violations
+    (0.1536-0.1808mm against a 0.200mm rule) between /GNSS_RX and /U3_CS_N.
+    """
+    s = src()
+    assert "B58" in s, "B58 comment block missing -- the delete-old-copper fix may be reverted"
+    assert re.search(r"if \(t\.GetNetname\(\) or \"\"\) in reroute:\n\s+b\.Remove\(t\)", s), (
+        "B58 regression: --append no longer REMOVES a re-routed net's existing copper"
+    )
+
+
+def test_b57_via_width_uses_a_layer_argument():
+    """B57: PCB_VIA.GetWidth() with NO layer argument is undefined and KiCad asserts.
+
+    Measured: ~10 assert warnings per --append invocation. A through via's diameter is
+    layer-independent, but the call still needs a layer to be defined.
+    """
+    s = src()
+    assert "B57" in s, "B57 comment missing -- the via-width guard may have been reverted"
+
+
 def test_constants_are_the_project_rules():
     """The router constants must equal the .kicad_pro rules it claims to implement.
 

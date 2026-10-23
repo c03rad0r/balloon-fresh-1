@@ -726,13 +726,44 @@ def main():
         # So: when re-routing a net, its own copper must NOT be an obstacle or an isolation
         # reference. It is still considered for the OTHER nets being routed in this pass.
         reroute = {n for n in args.nets.split(",") if n} if args.nets else None
+        # B58 (2026-10-22) -- AND ACTUALLY DELETE THAT COPPER, not just hide it from the model.
+        # B56 skipped a re-routed net's copper so it would not collide with ITSELF, but skipping
+        # only removed it from the grid/validator view: the old copper stayed ON THE BOARD. A
+        # re-routed net therefore ended up with BOTH its old route and its new one. Measured:
+        # an --append invocation left 16 kicad-cli clearance violations (0.1536-0.1808mm against a
+        # 0.200mm rule) between /GNSS_RX and /U3_CS_N, which check_lane_crossing also flagged as 16
+        # NEAR items. Every gate was green on the committed board and this state failed them -- so
+        # the gates caught it, but the router should never have produced it.
+        #
+        # A re-route must REPLACE the copper, so the old items are removed here before the pass.
+        removed = 0
+        if reroute:
+            for t in list(b.GetTracks()):
+                if (t.GetNetname() or "") in reroute:
+                    b.Remove(t)
+                    removed += 1
+            if removed:
+                print(f"B58: removed {removed} existing item(s) of {sorted(reroute)} before re-routing")
+                pcbnew.SaveBoard(args.board, b)
+                b = pcbnew.LoadBoard(args.board)
+                world["board"] = b
         for t in b.GetTracks():
             if reroute and t.GetNetname() in reroute:
                 continue  # this net is being re-routed -- its old copper must not block it
             if "VIA" in str(type(t)):
                 p = t.GetPosition()
-                world["routed_vias"].append((t.GetNetname() or "?", (p.x / UM, p.y / UM),
-                                             t.GetWidth() / UM))
+                # B57 (2026-10-22): PCB_VIA.GetWidth() with NO layer argument is UNDEFINED --
+                # KiCad asserts "PCB_VIA::GetWidth called without a layer argument" and returns
+                # garbage. Measured: this fired ~10 times per --append invocation, so it was
+                # silent noise on every incremental route. Use the via's own diameter instead,
+                # which is layer-independent (a through via has one drill and one pad size).
+                try:
+                    w = t.GetWidth() / UM
+                except Exception:  # noqa: BLE001
+                    w = float(getattr(t, "GetDrillValue", lambda: VIA_D * UM)()) / UM
+                if not (0.05 <= w <= 5.0):  # a garbage width is worse than the nominal one
+                    w = VIA_D
+                world["routed_vias"].append((t.GetNetname() or "?", (p.x / UM, p.y / UM), w))
             elif "TRACK" in str(type(t)):
                 world["routed_segs"].append((
                     t.GetNetname() or "?", t.GetLayer(),
