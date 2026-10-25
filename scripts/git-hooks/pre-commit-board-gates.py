@@ -23,6 +23,43 @@ import re
 import subprocess
 import sys
 
+HW = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(
+    os.path.abspath(__file__)))), "tracker", "hardware")
+
+
+def _run_router_agreement():
+    """Run the router agreement tests. Returns 0 on success, non-zero on failure.
+
+    REFUSES if the tests cannot run (missing file, missing KiCad python) rather than passing --
+    a gate that cannot run must never look green (AGENTS.md 20).
+    """
+    tests = os.path.join(HW, "..", "..", "tests", "test_router_grid_validator_agreement.py")
+    tests = os.path.abspath(tests)
+    if not os.path.exists(tests):
+        print(f"board-gates: REFUSED -- router agreement test missing at {tests}")
+        return 1
+    # The tests import pcbnew (they build the REAL grid), so they must run under KiCad's python.
+    cands = [
+        os.path.expanduser("~/venvs/kicad/bin/python"),
+        "/usr/bin/python3",
+        sys.executable,
+    ]
+    for py in cands:
+        if not os.path.exists(py):
+            continue
+        r = subprocess.run([py, tests], capture_output=True, text=True)
+        out = (r.stdout or "") + (r.stderr or "")
+        if r.returncode == 0:
+            return 0
+        if "ModuleNotFoundError" in out and "pcbnew" in out:
+            continue  # wrong interpreter, try the next
+        for ln in out.strip().splitlines()[-6:]:
+            print(f"    {ln}")
+        return 1
+    print("board-gates: REFUSED -- no interpreter with pcbnew could run the router tests")
+    return 1
+
+
 REPO = subprocess.run(["git", "rev-parse", "--show-toplevel"],
                       capture_output=True, text=True).stdout.strip()
 if not REPO:
@@ -33,6 +70,75 @@ staged = subprocess.run(["git", "diff", "--cached", "--name-only"],
                         capture_output=True, text=True).stdout.split()
 TRIGGERS = (".kicad_pcb", ".kicad_sch", ".kicad_mod", "v10_pinmap.reg", "OPEN-ITEMS.md")
 touching = [f for f in staged if f.endswith(TRIGGERS) or any(t in f for t in TRIGGERS[3:])]
+
+# ---------------------------------------------------------------------------------------------
+# ROOT LAYOUT GATE (2026-10-25). The repository root accumulates loose one-off scripts. It had
+# 23 of them before pr/root-file-tidy: 19 v10 probes/renderers, a poisoned board and a KiCad
+# scratch project -- and two of them were INVOKED BY PATH from tracker/hardware/, so the clutter
+# was load-bearing. The operator asked for them to be filed into subdirectories.
+#
+# WHY MECHANICAL. AGENTS.md: "'always X' => mechanical gate (hook), never convention". A comment
+# asking people to keep root clean is exactly the convention that let 23 files accumulate.
+#
+# WHY ALLOW-LISTED. A deny-list lets the NEXT stray through. The rule is: root may contain only
+# named entry points; anything else must live in a subdirectory.
+#
+# Runs on EVERY commit (it needs no board and no kicad); it is a cheap text check.
+ROOT_ALLOWLIST = {
+    ".gitignore", ".gitmodules", ".secret-patterns.txt",
+    "AGENTS.md", "README.md", "PROGRESS.md",
+    "Makefile", "pyproject.toml", "pytest.ini", "uv.lock",
+}
+if os.path.exists(os.path.join(REPO, "tests", "test_root_layout.py")):
+    _root = subprocess.run(
+        [sys.executable, "-m", "pytest", "tests/test_root_layout.py", "-q",
+         "-k", "test_root_has_no_unexpected_files"],
+        cwd=REPO, capture_output=True, text=True)
+    if _root.returncode != 0:
+        print("board-gates: FAIL ROOT LAYOUT -- the repository root has file(s) that belong in a")
+        print("    subdirectory. Root may contain only these entry points:")
+        print("      " + ", ".join(sorted(ROOT_ALLOWLIST)))
+        print("    File probes/debug/render one-offs under tracker/hardware/tmp_probes/; docs")
+        print("    under docs/. (Gate: tests/test_root_layout.py)")
+        tail = ( _root.stdout or "" ) + ( _root.stderr or "" )
+        for line in tail.splitlines():
+            if line.strip().startswith(("E ", "E\t")) or "assert not" in line:
+                print("    " + line.strip())
+        sys.exit(1)
+else:
+    # A gate that cannot run must never look green (AGENTS.md 20).
+    print("board-gates: REFUSED -- tests/test_root_layout.py is missing, so the root layout")
+    print("    gate cannot run. Restore it (it is tracked) before committing.")
+    sys.exit(1)
+
+# ---------------------------------------------------------------------------------------------
+# ROUTER AGREEMENT TESTS (2026-10-22). A router change must not reach a board without proving that
+# the router's SEARCH still agrees with its VALIDATOR and with kicad-cli.
+#
+# WHY THIS IS SEPARATE FROM THE BOARD GATES. The 16 bugs of this session were almost all in
+# route_v10_astar.py, and every one had the same shape: the A* grid (or the --append loader)
+# permitted a move that validate_plan then refused, or that kicad-cli flagged. Patching the router
+# does NOT touch a .kicad_pcb, so a board-triggered hook would never have run on the very commits
+# that introduced B34/B44/B46/B47/B48/B55/B56. Hand-testing each fix is how 16 of them accumulated.
+#
+# The tests are source/geometry agreement tests (no board needed), so they are cheap and they fire
+# on the router file itself.
+ROUTER_TRIGGERS = ("route_v10_astar.py", "route_escalating.sh", "route_priority.sh")
+router_touching = [f for f in staged if any(t in f for t in ROUTER_TRIGGERS)]
+if router_touching and not touching:
+    print("board-gates: router change -- running the router agreement tests")
+    for f in router_touching[:4]:
+        print(f"    {f}")
+    rc = _run_router_agreement()
+    if rc != 0:
+        print("board-gates: FAIL ROUTER AGREEMENT -- the router's search disagrees with its")
+        print("    validator. Fix the router (never relax the test): a router whose search and")
+        print("    validator disagree finds paths it must throw away, which is the B34/B44/B46/")
+        print("    B47/B48/B55/B56 class and wasted every ordering sweep this session.")
+        sys.exit(1)
+    print("board-gates: router agreement tests pass")
+    sys.exit(0)
+
 if not touching:
     sys.exit(0)
 

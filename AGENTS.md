@@ -660,7 +660,8 @@ images in future so that you catch and fix such errors before showing me your pr
 17. **Renders must make LAYER IDENTITY unambiguous.** The operator flagged two same-coloured
     lanes crossing and could not tell whether it was a short — because the old renderer drew ONE
     layer at a time in ONE colour, so a front-over-back crossing looked identical to a
-    front-front one. Use `render_layers_distinct.py`: FRONT = SOLID ORANGE, BACK = DASHED CYAN,
+    front-front one. Use `tracker/hardware/tmp_probes/render_layers_distinct.py`: FRONT = SOLID
+    ORANGE, BACK = DASHED CYAN,
     VIA = white circle, and any same-layer different-net crossing drawn in RED with the verdict
     and crossing count printed ON the image. A render is evidence only if it can show the defect
     it is used to rule out.
@@ -743,3 +744,54 @@ it gets checked & enforced automatically in future."*
     minimum. That is the smallest text that still prints legibly, not a cosmetic shrink; the board
     is dense enough (45 parts on 72×80mm) that a free-space sweep found only the left/right
     margins empty, so the fab minimum is what makes the labels fit at all.
+
+27. **A ROUTER CHANGE MUST PROVE SEARCH/VALIDATOR AGREEMENT BEFORE IT LANDS.** The pre-commit hook
+    runs `tests/test_router_grid_validator_agreement.py` whenever a staged file touches
+    `route_v10_astar.py` / `route_escalating.sh` / `route_priority.sh`, and **refuses** on failure.
+    This exists because **16 bugs in one session** (B34, B37, B44, B46, B47, B48, B55, B56 and the
+    earlier eight) shared ONE shape: the A* grid, or the `--append` loader, permitted a move that
+    `validate_plan` then refused, or that `kicad-cli` flagged. Every board gate was green while all
+    16 were live.
+    The gate had to fire on the **router file**, not on a board: patching the router does not touch
+    any `.kicad_pcb`, so a board-triggered hook never ran on the commits that introduced them.
+    The tests are **geometric, not textual** — one of them builds the real grid from the committed
+    board and asserts a cell inside the edge keep-out is blocked, which is the exact check that
+    catches B48. A comment-matching test was tried first and a poison test proved it did NOT fail
+    when the bug was reintroduced; it was replaced.
+    **Never relax these tests to make a commit pass.** If a test fails, the router is wrong.
+
+## REPOSITORY ROOT LAYOUT (2026-10-25) — BINDING
+
+Operator directive: *"there are still too many files on the top level directory of the repo.
+Please organize these files in subdirectories."* The root had **23** loose files: 19 v10
+probe/render one-offs, a poisoned test board and a KiCad scratch project. Two of them
+(`render_layers_distinct.py`) were **invoked by path** from `tracker/hardware/`, so the clutter
+was load-bearing — a move that ignores the callers breaks renders.
+
+28. **ROOT IS ALLOW-LISTED, AND IT IS A HOOK.** The repository root may contain **only** these
+    entry points: `.gitignore`, `.gitmodules`, `.secret-patterns.txt`, `AGENTS.md`, `README.md`,
+    `PROGRESS.md`, `Makefile`, `pyproject.toml`, `pytest.ini`, `uv.lock`.
+    Everything else must live in a subdirectory. Enforced by `tests/test_root_layout.py`, run from
+    `scripts/git-hooks/pre-commit-board-gates.py` on **every** commit (it needs no board and no
+    kicad). A gate that cannot run REFUSES (non-zero) rather than passing.
+    **Allow-listed, not deny-listed, on purpose** — a deny-list lets the next stray through, which
+    is exactly how 23 accumulated. Adding a name to the allow-list is the ONE way to add a root
+    file, and the reason must be "repo-wide entry point", never "it was convenient".
+
+29. **WHERE THINGS GO.**
+    - one-off debug / probe / render scripts → `tracker/hardware/tmp_probes/`
+      (read its `README.md` first — those probes have clobbered the real board before)
+    - board scratch: poisoned `.kicad_pcb` copies, scratch `.kicad_pro` → same directory
+    - documentation → `docs/` (clustered; see its own conventions)
+    - reusable tooling → `tools/` or `scripts/`, **not** root
+
+30. **A MOVE MUST FIX ITS CALLERS, AND MUST NOT DELETE WORK.** When relocating a script, grep the
+    repo for invocations and repairs them in the same commit; and file the script, never drop it —
+    the probes document *how* each defect was measured. `tests/test_root_layout.py` asserts both:
+    that the 19 former root probes still exist under `tmp_probes/`, and that the two known callers
+    point at the new path.
+
+31. **THE PRE-EXISTING HAZARD THIS DID NOT FIX (recorded, not hidden).** **64 of 65** scripts in
+    `tracker/hardware/tmp_probes/` hardcode `/home/c08r4d0r/worktrees/master-check/...`, so they
+    only run in one worktree. Fixing that is a 64-file change and is **out of scope** for a layout
+    PR; it is recorded here so the next person does not assume the directory is portable.

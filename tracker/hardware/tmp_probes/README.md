@@ -44,3 +44,28 @@ footprints** — the exact signature of these clobbers. If you see
 | `clean_dead_tracks.py` | removed zero-length tracks (CAD fiction) from an early board |
 | `census2.py` | dedup of duplicate shield pads — found the 4 phantom "self-nets" |
 | `conncheck_repo.py` | pad-touch verification per net |
+
+## Filed here from the repository ROOT (2026-10-25)
+
+The root had accumulated 23 loose files; `pr/root-file-tidy` filed them here. Two groups:
+
+- **Moved in (7)** — were only ever at root: `make_progress_map.py`, `make_registry_view.py`,
+  `render_cross_side.py`, `render_layer.py`, `render_layers_distinct.py`, `trackdbg.py`,
+  `u2pads.py`, plus the scratch artefacts `poison_uc9.kicad_pcb` and `scratch.kicad_pro`.
+- **De-duplicated (12)** — already existed here byte-for-byte, so the root copies were deleted:
+  `census2.py`, `clean_dead_tracks.py`, `conncheck_repo.py`, `layercheck.py`, `dbg_uc9.py`,
+  `paddbg.py`, `poison_uc9.py`, `samechip.py`, `trackdump.py`, `ucmeasure.py`, `ucnet.py`,
+  `zoom_defect.py`.
+
+Root is now allow-listed and gated (`tests/test_root_layout.py`, run from the pre-commit hook) —
+see AGENTS.md §28–§30.
+
+## KNOWN LIMITATION — this directory is NOT portable
+
+**64 of the 65 scripts here hardcode `/home/c08r4d0r/worktrees/master-check/...`.** They therefore
+only run when that exact worktree exists. This is a **pre-existing condition**, recorded rather
+than hidden: it was not introduced by the move and was deliberately **not** fixed in that PR
+(a 64-file change does not belong in a layout cleanup).
+
+If you are wiring one of these into anything real, **replace the hardcoded path with a repo-relative
+one resolved from `__file__`** — and cite the board you actually read, per rule 4 above.
