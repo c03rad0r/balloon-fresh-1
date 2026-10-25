@@ -26,10 +26,66 @@ REG = os.path.join(HW, "connectivity", "v10_pinmap.reg")
 UM = 1_000_000.0
 
 
+_PCBNEW_PROBE = None
+
+
+def _pcbnew_usable():
+    """Probe KiCad's python module AS THE CHILD SCRIPTS WILL SEE IT, in a subprocess.
+
+    WHY NOT `pytest.importorskip`. Two host states defeat a bare importorskip, and this
+    file hits both:
+
+    1. **Absent** (CI: plain ubuntu-latest has no KiCad) -> ImportError. importorskip
+       handles this, but only if it is reached.
+    2. **Found, then SEGFAULT.** On a dev host `/usr/lib/python3/dist-packages/
+       _pcbnew.so` can be a symlink to `_pcbnew.kiface` bound to a different CPython
+       ABI, so `import pcbnew` dies with SIGSEGV -- uncatchable in-process, it takes the
+       whole pytest run down.
+
+    THE DISTINCTION THAT MATTERS (measured 2026-10-25). This file does NOT import pcbnew
+    into its own process; it drives the board by running `tracker/hardware/check_lane_*.py`
+    as CHILD PROCESSES, and those do a plain `import pcbnew` with no path help. A bare
+    interpreter therefore CANNOT import pcbnew here even though a probe that first inserts
+    `/usr/lib/python3/dist-packages` CAN. Probing with the path-insert would report
+    "usable" and let the board tests run, whereupon every child dies with
+    ModuleNotFoundError and its non-zero exit is misread as a REAL GATE FAILURE.
+
+    So the probe must reproduce the CHILD's environment exactly: plain interpreter, no
+    path insertion. Whatever the children can do is what this file may assume.
+    """
+    global _PCBNEW_PROBE
+    if _PCBNEW_PROBE is None:
+        # Deliberately NO sys.path.insert: this mirrors check_lane_*.py, the real caller.
+        probe = "import pcbnew; print('OK')"
+        try:
+            r = subprocess.run([sys.executable, "-c", probe],
+                               capture_output=True, timeout=120)
+            ok = r.returncode == 0 and b"OK" in r.stdout
+            why = "ok" if ok else (
+                f"child `import pcbnew` failed, exit {r.returncode}"
+                + (" (SIGSEGV)" if r.returncode == -11 else "")
+                + (" [module not on the default path]" if r.returncode == 1 else ""))
+            _PCBNEW_PROBE = (ok, why)
+        except (OSError, subprocess.SubprocessError) as exc:
+            _PCBNEW_PROBE = (False, f"probe could not run: {exc!r}")
+    return _PCBNEW_PROBE
+
+
 def _pcbnew():
-    """Lazy import: the STATIC assertions in this file must run in CI (no KiCad there).
-    A module-level importorskip skips the whole file -- including them -- which made the
-    CI suite report "1 skipped" and exit 5 (no tests ran)."""
+    """KiCad's python module, or a LOUD skip.
+
+    The STATIC assertions in this file must still run where KiCad is unavailable
+    (they encode findings that do not need a board), so this is a per-test skip, not
+    a module-level one -- a module-level importorskip skips the whole file and made
+    the CI suite report "1 skipped / exit 5 (no tests ran)".
+    """
+    usable, why = _pcbnew_usable()
+    if not usable:
+        pytest.skip(
+            f"KiCad python module unusable here ({why}). NOT a pass -- the board-level "
+            f"checks could not be made. They run in the pre-commit hook where pcbnew "
+            f"is usable (pre-commit-board-gates.py).")
+    sys.path.insert(0, "/usr/lib/python3/dist-packages")
     return pytest.importorskip("pcbnew", reason="pcbnew unavailable (CI) -- loud skip")
 
 
