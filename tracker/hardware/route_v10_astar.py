@@ -700,6 +700,14 @@ def main():
                     help="per-net A* expansion cap; exceeded -> net reported UNROUTED, not hung")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--limit", type=int, default=0)
+    # Clobber guard. It exists so a bad load can never overwrite the real board with a
+    # skeleton -- but the threshold was hardcoded to the hub's 28 footprints, so a
+    # legitimately SMALL board (the 7-part wing interconnect) could never be saved. The
+    # caller now states the expected count; the default keeps the hub behaviour identical.
+    ap.add_argument("--expect-footprints", type=int, default=20,
+                    dest="expect_footprints",
+                    help="clobber guard: refuse to save if the board has fewer "
+                         "footprints than this (default 20 = the hub's floor)")
     args = ap.parse_args()
 
     world = load_world(args.board)
@@ -1044,9 +1052,9 @@ def main():
                 v.SetDrill(int(VIA_DRILL * UM))
                 b.Add(v)
     nfps = len(b.GetFootprints())
-    if nfps < 20:
+    if nfps < args.expect_footprints:
         raise SystemExit(f"REFUSED: refusing to save a board with only {nfps} footprints "
-                         "(clobber guard -- expected 28)")
+                         f"(clobber guard -- expected >= {args.expect_footprints})")
     pcbnew.SaveBoard(args.board, b)
     print(f"saved {args.board}")
     return 0
