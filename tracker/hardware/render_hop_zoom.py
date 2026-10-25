@@ -53,7 +53,7 @@ def main():
     # one base render at high scale, then crop per hop
     base = os.path.join(args.outdir, "_full.png")
     subprocess.run([sys.executable if "python" in sys.executable else "python3",
-                    os.path.join(HERE, "..", "..", "render_layers_distinct.py"),
+                    os.path.join(HERE, "tmp_probes", "render_layers_distinct.py"),
                     base, "--board", args.board, "--scale", "20"],
                    capture_output=True, text=True)
     if not os.path.exists(base):

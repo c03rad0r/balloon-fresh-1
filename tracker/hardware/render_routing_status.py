@@ -42,7 +42,7 @@ def main():
     ap.add_argument("--net", action="append", default=["/EN", "/SPI2_SCK", "/F33_RESET_N"])
     args = ap.parse_args()
 
-    subprocess.run(["python3", os.path.join(HERE, "..", "..", "render_layers_distinct.py"),
+    subprocess.run(["python3", os.path.join(HERE, "tmp_probes", "render_layers_distinct.py"),
                     "/tmp/_base_routing.png", "--board", args.board, "--scale", str(args.scale)],
                    capture_output=True, text=True)
     base = "/tmp/_base_routing.png"
