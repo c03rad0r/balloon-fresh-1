@@ -128,7 +128,14 @@ def pad_sig(pad):
 
 
 def model_paths(fp):
-    return [m.m_Filename for m in fp.Models()]
+    """MODELS THAT ARE ACTUALLY DRAWN. A reference with m_Show=False is excluded from the 3D
+    view by KiCad itself, so it cannot be "silently absent" -- there is nothing to resolve and
+    nothing to warn about. MEASURED: without this filter a deliberately-disabled reference was
+    reported as "does not resolve", which is a false finding: the user asked for no model.
+    Only a model that is SHOWN but unresolvable is the hazard AGENTS.md describes
+    ("kicad-cli pcb render exits 0 and prints no warning when a footprint's model does not
+    resolve -- the part is silently absent")."""
+    return [m.m_Filename for m in fp.Models() if getattr(m, "m_Show", True)]
 
 
 def audit_board(path: str, root: str | None = None) -> tuple[list[str], list[str]]:
