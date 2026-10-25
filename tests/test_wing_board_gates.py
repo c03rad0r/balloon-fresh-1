@@ -136,14 +136,36 @@ def test_fully_routed():
     assert d["tracks"] >= 20, d
 
 
-def test_drc_has_no_electrical_or_silk_violations():
-    """lib_footprint_issues is expected (generated footprints, no registered library).
-    Anything else -- short, clearance, crossing, mask bridge, silk -- is a defect."""
+def test_footprints_resolve_from_a_real_library():
+    """No `lib_footprint_issues` / `lib_footprint_mismatch`.
+
+    MEASURED history: the board named library 'wing_ic' but no such library existed, so
+    DRC reported 7 x "does not include the footprint library 'wing_ic'" and the board could
+    never be ordered. Creating wing_ic.pretty then produced 7 x lib_footprint_mismatch
+    because the board's hand-written bodies differed from the library files. The board now
+    emits the library footprint verbatim, so both classes must stay at zero.
+    """
     rpt = os.path.join(os.path.dirname(BOARD), "wing_interconnect_v1-drc.rpt")
     r = subprocess.run(["kicad-cli", "pcb", "drc", BOARD],
                        capture_output=True, text=True)
     assert r.returncode == 0, r.stdout + r.stderr
     text = open(rpt, errors="replace").read() if os.path.exists(rpt) else ""
-    kinds = set(re.findall(r"\[([a-z_]+)\]", text))
-    bad = kinds - {"lib_footprint_issues"}
-    assert not bad, "DRC reported: %s" % sorted(bad)
+    bad = [k for k in re.findall(r"\[([a-z_]+)\]", text)
+           if k in ("lib_footprint_issues", "lib_footprint_mismatch")]
+    assert not bad, "footprints do not resolve cleanly: %s" % bad
+    # and every footprint must point at the project library, not a placeholder
+    out = _board_script(
+        "print(json.dumps(sorted({f.GetFPIDAsString() for f in b.GetFootprints()})))\n")
+    import json
+    fpid = json.loads(out.strip().splitlines()[-1])
+    assert all(p.startswith("wing_ic:") for p in fpid), fpid
+
+
+def test_drc_has_no_electrical_or_silk_violations():
+    """The board is fully clean: zero violations of ANY class, including lib warnings."""
+    rpt = os.path.join(os.path.dirname(BOARD), "wing_interconnect_v1-drc.rpt")
+    r = subprocess.run(["kicad-cli", "pcb", "drc", "--exit-code-violations", BOARD],
+                       capture_output=True, text=True)
+    text = open(rpt, errors="replace").read() if os.path.exists(rpt) else ""
+    kinds = sorted(set(re.findall(r"\[([a-z_]+)\]", text)))
+    assert r.returncode == 0 and not kinds, "DRC reported: %s" % kinds

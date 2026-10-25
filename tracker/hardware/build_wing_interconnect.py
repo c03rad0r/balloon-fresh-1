@@ -54,6 +54,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import os
+import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -92,6 +93,16 @@ MID_Y = 10.4
 NETS = [("SOLAR_P", 1), ("SOLAR_MID1", 2), ("SOLAR_MID2", 3), ("SOLAR_N", 4)]
 NETCODE = dict(NETS)
 
+# lib_id INSTANCE NAME per reference. These resolve against tracker/hardware/wing_interconnect/
+# wing_ic.pretty via that directory's fp-lib-table (${KIPRJMOD}). MEASURED before this existed,
+# DRC reported 7 x "does not include the footprint library 'wing_ic'" -- a library-NAMING fault,
+# not a geometry fault. The pads below are unchanged; only the name resolves now.
+FP_FOR_REF = {
+    "J1": "Tab_2P",
+    "SC1": "SolarTail_2P", "SC2": "SolarTail_2P", "SC3": "SolarTail_2P",
+    "D1": "D_SMA_Wing", "D2": "D_SMA_Wing", "D3": "D_SMA_Wing",
+}
+
 # cell k: (ref, x of its PAD PAIR, high net, low net)
 CELLS = [
     ("SC1", CELL_X[0], "SOLAR_P", "SOLAR_MID1"),
@@ -120,6 +131,36 @@ def pads():
         p.append((ref, "1", hi, cx - PAD_DX, DIODE_Y, SMA_PAD_L, SMA_PAD_W))
         p.append((ref, "2", lo, cx + PAD_DX, DIODE_Y, SMA_PAD_L, SMA_PAD_W))
     return p
+
+
+def lib_footprint(ref: str, fpname: str, ox: float, oy: float, rows) -> str:
+    """The wing_ic library footprint, re-homed onto the board at (ox, oy).
+
+    Only three things change from the library file: the lib_id prefix, the origin, and
+    the reference text plus per-pad nets. Everything else -- courtyard, fab outline,
+    pad size, pad order -- is copied through byte-for-byte so `lib_footprint_mismatch`
+    cannot fire.
+    """
+    src = os.path.join(HERE, "wing_interconnect", "wing_ic.pretty", fpname + ".kicad_mod")
+    text = open(src, errors="replace").read().rsplit(")", 1)[0]  # drop the closing paren
+    body = text.split("\n", 1)[1]                                 # drop the (footprint "X" line
+    # replace the reference placeholder with the real designator
+    body = re.sub(r'\(fp_text reference "[^"]*"', '(fp_text reference "%s"' % ref, body, count=1)
+    # attach a net to each pad, matching by pad number
+    nets = {num: net for _r, num, net, _x, _y, _w, _h in rows}
+    out = []
+    for line in body.split("\n"):
+        mm = re.match(r'(\s*)\(pad "([^"]+)"(.*)\)\s*$', line)
+        if mm and mm.group(2) in nets:
+            net = nets[mm.group(2)]
+            out.append('%s(pad "%s"%s (net %d "%s"))'
+                       % (mm.group(1), mm.group(2), mm.group(3),
+                          NETCODE[net], net))
+        else:
+            out.append(line)
+    body = "\n".join(out)
+    return ('  (footprint "wing_ic:%s" (layer "F.Cu") (at %s %s)\n%s\n  )'
+            % (fpname, _f(ox), _f(oy), body))
 
 
 def _f(v: float) -> str:
@@ -201,22 +242,18 @@ def build() -> str:
     for row in pads():
         by_ref.setdefault(row[0], []).append(row)
     for ref, rows in by_ref.items():
-        # all pads of a ref share one origin; place the footprint at the first pad
-        _, _, _, ox, oy, _, _ = rows[0]
-        A(f'  (footprint "wing_ic:{ref}" (layer "F.Cu") (at {_f(ox)} {_f(oy)})')
-        # REFERENCE IS MANDATORY — on the FAB layer, not silk.
-        # Measured: I removed this to fix 3 silk_overlap and that was a serious mistake --
-        # without a Reference property every footprint's ref reads back as the same value,
-        # so load_world's (ref, pad-number) dedup collapsed SOLAR_P's three pads to ONE and
-        # the router skipped P and N entirely ("failed 0" but only 2 nets routed).
-        # F.Fab carries it without touching the silkscreen, so both gates pass.
-        A(f'    (fp_text reference "{ref}" (at 0 3.4) (layer "F.Fab") '
-          f'(effects (font (size {_f(SILK)} {_f(SILK)}) (thickness 0.15))))')
-        for _, num, net, x, y, w, h in rows:
-            A(f'    (pad "{num}" smd rect (at {_f(x - ox)} {_f(y - oy)}) '
-              f'(size {_f(w)} {_f(h)}) '
-              f'(layers "F.Cu" "F.Paste" "F.Mask") (net {NETCODE[net]} "{net}"))')
-        A("  )")
+        # ORIGIN IS THE PAD-PAIR CENTRE, not the first pad. The library footprint places
+        # its pads at +-dx around the origin, so anchoring at a pad would shift every pad
+        # by dx (measured: pads landed off the routed copper -> 2 shorts + 11 unconnected).
+        ox = (min(r[3] for r in rows) + max(r[3] for r in rows)) / 2.0
+        oy = (min(r[4] for r in rows) + max(r[4] for r in rows)) / 2.0
+        fpname = FP_FOR_REF[ref]
+        # EMIT THE LIBRARY FOOTPRINT VERBATIM, substituting only origin / reference /
+        # net. Writing the body by hand produced `lib_footprint_mismatch` on all 7 parts
+        # (measured): DRC compares the board's embedded copy against wing_ic.pretty and
+        # any difference -- even a missing courtyard or a different pad order -- is a
+        # warning. Generating from the library makes a mismatch impossible by construction.
+        A(lib_footprint(ref, fpname, ox, oy, rows))
     for net, layer, x1, y1, x2, y2 in STRAIGHT_ROUTES:
         A(f'  (segment (start {_f(x1)} {_f(y1)}) (end {_f(x2)} {_f(y2)}) '
           f'(width 0.5) (layer "{layer}") (net {NETCODE[net]}))')

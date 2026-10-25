@@ -66,146 +66,15 @@
 	(net 2 "SOLAR_MID1")
 	(net 3 "SOLAR_MID2")
 	(net 4 "SOLAR_N")
-	(footprint "wing_ic:D2"
+	(footprint "wing_ic:D_SMA_Wing"
 		(layer "F.Cu")
-		(uuid "08e456c1-ba46-4953-b8a1-b35fc45796e5")
-		(at 20.15 6)
-		(property "Reference" "D2"
-			(at 0 3.4 0)
-			(layer "F.Fab")
-			(uuid "483117fd-b155-4a04-ac6c-f9e4aebac014")
-			(effects
-				(font
-					(size 0.8 0.8)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property "Value" ""
-			(at 0 0 0)
-			(layer "F.Fab")
-			(uuid "cf14e608-f18a-4b9c-8983-b7a6f50166d1")
-			(effects
-				(font
-					(size 1.27 1.27)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 0 0 0)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "557593e8-6a6f-4c5b-bbd9-0d37f0c4aa36")
-			(effects
-				(font
-					(size 1.27 1.27)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 0 0 0)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "80ca62ec-740b-4b97-9361-22bfc80903b5")
-			(effects
-				(font
-					(size 1.27 1.27)
-					(thickness 0.15)
-				)
-			)
-		)
-		(pad "1" smd rect
-			(at 0 0)
-			(size 2.3 1.55)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-			(net 2 "SOLAR_MID1")
-			(uuid "00425029-b9da-4fe7-a154-2de187e20dcc")
-		)
-		(pad "2" smd rect
-			(at 3.7 0)
-			(size 2.3 1.55)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-			(net 3 "SOLAR_MID2")
-			(uuid "bf5712e0-8bff-411c-9766-c997abbd64c7")
-		)
-		(embedded_fonts no)
-	)
-	(footprint "wing_ic:D3"
-		(layer "F.Cu")
-		(uuid "1d4de93e-cb26-484b-91f8-b800cc43b4cd")
-		(at 28.15 6)
-		(property "Reference" "D3"
-			(at 0 3.4 0)
-			(layer "F.Fab")
-			(uuid "d287b574-c6da-4427-94e2-d8a45374a5b4")
-			(effects
-				(font
-					(size 0.8 0.8)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property "Value" ""
-			(at 0 0 0)
-			(layer "F.Fab")
-			(uuid "136ae921-5972-448d-960f-0d6aa2a37df8")
-			(effects
-				(font
-					(size 1.27 1.27)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 0 0 0)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "98cd6c09-0227-4a85-bbc1-7d1d3ed10b49")
-			(effects
-				(font
-					(size 1.27 1.27)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 0 0 0)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "300b3ef5-1746-4727-881d-aa504805fbfc")
-			(effects
-				(font
-					(size 1.27 1.27)
-					(thickness 0.15)
-				)
-			)
-		)
-		(pad "1" smd rect
-			(at 0 0)
-			(size 2.3 1.55)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-			(net 3 "SOLAR_MID2")
-			(uuid "632b6fea-6ba6-4c92-ae84-ad00f6c007a5")
-		)
-		(pad "2" smd rect
-			(at 3.7 0)
-			(size 2.3 1.55)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-			(net 4 "SOLAR_N")
-			(uuid "075c8de9-f4f4-4f75-ae34-09cea13dd6bc")
-		)
-		(embedded_fonts no)
-	)
-	(footprint "wing_ic:D1"
-		(layer "F.Cu")
-		(uuid "4660379d-9354-49e7-beeb-efd80d446cb4")
-		(at 12.15 6)
+		(uuid "092012e4-2506-484c-a92f-47b66db962e1")
+		(at 14 6)
+		(descr "Wing interconnect D_SMA_Wing -- house land pattern, see build_wing_footprints.py")
 		(property "Reference" "D1"
-			(at 0 3.4 0)
+			(at 0 -2.3 0)
 			(layer "F.Fab")
-			(uuid "5008bb76-bfcc-45c2-b8f8-3979609374a3")
+			(uuid "3deb62f6-73a8-46d9-bbdf-6408ddb0dc6d")
 			(effects
 				(font
 					(size 0.8 0.8)
@@ -213,13 +82,14 @@
 				)
 			)
 		)
-		(property "Value" ""
-			(at 0 0 0)
+		(property "Value" "D_SMA_Wing"
+			(at 0 2.3 0)
 			(layer "F.Fab")
-			(uuid "47f71ddb-2f95-4bee-8949-d59b5cbe145a")
+			(hide yes)
+			(uuid "b7392110-bb0a-487c-adbd-b9c12ebd8a45")
 			(effects
 				(font
-					(size 1.27 1.27)
+					(size 0.8 0.8)
 					(thickness 0.15)
 				)
 			)
@@ -228,7 +98,7 @@
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "bc81d32e-45aa-4f4d-8a9e-ceec1e37be8c")
+			(uuid "618d662a-6c3e-43ab-ae43-8af5a7039f95")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -240,7 +110,7 @@
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "090305d3-5cbb-4fc2-8906-ecad50212008")
+			(uuid "0292d2d0-c7e5-47ce-ac6b-fc944f4bb078")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -248,96 +118,54 @@
 				)
 			)
 		)
+		(attr smd)
+		(fp_rect
+			(start -2.4 -1.55)
+			(end 2.4 1.55)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "785a707d-a2d9-4593-91f1-0f2af907b8ef")
+		)
+		(fp_rect
+			(start -2.15 -1.3)
+			(end 2.15 1.3)
+			(stroke
+				(width 0.1)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.Fab")
+			(uuid "8edf13a4-3df7-49bb-aa9b-cf92430d3133")
+		)
 		(pad "1" smd rect
-			(at 0 0)
+			(at -1.85 0)
 			(size 2.3 1.55)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net 1 "SOLAR_P")
-			(uuid "e6d22024-9c30-42cc-a484-c0d64f527b27")
+			(uuid "08210684-bac7-4736-8ee9-659aa804746d")
 		)
 		(pad "2" smd rect
-			(at 3.7 0)
+			(at 1.85 0)
 			(size 2.3 1.55)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net 2 "SOLAR_MID1")
-			(uuid "f5b35f36-0809-48b8-9fad-5f5c19b89016")
+			(uuid "b4c1ff8e-400e-4e6c-95de-6f0035f34106")
 		)
 		(embedded_fonts no)
 	)
-	(footprint "wing_ic:J1"
+	(footprint "wing_ic:SolarTail_2P"
 		(layer "F.Cu")
-		(uuid "4f6be495-015b-4a26-aa33-5d0484b9c32f")
-		(at 3.6 9.1)
-		(property "Reference" "J1"
-			(at 0 3.4 0)
-			(layer "F.Fab")
-			(uuid "f45d0133-b8e5-4992-bb8f-1d0beb34e549")
-			(effects
-				(font
-					(size 0.8 0.8)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property "Value" ""
-			(at 0 0 0)
-			(layer "F.Fab")
-			(uuid "659ccd4c-ac9b-48ed-94ec-683f47ec71fd")
-			(effects
-				(font
-					(size 1.27 1.27)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 0 0 0)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "265940f4-22df-4f8f-b041-1620f60d73b2")
-			(effects
-				(font
-					(size 1.27 1.27)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 0 0 0)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "abb02a69-9cb7-432d-b26e-2d7a1175ae7d")
-			(effects
-				(font
-					(size 1.27 1.27)
-					(thickness 0.15)
-				)
-			)
-		)
-		(pad "1" smd rect
-			(at 0 0)
-			(size 4 1.2)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-			(net 1 "SOLAR_P")
-			(uuid "ad6848a6-fc6a-4ee6-b7eb-c466d327e416")
-		)
-		(pad "2" smd rect
-			(at 0 1.8)
-			(size 4 1.2)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-			(net 4 "SOLAR_N")
-			(uuid "b0e62f99-bc79-4556-bc9d-491b1fb8eb8f")
-		)
-		(embedded_fonts no)
-	)
-	(footprint "wing_ic:SC3"
-		(layer "F.Cu")
-		(uuid "588cc953-7a3f-4115-b566-279f0ffa1205")
-		(at 28.15 15)
+		(uuid "1c4ad530-b764-432a-85df-1b8c85313aee")
+		(at 30 15)
+		(descr "Wing interconnect SolarTail_2P -- house land pattern, see build_wing_footprints.py")
 		(property "Reference" "SC3"
-			(at 0 3.4 0)
+			(at 0 -3.5 0)
 			(layer "F.Fab")
-			(uuid "6d98cc1d-6f9a-4c6f-9944-4bd5f8726cff")
+			(uuid "85018dd9-1924-40c8-8d5d-18723d998ed9")
 			(effects
 				(font
 					(size 0.8 0.8)
@@ -345,13 +173,14 @@
 				)
 			)
 		)
-		(property "Value" ""
-			(at 0 0 0)
+		(property "Value" "SolarTail_2P"
+			(at 0 3.5 0)
 			(layer "F.Fab")
-			(uuid "a687554e-6910-4b2e-9b08-d9ac7fb23d66")
+			(hide yes)
+			(uuid "d2780f56-a996-4c9c-98e9-48e651ebcbc2")
 			(effects
 				(font
-					(size 1.27 1.27)
+					(size 0.8 0.8)
 					(thickness 0.15)
 				)
 			)
@@ -360,7 +189,7 @@
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "745c737e-b151-4026-8afd-cf9643b8042e")
+			(uuid "be78ae94-387d-497e-a278-7eab8fff049e")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -372,7 +201,7 @@
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "91f7bfc3-3b13-4374-b408-56af24676ff9")
+			(uuid "658c973d-fce2-43fb-b67d-26318c53eee0")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -380,30 +209,54 @@
 				)
 			)
 		)
+		(attr smd)
+		(fp_rect
+			(start -3.05 -2.75)
+			(end 3.05 2.75)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "8d594b55-ebdd-4019-a718-11a6400e97e8")
+		)
+		(fp_rect
+			(start -2.8 -2.5)
+			(end 2.8 2.5)
+			(stroke
+				(width 0.1)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.Fab")
+			(uuid "f72c01b8-a052-40a1-b04b-78f11543027d")
+		)
 		(pad "1" smd rect
-			(at 0 0)
+			(at -1.85 0)
 			(size 2.2 4)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net 3 "SOLAR_MID2")
-			(uuid "c984bda4-0efd-4be6-8744-1665b44a457e")
+			(uuid "bef7caa7-fdc0-4ade-842a-3c8f6f14e4ce")
 		)
 		(pad "2" smd rect
-			(at 3.7 0)
+			(at 1.85 0)
 			(size 2.2 4)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net 4 "SOLAR_N")
-			(uuid "7f5dabc3-40c6-4d7c-8118-9c87a86277d5")
+			(uuid "f3ce7300-c49b-4c7f-8efd-aac76bfe2e6c")
 		)
 		(embedded_fonts no)
 	)
-	(footprint "wing_ic:SC1"
+	(footprint "wing_ic:Tab_2P"
 		(layer "F.Cu")
-		(uuid "5c7b1935-4840-4745-834c-8527dc8f6c6e")
-		(at 12.15 15)
-		(property "Reference" "SC1"
-			(at 0 3.4 0)
+		(uuid "7131913b-b3de-4ec8-a6b3-c94d61f9d276")
+		(at 3.6 10)
+		(descr "Wing interconnect Tab_2P -- house land pattern, see build_wing_footprints.py")
+		(property "Reference" "J1"
+			(at 0 -2.6 0)
 			(layer "F.Fab")
-			(uuid "e1731af8-99c0-4939-a40a-6e46f651e3fb")
+			(uuid "79366e54-2e27-495d-9545-52a728ef4c78")
 			(effects
 				(font
 					(size 0.8 0.8)
@@ -411,13 +264,14 @@
 				)
 			)
 		)
-		(property "Value" ""
-			(at 0 0 0)
+		(property "Value" "Tab_2P"
+			(at 0 2.6 0)
 			(layer "F.Fab")
-			(uuid "18086643-e1fb-4a58-8dd0-3606663b7803")
+			(hide yes)
+			(uuid "02d12c17-6967-4963-96db-3e4ebb91f00e")
 			(effects
 				(font
-					(size 1.27 1.27)
+					(size 0.8 0.8)
 					(thickness 0.15)
 				)
 			)
@@ -426,7 +280,7 @@
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "ca5f691c-48a9-4305-b37d-1e834a965937")
+			(uuid "3ab99262-6f42-4c5d-bec7-cc95f2c0b26d")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -438,7 +292,7 @@
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "eca8b89f-9ea4-4e3d-8c27-947e976570b1")
+			(uuid "518fc421-f5dd-4b01-aa93-a7f416cce04c")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -446,30 +300,54 @@
 				)
 			)
 		)
+		(attr smd)
+		(fp_rect
+			(start -4.75 -1.85)
+			(end 4.75 1.85)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "d71c60b9-9c6d-4dfc-9e5a-b80846a8cf57")
+		)
+		(fp_rect
+			(start -4.5 -1.6)
+			(end 4.5 1.6)
+			(stroke
+				(width 0.1)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.Fab")
+			(uuid "81b04ab8-8972-4343-a9d6-0019c59bb76f")
+		)
 		(pad "1" smd rect
-			(at 0 0)
-			(size 2.2 4)
+			(at 0 -0.9)
+			(size 4 1.2)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net 1 "SOLAR_P")
-			(uuid "8e236ceb-e3aa-46d4-a9e5-aaf269f01beb")
+			(uuid "93f2a688-d629-4ad8-bb01-2373740f96c8")
 		)
 		(pad "2" smd rect
-			(at 3.7 0)
-			(size 2.2 4)
+			(at 0 0.9)
+			(size 4 1.2)
 			(layers "F.Cu" "F.Mask" "F.Paste")
-			(net 2 "SOLAR_MID1")
-			(uuid "5829a05c-9a19-494c-98eb-9cf383379a2d")
+			(net 4 "SOLAR_N")
+			(uuid "658a5b1b-20b2-4e07-9f69-8e395a8d3288")
 		)
 		(embedded_fonts no)
 	)
-	(footprint "wing_ic:SC2"
+	(footprint "wing_ic:D_SMA_Wing"
 		(layer "F.Cu")
-		(uuid "98acf286-5711-4701-b684-5a6184f02da7")
-		(at 20.15 15)
-		(property "Reference" "SC2"
-			(at 0 3.4 0)
+		(uuid "e10ab366-605f-4221-9b58-ebd7cc4cb97b")
+		(at 22 6)
+		(descr "Wing interconnect D_SMA_Wing -- house land pattern, see build_wing_footprints.py")
+		(property "Reference" "D2"
+			(at 0 -2.3 0)
 			(layer "F.Fab")
-			(uuid "2eea86e0-1952-47b1-94c8-01a81aa13f96")
+			(uuid "a69bc54f-9b59-4660-9f07-974a8aa50950")
 			(effects
 				(font
 					(size 0.8 0.8)
@@ -477,13 +355,14 @@
 				)
 			)
 		)
-		(property "Value" ""
-			(at 0 0 0)
+		(property "Value" "D_SMA_Wing"
+			(at 0 2.3 0)
 			(layer "F.Fab")
-			(uuid "24b81adf-798f-44ca-9237-251c81aba165")
+			(hide yes)
+			(uuid "847b22e7-54ca-4e80-9b18-4b519b53321d")
 			(effects
 				(font
-					(size 1.27 1.27)
+					(size 0.8 0.8)
 					(thickness 0.15)
 				)
 			)
@@ -492,7 +371,7 @@
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "4a575b91-1d7f-4b94-84b8-35aa8d185bf6")
+			(uuid "60230a19-9954-41d0-b0b1-a097789e6d20")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -504,7 +383,7 @@
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "5d7d4e3b-3cb8-4d2f-8e67-8a84e1ad42e3")
+			(uuid "1081a78b-d1e6-4b2d-88f4-76d6c9666b8e")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -512,19 +391,315 @@
 				)
 			)
 		)
+		(attr smd)
+		(fp_rect
+			(start -2.4 -1.55)
+			(end 2.4 1.55)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "8c2044b8-b549-410e-ad79-81dee9a5edff")
+		)
+		(fp_rect
+			(start -2.15 -1.3)
+			(end 2.15 1.3)
+			(stroke
+				(width 0.1)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.Fab")
+			(uuid "eeb8597c-977e-4643-9605-35258b33d7cf")
+		)
 		(pad "1" smd rect
-			(at 0 0)
+			(at -1.85 0)
+			(size 2.3 1.55)
+			(layers "F.Cu" "F.Mask" "F.Paste")
+			(net 2 "SOLAR_MID1")
+			(uuid "c2ffebda-c4ca-48ce-8a19-7d21034fd809")
+		)
+		(pad "2" smd rect
+			(at 1.85 0)
+			(size 2.3 1.55)
+			(layers "F.Cu" "F.Mask" "F.Paste")
+			(net 3 "SOLAR_MID2")
+			(uuid "c5154f25-03c6-408f-9c94-5dd9a78b973e")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "wing_ic:SolarTail_2P"
+		(layer "F.Cu")
+		(uuid "f3d81866-978d-4cc4-846a-c7a0194d5547")
+		(at 22 15)
+		(descr "Wing interconnect SolarTail_2P -- house land pattern, see build_wing_footprints.py")
+		(property "Reference" "SC2"
+			(at 0 -3.5 0)
+			(layer "F.Fab")
+			(uuid "95b09863-43f3-40b5-98cf-57b12f077224")
+			(effects
+				(font
+					(size 0.8 0.8)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" "SolarTail_2P"
+			(at 0 3.5 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "7009b6d2-28e8-4561-87aa-5ad780be014c")
+			(effects
+				(font
+					(size 0.8 0.8)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "2247326f-e996-411b-9c99-b3fa275564df")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "faeb8731-eba9-4114-b278-c41e290bf172")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr smd)
+		(fp_rect
+			(start -3.05 -2.75)
+			(end 3.05 2.75)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "77b06bf7-6837-402b-84a8-69f4844a16dd")
+		)
+		(fp_rect
+			(start -2.8 -2.5)
+			(end 2.8 2.5)
+			(stroke
+				(width 0.1)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.Fab")
+			(uuid "64ec8152-ff10-4d37-978d-53e6551844a1")
+		)
+		(pad "1" smd rect
+			(at -1.85 0)
 			(size 2.2 4)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net 2 "SOLAR_MID1")
-			(uuid "b2117be9-6929-4661-8286-314a46d2e15e")
+			(uuid "b99bae36-0656-4f2a-9c61-1eece06a66c4")
 		)
 		(pad "2" smd rect
-			(at 3.7 0)
+			(at 1.85 0)
 			(size 2.2 4)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net 3 "SOLAR_MID2")
-			(uuid "b93fd2b3-2e54-4b8b-b580-7af2823901d3")
+			(uuid "fde41ee9-7451-439e-8f46-1252d5088d03")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "wing_ic:SolarTail_2P"
+		(layer "F.Cu")
+		(uuid "f624c407-13b1-45d5-b0b3-d8e70cee3529")
+		(at 14 15)
+		(descr "Wing interconnect SolarTail_2P -- house land pattern, see build_wing_footprints.py")
+		(property "Reference" "SC1"
+			(at 0 -3.5 0)
+			(layer "F.Fab")
+			(uuid "a175a43a-1e76-41be-bb37-aa1aedf21865")
+			(effects
+				(font
+					(size 0.8 0.8)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" "SolarTail_2P"
+			(at 0 3.5 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "87e1f8e5-2edd-46ce-a9c6-a220067efb20")
+			(effects
+				(font
+					(size 0.8 0.8)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "ab044d3b-2502-45de-a102-5466388604b0")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "b4b2a5e3-dd60-4705-bc18-d25fbbd5e7f7")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr smd)
+		(fp_rect
+			(start -3.05 -2.75)
+			(end 3.05 2.75)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "87793ec5-24d3-4f58-a6c5-347e84bf25cb")
+		)
+		(fp_rect
+			(start -2.8 -2.5)
+			(end 2.8 2.5)
+			(stroke
+				(width 0.1)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.Fab")
+			(uuid "95ad9b8c-998d-4a6c-b9d8-00e8f60de174")
+		)
+		(pad "1" smd rect
+			(at -1.85 0)
+			(size 2.2 4)
+			(layers "F.Cu" "F.Mask" "F.Paste")
+			(net 1 "SOLAR_P")
+			(uuid "eff3b7df-6604-4d55-a90b-a6de10a3c8c9")
+		)
+		(pad "2" smd rect
+			(at 1.85 0)
+			(size 2.2 4)
+			(layers "F.Cu" "F.Mask" "F.Paste")
+			(net 2 "SOLAR_MID1")
+			(uuid "5e35a0c4-5fed-4035-9a87-158d0a8eff55")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "wing_ic:D_SMA_Wing"
+		(layer "F.Cu")
+		(uuid "fa2b8d53-9684-4fe4-a30c-18b7728e73f7")
+		(at 30 6)
+		(descr "Wing interconnect D_SMA_Wing -- house land pattern, see build_wing_footprints.py")
+		(property "Reference" "D3"
+			(at 0 -2.3 0)
+			(layer "F.Fab")
+			(uuid "ce0df86c-73f0-4c9f-affb-8aaaf8413bde")
+			(effects
+				(font
+					(size 0.8 0.8)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" "D_SMA_Wing"
+			(at 0 2.3 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "ae92181a-8be1-42ef-b384-9147f720d1c6")
+			(effects
+				(font
+					(size 0.8 0.8)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "b511b51c-e2f9-4813-b22d-8c28c5857e54")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "cb8e27bb-0524-4ab3-ba7b-782f104653b4")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr smd)
+		(fp_rect
+			(start -2.4 -1.55)
+			(end 2.4 1.55)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "b1340520-36cb-4ebe-9177-22a93907660e")
+		)
+		(fp_rect
+			(start -2.15 -1.3)
+			(end 2.15 1.3)
+			(stroke
+				(width 0.1)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.Fab")
+			(uuid "732f7937-0904-44d7-9a8a-b202abf27aef")
+		)
+		(pad "1" smd rect
+			(at -1.85 0)
+			(size 2.3 1.55)
+			(layers "F.Cu" "F.Mask" "F.Paste")
+			(net 3 "SOLAR_MID2")
+			(uuid "e1a74e4c-adde-4ce9-89f7-562a41f37920")
+		)
+		(pad "2" smd rect
+			(at 1.85 0)
+			(size 2.3 1.55)
+			(layers "F.Cu" "F.Mask" "F.Paste")
+			(net 4 "SOLAR_N")
+			(uuid "d729c4d6-5b7d-42cd-b4f8-c66f7f1c5a88")
 		)
 		(embedded_fonts no)
 	)
@@ -536,7 +711,7 @@
 			(type solid)
 		)
 		(layer "Edge.Cuts")
-		(uuid "e130ef8d-3102-4f4b-a0e9-3bd5765391cd")
+		(uuid "762f2c11-6f74-4c30-a4c6-748d6d0ffbef")
 	)
 	(gr_line
 		(start 0 20)
@@ -546,7 +721,7 @@
 			(type solid)
 		)
 		(layer "Edge.Cuts")
-		(uuid "1dad22d0-67d0-4e48-ba43-50d318dd196c")
+		(uuid "7142a8f1-9890-4141-b260-16295f9d2b43")
 	)
 	(gr_line
 		(start 44 0)
@@ -556,7 +731,7 @@
 			(type solid)
 		)
 		(layer "Edge.Cuts")
-		(uuid "e9a18ef2-bcee-4ab3-8be2-643c77a5b275")
+		(uuid "223f5890-d8ac-4756-b0dc-8e47146daec4")
 	)
 	(gr_line
 		(start 44 20)
@@ -566,12 +741,12 @@
 			(type solid)
 		)
 		(layer "Edge.Cuts")
-		(uuid "06e983df-b708-4cfe-b8d2-2cdea44c1180")
+		(uuid "f8dbb3d5-2ba7-4975-8397-6981ff696874")
 	)
 	(gr_text "D1"
 		(at 11.4 8.6 0)
 		(layer "F.SilkS")
-		(uuid "8845a55c-efd4-4dc7-9445-5c6cad9b21ac")
+		(uuid "e86a4349-c4de-499a-a824-0016a72c2f9c")
 		(effects
 			(font
 				(size 0.8 0.8)
@@ -582,7 +757,7 @@
 	(gr_text "SC1"
 		(at 11.4 12.2 0)
 		(layer "F.SilkS")
-		(uuid "97dff555-c4b3-402b-b670-e6254bf0f0b3")
+		(uuid "9b9d6570-2481-487f-8892-0ca7fae83b17")
 		(effects
 			(font
 				(size 0.8 0.8)
@@ -593,7 +768,7 @@
 	(gr_text "+"
 		(at 17.6 12.2 0)
 		(layer "F.SilkS")
-		(uuid "b6dbbee5-f3c8-49f2-bfb5-dcfbb4d05321")
+		(uuid "7ed52f36-6a8d-4fed-9308-5d8d890ca954")
 		(effects
 			(font
 				(size 0.8 0.8)
@@ -604,7 +779,7 @@
 	(gr_text "D2"
 		(at 19.4 8.6 0)
 		(layer "F.SilkS")
-		(uuid "b249d9e1-0adc-498e-bc4c-8cdcec0894e8")
+		(uuid "f8f471d8-66c1-4315-9081-77148f45b6ce")
 		(effects
 			(font
 				(size 0.8 0.8)
@@ -615,7 +790,7 @@
 	(gr_text "SC2"
 		(at 19.4 12.2 0)
 		(layer "F.SilkS")
-		(uuid "c68c68ad-d352-4d93-9101-9e1f3426af6d")
+		(uuid "08934c42-62a0-4fdf-9e55-2a2693146753")
 		(effects
 			(font
 				(size 0.8 0.8)
@@ -626,7 +801,7 @@
 	(gr_text "+"
 		(at 25.6 12.2 0)
 		(layer "F.SilkS")
-		(uuid "4380b11f-a898-4ed9-97af-72389b2d8601")
+		(uuid "9cc2b7d4-f567-483c-bb27-adefe3b53dbd")
 		(effects
 			(font
 				(size 0.8 0.8)
@@ -637,7 +812,7 @@
 	(gr_text "D3"
 		(at 27.4 8.6 0)
 		(layer "F.SilkS")
-		(uuid "c14004d7-2c21-451f-b107-63031621dfde")
+		(uuid "6305bd63-f32f-42f4-b134-9d9f893d1451")
 		(effects
 			(font
 				(size 0.8 0.8)
@@ -648,7 +823,7 @@
 	(gr_text "SC3"
 		(at 27.4 12.2 0)
 		(layer "F.SilkS")
-		(uuid "0fc27bd3-de28-4c97-80aa-72a70c4dadb7")
+		(uuid "cc4881d6-07b8-48bb-984f-f698b28e3107")
 		(effects
 			(font
 				(size 0.8 0.8)
@@ -659,7 +834,7 @@
 	(gr_text "+"
 		(at 33.6 12.2 0)
 		(layer "F.SilkS")
-		(uuid "c8a1ee4c-912d-4828-947f-3a81df6cff06")
+		(uuid "10255fa9-a27a-424b-b916-6a3c7051d34c")
 		(effects
 			(font
 				(size 0.8 0.8)
@@ -670,7 +845,7 @@
 	(gr_text "IC v1"
 		(at 38 12.2 0)
 		(layer "F.SilkS")
-		(uuid "6290fad3-a1fe-467d-9233-8ee6eef54651")
+		(uuid "34b7a58f-e986-4a8f-82e5-28457bd1adca")
 		(effects
 			(font
 				(size 0.8 0.8)
@@ -684,15 +859,7 @@
 		(width 0.5)
 		(layer "F.Cu")
 		(net 1)
-		(uuid "7e35c038-0edb-44e5-92a4-edf9813ab38f")
-	)
-	(segment
-		(start 12.15 9.1)
-		(end 12.15 15)
-		(width 0.5)
-		(layer "F.Cu")
-		(net 1)
-		(uuid "945fc967-6c66-44ff-b38e-f32752072270")
+		(uuid "833276d5-6168-4670-afb4-b2c5d08f1c33")
 	)
 	(segment
 		(start 3.6 9.1)
@@ -700,55 +867,15 @@
 		(width 0.5)
 		(layer "F.Cu")
 		(net 1)
-		(uuid "fa20b881-449d-4857-a63d-50a5aaa869ed")
+		(uuid "9bfd0c65-e9d3-4e2c-bb18-c4f588a64faf")
 	)
 	(segment
-		(start 15.85 7.05)
-		(end 15.85 5.95)
-		(width 0.2)
+		(start 12.15 9.1)
+		(end 12.15 15)
+		(width 0.5)
 		(layer "F.Cu")
-		(net 2)
-		(uuid "330e0df1-ab3d-4b78-94cf-654666e93df3")
-	)
-	(segment
-		(start 17.45 17.45)
-		(end 17.45 14.95)
-		(width 0.2)
-		(layer "F.Cu")
-		(net 2)
-		(uuid "3688e78c-5213-4820-8015-fe7cb993b8a5")
-	)
-	(segment
-		(start 17.45 14.95)
-		(end 17.45 7.05)
-		(width 0.2)
-		(layer "F.Cu")
-		(net 2)
-		(uuid "3da92b15-d4c2-45b7-a014-7de6c78be7f6")
-	)
-	(segment
-		(start 15.85 14.95)
-		(end 17.25 14.95)
-		(width 0.2)
-		(layer "F.Cu")
-		(net 2)
-		(uuid "448dfdc9-a571-4dd3-83bf-6c95b02a22f4")
-	)
-	(segment
-		(start 17.25 14.95)
-		(end 17.25 17.45)
-		(width 0.2)
-		(layer "F.Cu")
-		(net 2)
-		(uuid "4b88e88e-76a1-4065-9b3b-352bb2e45bf8")
-	)
-	(segment
-		(start 20.15 14.95)
-		(end 17.45 14.95)
-		(width 0.2)
-		(layer "F.Cu")
-		(net 2)
-		(uuid "4e1b74c4-001f-4582-9f69-f5b6877051e1")
+		(net 1)
+		(uuid "b0cdd1fb-e916-407e-899e-8a2533ad3795")
 	)
 	(segment
 		(start 15.85 5.95)
@@ -756,7 +883,23 @@
 		(width 0.2)
 		(layer "F.Cu")
 		(net 2)
-		(uuid "7596d202-236e-42e7-9efb-15822f79df5b")
+		(uuid "08a39e1e-d8db-4a4e-8578-ac1e71b721ff")
+	)
+	(segment
+		(start 15.85 7.05)
+		(end 15.85 5.95)
+		(width 0.2)
+		(layer "F.Cu")
+		(net 2)
+		(uuid "0b36d633-06dc-4ec6-b4bf-783f3dadb7ad")
+	)
+	(segment
+		(start 17.45 17.45)
+		(end 17.45 14.95)
+		(width 0.2)
+		(layer "F.Cu")
+		(net 2)
+		(uuid "579d467c-f160-4b6f-9daf-738c1b6b9aed")
 	)
 	(segment
 		(start 17.25 17.45)
@@ -764,7 +907,15 @@
 		(width 0.2)
 		(layer "F.Cu")
 		(net 2)
-		(uuid "942ebd20-e89f-4e77-8241-6e5edcd4e5b6")
+		(uuid "611aaeac-b648-41d6-8667-b28b874e66c3")
+	)
+	(segment
+		(start 17.45 14.95)
+		(end 17.45 7.05)
+		(width 0.2)
+		(layer "F.Cu")
+		(net 2)
+		(uuid "625beb19-4529-44f3-966d-f25ac5eb35db")
 	)
 	(segment
 		(start 17.45 7.05)
@@ -772,7 +923,31 @@
 		(width 0.2)
 		(layer "F.Cu")
 		(net 2)
-		(uuid "9e0f3b69-9f9f-4256-be75-0be518f0acb4")
+		(uuid "66a658ef-5d28-4e82-8a5a-f5fe394d7baa")
+	)
+	(segment
+		(start 17.25 14.95)
+		(end 17.25 17.45)
+		(width 0.2)
+		(layer "F.Cu")
+		(net 2)
+		(uuid "794d47c4-156e-4c33-afaa-eea497dffb24")
+	)
+	(segment
+		(start 15.85 14.95)
+		(end 17.25 14.95)
+		(width 0.2)
+		(layer "F.Cu")
+		(net 2)
+		(uuid "ae27cb65-0a50-4adc-83aa-33063a503937")
+	)
+	(segment
+		(start 20.15 14.95)
+		(end 17.45 14.95)
+		(width 0.2)
+		(layer "F.Cu")
+		(net 2)
+		(uuid "b9aa8c14-c755-4681-9f0a-841926ca032c")
 	)
 	(segment
 		(start 17.45 14.95)
@@ -780,63 +955,7 @@
 		(width 0.2)
 		(layer "F.Cu")
 		(net 2)
-		(uuid "a96ad667-b60f-4b9e-8751-da621f133ce3")
-	)
-	(segment
-		(start 25.45 17.45)
-		(end 25.45 14.95)
-		(width 0.2)
-		(layer "F.Cu")
-		(net 3)
-		(uuid "0263438a-c308-416f-a8b0-d82a76887912")
-	)
-	(segment
-		(start 23.85 7.05)
-		(end 23.85 5.95)
-		(width 0.2)
-		(layer "F.Cu")
-		(net 3)
-		(uuid "07823aeb-8d83-4cd0-ad3f-414cff4a1988")
-	)
-	(segment
-		(start 25.45 14.95)
-		(end 25.45 7.05)
-		(width 0.2)
-		(layer "F.Cu")
-		(net 3)
-		(uuid "24375c53-e26f-4d55-8f01-0b67fe1cfaad")
-	)
-	(segment
-		(start 25.25 17.45)
-		(end 25.45 17.45)
-		(width 0.2)
-		(layer "F.Cu")
-		(net 3)
-		(uuid "387499c9-9e2d-4c8f-87ae-392a454a74d6")
-	)
-	(segment
-		(start 25.25 14.95)
-		(end 25.25 17.45)
-		(width 0.2)
-		(layer "F.Cu")
-		(net 3)
-		(uuid "3b3f0e09-2cbf-4578-b5da-6b821be36ab5")
-	)
-	(segment
-		(start 25.45 14.95)
-		(end 28.15 14.95)
-		(width 0.2)
-		(layer "F.Cu")
-		(net 3)
-		(uuid "3da980a8-4aa9-4e13-bbf0-e080c7cac1c9")
-	)
-	(segment
-		(start 26.45 5.95)
-		(end 26.45 4.65)
-		(width 0.2)
-		(layer "F.Cu")
-		(net 3)
-		(uuid "55d36427-3c1a-4dda-a95c-3815aacd0abf")
+		(uuid "ccc8a3ee-810f-4cea-bcd5-dd53381ca3cb")
 	)
 	(segment
 		(start 29.75 4.65)
@@ -844,47 +963,15 @@
 		(width 0.2)
 		(layer "F.Cu")
 		(net 3)
-		(uuid "591e08d1-676d-459a-85ad-913ae5a5a2c9")
+		(uuid "1cce1374-5ab9-4e43-baa2-7b88ab43d192")
 	)
 	(segment
-		(start 28.15 4.85)
-		(end 28.15 5.95)
+		(start 25.45 14.95)
+		(end 28.15 14.95)
 		(width 0.2)
 		(layer "F.Cu")
 		(net 3)
-		(uuid "6eaa5ac6-4c1a-46fe-a235-781678dcde25")
-	)
-	(segment
-		(start 26.45 4.65)
-		(end 29.75 4.65)
-		(width 0.2)
-		(layer "F.Cu")
-		(net 3)
-		(uuid "6f82f18d-9e9f-46f8-b29b-a90f083cfc7a")
-	)
-	(segment
-		(start 28.15 14.95)
-		(end 25.45 14.95)
-		(width 0.2)
-		(layer "F.Cu")
-		(net 3)
-		(uuid "b0006cb5-fff4-46d8-a69a-ab249d637b49")
-	)
-	(segment
-		(start 25.45 7.05)
-		(end 23.85 7.05)
-		(width 0.2)
-		(layer "F.Cu")
-		(net 3)
-		(uuid "c0b63def-2489-49b6-9b67-f58f8584b252")
-	)
-	(segment
-		(start 23.85 5.95)
-		(end 26.45 5.95)
-		(width 0.2)
-		(layer "F.Cu")
-		(net 3)
-		(uuid "c6f55c02-9fb0-4736-a29b-68715a68f82b")
+		(uuid "1e3d4757-fe33-4d8c-85b7-701bca674969")
 	)
 	(segment
 		(start 23.85 14.95)
@@ -892,7 +979,7 @@
 		(width 0.2)
 		(layer "F.Cu")
 		(net 3)
-		(uuid "c7aa6eae-cf56-4fda-9050-cfd5d4152403")
+		(uuid "292bb15b-830c-44a1-8f85-3fbde6a12dcb")
 	)
 	(segment
 		(start 29.75 4.85)
@@ -900,15 +987,95 @@
 		(width 0.2)
 		(layer "F.Cu")
 		(net 3)
-		(uuid "defa8d34-bc74-48d2-8d7d-3190ded525b9")
+		(uuid "2c14ea2b-8b57-4e47-9b3c-57f31096521d")
 	)
 	(segment
-		(start 3.6 10.9)
-		(end 7.5 10.9)
-		(width 0.5)
+		(start 26.45 4.65)
+		(end 29.75 4.65)
+		(width 0.2)
 		(layer "F.Cu")
-		(net 4)
-		(uuid "0c29e427-379f-495e-b375-80521ef8d9c4")
+		(net 3)
+		(uuid "56a30abf-6690-4d5d-8b99-6b113f86afcd")
+	)
+	(segment
+		(start 28.15 14.95)
+		(end 25.45 14.95)
+		(width 0.2)
+		(layer "F.Cu")
+		(net 3)
+		(uuid "572e9d5c-b1cb-48f2-82c4-ff5ee91760ab")
+	)
+	(segment
+		(start 28.15 4.85)
+		(end 28.15 5.95)
+		(width 0.2)
+		(layer "F.Cu")
+		(net 3)
+		(uuid "88fa48ef-ceb1-4ccd-98be-467f2d2198ee")
+	)
+	(segment
+		(start 25.45 14.95)
+		(end 25.45 7.05)
+		(width 0.2)
+		(layer "F.Cu")
+		(net 3)
+		(uuid "891759ec-6b3e-40b3-9f5c-c537a3ca9cf7")
+	)
+	(segment
+		(start 25.25 17.45)
+		(end 25.45 17.45)
+		(width 0.2)
+		(layer "F.Cu")
+		(net 3)
+		(uuid "8972adc5-94e4-47dc-b4f5-46fbead0c659")
+	)
+	(segment
+		(start 25.45 17.45)
+		(end 25.45 14.95)
+		(width 0.2)
+		(layer "F.Cu")
+		(net 3)
+		(uuid "8a5d0daf-7077-4853-9aec-a8824d8c1c4e")
+	)
+	(segment
+		(start 25.45 7.05)
+		(end 23.85 7.05)
+		(width 0.2)
+		(layer "F.Cu")
+		(net 3)
+		(uuid "a4f2171f-a3bb-46b2-9cc6-65dab4585d7f")
+	)
+	(segment
+		(start 26.45 5.95)
+		(end 26.45 4.65)
+		(width 0.2)
+		(layer "F.Cu")
+		(net 3)
+		(uuid "c13e100b-386b-4fa6-a72e-7616b51b4fdb")
+	)
+	(segment
+		(start 25.25 14.95)
+		(end 25.25 17.45)
+		(width 0.2)
+		(layer "F.Cu")
+		(net 3)
+		(uuid "c176db10-240c-4fff-a02f-d59069777b44")
+	)
+	(segment
+		(start 23.85 7.05)
+		(end 23.85 5.95)
+		(width 0.2)
+		(layer "F.Cu")
+		(net 3)
+		(uuid "c27dadbf-0081-4458-910f-d21b0b8f11bd")
+	)
+	(segment
+		(start 23.85 5.95)
+		(end 26.45 5.95)
+		(width 0.2)
+		(layer "F.Cu")
+		(net 3)
+		(uuid "dd9b3c10-9860-48fd-a81b-ba303d09a96b")
 	)
 	(segment
 		(start 31.85 10.9)
@@ -916,7 +1083,15 @@
 		(width 0.5)
 		(layer "F.Cu")
 		(net 4)
-		(uuid "3ce56660-f4ea-475e-8ce1-de75602bde5e")
+		(uuid "5a77291b-f665-4689-bd6d-cffec80a8599")
+	)
+	(segment
+		(start 3.6 10.9)
+		(end 7.5 10.9)
+		(width 0.5)
+		(layer "F.Cu")
+		(net 4)
+		(uuid "7a4e7ad3-cd7e-486c-8f06-1bd2eb55a80d")
 	)
 	(segment
 		(start 31.85 10.9)
@@ -924,7 +1099,7 @@
 		(width 0.5)
 		(layer "F.Cu")
 		(net 4)
-		(uuid "7df544dd-3f09-42b0-84ff-76198d5e0c5b")
+		(uuid "a5832816-dc2e-4168-ba94-19de19878fd8")
 	)
 	(via
 		(at 7.5 10.9)
@@ -932,7 +1107,7 @@
 		(drill 0.4)
 		(layers "F.Cu" "B.Cu")
 		(net 4)
-		(uuid "1a134569-54f5-45d3-89f7-81a79a48c02d")
+		(uuid "40cd0011-7fa7-4888-85af-1c51c9dc90a2")
 	)
 	(via
 		(at 31.85 10.9)
@@ -940,7 +1115,7 @@
 		(drill 0.4)
 		(layers "F.Cu" "B.Cu")
 		(net 4)
-		(uuid "1d4fc132-a4b4-43ed-b785-5a1eb53c2dd5")
+		(uuid "a44b7754-167c-4c1a-a722-3c1e8e98c8a9")
 	)
 	(segment
 		(start 7.5 10.9)
@@ -948,7 +1123,7 @@
 		(width 0.5)
 		(layer "B.Cu")
 		(net 4)
-		(uuid "1fcad6b4-6cce-41f0-904c-7c5df303c23f")
+		(uuid "c6fed586-afa7-445c-b012-2bdc5519270d")
 	)
 	(embedded_fonts no)
 )
