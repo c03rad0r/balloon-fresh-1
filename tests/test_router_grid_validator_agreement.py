@@ -40,8 +40,33 @@ def src():
 
 
 def _grid(pitch=0.10):
-    """Build the real grid from the committed board, exactly as the router does."""
+    """Build the real grid from the committed board, exactly as the router does.
+
+    LOUD-SKIP WITHOUT pcbnew. `route_v10_astar` imports `pcbnew` (KiCad's bindings) at
+    module scope, so importing it on a runner with no KiCad raises ModuleNotFoundError.
+    CI runs these tests on plain `ubuntu-latest` (see .github/workflows/test.yml), where
+    pcbnew is absent -- and this file had NO guard, so `python -m pytest tests/` went RED
+    on EVERY branch, including master. The rest of the board suite already follows the
+    documented convention (ci-host-tests.yml: pcbnew tests "loud-skip on a runner without
+    it"); this file did not.
+
+    A SKIP here is NOT a pass -- it is a check that could not be made. It is loud, and it
+    names the reason and where the real check runs, exactly as the repo's convention
+    requires (AGENTS.md 20: a gate that cannot run must never look green).
+
+    The pre-commit hook runs this file where pcbnew DOES exist, so the check is not lost.
+    """
     import importlib
+    import pytest
+    try:
+        import pcbnew  # noqa: F401
+    except ImportError:
+        pytest.skip(
+            "router grid agreement NEEDS pcbnew (KiCad python bindings), which is not "
+            "installed in this environment. This is NOT a pass -- the check could not be "
+            "made. It runs in the pre-commit hook where pcbnew exists "
+            "(pre-commit-board-gates.py). Tracked as a CI environment gap."
+        )
     sys.path.insert(0, os.path.join(HERE, "..", "tracker", "hardware"))
     R = importlib.import_module("route_v10_astar")
     board = os.path.join(HERE, "..", "tracker", "hardware", "hub_board_v10.kicad_pcb")
