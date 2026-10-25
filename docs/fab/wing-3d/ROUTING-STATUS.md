@@ -6,6 +6,13 @@
 **Status:** 44 × 20 mm, 2-pin tab (ADR-134), 3 × per-cell SS24 bypass (ADR-132).
 **Placement complete. Routing complete. Not yet orderable — see §5.**
 
+> **UPDATE 2026-10-25 (ADR-135): the routing blocker is now REMOVED.** The board has a
+> schematic — `tracker/hardware/build_wing_sch.py` →
+> `tracker/hardware/schematics/wing_interconnect/wing_interconnect.kicad_sch`, with
+> **ERC 0 violations** and a netlist of exactly the four ADR-134 nets. Sections below that
+> say "no schematic / no netlist" describe the state BEFORE that work and are kept as the
+> measurement record. The router pass itself is still outstanding.
+
 ---
 
 ## 1. Measured state
