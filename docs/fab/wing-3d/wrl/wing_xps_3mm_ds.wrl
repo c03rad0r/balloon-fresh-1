@@ -1,0 +1,24 @@
+#VRML V2.0 utf8
+# foam wing, ADR-117: XPS 3 mm, double-sided, end-only cells
+# arm 167.1 x 86.8 mm; cells 78.55 x 38.90 x 0.21 mm
+Transform { translation 0.000000 0.000000 -0.590551
+  children [ Shape { appearance Appearance { material Material { diffuseColor 0.92 0.9 0.84 } }
+    geometry Box { size 65.787402 34.173228 1.181102 } } ] }
+Transform { translation -16.250000 -8.661417 0.631890
+  children [ Shape { appearance Appearance { material Material { diffuseColor 0.06 0.1 0.3 } }
+    geometry Box { size 30.925197 15.314961 0.082677 } } ] }
+Transform { translation -16.250000 -8.661417 -0.631890
+  children [ Shape { appearance Appearance { material Material { diffuseColor 0.06 0.1 0.3 } }
+    geometry Box { size 30.925197 15.314961 0.082677 } } ] }
+Transform { translation 16.250000 -8.661417 0.631890
+  children [ Shape { appearance Appearance { material Material { diffuseColor 0.06 0.1 0.3 } }
+    geometry Box { size 30.925197 15.314961 0.082677 } } ] }
+Transform { translation 16.250000 -8.661417 -0.631890
+  children [ Shape { appearance Appearance { material Material { diffuseColor 0.06 0.1 0.3 } }
+    geometry Box { size 30.925197 15.314961 0.082677 } } ] }
+Transform { translation 0.000000 8.661417 0.631890
+  children [ Shape { appearance Appearance { material Material { diffuseColor 0.06 0.1 0.3 } }
+    geometry Box { size 30.925197 15.314961 0.082677 } } ] }
+Transform { translation 0.000000 8.661417 -0.631890
+  children [ Shape { appearance Appearance { material Material { diffuseColor 0.06 0.1 0.3 } }
+    geometry Box { size 30.925197 15.314961 0.082677 } } ] }
