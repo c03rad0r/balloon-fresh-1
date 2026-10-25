@@ -29,9 +29,21 @@ BOARD = os.path.join(REPO, "tracker", "hardware", "wing_interconnect",
 SCH = os.path.join(REPO, "tracker", "hardware", "schematics", "wing_interconnect",
                    "wing_interconnect.kicad_sch")
 
+def _pcbnew_ok():
+    """Parity G3/G4 read the BOARD, which needs pcbnew (the parity script now adds the distro
+    path itself). MEASURED: without this probe the tests fail on a runner that has kicad-cli
+    but no pcbnew. A gate that cannot run must SKIP LOUDLY, never fail for want of a tool."""
+    if not os.path.exists("/usr/bin/python3"):
+        return False
+    r = subprocess.run(["/usr/bin/python3", "-c", "import pcbnew"],
+                       capture_output=True, text=True,
+                       env=dict(os.environ, PYTHONPATH="/usr/lib/python3/dist-packages"))
+    return r.returncode == 0
+
+
 pytestmark = pytest.mark.skipif(
-    shutil.which("kicad-cli") is None,
-    reason="kicad-cli not installed -- cannot verify schematic/board parity",
+    shutil.which("kicad-cli") is None or not _pcbnew_ok(),
+    reason="kicad-cli and/or pcbnew unavailable -- cannot verify schematic/board parity",
 )
 
 
