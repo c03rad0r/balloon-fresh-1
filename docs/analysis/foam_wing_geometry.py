@@ -98,12 +98,15 @@ def _box(cx: float, cy: float, cz: float, dx: float, dy: float, dz: float,
             f'    geometry Box {{ size {sx:.6f} {sy:.6f} {sz:.6f} }} }} ] }}\n')
 
 
-def _cell(cx: float, top: bool, t_mm: float) -> str:
-    """One large cell: 78.55 x 38.90 x 0.21 mm slab, dark blue, sitting on face."""
-    # cell long axis along board X, span across Y.  Model Y is inverted.
-    y_off = -(ARM_Y_MM / 2.0 - 20.0) if top else (ARM_Y_MM / 2.0 - 20.0)
+def _cell(cx: float, cy: float, top: bool, t_mm: float) -> str:
+    """One large cell: 78.55 x 38.90 x 0.21 mm slab, dark blue, sitting on face.
+
+    `cy` is the cell's centre across the arm width, set by the 2+1 layout (row 1 at
+    y = -22, row 2 at y = +22); it is NOT offset to the arm edge, so the slab does
+    not hide the cell.
+    """
     z = t_mm / 2.0 + CELL_T_MM / 2.0 if top else -(t_mm / 2.0 + CELL_T_MM / 2.0)
-    return _box(cx, y_off, z, 78.55, 38.90, CELL_T_MM, (0.06, 0.10, 0.30))
+    return _box(cx, cy, z, 78.55, 38.90, CELL_T_MM, (0.06, 0.10, 0.30))
 
 
 def wing_wrl(foam: str, t_mm: float, double_sided: bool) -> str:
@@ -116,12 +119,15 @@ def wing_wrl(foam: str, t_mm: float, double_sided: bool) -> str:
     # top face is Z=0), so the slab hangs BELOW zero.
     lines.append(_box(0.0, 0.0, -t_mm / 2.0, ARM_X_MM, ARM_Y_MM, t_mm,
                       (0.92, 0.90, 0.84)))          # off-white Depron
-    # three cells along X; centre pitch from the arm: 3 cells over 167.1 mm
-    pitch = 55.7
-    for i, cx in enumerate((-pitch, 0.0, pitch)):
-        lines.append(_cell(cx, True, t_mm))
+    # cells in ADR-049's "2 rows, 2+1" layout: two side by side in row 1, one
+    # centred in row 2.  (Three 78.55 mm cells CANNOT lie in one row across a
+    # 167.10 mm arm -- 3 x 78.55 = 235.65 mm.)
+    half_cell_x = 78.55 / 2.0 + 2.0
+    layout = [(-half_cell_x, -22.0), (half_cell_x, -22.0), (0.0, 22.0)]
+    for cx, cy in layout:
+        lines.append(_cell(cx, cy, True, t_mm))
         if double_sided:
-            lines.append(_cell(cx, False, t_mm))
+            lines.append(_cell(cx, cy, False, t_mm))
     return "".join(lines)
 
 

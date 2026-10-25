@@ -43,14 +43,15 @@ def boxes_for(foam: str, t_mm: float, double_sided: bool) -> list[tuple]:
     # foam slab: centred, top face at z=0 (matches the VRML)
     b.append((_box_verts(0, 0, -t_mm / 2, ARM_X_MM, ARM_Y_MM, t_mm),
               FOAM_COLOUR, f"{foam} {t_mm:g} mm"))
-    pitch = 55.7
-    y_top = -(ARM_Y_MM / 2.0 - 20.0)
-    for cx in (-pitch, 0.0, pitch):
-        z = t_mm / 2.0 + CELL_T_MM / 2.0
-        b.append((_box_verts(cx, y_top, z, 78.55, 38.90, CELL_T_MM),
+    # ADR-049 "2 rows, 2+1" layout (see render_foam_wing_faces.scene for the why)
+    half_cell_x = 78.55 / 2.0 + 2.0
+    layout = [(-half_cell_x, -22.0), (half_cell_x, -22.0), (0.0, 22.0)]
+    z = t_mm / 2.0 + CELL_T_MM / 2.0
+    for cx, cy in layout:
+        b.append((_box_verts(cx, cy, z, 78.55, 38.90, CELL_T_MM),
                   CELL_COLOUR, "cell (end-mounted)"))
         if double_sided:
-            b.append((_box_verts(cx, -y_top, -z, 78.55, 38.90, CELL_T_MM),
+            b.append((_box_verts(cx, cy, -z, 78.55, 38.90, CELL_T_MM),
                       CELL_COLOUR, "cell (back face)"))
     return b
 
@@ -70,17 +71,21 @@ def render(foam: str, t_mm: float, double_sided: bool, out: str) -> str:
     fig = plt.figure(figsize=(11, 5.2), dpi=130)
     ax = fig.add_subplot(111, projection="3d")
     for verts, colour, _ in boxes_for(foam, t_mm, double_sided):
+        # The foam is drawn TRANSLUCENT so it never occludes the cells it carries:
+        # an opaque slab depth-sorts over them and a render then fails to show what
+        # its own title claims (measured -- the operator could not see the cells).
+        a = 0.30 if colour == FOAM_COLOUR else 1.0
         pc = Poly3DCollection(verts, facecolor=colour, edgecolor="#333333",
-                              linewidths=0.4, alpha=1.0)
+                              linewidths=0.5, alpha=a)
         ax.add_collection3d(pc)
     ax.set_xlim(-100, 100)
     ax.set_ylim(-55, 55)
     ax.set_zlim(-20, 20)
     ax.set_box_aspect((200, 110, 40))
     ax.set_xlabel("X (mm) — arm long axis")
-    ax.set_ylabel("Y (mm) — 25 mm blade width... arm width")
+    ax.set_ylabel("Y (mm) — arm width")
     ax.set_zlabel("Z (mm)")
-    ax.view_init(elev=22, azim=-58)
+    ax.view_init(elev=55, azim=-70)
     m = wing_mass(foam, t_mm, double_sided)
     ax.set_title(
         f"Foam wing — {foam} {t_mm:g} mm, "

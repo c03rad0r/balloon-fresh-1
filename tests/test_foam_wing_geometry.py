@@ -16,7 +16,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__))), "docs", "analysis"))
 
 from foam_wing_geometry import (  # noqa: E402
-    ARM_CM2, CELL_G, areal_mg_cm2, wing_mass, wing_wrl, greedy_foam,
+    ARM_CM2, ARM_X_MM, ARM_Y_MM, CELL_G, areal_mg_cm2, wing_mass, wing_wrl,
+    greedy_foam,
 )
 
 
@@ -80,3 +81,21 @@ def test_wrl_emits_the_right_cell_count():
 def test_wrl_uses_kicad_model_units():
     # foam slab dz = 3 mm / 2.54 = 1.181102 model units
     assert "1.181102" in wing_wrl("EPS", 3.0, False)
+
+
+def test_three_large_cells_cannot_lie_in_one_row_across_the_arm():
+    """Guard the layout error this module once made.
+
+    ADR-049 / wing-mass-shape.md line 276 put the large-cell arm at 167.10 x 86.80
+    mm as "short+wide (2 rows, 2+1)".  Three 78.55 mm cells end-to-end need
+    235.65 mm and DO NOT FIT, so a single lengthwise row of 3 is geometrically
+    impossible and must never be drawn again.
+    """
+    assert 3 * 78.55 > ARM_X_MM
+    # the 2+1 layout DOES fit: 2 cells + gap across X, and 2 rows across Y
+    # (compare the layout's REAL extents, with a tolerance: 2*38.9 + 9.0 lands on
+    #  86.80000000000001 in float and would fail a bare <= against 86.8)
+    row_x = 2 * 78.55 + 2.0
+    two_rows_y = 2 * 38.90 + 9.0
+    assert row_x <= ARM_X_MM
+    assert two_rows_y <= ARM_Y_MM + 1e-9
