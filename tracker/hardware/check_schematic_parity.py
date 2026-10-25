@@ -68,7 +68,19 @@ def board_nets(path):
     try:
         import pcbnew
     except Exception:
-        return None
+        # pcbnew ships in the DISTRO python's site-packages, not the venv pytest runs in.
+        # MEASURED on this host: it lives at /usr/lib/python3/dist-packages and loads under
+        # /usr/bin/python3 (3.12). Without this the gate REFUSES every board it is pointed
+        # at, which is safe but useless -- a permanent refusal is indistinguishable from a
+        # gate nobody can run.
+        import sys as _sys
+        for p in ("/usr/lib/python3/dist-packages",):
+            if p not in _sys.path:
+                _sys.path.insert(0, p)
+        try:
+            import pcbnew
+        except Exception:
+            return None
     b = pcbnew.LoadBoard(path)
     nets = {}
     for fp in b.GetFootprints():
@@ -180,8 +192,14 @@ def _erc(path):
     if n_err > sum(ERC_OPEN_ITEMS.values()):
         return False, (f"ERC has {n_err} error(s), more than the documented open items "
                        f"{ERC_OPEN_ITEMS} -- REFUSED")
-    return True, (f"ERC {n_err} error(s), all within the documented open items "
-                  f"({', '.join(f'{k}:{v}' for k, v in sorted(ERC_OPEN_ITEMS.items()))})")
+    # The message must name what ERC actually FOUND, not the allowance table. MEASURED:
+    # the previous wording printed ERC_OPEN_ITEMS, so a schematic with ZERO errors was
+    # reported as "all within the documented open items (label_dangling:7, ...)" -- reading
+    # as though it had 7 label_dangling. A green that misdescribes the evidence is a
+    # misleading green, which is the failure mode this gate exists to prevent.
+    found = ", ".join(f"{k}:{v}" for k, v in sorted(tys.items())) or "none"
+    return True, (f"ERC {n_err} error(s); found [{found}], within the documented "
+                  f"allowance {dict(sorted(ERC_OPEN_ITEMS.items()))}")
 
 
 def run(board, sch, reg, verbose=True):
@@ -289,12 +307,22 @@ def run(board, sch, reg, verbose=True):
         say(f"   PASS  G4 NODE PARITY: per-net (ref,pin) sets equal")
 
     # ---- G5 REGISTRY AGREEMENT ----------------------------------------------
-    rnets = registry_nets(reg)
-    if rnets is None or not rnets:
-        # An empty/unparseable registry must NOT read as a pass: "0 nets agree" is vacuous.
-        notes.append(f"G5 REGISTRY AGREEMENT: registry absent or 0 nets parsed -- SKIPPED, "
-                     f"not passed (a vacuous check must not look green)")
-        say("   skip  G5 REGISTRY AGREEMENT: registry absent/empty -- SKIPPED, not passed")
+    # OPT-IN via --registry. The v10 pinmap is the HUB's registry and has no business
+    # being asserted against an unrelated board: MEASURED, pointing this gate at the wing
+    # interconnect with the default registry failed on 8 hub nets (+3V3, ANT*_2G4_*, ...)
+    # that were never meant to exist there. G3/G4 are the board-vs-schematic truth; G5 is
+    # an extra check that only applies when a registry is explicitly named.
+    if not reg:
+        notes.append("G5 REGISTRY AGREEMENT: no --registry given -- SKIPPED, not passed")
+        say("   skip  G5 REGISTRY AGREEMENT: no --registry given -- SKIPPED, not passed")
+        rnets = None
+    else:
+        rnets = registry_nets(reg)
+    if rnets is None:
+        if reg:
+            notes.append(f"G5 REGISTRY AGREEMENT: registry absent or 0 nets parsed -- SKIPPED, "
+                         f"not passed (a vacuous check must not look green)")
+            say("   skip  G5 REGISTRY AGREEMENT: registry absent/empty -- SKIPPED, not passed")
     else:
         rn = {norm(n) for n in rnets}
         drift = sorted(rn - ns)
@@ -336,7 +364,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--board", default=BOARD)
     ap.add_argument("--sch", default=SCH)
-    ap.add_argument("--registry", default=REG)
+    ap.add_argument("--registry", default=None,
+                    help="optional pinmap registry; G5 is skipped when omitted")
     ap.add_argument("--self-test", action="store_true")
     ap.add_argument("-q", "--quiet", action="store_true")
     args = ap.parse_args()
