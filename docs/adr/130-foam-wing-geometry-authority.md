@@ -96,7 +96,9 @@ Removing the board removes the tab ADR-046 §2.1 fixes (9.0 mm, 4-land, single
 edge) and against which the hub is routed. **A foam wing has no tab**, so the
 keep/slip-fit and the electrical interface are **one** problem. **This record does
 not solve it** — it sequence-locks it: interface and release are designed together,
-not sequentially. `TODO(unverified)`. Registered as an open item, not a frozen value.
+not sequentially. **CLOSED by ADR-131** (which keeps the 4-pin row, moves the
+mechanical normal force to a carried insert, and sizes the keeper to the measured
+wing mass).
 
 ### D6 — **OPEN** — "more panels" is bounded by the ARM, not by a board
 

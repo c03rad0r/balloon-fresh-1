@@ -23,8 +23,8 @@
   header, or a supersede pointer inside a committed record), this index says
   `UNRESOLVED - needs an operator decision`. It never guesses.
 
-Generated from `docs/adr/`: **115** distinct
-numbers, **115** numbered files, **1** non-conforming filenames.
+Generated from `docs/adr/`: **116** distinct
+numbers, **116** numbered files, **1** non-conforming filenames.
 
 ## Collisions
 
@@ -149,6 +149,7 @@ None.
 | 128 | `128-schematic-is-source-of-truth.md` | The Schematic Is The Source Of Truth — Board Derived From It, Mechanically Enforced | Accepted |
 | 129 | `129-v10-power-restoration-and-bypass-diodes.md` | v10 power-management restoration, per-cell bypass diodes, and the hub panel connector | ACCEPTED — operator instruction, 2026-10-22 |
 | 130 | `130-foam-wing-geometry-authority.md` | The FOAM wing is the wing of record; the wing has no PCB, and its geometry is parametric | Proposed — the design direction is worker-derivable; the operator |
+| 131 | `131-wing-hub-interface-and-release.md` | Wing↔hub interface redesigned for a FOAM wing: the 4-pin row stays, the insertion feature changes, and the release is designed with it | Proposed — design direction is worker-derivable; the operator |
 | ≥044 | *(reserved)* | next free: `scripts/adr_next_number.py` → 086 | — |
 
 ## Non-conforming filenames (not `NNN-description.md`)
