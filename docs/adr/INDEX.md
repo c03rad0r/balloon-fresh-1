@@ -23,8 +23,8 @@
   header, or a supersede pointer inside a committed record), this index says
   `UNRESOLVED - needs an operator decision`. It never guesses.
 
-Generated from `docs/adr/`: **120** distinct
-numbers, **120** numbered files, **1** non-conforming filenames.
+Generated from `docs/adr/`: **121** distinct
+numbers, **121** numbered files, **1** non-conforming filenames.
 
 ## Collisions
 
@@ -154,6 +154,7 @@ None.
 | 133 | `133-gnd-and-rf-feed-purpose.md` | What GND and RF_FEED are actually for, and what happens to them when the wing loses its Yagi | Proposed — explanatory record; operator corrects pass 2 |
 | 134 | `134-wing-tab-two-pin-dead-copper-removal.md` | The wing tab is TWO pins; GND and RF_FEED are removed as dead copper, and antennas attach to the hub by U.FL | Accepted by operator |
 | 135 | `135-wing-interconnect-schematic.md` | The wing interconnect has a schematic, and forward-generation is the direction of truth for a board that has no netlist | Accepted |
+| 136 | `136-flight-wing-interface-two-land-and-routing-sequence.md` | The flight wing interface is TWO lands; cut-sense is deferred DNP; routing is sequenced AFTER the interface | Accepted |
 | ≥044 | *(reserved)* | next free: `scripts/adr_next_number.py` → 086 | — |
 
 ## Non-conforming filenames (not `NNN-description.md`)
