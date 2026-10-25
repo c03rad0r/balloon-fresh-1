@@ -25,9 +25,25 @@ BOARD = os.path.join(REPO, "tracker", "hardware", "wing_interconnect",
                      "wing_interconnect_v1.kicad_pcb")
 PROC = os.path.join(REPO, "docs", "fab", "wing-3d", "FIRST-ARTICLE-TEST.md")
 
+def _pcbnew_ok():
+    """pcbnew MUST be probed, not assumed from the interpreter's existence.
+
+    MEASURED (CI run 40213037632): gating on os.path.exists('/usr/bin/python3') was wrong --
+    python3 exists on the runner but pcbnew does not, so all three board tests FAILED in CI
+    instead of skipping. A gate that cannot run must SKIP LOUDLY, never fail for want of a
+    tool (AGENTS.md 23).
+    """
+    if not os.path.exists("/usr/bin/python3"):
+        return False
+    r = subprocess.run(["/usr/bin/python3", "-c", "import pcbnew"],
+                       capture_output=True, text=True,
+                       env=dict(os.environ, PYTHONPATH="/usr/lib/python3/dist-packages"))
+    return r.returncode == 0
+
+
 needs_pcbnew = pytest.mark.skipif(
-    not os.path.exists("/usr/bin/python3"),
-    reason="no /usr/bin/python3 -- cannot read the board with pcbnew",
+    not _pcbnew_ok(),
+    reason="pcbnew not importable -- pad roles are UNVERIFIED, not passed",
 )
 
 
