@@ -166,9 +166,16 @@ answered wrongly, send the artefact rather than a description, and record the **
 is not a model, and a router that substitutes a different family has not given you the review you asked for.
 
 **Environment gotchas — measured, each cost real time:**
-- KiCad's Python bindings (`pcbnew`) load **only under `/usr/bin/python3.14`**, NOT the 3.11 the test
-  suite uses. Importing `pcbnew` under 3.11 **segfaults the interpreter** and kills the whole pytest
-  run — probe it in a subprocess, never in-process.
+- KiCad's Python bindings (`pcbnew`) live in the **distro** python's site-packages, not the venv the
+  test suite runs in. **CORRECTED 2026-10-25:** this note used to name `/usr/bin/python3.14`, which
+  **does not exist on this host** — measured, `ls /usr/bin/python3*` returns only `python3` and
+  `python3.12`. Importing `pcbnew` under the WRONG interpreter can **segfault** and kill the whole
+  pytest run, so still probe it in a subprocess, never in-process. The working invocations are:
+
+  ```
+  /usr/bin/python3 -c 'import pcbnew; print(pcbnew.Version())'     -> 9.0.9
+  PYTHONPATH=/usr/lib/python3/dist-packages python3 -m pytest ...  # project pytest + pcbnew
+  ```
 - **3D models — corrected 2026-10-11.** The earlier note here ("`KICAD9_3DMODEL_DIR` is **unset** and
   no 3D model library is installed, so renders are substrate+copper+silkscreen only") was **wrong on
   its first two clauses** and is superseded: `kicad-packages3d 9.0.7-1` **is** installed (14,043
@@ -179,7 +186,7 @@ is not a model, and a router that substitutes a different family has not given y
   render` exits 0 and prints no warning when a footprint's model does not resolve** — the part is
   silently absent. So never infer component bodies from a render, and never trust a vision
   description of one; ask the machine instead:
-  `/usr/bin/python3.14 scripts/model_resolution_census.py --check --require-refs U1,U2,U3,U4,U5,ANT3 <board>.kicad_pcb`
+  `/usr/bin/python3 scripts/model_resolution_census.py --check --require-refs U1,U2,U3,U4,U5,ANT3 <board>.kicad_pcb`
   (text parse, no `pcbnew`, exit 1 on any unresolved reference or missing required model). Measured
   2026-10-11: wing **12/12 resolved, 0 unresolved** (15 fp; H1–H3 mounting holes carry no model, which
   is legitimate); hub **25/32 resolved, 7 unresolved** (model-less U2/U4 + missing LoRa2021, ESP32-S3,

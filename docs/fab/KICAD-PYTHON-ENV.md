@@ -1,8 +1,8 @@
 # KiCad / pcbnew environment — corrected 2026-10-25
 
 **This file corrects a stale instruction in `AGENTS.md` "Environment gotchas" (first bullet).**
-`AGENTS.md` is a protected agent-instruction file, so the correction is recorded here and the
-AGENTS.md line needs an explicit operator edit (see §4).
+**STATUS 2026-10-25: APPLIED to `AGENTS.md`** with operator approval — see §5 for the exact text
+that landed. Kept as the measurement record, because the numbers are what justify the change.
 
 ---
 
