@@ -3,6 +3,13 @@
 > Numbered **133** on 2026-10-25. Verified free with `scripts/adr_next_number.py --number 133`
 > (exit 0) and across all refs.
 
+> **SUPERSEDED 2026-10-25 by ADR-134 — kept as history.** This record explained what `GND`
+> and `RF_FEED` were FOR, because they still existed. **Both pins have since been REMOVED**
+> as dead copper (operator: antennas attach to the hub by U.FL, no antennas on the wing).
+> The tab is now two pins, `SOLAR_P` and `SOLAR_N`. Read this record for the *reasoning*
+> (why GND was never a solar return; where RF_FEED came from), and ADR-134 for the
+> *current* state.
+
 - **Status:** **Proposed** — explanatory record; operator corrects pass 2.
 - **Date:** 2026-10-25
 - **Answers:** *"what are the GND and RF-Feed pins for? How is rf-feed related to the wing?"*

@@ -1,28 +1,38 @@
 #!/usr/bin/env python3
-"""Build the WING INTERCONNECT BOARD (ADR-132) -- per-cell bypass + wing<->hub interface.
+"""Build the WING INTERCONNECT BOARD (ADR-132 / ADR-134) -- a SMALL series connector.
 
-WHAT THIS BOARD IS, AND WHAT IT IS NOT
---------------------------------------
-It is a SMALL SPINE, not a cell carrier. The operator asked for "a small board with
-bypass diodes that all the cells can be soldered to ... responsible for connecting the
-wing to the hub board". Both requirements are met:
+WHAT THIS BOARD IS (operator's words, 2026-10-25)
+-------------------------------------------------
+  "the panels won't be mounted to the wing board. The solar cells get mounted to
+   styrofoam and the wing board is just a small connector where + and - of each solar
+   panel gets soldered onto. The wing board contains the bypass diodes and it makes the
+   series connection between the cells and it connects to the hub board."
 
-  * every cell's two ENDS solder to this board (6 end lands, ADR-052 end-only),
-  * 3 bypass Schottky diodes, one ACROSS EACH CELL (ADR-132), SS24 / SMA,
-  * the 4-pad tab that plugs into the hub's already-routed land row (ADR-046).
+So the board is a **connector**, NOT a carrier:
 
-**The cell BODIES rest on the FOAM, not on this board.** That is the point of
-ADR-117/ADR-130: the XPS sheet is the airframe and the board exists only where copper is
-needed. A first draft laid out a full cell-COURT board -- 83.8 x 159.1 mm = 133 cm2,
-**12.0 g/wing, 48 g for four** -- which exceeds the entire ~42 g payload. Measured and
-rejected. This spine is 14.3 cm2 and **1.29 g/wing, 5.2 g for four**.
+  * the CELLS stay on the XPS foam (ADR-117); their bodies never touch this board,
+  * each cell's **+ and - tails** solder to one pad pair here (6 pads total),
+  * **3 bypass diodes**, one ACROSS EACH CELL -- a short wire jumper from each cell's
+    tail to this board puts the diode in parallel with it (ADR-132),
+  * **2-pin tab** out to the hub: SOLAR_P and SOLAR_N (ADR-134 removed GND + RF_FEED).
 
-TOPOLOGY (ADR-046 sec 2.1, ADR-132 sec 2)
------------------------------------------
+SIZE: 44 x 20 mm = 8.8 cm2, 0.4 mm FR4 = 0.79 g/wing, 3.17 g for four.
+
+WHY IT IS NOT A LONG SPINE (measured, twice)
+--------------------------------------------
+Two earlier attempts were wrong and the arithmetic caught both:
+  * a full cell-COURT board: 83.8 x 159.1 mm = 133 cm2 = 12.0 g/wing, 48 g for four --
+    more than the entire ~42 g payload;
+  * a 3-cell single-row spine: 197.15 mm long, which does not fit the 167.1 mm arm.
+The connector has no such problem because it carries no cell geometry at all.
+
+TOPOLOGY (ADR-046 / ADR-132 sec 2 / ADR-134)
+---------------------------------------------
     SOLAR_P -[SC1]- SOLAR_MID1 -[SC2]- SOLAR_MID2 -[SC3]- SOLAR_N
                  |               |               |
-                D1              D2              D3      K -> the cell's HIGH node
-                 |               |               |       A -> the cell's LOW  node
+                D1              D2              D3     K -> the cell's HIGH node
+                 |               |               |      A -> the cell's LOW  node
+
 A reversed diode is forward-biased by its own cell's 0.5 V and silently shunts that cell,
 invisible to a string-voltage check (ADR-054 sec 2.3(b)). Hence the printed K marks and a
 mandatory first-article reverse-bias test.
@@ -32,8 +42,7 @@ LAYOUT RULES THAT COST REWRITES (kept so they are not repeated)
   * pads need >=0.5 mm to Edge.Cuts, or copper_edge_clearance fires at 0.000 mm
   * silk text below 0.8 mm fires text_height on JLCPCB rules
   * a designator sitting on a pad fires silk_over_copper ("clipped by solder mask")
-  * a window overlapping an end land fires copper_edge_clearance
-  * a cell is 78.55 x 38.90 -- three of them END TO END need 235.65 mm
+  * derive a dimension from the layout; a hard-coded length left lands off-board
 
 RUN
 ---
@@ -51,64 +60,60 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "wing_interconnect", "wing_interconnect_v1.kicad_pcb")
 
 # ---------------------------------------------------------------- geometry (mm)
-CELL_L, CELL_W = 78.55, 38.90   # ADR-049 measured large cell
-CELL_PITCH = 44.0               # high-end pitch along the spine (cell W 38.90 + gap)
-EDGE = 1.6                      # board margin
+BOARD_W = 44.0
+BOARD_H = 20.0
+EDGE = 1.6
 
+# TAB -- ADR-134: TWO pins only. GND and RF_FEED were removed as dead copper.
+TAB_PINS = ["SOLAR_P", "SOLAR_N"]
 TAB_PAD_W, TAB_PAD_H = 4.0, 1.2
 TAB_PITCH = 1.8
-TAB_L = 6.0
-TAB_X = TAB_L / 2.0 + EDGE
+TAB_X = EDGE + TAB_PAD_W / 2.0
 
 SMA_PAD_L, SMA_PAD_W = 2.3, 1.55
-LAND_W, LAND_H = 1.6, 4.0       # cell end land, ADR-046 sec 3.4
-SILK = 0.8                      # JLCPCB legible minimum
+CELL_PAD_W, CELL_PAD_H = 2.2, 4.0     # a cell TAIL lands here, one pad per terminal
+SILK = 0.8                            # JLCPCB legible minimum
 
-CELL_Y = 8.4                    # upper rail: the cell END lands
-DIODE_Y = 3.4                   # lower rail: the bypass diodes
-MID_Y = 5.9                     # clear silk strip between the rails
+# three cell-terminal pairs along the top, three diodes along the bottom
+CELL_X = (14.0, 22.0, 30.0)
+CELL_Y = 15.0
+DIODE_X = (14.0, 22.0, 30.0)
+DIODE_Y = 6.0
+MID_Y = 10.4
 
-SPINE_L = 130.0
-SPINE_W = 11.0
-
-NETS = [("SOLAR_P", 1), ("SOLAR_MID1", 2), ("SOLAR_MID2", 3), ("SOLAR_N", 4),
-        ("GND", 5), ("RF_FEED", 6)]
+NETS = [("SOLAR_P", 1), ("SOLAR_MID1", 2), ("SOLAR_MID2", 3), ("SOLAR_N", 4)]
 NETCODE = dict(NETS)
 
-# cell k: (ref, high-end x, high net, low net). The - end is one cell length further on.
-_X0 = TAB_L + EDGE + 6.0
+# cell k: (ref, x of its PAD PAIR, high net, low net)
 CELLS = [
-    ("SC1", _X0, "SOLAR_P", "SOLAR_MID1"),
-    ("SC2", _X0 + CELL_PITCH, "SOLAR_MID1", "SOLAR_MID2"),
-    ("SC3", _X0 + 2 * CELL_PITCH, "SOLAR_MID2", "SOLAR_N"),
+    ("SC1", CELL_X[0], "SOLAR_P", "SOLAR_MID1"),
+    ("SC2", CELL_X[1], "SOLAR_MID1", "SOLAR_MID2"),
+    ("SC3", CELL_X[2], "SOLAR_MID2", "SOLAR_N"),
 ]
-DIODES = [("D1", CELLS[0][1], "SOLAR_P", "SOLAR_MID1"),
-          ("D2", CELLS[1][1], "SOLAR_MID1", "SOLAR_MID2"),
-          ("D3", CELLS[2][1], "SOLAR_MID2", "SOLAR_N")]
+DIODES = [("D1", DIODE_X[0], "SOLAR_P", "SOLAR_MID1"),
+          ("D2", DIODE_X[1], "SOLAR_MID1", "SOLAR_MID2"),
+          ("D3", DIODE_X[2], "SOLAR_MID2", "SOLAR_N")]
 
 
 def pads():
     p = []
-    # tab on the LEFT edge: pins 1..4 = SOLAR_P, GND, RF_FEED, SOLAR_N (ADR-046)
-    for i in range(4):
-        y = SPINE_W / 2.0 + (i - 1.5) * TAB_PITCH
-        p.append(("J1", str(i + 1), NETS[i][0], TAB_X, y, TAB_PAD_W, TAB_PAD_H))
-    # cell END lands on the upper rail; the cell body spans the FOAM between its ends
+    # 2-pin tab on the LEFT edge, centred vertically
+    for i, net in enumerate(TAB_PINS):
+        y = BOARD_H / 2.0 + (i - (len(TAB_PINS) - 1) / 2.0) * TAB_PITCH
+        p.append(("J1", str(i + 1), net, TAB_X, y, TAB_PAD_W, TAB_PAD_H))
+    # each cell's TWO TAILS land on one pad pair (hi = +, lo = -)
     for ref, cx, hi, lo in CELLS:
-        p.append((ref, "1", hi, cx, CELL_Y, LAND_W, LAND_H))
-        p.append((ref, "2", lo, cx + CELL_L, CELL_Y, LAND_W, LAND_H))
-    # bypass diodes on the lower rail: pad1 = K (cell HIGH), pad2 = A (cell LOW)
+        p.append((ref, "1", hi, cx - CELL_PAD_W / 2.0 - 0.75, CELL_Y,
+                  CELL_PAD_W, CELL_PAD_H))
+        p.append((ref, "2", lo, cx + CELL_PAD_W / 2.0 + 0.75, CELL_Y,
+                  CELL_PAD_W, CELL_PAD_H))
+    # bypass diodes along the bottom: pad1 = K (cell HIGH), pad2 = A (cell LOW)
     for ref, cx, hi, lo in DIODES:
         p.append((ref, "1", hi, cx - SMA_PAD_L / 2.0 - 0.4, DIODE_Y,
                   SMA_PAD_L, SMA_PAD_W))
         p.append((ref, "2", lo, cx + SMA_PAD_L / 2.0 + 0.4, DIODE_Y,
                   SMA_PAD_L, SMA_PAD_W))
     return p
-
-
-def windows():
-    """No windows: a spine has no FR4 under the cells in the first place."""
-    return []
 
 
 def _f(v: float) -> str:
@@ -129,7 +134,7 @@ def build() -> str:
     A("  (setup (pad_to_mask_clearance 0.05))")
     for name, code in NETS:
         A(f'  (net {code} "{name}")')
-    o = [(0, 0), (SPINE_L, 0), (SPINE_L, SPINE_W), (0, SPINE_W)]
+    o = [(0, 0), (BOARD_W, 0), (BOARD_W, BOARD_H), (0, BOARD_H)]
     for i in range(4):
         x1, y1 = o[i]
         x2, y2 = o[(i + 1) % 4]
@@ -137,30 +142,28 @@ def build() -> str:
           f'(stroke (width 0.1) (type solid)) (layer "Edge.Cuts"))')
     # ---- NO TRACKS AT PLACEMENT STAGE (deliberate, same staging as hub_board_v10).
     #      AGENTS.md 21: schematic -> ERC -> netlist -> board -> DRC -> gates -> render,
-    #      and ROUTING follows the placement gate. Measured: hand-routing on F.Cu gave
-    #      tracks_crossing + copper_edge_clearance; moving to B.Cu then needed
-    #      through-hole pads and produced 5 shorting_items + 10 solder_mask_bridge.
-    #      Hand routing here made the board WORSE, so it is left to the router pass.
+    #      and ROUTING follows the placement gate. The ratsnest below is the routing task.
     for ref, num, net, x, y, w, h in pads():
         A(f'  (footprint "wing_ic:{ref}" (layer "F.Cu") (at {_f(x)} {_f(y)})')
         A(f'    (pad "{num}" smd rect (at 0 0) (size {_f(w)} {_f(h)}) '
           f'(layers "F.Cu" "F.Paste" "F.Mask") (net {NETCODE[net]} "{net}"))')
         A("  )")
-    # ---- SILK: designators + polarity, on the clear strip between the two rails.
-    #      ADR-132 sec 4.2 makes the cathode mark mandatory. Everything is at the
-    #      JLCPCB minimum 0.8 mm / 0.15 mm: measured, 0.7 mm fires text_height.
+    # ---- SILK: TWO separate rows so cell and diode labels cannot collide.
+    #      Measured: putting both on the mid strip produced 4 silk_overlap.
+    #      ADR-132 sec 4.2 makes the cathode mark mandatory.
+    # cell pads span y 13.0..17.0 and diode pads y 4.4..7.6, so the two label rows must
+    # sit at 12.2 and 8.6 -- measured: 12.6 clipped the cell pads, 10.4 collided.
+    CELL_LBL_Y = 12.2
+    DIODE_LBL_Y = 8.6
     for ref, cx, hi, lo in CELLS:
-        A(f'  (gr_text "{ref}" (at {_f(cx - 1.5)} {_f(MID_Y)}) (layer "F.SilkS") '
+        A(f'  (gr_text "{ref}" (at {_f(cx - 2.6)} {_f(CELL_LBL_Y)}) (layer "F.SilkS") '
           f'(effects (font (size {_f(SILK)} {_f(SILK)}) (thickness 0.15))))')
-        A(f'  (gr_text "+" (at {_f(cx + 3.4)} {_f(MID_Y)}) (layer "F.SilkS") '
+        A(f'  (gr_text "+" (at {_f(cx + 3.6)} {_f(CELL_LBL_Y)}) (layer "F.SilkS") '
           f'(effects (font (size {_f(SILK)} {_f(SILK)}) (thickness 0.15))))')
-    # diode marks sit BELOW the diode rail, clear of both cell land and diode pad
     for ref, cx, hi, lo in DIODES:
-        A(f'  (gr_text "{ref}" (at {_f(cx - 3.2)} {_f(1.05)}) (layer "F.SilkS") '
+        A(f'  (gr_text "{ref}" (at {_f(cx - 2.6)} {_f(DIODE_LBL_Y)}) (layer "F.SilkS") '
           f'(effects (font (size {_f(SILK)} {_f(SILK)}) (thickness 0.15))))')
-    # board ID goes at the far RIGHT end, past the last cell land, where silk is empty
-    _last_land_x = CELLS[-1][1] + CELL_L
-    A(f'  (gr_text "IC v1 ADR-132" (at {_f(_last_land_x + 6.0)} {_f(MID_Y)}) '
+    A(f'  (gr_text "IC v1" (at {_f(BOARD_W - 6.0)} {_f(CELL_LBL_Y)}) '
       f'(layer "F.SilkS") (effects (font (size {_f(SILK)} {_f(SILK)}) (thickness 0.15))))')
     A(")")
     return "\n".join(L) + "\n"
@@ -182,9 +185,9 @@ def main() -> int:
         print(f"ok: {OUT} matches")
         return 0
     open(OUT, "w").write(body)
-    area = SPINE_L * SPINE_W / 100.0
+    area = BOARD_W * BOARD_H / 100.0
     print(OUT)
-    print(f"size {SPINE_L:.2f} x {SPINE_W:.2f} mm = {area:.1f} cm2")
+    print(f"size {BOARD_W:.1f} x {BOARD_H:.1f} mm = {area:.1f} cm2")
     print(f"FR4 0.4 mm {area * 0.09028:.2f} g/wing  ({area * 0.09028 * 4:.2f} g for four)")
     print(f"sha256 {hashlib.sha256(body.encode()).hexdigest()[:16]}")
     return 0
