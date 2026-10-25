@@ -4,6 +4,14 @@
 > (`scripts/adr_next_number.py --number 132` / `--path …` both exit 0) and across all
 > refs (`git log --all --name-only --pretty=format: -- 'docs/adr/132*'` returns nothing).
 
+> **AMENDED 2026-10-25 by ADR-134.** The tab is now **TWO pins** (`SOLAR_P`, `SOLAR_N`);
+> `GND` and `RF_FEED` were removed as dead copper (antennas attach to the hub by U.FL).
+> The board is therefore **4 nets and 2 tab pads**, not 6 and 4. The board also became a
+> genuine **small connector**: 44 × 20 mm = 8.8 cm², **0.79 g/wing, 3.18 g for four** —
+> the cells stay on the foam and only their `+`/`−` tails reach the board. Everything
+> else in this record (per-cell SS24 bypass, end-only cells, cathode marks, the two-layer
+> protection argument) **stands**.
+
 - **Status:** **Accepted by operator** (Felix, 2026-10-25, verbatim): *"the wing board needs
   bypass diodes for each solar cell. Please update the adrs accordingly and please make a
   small board with bypass diodes that all the cells can be soldered to. This board will be

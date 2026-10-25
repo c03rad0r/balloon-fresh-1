@@ -110,9 +110,18 @@ series stack will be wired backwards):
 | Land # | Net name | Wing side net | Function |
 |---|---|---|---|
 | 1 | `W<n>_SOLAR_P` | `SOLAR_P` | wing n solar **positive** terminal (top of that wing's 1.5 V string) |
-| 2 | `GND` | `GND` | system ground / wing plane reference |
-| 3 | `W<n>_RF` | `RF_FEED` | **V2-only provision** — leave as a land with **no net** on v9 (see §3.2) |
-| 4 | `W<n>_SOLAR_N` | `SOLAR_N` | wing n solar **negative** terminal |
+| 2 | `W<n>_SOLAR_N` | `SOLAR_N` | wing n solar **negative** terminal |
+
+> **CORRECTION (2026-10-25, ADR-134) — the tab is now TWO pins; the 4-land row this file
+> was written for is STALE.** `GND` and `RF_FEED` were **removed as dead copper**:
+> antennas attach to the **hub via U.FL**, so the wing has no antenna and no RF path, and
+> `GND` existed only as the wing Yagi's ground plane. Every "4 lands per face" and every
+> `GND` / `W<n>_RF` reference below is **inherited text kept for the reasoning**; read
+> **ADR-134** for the current interface. The hub is routed against the 4-land row, so this
+> is a **hub respin item**, not a free change.
+>
+> Removed rows, for the record: `| 2 | GND | GND | wing plane reference |` and
+> `| 3 | W<n>_RF | RF_FEED | V2-only provision, no net on v9 |`.
 
 where `<n>` ∈ {1,2,3,4} is the slot index.
 
