@@ -61,7 +61,12 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "wing_interconnect", "wing_interconnect_v1.kicad_pcb")
 
 # ---------------------------------------------------------------- geometry (mm)
-BOARD_W = 44.0
+# BOARD WIDTH IS DERIVED FROM THE PADS, not chosen. MEASURED: the pads ended at x=33.00
+# while the board was 44.0 wide, so 11 mm of the right-hand side carried NO copper at all --
+# only the "IC v1" silk label. That is dead FR4: 8.80 cm2 x 0.09028 g/cm2 = 0.79 g/wing,
+# of which ~0.20 g was empty board.
+#   W = last pad x + EDGE, with the silkscreen markers moved into the free strip instead.
+BOARD_W = 34.6      # was 44.0; pads end at 33.00, +1.6 edge = 34.6
 BOARD_H = 20.0
 EDGE = 1.6
 
@@ -275,7 +280,12 @@ def build() -> str:
     for ref, cx, hi, lo in DIODES:
         A(f'  (gr_text "{ref}" (at {_f(cx - 2.6)} {_f(DIODE_LBL_Y)}) (layer "F.SilkS") '
           f'(effects (font (size {_f(SILK)} {_f(SILK)}) (thickness 0.15))))')
-    A(f'  (gr_text "IC v1" (at {_f(BOARD_W - 6.0)} {_f(CELL_LBL_Y)}) '
+    # BOARD ID: moved into the free TOP STRIP (y 0..5.22 is clear of all pads).
+    # It used to sit at x = BOARD_W-6.0 = 38.0, i.e. in 11 mm of otherwise-empty board --
+    # which is why it LOOKED like it was occupying that space. Shrinking the board to
+    # 34.6 mm would have put the same text at x=28.6, directly on top of SC3's pad
+    # (which spans x 27.05..29.25), so it moves here instead. Silk needs no copper.
+    A(f'  (gr_text "IC v1" (at 8.0 2.4) '
       f'(layer "F.SilkS") (effects (font (size {_f(SILK)} {_f(SILK)}) (thickness 0.15))))')
     A(")")
     return "\n".join(L) + "\n"
