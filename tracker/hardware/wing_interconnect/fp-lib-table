@@ -1,0 +1,4 @@
+(fp_lib_table
+	(version 7)
+	(lib (name "wing_ic")(type "KiCad")(uri "${KIPRJMOD}/wing_ic.pretty")(options "")(descr "Wing interconnect house land patterns -- ADR-132/134/135"))
+)
