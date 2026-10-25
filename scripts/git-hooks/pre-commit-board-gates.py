@@ -72,6 +72,46 @@ TRIGGERS = (".kicad_pcb", ".kicad_sch", ".kicad_mod", "v10_pinmap.reg", "OPEN-IT
 touching = [f for f in staged if f.endswith(TRIGGERS) or any(t in f for t in TRIGGERS[3:])]
 
 # ---------------------------------------------------------------------------------------------
+# ROOT LAYOUT GATE (2026-10-25). The repository root accumulates loose one-off scripts. It had
+# 23 of them before pr/root-file-tidy: 19 v10 probes/renderers, a poisoned board and a KiCad
+# scratch project -- and two of them were INVOKED BY PATH from tracker/hardware/, so the clutter
+# was load-bearing. The operator asked for them to be filed into subdirectories.
+#
+# WHY MECHANICAL. AGENTS.md: "'always X' => mechanical gate (hook), never convention". A comment
+# asking people to keep root clean is exactly the convention that let 23 files accumulate.
+#
+# WHY ALLOW-LISTED. A deny-list lets the NEXT stray through. The rule is: root may contain only
+# named entry points; anything else must live in a subdirectory.
+#
+# Runs on EVERY commit (it needs no board and no kicad); it is a cheap text check.
+ROOT_ALLOWLIST = {
+    ".gitignore", ".gitmodules", ".secret-patterns.txt",
+    "AGENTS.md", "README.md", "PROGRESS.md",
+    "Makefile", "pyproject.toml", "pytest.ini", "uv.lock",
+}
+if os.path.exists(os.path.join(REPO, "tests", "test_root_layout.py")):
+    _root = subprocess.run(
+        [sys.executable, "-m", "pytest", "tests/test_root_layout.py", "-q",
+         "-k", "test_root_has_no_unexpected_files"],
+        cwd=REPO, capture_output=True, text=True)
+    if _root.returncode != 0:
+        print("board-gates: FAIL ROOT LAYOUT -- the repository root has file(s) that belong in a")
+        print("    subdirectory. Root may contain only these entry points:")
+        print("      " + ", ".join(sorted(ROOT_ALLOWLIST)))
+        print("    File probes/debug/render one-offs under tracker/hardware/tmp_probes/; docs")
+        print("    under docs/. (Gate: tests/test_root_layout.py)")
+        tail = ( _root.stdout or "" ) + ( _root.stderr or "" )
+        for line in tail.splitlines():
+            if line.strip().startswith(("E ", "E\t")) or "assert not" in line:
+                print("    " + line.strip())
+        sys.exit(1)
+else:
+    # A gate that cannot run must never look green (AGENTS.md 20).
+    print("board-gates: REFUSED -- tests/test_root_layout.py is missing, so the root layout")
+    print("    gate cannot run. Restore it (it is tracked) before committing.")
+    sys.exit(1)
+
+# ---------------------------------------------------------------------------------------------
 # ROUTER AGREEMENT TESTS (2026-10-22). A router change must not reach a board without proving that
 # the router's SEARCH still agrees with its VALIDATOR and with kicad-cli.
 #
