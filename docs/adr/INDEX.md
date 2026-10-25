@@ -23,8 +23,8 @@
   header, or a supersede pointer inside a committed record), this index says
   `UNRESOLVED - needs an operator decision`. It never guesses.
 
-Generated from `docs/adr/`: **116** distinct
-numbers, **116** numbered files, **1** non-conforming filenames.
+Generated from `docs/adr/`: **118** distinct
+numbers, **118** numbered files, **1** non-conforming filenames.
 
 ## Collisions
 
@@ -150,6 +150,8 @@ None.
 | 129 | `129-v10-power-restoration-and-bypass-diodes.md` | v10 power-management restoration, per-cell bypass diodes, and the hub panel connector | ACCEPTED — operator instruction, 2026-10-22 |
 | 130 | `130-foam-wing-geometry-authority.md` | The FOAM wing is the wing of record; the wing has no PCB, and its geometry is parametric | Proposed — the design direction is worker-derivable; the operator |
 | 131 | `131-wing-hub-interface-and-release.md` | Wing↔hub interface redesigned for a FOAM wing: the 4-pin row stays, the insertion feature changes, and the release is designed with it | Proposed — design direction is worker-derivable; the operator |
+| 132 | `132-wing-per-cell-bypass-interconnect-board.md` | The wing carries its own interconnect board with a PER-CELL bypass diode, and that board is the wing↔hub interface | Accepted by operator |
+| 133 | `133-gnd-and-rf-feed-purpose.md` | What GND and RF_FEED are actually for, and what happens to them when the wing loses its Yagi | Proposed — explanatory record; operator corrects pass 2 |
 | ≥044 | *(reserved)* | next free: `scripts/adr_next_number.py` → 086 | — |
 
 ## Non-conforming filenames (not `NNN-description.md`)
