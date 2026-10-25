@@ -95,3 +95,4 @@ tracker/hardware/base_station/output/
 
 # rip-up-and-reroute scratch backups (route_ripup.py; board copies, never tracked)
 *.ripup.bak
+*.rpt
