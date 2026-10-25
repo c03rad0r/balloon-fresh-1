@@ -23,8 +23,8 @@
   header, or a supersede pointer inside a committed record), this index says
   `UNRESOLVED - needs an operator decision`. It never guesses.
 
-Generated from `docs/adr/`: **111** distinct
-numbers, **111** numbered files, **1** non-conforming filenames.
+Generated from `docs/adr/`: **115** distinct
+numbers, **115** numbered files, **1** non-conforming filenames.
 
 ## Collisions
 
@@ -145,6 +145,10 @@ None.
 | 123 | `123-v10-two-spi-buses.md` | v10 radio interconnect v2: TWO SPI buses, partitioned by band (bent-pipe capable) | ACCEPTED — operator instruction, 2026-10-21: *"make sure that one of the low power LR2021 is on one SPI bus and the F33 … on the other SPI bus so that we can have a real time bent pipe without being forced to do TDMA if we want to."* |
 | 124 | `124-tether-holes.md` | Tether holes: four NPTH line-attachment holes on the flight hub | ACCEPTED — operator instruction, 2026-10-21: *"include holes in the board so that a string can be attached for tying it to the balloon."* |
 | 125 | `125-wing-string-holes.md` | Wing string-attachment holes + deterministic hole-clearance test | ACCEPTED — operator instruction, 2026-10-21: *"Also please make holes for attaching the wing boards via a string. Please make a deterministic geometric test for ensuring that the holes don't overlap with any components or lanes in the circuit board."* |
+| 126 | `126-astar-routing-mandatory.md` | Grid A* routing with via support is the ONLY permitted routing method | ACCEPTED — operator directive, 2026-10-21: *"(a) a real grid/A* router with via |
+| 128 | `128-schematic-is-source-of-truth.md` | The Schematic Is The Source Of Truth — Board Derived From It, Mechanically Enforced | Accepted |
+| 129 | `129-v10-power-restoration-and-bypass-diodes.md` | v10 power-management restoration, per-cell bypass diodes, and the hub panel connector | ACCEPTED — operator instruction, 2026-10-22 |
+| 130 | `130-foam-wing-geometry-authority.md` | The FOAM wing is the wing of record; the wing has no PCB, and its geometry is parametric | Proposed — the design direction is worker-derivable; the operator |
 | ≥044 | *(reserved)* | next free: `scripts/adr_next_number.py` → 086 | — |
 
 ## Non-conforming filenames (not `NNN-description.md`)
