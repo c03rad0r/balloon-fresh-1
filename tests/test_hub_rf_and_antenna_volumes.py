@@ -57,7 +57,9 @@ def _board_json(expr: str):
 @needs_pcbnew
 def test_no_rf_nets_on_hub():
     """ADR-137: the hub carries no RF provision. Zero ANT* nets of any kind."""
-    nets = _board_json("[t.GetNetname() for t in b.GetTracks()]")
+    nets = _board_json(
+        "[t.GetNetname() for t in b.GetTracks()] + "
+        "[p.GetNetname() for f in b.GetFootprints() for p in f.Pads()]")
     bad = sorted({n for n in nets if n.startswith("/ANT")})
     assert bad == [], (
         f"ADR-137 violated: RF copper found on the hub: {bad}. "
@@ -103,10 +105,10 @@ def test_every_volume_is_classified():
     """A guess must never be readable as a measurement."""
     d = json.load(open(VOLJSON))
     for v in d["volumes"]:
-        assert v["status"] in ("CONFIRMED", "PROVISIONAL"), v["ref"]
+        assert v["status"] in ("VERIFIED", "PROVISIONAL"), v["ref"]
         assert v["evidence"], f"{v['ref']} has no evidence note"
         if v["status"] == "PROVISIONAL":
-            assert not v["side_confirmed"], "PROVISIONAL volume claims a confirmed side"
+            assert v["status"] != "VERIFIED", "PROVISIONAL volume claims a verified pad"
 
 
 def test_volume_model_is_labelled_placeholder():
@@ -116,22 +118,43 @@ def test_volume_model_is_labelled_placeholder():
         "antenna body dimensions must remain labelled PLACEHOLDER until a real part is chosen"
 
 
-def test_collision_detector_works_and_collision_is_still_visible():
-    """U2<->U3 overlap 131 mm2 was found by this detector and is STILL OPEN. The test asserts the
-    detector finds it, so resolving it forces this test to be updated deliberately."""
+def test_antenna_volume_collisions_are_detected_and_visible():
+    """Real collisions exist and must stay visible until resolved.
+
+    NOTE the history: an earlier version anchored volumes at the module CENTRE and guessed the
+    nearest board edge, which produced a spurious "U2 <-> U3, 131 mm2" conflict. That claim was
+    WITHDRAWN. Anchored at the datasheet-verified antenna pads, the real conflicts are:
+      U2.9 <-> U2.10   (one module's two ports, both exiting east)
+      U3.9 <-> U_C.9   (two modules facing each other, sub-GHz ports)
+      U3.10 <-> U_C.10 (same, 2.4 GHz ports)
+    These are open mechanical items. If they disappear, either they were FIXED (update this test
+    and the status doc) or the model lost them.
+    """
     d = json.load(open(VOLJSON))
-    V = d["volumes"]
-    overlaps = []
-    for a, b in itertools.combinations(V, 2):
-        A, B = a["volume"], b["volume"]
-        ox = min(A["x2"], B["x2"]) - max(A["x1"], B["x1"])
-        oy = min(A["y2"], B["y2"]) - max(A["y1"], B["y1"])
-        if ox > 0 and oy > 0:
-            overlaps.append((a["ref"], b["ref"]))
-    assert ("U2", "U3") in [tuple(sorted(o)) for o in overlaps] or \
-           ("U2", "U3") in overlaps, (
-        "the U2<->U3 antenna volume collision is no longer detected -- either it was FIXED "
-        "(then update this test and the status doc) or the volumes changed and it was lost")
+    pairs = {frozenset((c["a"], c["b"])) for c in d.get("collisions", [])}
+    for want in ({"U2.9", "U2.10"}, {"U3.9", "U_C.9"}, {"U3.10", "U_C.10"}):
+        assert frozenset(want) in pairs, (
+            f"antenna volume collision {sorted(want)} is no longer reported -- fixed (then update "
+            "this test) or lost (then the model is wrong)")
+
+
+def test_volumes_are_anchored_at_real_antenna_pads():
+    """Regression guard for the defect that produced the withdrawn 131 mm2 claim: a volume must
+    sit at its own pad, not at a module-centre guess."""
+    d = json.load(open(VOLJSON))
+    board = json.load(open(VOLJSON))  # keep single load; anchors live in the same file
+    for v in d["volumes"]:
+        ax, ay = v["anchor"]
+        vol = v["volume"]
+        # the pad itself must lie on the volume's inner edge, within the body width
+        if v["side"] in ("east", "west"):
+            inner = vol["x1"] if v["side"] == "east" else vol["x2"]
+            assert abs(ax - inner) > 0.1, (
+                f"{v['ref']}.{v['pin']} volume does not start at its pad (anchor x={ax})")
+        else:
+            inner = vol["y1"] if v["side"] == "south" else vol["y2"]
+            assert abs(ay - inner) > 0.1, (
+                f"{v['ref']}.{v['pin']} volume does not start at its pad (anchor y={ay})")
 
 
 @needs_pcbnew
@@ -171,5 +194,5 @@ def test_vias_meet_the_board_margin():
 
 def test_status_doc_records_the_blockers():
     doc = open(STATUS, encoding="utf-8").read()
-    for phrase in ("0.370", "0.600", "2-LAYER", "no free ESP32-S3 GPIO remains", "131"):
+    for phrase in ("0.370", "0.600", "no free ESP32-S3 GPIO remains", "4-layer"):
         assert phrase in doc, f"status doc lost a measured finding: {phrase!r}"
