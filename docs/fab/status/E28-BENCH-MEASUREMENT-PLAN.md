@@ -31,9 +31,17 @@ silicon with a **PCB antenna** and would not validate our IPEX geometry.
 
 ---
 
+> **CORRECTION 2026-10-26 — read `E28-DIMENSIONS-RESOLVED.md` first.**
+> A1 was ranked here as board-scrapping-class. That was **too strong**. The 15-vs-16 conflict
+> resolves as **body 15.0 vs castellation envelope 16.0**, and the footprint's governing dimension
+> — pad-centre row separation — is **15.0 mm under either reading**. So A1 cannot scrap the board.
+> It moves the courtyard and the 3D envelope by 1.0 mm. The table at §5 rows 1–2 below is
+> therefore superseded; everything else here still stands. A caliper is still the cheapest
+> confirmation, but it is **no longer a reason to delay placing the board.**
+
 ## 1. Tier A — caliper. Do these, in this order.
 
-### A1. Body width across the pad rows — **the single most valuable measurement**
+### A1. Body width across the pad rows — **confirmatory, not decisive**
 
 The datasheet contradicts itself: the Chapter 3 **drawing** says the outline is **16.0 × 20.0 ×
 2.90 mm**; the specification **table** says **15 × 20 mm**.
