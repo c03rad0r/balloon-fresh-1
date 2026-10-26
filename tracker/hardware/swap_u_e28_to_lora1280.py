@@ -106,6 +106,15 @@ def main(argv=None) -> int:
     new.SetPosition(tgt)
     new.SetOrientationDegrees(rot)
     b.Add(new)
+    # The outgoing U_E28 was mounted on B.Cu (bottom side, two-sided population per
+    # ADR-118). FootprintLoad() gives an F.Cu part, so it must be flipped or it lands on
+    # the wrong side of the board and the router has nothing to reach.
+    # Flip() segfaults on a library-loaded footprint, so it is done here, after Add().
+    # NOTE: pad.GetLayerName() still reports "F.Cu" afterwards — that accessor is
+    # misleading. The pad LAYER SET is what matters and is correctly
+    # B.Cu/B.Mask/B.Paste. Verify with GetLayerSet(), never GetLayerName().
+    if old.GetLayer() == pcbnew.B_Cu and new.GetLayer() != pcbnew.B_Cu:
+        new.Flip(tgt, False)
     nb = bbox_of(new)
     print(f"{NEW_REF}: same centre/rot -> body bbox x {nb[0]:.2f}..{nb[2]:.2f}  "
           f"y {nb[1]:.2f}..{nb[3]:.2f}  ({nb[2]-nb[0]:.2f} x {nb[3]-nb[1]:.2f})")
