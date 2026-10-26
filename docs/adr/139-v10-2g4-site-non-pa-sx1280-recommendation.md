@@ -202,6 +202,62 @@ enables          TX_EN, RX_EN        none
 A 2.00 mm pitch with a ~0.80 mm gap is materially easier to hand-solder than the E28's 0.27 mm gap —
 relevant because this board is hand-assembled by the operator.
 
+## 8.4 Operator asked for `LoRa1280F27` — recorded conflict, not applied
+
+Operator, 2026-10-26:
+
+> "LoRa1280F27 — lets go for this one. That way we know we can measure range at a big distance."
+
+**That is the one variant in the family the vendor says cannot range**, so it fails the operator's
+own gate ("I won't fly it unless if it does ranging"). Three independent checks:
+
+1. **NiceRF comparison table** (`nicerf.com/sx1280-lora-module.html`): `Ranging function` =
+   **No** for `LoRa1280F27` and `LoRa1280F27-TCXO`.
+2. **The F27 datasheet never mentions ranging.** `pdftotext -layout` over
+   `lora128xf27-500mw-…-v2.5.pdf`: **zero** occurrences of "ranging" — every "range" hit is
+   "frequency range" or "operating range".
+3. **The sibling datasheet is explicit where it matters.** `LoRa128X` Rev 2.2 states
+   `LoRa1280-TCXO ★ Supports ranging with more precision` **and**
+   `LoRa1281-TCXO Does not support ranging`. A vendor that writes the distinction for one series and
+   omits it for another is not claiming it for the second.
+
+### Why the stated reason does not hold either
+
+"measure range at a big distance" mixes two different quantities:
+
+| | meaning | LoRa1280-TCXO | LoRa1280F27 |
+|---|---|---|---|
+| **range** | link distance (communication) | 1.4 km (vendor, open area) | 4 km (vendor, open area) |
+| **ranging** | distance *measurement* by time-of-flight | **Yes** | **No** |
+
+The F27's 4 km figure is quoted at **27 dBm**, and this repo's own analysis caps the lawful 2.4 GHz
+ceiling for this modulation at **10 mW EIRP = 10 dBm** (§3 above). So the 14.5 dB that buys
+1.4 → 4 km **is not legally available**. A link test run at 27 dBm therefore produces a distance
+number that **cannot be flown** — the worst kind of test result.
+
+### Cost of the F27 if it were chosen anyway
+
+```
+pins      18   (TXEN 13, RXEN 14, ANT 17)
+size      31.54 x 15.8 x 2.9 mm      (vs 16 x 16 x 2.1)
+current   <600 mA TX                  (vs 28 mA)
+enables   TX_EN + RX_EN               -> ADR-138 Q2/Q4/Q5 return
+ranging   No
+```
+
+Twice the footprint, twenty times the current, the enable hazard class back, and no ranging.
+
+### What this does NOT decide
+
+If the operator's actual priority is **link distance rather than time-of-flight ranging**, that is a
+different requirement and it would change ADR-035 (ranging slot) — but it still cannot be met by
+raising TX power inside the 10 dBm EIRP ceiling. The lawful levers for range are **receive-side**:
+antenna gain, LNA at the ground station, lower bandwidth / higher spreading factor. Those buy more
+than the PA does, and they are legal.
+
+**Status of this section: an open operator decision, recorded so it is not silently overridden.**
+The F27 has not been specified into the board.
+
 ## 9. Reproduce
 
 ```bash
