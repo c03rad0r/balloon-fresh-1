@@ -2,7 +2,8 @@
 
 > Numbered **139** on 2026-10-26. Next free after 138.
 
-**Status:** **Proposed** — a recommendation with one open question (§8). Not applied to the board.
+**Status:** **Accepted** — operator decision 2026-10-26. **Part: `LoRa1280` (plain, 10 ppm crystal).**
+Not yet applied to `hub_board_v10.kicad_pcb`; footprint spec in `docs/modules/lora128x/FOOTPRINT-SPEC.md`.
 **Relates:** ADR-138 (ranging unproven on the E28 — this record answers it),
 ADR-118/119 (v10 radio sites — would be amended), ADR-035 (ranging slot),
 ADR-137 (no RF on the carrier), `docs/analysis/radio-legal-power-limits.md` §2.4 GHz
