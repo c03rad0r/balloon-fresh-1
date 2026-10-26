@@ -70,6 +70,10 @@ def main(argv=None) -> int:
     ap.add_argument("--dy", type=float, default=0.0,
                     help="shift the new footprint down by this many mm")
     ap.add_argument("--dx", type=float, default=0.0)
+    ap.add_argument("--rot", type=float, default=None,
+                    help="override rotation (deg); default keeps the outgoing part's")
+    ap.add_argument("--side", choices=("B.Cu", "F.Cu"), default=None,
+                    help="override which side the part mounts on")
     a = ap.parse_args(argv)
 
     b = pcbnew.LoadBoard(a.board)
@@ -80,6 +84,9 @@ def main(argv=None) -> int:
 
     op = old.GetPosition()
     rot = old.GetOrientationDegrees()
+    if a.rot is not None:
+        rot = a.rot
+    want_back = (old.GetLayer() == pcbnew.B_Cu) if a.side is None else (a.side == "B.Cu")
     ob = bbox_of(old)
     print(f"{OLD_REF}: pos ({mm(op.x):.3f},{mm(op.y):.3f}) rot {rot}")
     print(f"  old body bbox x {ob[0]:.2f}..{ob[2]:.2f}  y {ob[1]:.2f}..{ob[3]:.2f}"
@@ -113,7 +120,7 @@ def main(argv=None) -> int:
     # NOTE: pad.GetLayerName() still reports "F.Cu" afterwards — that accessor is
     # misleading. The pad LAYER SET is what matters and is correctly
     # B.Cu/B.Mask/B.Paste. Verify with GetLayerSet(), never GetLayerName().
-    if old.GetLayer() == pcbnew.B_Cu and new.GetLayer() != pcbnew.B_Cu:
+    if want_back and new.GetLayer() != pcbnew.B_Cu:
         new.Flip(tgt, False)
     nb = bbox_of(new)
     print(f"{NEW_REF}: same centre/rot -> body bbox x {nb[0]:.2f}..{nb[2]:.2f}  "
