@@ -185,58 +185,74 @@ already warns about this ("self-grading"); this session produced a second live i
 
 ## 5. Antenna volumes (the operator's standing directive)
 
-`reserve_antenna_volume.py` reserves a **3D volume** per radio — connector + pigtail bend + antenna
-body — not a blanket copper keep-out (a keep-out in the wrong place forbids routing where the
-antenna is not while leaving the real antenna unprotected).
+Directive: *"please make sure you reserve space for the antennas in your 3D models of the circuit
+from now on."*
+
+`reserve_antenna_volume.py` reserves a **3D volume** per antenna port — connector + pigtail bend +
+antenna body — not a blanket copper keep-out (a keep-out in the wrong place forbids routing where
+the antenna is not while leaving the real antenna unprotected).
 
 Volume model: body **32 × 8 × 3 mm** `PLACEHOLDER` + connector **4 × 4 × 3 mm** + pigtail bend
 **r 8 mm**.
 
-| ref | side | status | access | basis |
-|---|---|---|---|---|
-| `U2` | west | **CONFIRMED** | module pin (50 Ω) | project plan: `docs/F33-MODULE-PLAN.md` pins 9/10 (ANT, ANT-2G4) — **not vendor-verified** |
-| `U5` | west | PROVISIONAL | unknown | no evidence in repo |
-| `U3` | west | PROVISIONAL | unknown | no evidence in repo |
-| `U_C` | north | PROVISIONAL | unknown | no evidence in repo |
-| `U_E28` | south | PROVISIONAL | unknown | no evidence in repo |
+### 5.1 CORRECTION — the first version of this was wrong twice, and one claim is withdrawn
 
-### 4.1 A real collision was found
+**Withdrawn:** the earlier "U2 ↔ U3 antenna volumes overlap 28.6 × 4.6 mm = 131 mm²" was an
+**artefact of the model**, not a finding. The first version anchored volumes at the module *centre*
+and guessed the nearest board edge, and reserved only ONE volume per module. Both were wrong.
+
+The corrected model anchors each volume at the module's **actual antenna pad**, derives direction
+from pad→centre, and supports **multiple ports per module**.
+
+### 5.2 Antenna pins — three of five modules are now datasheet-VERIFIED
+
+`docs/adr/045-antenna-solder-access.md` D1 already recorded these, extracted with
+**`pdftotext -layout`, not a vision model**, from datasheets committed in this repo. Using it
+replaces four guesses with two.
+
+| port | band | status | basis |
+|---|---|---|---|
+| `U2.9` | sub-GHz | **VERIFIED** | F33 datasheet v1.1 §7 p.6; board net `/ANT1_433_TX` agrees |
+| `U2.10` | 2.4 GHz | **VERIFIED** | F33 datasheet v1.1 §7 p.6 |
+| `U3.9` | sub-GHz | **VERIFIED** | LoRa2021 V1.3 §7 p.6 |
+| `U3.10` | 2.4 GHz | **VERIFIED** | LoRa2021 V1.3 §7 p.6; board net `/ANT3_2G4_RX` agrees |
+| `U_C.9` | sub-GHz | **VERIFIED** | LoRa2021 V1.3 §7 p.6 |
+| `U_C.10` | 2.4 GHz | **VERIFIED** | LoRa2021 V1.3 §7 p.6; board net `/ANT_C_2G4` agrees |
+| `U_E28.9` | 2.4 GHz | **PROVISIONAL** | no SX1280 datasheet in repo (ADR-045 TODO) |
+| `U5.11` | GNSS L1 | **PROVISIONAL** | no MAX-M10S datasheet; pad 11 carries `/ANT4_GNSS_L1` |
+
+**Two independent sources agreeing** (datasheet pin number + the board's own net name) is worth more
+than either alone. It is recorded as corroboration, not as proof.
+
+### 5.3 REAL collisions — different pair from the withdrawn claim
 
 ```
-U2 <-> U3   overlap 28.6 x 4.6 mm = 131 mm2
+U2.9  <-> U2.10    28.1 x 8.0 mm = 225 mm2   one module, both ports exit EAST, 3.9 mm apart
+U3.9  <-> U_C.9     9.2 x 8.0 mm =  74 mm2   two modules facing each other, sub-GHz ports
+U3.10 <-> U_C.10    9.2 x 8.0 mm =  74 mm2   same, 2.4 GHz ports
 ```
 
-**Two antennas cannot occupy the same space.** This is a physical conflict the volume reservation
-surfaced that no copper-level check would have. It must be resolved before enclosure or mechanical
-work: either a module's antenna is re-aimed, or the pigtail routes to a different exit.
+Reading these honestly:
 
-### 4.2 What is NOT claimed
+- `U2.9`/`U2.10` are **3.93 mm apart on the same module** and both exit east. Two 8 mm-wide antenna
+  bodies cannot both run straight out. **This does not mean it is impossible** — the model assumes a
+  straight escape, and a real pigtail bends. It means the two ports need an explicit route plan (one
+  leaving at a different angle), and that is a mechanical decision, not a layout accident.
+- `U3`/`U_C` are placed 22.8 mm apart with **antenna ports on their facing sides**, so both point
+  into the same 22.8 mm gap. This is a genuine placement consequence of the 18-pad symmetric module:
+  whichever module pair sits side by side, their inner antenna ports face each other.
 
-- The antenna **body size is a placeholder**, sized to a 433 MHz quarter-wave whip's mechanical
-  envelope. It is not a datasheet part and must not be quoted as a requirement.
-- Four of five **sides are guesses** (nearest board edge). The volume *size* is usable as a
-  reservation; the *side* is not verified.
-- Nothing in this repo establishes the antenna access of `U_E28`, `U3`, `U_C` or `U5`.
+All three are **open**, and the gate keeps them visible until resolved deliberately.
 
----
+### 5.4 A gate hole this uncovered
 
-## 5. Why the RFC821 datasheet point matters
+The ADR-137 gate originally checked **track** netnames only. It passed while four module antenna
+pads still carried `/ANT1_433_TX`, `/ANT3_2G4_RX`, `/ANT4_GNSS_L1` and `/ANT_C_2G4` — a pad net with
+no copper still declares an RF net on the board, and that pad is exactly where the pigtail attaches.
 
-`docs/LR2021_LR2022_LR2012_Datasheet_Rev2.1.pdf` confirms ADR-137 was the right call, and that it
-is not merely a preference:
-
-- lines 1615–1621: PA output on `RFO_LF1`/`RFO_LF2`, which **"must be connected together at PCB
-  level"**, and **"off-chip impedance matching and harmonic filtering are carried out using external
-  components"**.
-- lines 1792–1800: the reference design contains an **"Antenna match"** block and a
-  **"PA matching & filtering"** block.
-- lines 2950–2952: impedances matched using the vendor **reference design**; output power defined in
-  a **50 Ω load**.
-
-So a bare LR2021 **cannot** be connected without exactly the RF design ADR-137 forbids. The module
-does it for us, which is why the antenna attaches at the module.
-
----
+Fixed in two places: the gate now checks **pad** netnames too, and `apply_adr137_remove_rf.py`
+clears the net from those pads (a bare land, not a net). Result: **0 `ANT*` pads remaining**,
+unconnected unchanged at 82, DRC unchanged at 35.
 
 ## 6. Reproduction
 
