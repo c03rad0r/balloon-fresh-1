@@ -62,17 +62,49 @@ and USB. It is the single most likely place for this design to fail for reasons 
 able to diagnose from a flight log. **This ADR deletes exactly that risk** — not by tuning it, but
 by not having it.
 
-### 2.3 Why "avoid doing RF engineering" is the correct engineering position here
+## 2.3 Why "avoid doing RF engineering" is the correct engineering position here
 
-- RF layout is not verifiable by the gates this repo has. DRC checks clearance, not impedance,
-  not return-path continuity, not radiation. A 98.7 mm feed can pass every gate and still be
-  wrong.
+### 2.3.1 THE DATASHEET SETTLES IT — the bare LR2021 genuinely cannot be connected without RF work
+
+From `docs/LR2021_LR2022_LR2012_Datasheet_Rev2.1.pdf` (converted with `pdftotext`, lines as cited):
+
+> **line 1615-1621:** "The amplified signal is available on pin **RFO_HF** … available on pins
+> **RFO_LF1 and RFO_LF2**. These two pins must be **connected together at PCB level** to provide a
+> single ended configuration. … **off-chip impedance matching and harmonic filtering are carried out
+> using external components** to optimize the performance of the amplifiers."
+
+> **line 1792-1800:** the reference design shows an **"Antenna match"** block and a **"PA matching &
+> filtering"** block between the LR2021 and the antenna.
+
+> **line 2950-2952:** "All RF impedances matched using multi-band 868-915MHz **reference design** for
+> LF and dedicated 2.4GHz **reference design**." / "Transmit mode output power defined in **50 Ω load**."
+
+So a **bare** LR2021 requires, on our PCB: a PA matching network, harmonic filtering, an antenna
+match, and (for the LF path) two pins tied together at PCB level. That is precisely the RF design
+the operator is refusing — and refusing it is correct, because **none of it is verifiable by any
+gate in this repo** (DRC checks clearance, not impedance, not return path, not radiation).
+
+By contrast `docs/F33-MODULE-PLAN.md` line 12 states the module's whole point:
+
+> "**Simpler PCB:** fewer components, fewer traces, **less impedance matching**"
+
+and lines 58-59 give the module's own antenna interface:
+
+> pin 9 = `ANT` — "Sub-GHz antenna (433/868/915 MHz), **50 Ohm**"
+> pin 10 = `ANT-2G4` — "2.4 GHz antenna, **50 Ohm**"
+
+**These are the module's pins, not ours.** Connecting here is the correct boundary: the vendor
+already did the matching, and we attach at their port.
+
+### 2.3.2 The general argument
+
+- RF layout is not verifiable by the gates this repo has. A 98.7 mm feed can pass every gate and
+  still be wrong.
 - The modules are already characterised, matched and (usually) certified by their vendor. Their
   antenna port is the one place where RF is known-good.
 - The operator has stated he does not want AI-authored RF design. That is a **sound** boundary:
-  the failure mode of subtly-wrong RF is silent and expensive, and no automated gate here would
-  catch it. Recording it as a rule prevents a future session from "helpfully" adding a matching
-  network.
+  the failure mode of subtly-wrong RF is silent and expensive. Recording it as a rule prevents a
+  future session from "helpfully" adding a matching network.
 
 ## 3. What this changes on the hub
 
@@ -120,6 +152,44 @@ It does not. Two separate problems were being conflated because both involve "an
   design applies.
 - If a module later proves to have no usable on-module antenna access, the answer is a **different
   module** or a vendor pigtail — not a trace on our board.
+
+## 5.1 THIS DECISION IS A PREREQUISITE FOR ADR-136 OPTIONS A AND B (measured 2026-10-25)
+
+The two decisions turned out to be coupled, and the coupling was not obvious. Executing ADR-136
+option A (move `U_E28` up 2.4 mm) was REFUSED by the destination-clearance check:
+
+```
+U_E28 at (53.00, 69.00) -> y 66.60  (up 2.4 mm)
+destination pad box: x 48.1..57.9  y 58.0..75.2
+foreign-net items inside the destination: 2
+    ('/ANT1_433_TX', 'F.Cu', 39.9, 59.4)
+    ('/ANT1_433_TX', 'F.Cu', 56.4, 56.2)
+REFUSING: the destination is not clear.
+```
+
+**The item blocking the placement move is `/ANT1_433_TX` — the very RF net this ADR deletes.**
+So the order of work is forced:
+
+1. **ADR-137 first:** delete `ANT1..ANT4` and the `ANT*` copper.
+2. **Then** ADR-136 option A becomes executable (re-run `move_u_e28_up.py`).
+3. Then option B, which is separately blocked (§5.2).
+
+### 5.2 Option B is blocked for a different reason — measured, not assumed
+
+Option B (re-assign the radio nets to U1's top/right pads) was checked before any pin work:
+
+- **U1 does have 9 free GPIOs** on its top/right/bottom-right edges: pads `35, 30, 29, 28, 27, 26,
+  15, 16` — all unconnected in the current netlist, so reassignment is electrically available.
+- **But the space to the right of U1 is NOT free.** Measured occupancy of the corridor
+  x 29.5-33 / y 33-58: F.Cu carries `/I2C_SCL` and `/I2C_SDA`; B.Cu carries `/USB_DN` and
+  `/U3_CS_N`; and `J_PROG` pads sit in x 30-33 / y 51-56.
+
+So simply moving the nets to the right-hand pads relocates them into another saturated corridor.
+**Option B therefore requires moving or re-routing `/I2C_SCL`, `/I2C_SDA`, `/USB_DN` or `J_PROG`
+as well** — it is not a pin-only change. This is recorded so the next attempt does not start by
+assuming the pads were the whole problem.
+
+**Neither option is a routing task. Both are placement changes, and ADR-137 gates the first one.**
 
 ## 6. For future sessions
 

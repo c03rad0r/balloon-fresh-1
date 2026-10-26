@@ -1,0 +1,124 @@
+{
+  "board": "hub_board_v10.kicad_pcb",
+  "board_mm": [
+    72.1,
+    80.1
+  ],
+  "model": {
+    "ant_body": {
+      "w": 32.0,
+      "d": 8.0,
+      "h": 3.0,
+      "status": "PLACEHOLDER (433 MHz whip envelope, not a datasheet part)"
+    },
+    "connector": {
+      "w": 4.0,
+      "d": 4.0,
+      "h": 3.0,
+      "status": "U.FL/IPEX body + latch, typical"
+    },
+    "pigtail_bend_r": 8.0
+  },
+  "volumes": [
+    {
+      "ref": "U5",
+      "side": "west",
+      "side_confirmed": false,
+      "anchor": [
+        10.25,
+        58.8
+      ],
+      "volume": {
+        "x1": -33.75,
+        "x2": -1.75,
+        "y1": 54.8,
+        "y2": 62.8,
+        "z_mm": 3.0
+      },
+      "access": "unknown",
+      "evidence": "NO EVIDENCE in repo -- MAX-M10S antenna pin",
+      "entirely_on_board": false,
+      "status": "PROVISIONAL"
+    },
+    {
+      "ref": "U2",
+      "side": "west",
+      "side_confirmed": true,
+      "anchor": [
+        13.43,
+        20.1
+      ],
+      "volume": {
+        "x1": -30.57,
+        "x2": 1.43,
+        "y1": 16.1,
+        "y2": 24.1,
+        "z_mm": 3.0
+      },
+      "access": "module pin (50 ohm)",
+      "evidence": "PROJECT PLAN: docs/F33-MODULE-PLAN.md pins 9/10 (ANT, ANT-2G4); not vendor-verified",
+      "entirely_on_board": false,
+      "status": "CONFIRMED"
+    },
+    {
+      "ref": "U_C",
+      "side": "north",
+      "side_confirmed": false,
+      "anchor": [
+        43.7,
+        11.19
+      ],
+      "volume": {
+        "y1": -32.81,
+        "y2": -0.81,
+        "x1": 39.7,
+        "x2": 47.7,
+        "z_mm": 3.0
+      },
+      "access": "unknown",
+      "evidence": "NO EVIDENCE in repo -- castellated LR2021 module",
+      "entirely_on_board": false,
+      "status": "PROVISIONAL"
+    },
+    {
+      "ref": "U3",
+      "side": "west",
+      "side_confirmed": false,
+      "anchor": [
+        9.99,
+        16.7
+      ],
+      "volume": {
+        "x1": -34.01,
+        "x2": -2.01,
+        "y1": 12.7,
+        "y2": 20.7,
+        "z_mm": 3.0
+      },
+      "access": "unknown",
+      "evidence": "NO EVIDENCE in repo -- castellated LR2021 module",
+      "entirely_on_board": false,
+      "status": "PROVISIONAL"
+    },
+    {
+      "ref": "U_E28",
+      "side": "south",
+      "side_confirmed": false,
+      "anchor": [
+        53.0,
+        75.2
+      ],
+      "volume": {
+        "y1": 87.2,
+        "y2": 119.2,
+        "x1": 49.0,
+        "x2": 57.0,
+        "z_mm": 3.0
+      },
+      "access": "unknown",
+      "evidence": "NO EVIDENCE in repo -- E28/SX1280 module board",
+      "entirely_on_board": false,
+      "status": "PROVISIONAL"
+    }
+  ]
+}
