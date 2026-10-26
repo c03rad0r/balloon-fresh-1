@@ -77,12 +77,19 @@ MODULES = {
              evidence="ADR-045 D1, LoRa2021 V1.3 s7 p.6; board net /ANT_C_2G4 agrees",
              verified=True),
     ],
-    # The antenna pad number is NOT established. ADR-045 records this as TODO(unverified).
-    # pad 9 is the best candidate (unconnected, at the module edge) but that is position-only.
+    # CORRECTED from the module's own user manual (docs/modules/e28-2g4m27sx/
+    # E28-2G4M27SX_UserManual_v1.0.pdf via pdftotext):
+    #   line 216 -> "Antenna Interface  IPEX/PCB   Equivalent impedance is about 50 ohm"
+    #   the 16-pin table has NO antenna pin: 1 VCC, 2 GND, 3 MISO_TX, 4 MOSI_RX, 5 SCK_RTSN,
+    #   6 NSS_CTS, 7 GND, 8 RX_EN, 9 TX_EN, 10 GND, 11 NRESET, 12 BUSY, 13-15 DIO1-3, 16 GND
+    # The antenna is an IPEX connector ON THE MODULE BODY. The earlier entry anchored a volume at
+    # pad 9 -- which is TX_EN, a PA control pin. That was simply wrong.
     "U_E28": [
-        dict(pin="9", band="2.4 GHz", access="unknown",
-             evidence="TODO: no SX1280 datasheet committed; pad 9 assumed from position only",
-             verified=False),
+        dict(pin=None, band="2.4 GHz", access="module-integrated IPEX/PCB connector",
+             evidence="E28 user manual v1.0 line 216 (IPEX/PCB, ~50 ohm) + 16-pin table with no "
+                      "antenna pin (pdftotext). Connector POSITION needs the Ch.3 mechanical "
+                      "drawing; anchor is the module body, not a pad",
+             verified=True),
     ],
     "U5": [
         dict(pin="11", band="GNSS L1", access="unknown",
@@ -112,13 +119,29 @@ def main() -> int:
         cx, cy = c.x / 1e6, c.y / 1e6
         pads = {str(p.GetNumber()): p for p in fp.Pads()}
         for port in ports:
-            p = pads.get(port["pin"])
-            if p is None:
-                print(f"WARNING: {ref} has no pad {port['pin']} -- skipped")
-                continue
-            q = p.GetPosition()
-            px, py = q.x / 1e6, q.y / 1e6
-            dx, dy = px - cx, py - cy
+            if port["pin"] is None:
+                # module-integrated antenna: no pad to anchor at. Use the module body side
+                # nearest a board edge and say so -- the connector's real position needs the
+                # mechanical drawing.
+                fbb = fp.GetBoundingBox()
+                bx1, by1 = fbb.GetX() / 1e6, fbb.GetY() / 1e6
+                bx2 = (fbb.GetX() + fbb.GetWidth()) / 1e6
+                by2 = (fbb.GetY() + fbb.GetHeight()) / 1e6
+                dd = {"west": bx1, "east": BW - bx2, "north": by1, "south": BH - by2}
+                anchor_side = min(dd, key=dd.get)
+                px, py = {"west": (bx1, (by1 + by2) / 2), "east": (bx2, (by1 + by2) / 2),
+                          "north": ((bx1 + bx2) / 2, by1),
+                          "south": ((bx1 + bx2) / 2, by2)}[anchor_side]
+                dx, dy = {"west": (-1, 0), "east": (1, 0),
+                          "north": (0, -1), "south": (0, 1)}[anchor_side]
+            else:
+                p = pads.get(port["pin"])
+                if p is None:
+                    print(f"WARNING: {ref} has no pad {port['pin']} -- skipped")
+                    continue
+                q = p.GetPosition()
+                px, py = q.x / 1e6, q.y / 1e6
+                dx, dy = px - cx, py - cy
             if abs(dx) >= abs(dy):
                 side = "east" if dx >= 0 else "west"
             else:
@@ -139,7 +162,7 @@ def main() -> int:
                            y1=min(ya, yb), y2=max(ya, yb))
             vol["z_mm"] = ANT_BODY["h"]
 
-            out.append(dict(ref=ref, pin=port["pin"], band=port["band"], side=side,
+            out.append(dict(ref=ref, pin=port["pin"] or "body", band=port["band"], side=side,
                             anchor=[round(px, 2), round(py, 2)],
                             volume={k: round(v, 2) for k, v in vol.items()},
                             access=port["access"], evidence=port["evidence"],

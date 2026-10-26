@@ -196,3 +196,45 @@ def test_status_doc_records_the_blockers():
     doc = open(STATUS, encoding="utf-8").read()
     for phrase in ("0.370", "0.600", "no free ESP32-S3 GPIO remains", "4-layer"):
         assert phrase in doc, f"status doc lost a measured finding: {phrase!r}"
+
+
+# ------------------------------------------------------- radio PA/LNA enable pins
+
+# Enable-type pins per module, from the datasheets (pdftotext, not vision):
+#   E28-2G4M27SX user manual v1.0 lines 253-254: pin 8 RX_EN, pin 9 TX_EN, both "active high"
+#   LoRa2021F33-2G4 datasheet v1.1 s7: pin 5 CE, "drive high or float for operation"
+ENABLE_PINS = {
+    "U_E28": {"8": "RX_EN", "9": "TX_EN"},
+    "U2": {"5": "CE"},
+}
+
+# Unconnected enables that are KNOWN and accepted-as-open. They must also appear in the status doc.
+# Dropping an entry without fixing the board fails this test; fixing the board without dropping the
+# entry ALSO fails it -- so the list cannot rot in either direction.
+ACCEPTED_OPEN = {"U_E28:8", "U_E28:9"}
+
+
+@needs_pcbnew
+def test_no_unrecorded_floating_radio_enable():
+    """A floating PA/LNA enable can make a ROUTED radio link still not work -- and it would look
+    like an RF or firmware fault. Every unconnected enable must be explicitly recorded."""
+    state = _board_json(
+        "{f.GetReference()+'|'+str(p.GetNumber()): (p.GetNetname() or '') "
+        "for f in b.GetFootprints() for p in f.Pads()}")
+    doc = open(STATUS, encoding="utf-8").read()
+    problems, fixed = [], []
+    for ref, pins in ENABLE_PINS.items():
+        for pin, name in pins.items():
+            net = state.get(f"{ref}|{pin}", "MISSING")
+            key = f"{ref}:{pin}"
+            if net == "":
+                if key not in ACCEPTED_OPEN:
+                    problems.append(f"{key} ({name}) is unconnected and NOT in ACCEPTED_OPEN")
+                elif name not in doc:
+                    problems.append(f"{key} ({name}) is accepted-open but the status doc lost it")
+            elif key in ACCEPTED_OPEN:
+                fixed.append(f"{key} ({name}) is now on net {net} -- remove it from ACCEPTED_OPEN")
+    assert not problems, "unrecorded floating radio enable pin(s):\n  " + "\n  ".join(problems)
+    assert not fixed, (
+        "a known-open enable was FIXED -- good, but the bookkeeping must follow:\n  "
+        + "\n  ".join(fixed) + "\nUpdate ACCEPTED_OPEN and the status doc in the same commit.")

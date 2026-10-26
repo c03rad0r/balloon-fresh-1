@@ -143,23 +143,23 @@
     },
     {
       "ref": "U_E28",
-      "pin": "9",
+      "pin": "body",
       "band": "2.4 GHz",
       "side": "south",
       "anchor": [
-        48.55,
-        74.1
+        53.31,
+        75.22
       ],
       "volume": {
-        "x1": 44.55,
-        "x2": 52.55,
-        "y1": 86.1,
-        "y2": 118.1,
+        "x1": 49.31,
+        "x2": 57.31,
+        "y1": 87.22,
+        "y2": 119.22,
         "z_mm": 3.0
       },
-      "access": "unknown",
-      "evidence": "TODO: no SX1280 datasheet committed; pad 9 assumed from position only",
-      "status": "PROVISIONAL"
+      "access": "module-integrated IPEX/PCB connector",
+      "evidence": "E28 user manual v1.0 line 216 (IPEX/PCB, ~50 ohm) + 16-pin table with no antenna pin (pdftotext). Connector POSITION needs the Ch.3 mechanical drawing; anchor is the module body, not a pad",
+      "status": "VERIFIED"
     },
     {
       "ref": "U5",

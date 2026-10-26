@@ -218,7 +218,7 @@ replaces four guesses with two.
 | `U3.10` | 2.4 GHz | **VERIFIED** | LoRa2021 V1.3 §7 p.6; board net `/ANT3_2G4_RX` agrees |
 | `U_C.9` | sub-GHz | **VERIFIED** | LoRa2021 V1.3 §7 p.6 |
 | `U_C.10` | 2.4 GHz | **VERIFIED** | LoRa2021 V1.3 §7 p.6; board net `/ANT_C_2G4` agrees |
-| `U_E28.9` | 2.4 GHz | **PROVISIONAL** | no SX1280 datasheet in repo (ADR-045 TODO) |
+| `U_E28.body` | 2.4 GHz | **VERIFIED** | E28 user manual v1.0 line 216: antenna is **IPEX/PCB on the module**; the 16-pin table has NO antenna pin |
 | `U5.11` | GNSS L1 | **PROVISIONAL** | no MAX-M10S datasheet; pad 11 carries `/ANT4_GNSS_L1` |
 
 **Two independent sources agreeing** (datasheet pin number + the board's own net name) is worth more
@@ -253,6 +253,52 @@ no copper still declares an RF net on the board, and that pad is exactly where t
 Fixed in two places: the gate now checks **pad** netnames too, and `apply_adr137_remove_rf.py`
 clears the net from those pads (a bare land, not a net). Result: **0 `ANT*` pads remaining**,
 unconnected unchanged at 82, DRC unchanged at 35.
+
+## 5.5 NEW BLOCKER FOUND: the E28's PA and LNA enables are unconnected
+
+Reading the E28 module's own user manual (`docs/modules/e28-2g4m27sx/E28-2G4M27SX_UserManual_v1.0.pdf`,
+`pdftotext` lines 253-254) turned up something more serious than an antenna question:
+
+```
+pin  8  RX_EN   Input   LNA control pin, active high
+pin  9  TX_EN   Input   PA control pin, active high
+```
+
+Measured on `hub_board_v10.kicad_pcb`:
+
+```
+U_E28 pad 8  RX_EN   (NC)   <-- unconnected
+U_E28 pad 9  TX_EN   (NC)   <-- unconnected
+```
+
+**Both floating.** These enable the module's low-noise amplifier and power amplifier. The manual
+documents a built-in 50 K pull-up for `NRESET` (pin 11) but states **no default and no internal
+pull-up** for `RX_EN`/`TX_EN`.
+
+Cross-checked against the other three radios -- this defect is unique to `U_E28`:
+
+```
+U2     pin 5 (CE)     +3V3        driven high, correct (F33 CE "drive high or float")
+U2     pin 9 (ANT)    (NC)        correct after ADR-137
+U3     pin 5 (SCK)    /SPI1_SCK
+U_C    pin 5 (SCK)    /SPI1_SCK
+U_E28  pin 8 RX_EN    (NC)        <-- ONLY unconnected enable on the board
+U_E28  pin 9 TX_EN    (NC)        <-- ONLY unconnected enable on the board
+```
+
+**Why this matters more than the routing:** the radio link is routed 9/9, but if the PA and LNA are
+not enabled the link may still not work -- and it would look like an RF or firmware fault. This is a
+first-flight blocker.
+
+**Recommended fix (NOT applied -- needs a decision):** strap both to `+3V3`, the same pattern ADR-108
+already uses for the F33's `CE` ("do not drive from firmware; strap to 3V3"). ADR-108 also records
+that **no free ESP32-S3 GPIO remains**, so firmware control is not available without changing the pin
+plan. Strap-to-3V3 costs two short tracks and leaves PA/LNA permanently on; the downside is losing
+the ability to power down the LNA for current savings.
+
+Not applied because it is a netlist change (two new nets) plus routing and a re-grade -- it should be
+a recorded decision, not a silent edit. **Check first:** ask Ebyte whether the module pulls these up
+internally; if it does, no change is needed and the datasheet is merely silent.
 
 ## 6. Reproduction
 
