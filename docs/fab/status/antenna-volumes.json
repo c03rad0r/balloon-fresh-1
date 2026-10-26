@@ -147,18 +147,18 @@
       "band": "2.4 GHz",
       "side": "south",
       "anchor": [
-        53.31,
-        75.22
+        57.0,
+        74.6
       ],
       "volume": {
-        "x1": 49.31,
-        "x2": 57.31,
-        "y1": 87.22,
-        "y2": 119.22,
+        "x1": 53.0,
+        "x2": 61.0,
+        "y1": 86.6,
+        "y2": 118.6,
         "z_mm": 3.0
       },
       "access": "module-integrated IPEX/PCB connector",
-      "evidence": "E28 user manual v1.0 line 216 (IPEX/PCB, ~50 ohm) + 16-pin table with no antenna pin (pdftotext). Connector POSITION needs the Ch.3 mechanical drawing; anchor is the module body, not a pad",
+      "evidence": "E28 user manual: line 216 'IPEX/PCB, ~50 ohm' + Ch.3 mechanical drawing (IPX in lower-right corner, opposite pin 1; no numeric offset given). 16-pin table has no antenna pin",
       "status": "VERIFIED"
     },
     {

@@ -32,6 +32,88 @@ module's behaviour stated rather than inferred.
 Questions are ordered by **what would change our design**, not by pin number. Two of them could
 force a board change; the rest are documentation.
 
+## ANSWERS FOUND — from Ebyte's official manual and product page (2026-10-26)
+
+The operator supplied a link; the Google redirect token would not resolve, but Ebyte's own PDF was
+located and fetched: **`https://www.cdebyte.com/pdf-down.aspx?id=1671`** (14 pages, "E28-2G4M27SX User
+Manual") plus the product page `cdebyte.com/products/E28-2G4M27SX/1`. Extracted with `pdftotext
+-layout`, and the Chapter 3 mechanical drawing read from a 200 dpi render.
+
+This section **supersedes the questions below where they overlap** — check here first.
+
+### ANSWERED — Q3 (series resistor): no, 3.3 V direct is correct
+
+Two independent statements in the manual:
+
+> "Communication level | 3.3 V | Risk of burnout with 5 V TTL"
+
+> §4.1: "If the communication line uses **5 V level**, a 1k–5.1k resistor must be connected in series
+> (not recommended, there is still a risk of damage)"
+
+A series resistor is specified **only for 5 V lines**, and even then is called "not recommended".
+At 3.3 V there is no resistor requirement. **No BOM change needed** — drive both pins directly from
+ESP32 GPIOs.
+
+### ANSWERED — Q7 (current), module totals (the enable delta is still not given)
+
+| parameter | typ | note |
+|---|---|---|
+| emission current | **580 mA** | instantaneous, during TX |
+| receive current | **14.5 mA** | |
+| sleep current | **2.0 µA** | software shutdown |
+
+Receive sensitivity is quoted as **−130 / −131 / −132 dBm** "...with **high sensitivity mode
+enabled**", i.e. the LNA enable is worth roughly the 2 dB between the un-enabled and enabled figures.
+So `RX_EN` is not cosmetic for a weak-signal link, and `TX_EN` gates the 580 mA. The PA-on/off
+*delta* specifically is still unstated.
+
+### ANSWERED — Q1 (IPEX finished 50 Ω port): strongly implied YES, not stated verbatim
+
+Never stated in one sentence, but the manual is unambiguous in aggregate:
+
+- antenna interface is **"IPEX/PCB, equivalent impedance is about 50 Ω"**;
+- the module is **"SX1280+PA+LNA"** — the amplifiers are **inside** the module;
+- the only antenna interface offered is the IPEX (or a PCB antenna variant);
+- §4.2: *"It is recommended to set the power output parameter of SX1280 to 0 dBm. At this time, the
+  module can output power of 27 dBm"* — the gain is added on-module.
+
+A module sold as a finished 27 dBm product, whose only RF port is an IPEX, must carry its own
+matching. **ADR-137 stands on that basis**, but it remains an inference rather than a quoted
+sentence, so it is still worth confirming in writing before a purchase order.
+
+### PARTIALLY ANSWERED — Q6 (IPEX position): corner known, offset not
+
+The Chapter 3 mechanical drawing shows the connector labelled **"IPX"** in the module's
+**lower-right corner — diagonally opposite pin 1** (i.e. at the pin-16 corner), on the component
+face. Pin 1 is on a long edge near the upper-left corner, numbering runs **1→8 down one long edge
+then 9→16 up the other** (counter-clockwise from the component side).
+
+**No numeric offset from either edge is dimensioned.** The `2.69 mm` callout locates the first pad
+from the top edge, not the antenna.
+
+Consequence applied: the `U_E28` antenna volume is now anchored at that corner `(57.0, 74.6)` rather
+than at the module centre — previously it was centred at x≈53, about 4 mm too far left.
+
+**A drawing-vs-table discrepancy worth recording:** the mechanical drawing is
+**16.0 × 20.0 × 2.90 mm**, while the specification table says **15 × 20 mm**. Our footprint's
+**15.0 mm** pad-row separation matches the **drawing** (16.0 mm outline, pads inset ~0.5 mm each
+side), not the table. So the drawing is the correct reference for our land pattern.
+
+### STILL OPEN — genuinely unanswered by the manual
+
+| question | status |
+|---|---|
+| **Q2** — is `TX_EN` + `RX_EN` high **simultaneously** permitted? | **not addressed anywhere** in the manual or product page |
+| **Q4** — behaviour while both pins **float** (our boot window) | **not addressed**; only `NRESET` documents a 50 K pull-up |
+| **Q5** — sequencing between VCC / `NRESET` / `TX_EN` / `RX_EN` | **not addressed** |
+
+These three are the ones actually worth sending now. Q2 in particular has a board consequence
+(hardware interlock or not) and cannot be inferred from the documents.
+
+---
+
+## Original question set (kept for the record; see ANSWERS above first)
+
 ### Tier 1 — could change the board
 
 **Q1. Is the antenna IPEX port a FINISHED 50 Ω interface, or is it the raw SX1280 RF pin?**

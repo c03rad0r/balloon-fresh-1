@@ -85,11 +85,18 @@ MODULES = {
     # The antenna is an IPEX connector ON THE MODULE BODY. The earlier entry anchored a volume at
     # pad 9 -- which is TX_EN, a PA control pin. That was simply wrong.
     "U_E28": [
+        # POSITION now read from the Chapter 3 MECHANICAL DRAWING (rendered from Ebyte's official
+        # user manual, cdebyte.com pdf id=1671, page 5): the connector labelled "IPX" sits in the
+        # module's LOWER-RIGHT corner -- diagonally opposite pin 1, i.e. at the pin-16 corner. The
+        # drawing gives no numeric offset from either edge, so the anchor is that corner rather
+        # than a dimensioned point.
+        # Note the drawing is 16.0 x 20.0 x 2.90 mm while the spec table says 15 x 20 mm; our
+        # footprint's 15.0 mm pad-row separation matches the 16.0 mm DRAWING, not the table.
         dict(pin=None, band="2.4 GHz", access="module-integrated IPEX/PCB connector",
-             evidence="E28 user manual v1.0 line 216 (IPEX/PCB, ~50 ohm) + 16-pin table with no "
-                      "antenna pin (pdftotext). Connector POSITION needs the Ch.3 mechanical "
-                      "drawing; anchor is the module body, not a pad",
-             verified=True),
+             evidence="E28 user manual: line 216 'IPEX/PCB, ~50 ohm' + Ch.3 mechanical drawing "
+                      "(IPX in lower-right corner, opposite pin 1; no numeric offset given). "
+                      "16-pin table has no antenna pin",
+             verified=True, anchor_xy=(57.0, 74.6), anchor_side="south"),
     ],
     "U5": [
         dict(pin="11", band="GNSS L1", access="unknown",
@@ -119,10 +126,15 @@ def main() -> int:
         cx, cy = c.x / 1e6, c.y / 1e6
         pads = {str(p.GetNumber()): p for p in fp.Pads()}
         for port in ports:
-            if port["pin"] is None:
-                # module-integrated antenna: no pad to anchor at. Use the module body side
-                # nearest a board edge and say so -- the connector's real position needs the
-                # mechanical drawing.
+            if port.get("anchor_xy"):
+                # explicit anchor from a mechanical drawing -- always beats the heuristic below
+                px, py = port["anchor_xy"]
+                anchor_side = port["anchor_side"]
+                dx, dy = {"west": (-1, 0), "east": (1, 0),
+                          "north": (0, -1), "south": (0, 1)}[anchor_side]
+            elif port["pin"] is None:
+                # module-integrated antenna, no pad and no drawing offset: fall back to the
+                # module body side nearest a board edge and say so.
                 fbb = fp.GetBoundingBox()
                 bx1, by1 = fbb.GetX() / 1e6, fbb.GetY() / 1e6
                 bx2 = (fbb.GetX() + fbb.GetWidth()) / 1e6
