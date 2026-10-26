@@ -156,6 +156,7 @@ None.
 | 135 | `135-wing-interconnect-schematic.md` | The wing interconnect has a schematic, and forward-generation is the direction of truth for a board that has no netlist | Accepted |
 | 136 | `136-flight-wing-interface-two-land-and-routing-sequence.md` | The flight wing interface is TWO lands; cut-sense is deferred DNP; routing is sequenced AFTER the interface | Accepted |
 | 137 | `137-no-rf-on-hub-antenna-at-module.md` | No RF on the hub: antennas connect at the radio module, never on our PCB | Accepted |
+| 138 | `138-e28-ranging-capability-unproven-flight-gate.md` | The E28-2G4M27SX's ranging capability is UNPROVEN; the flight is gated on it | Accepted |
 | ≥044 | *(reserved)* | next free: `scripts/adr_next_number.py` → 086 | — |
 
 ## Non-conforming filenames (not `NNN-description.md`)
