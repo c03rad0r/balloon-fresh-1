@@ -122,8 +122,8 @@ def main() -> int:
         if func in ("ANT", "VCC", "NSS", "NRESET"):
             ax.text(x, y, num, color="#0d1117", fontsize=6.5, ha="center",
                     va="center", fontweight="bold", zorder=7)
-    ax.text(fpx + 7.6, fpy + 6.6, "ANT\n9", color="#0d1117", fontsize=7.5, ha="center",
-            va="center", fontweight="bold", zorder=8)
+    ax.text(fpx + 9.1, fpy + 7.1, "ANT", color="#f0b429", fontsize=8.5, ha="left",
+            va="center", fontweight="bold", zorder=9)
 
     # the 9 connections still to be made
     cols = ["#ff7b72", "#79c0ff", "#7ee787", "#d2a8ff", "#ffa657", "#f778ba",
@@ -143,7 +143,7 @@ def main() -> int:
     # escape-corridor arrow, annotation kept clear of the arrowhead
     ax.annotate("", xy=(fpx, fpy - 8.0 - 7.0), xytext=(fpx, fpy - 8.0),
                 arrowprops=dict(arrowstyle="-|>", color="#3fb950", lw=2.0), zorder=6)
-    ax.text(fpx - 7.6, fpy - 8.0 - 9.2, "16.0 mm clear (B.Cu, measured)", color="#3fb950",
+    ax.text(fpx - 7.6, fpy - 8.0 - 9.2, "16.0 mm clear (B.Cu)", color="#3fb950",
             fontsize=8.5, fontweight="bold", zorder=8, va="bottom",
             bbox=dict(facecolor="#0d1117", edgecolor="none", pad=1.4))
 
