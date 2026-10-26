@@ -8,8 +8,11 @@ Our document: `E28-2G4M27SX_UserManual_v1.0.pdf`, Chapter 3 pin table and Chapte
 
 ## Why we are asking (context you can paste with the question)
 
-We have designed this module onto a carrier board. Our carrier leaves **pin 8 (`RX_EN`) and pin 9
-(`TX_EN`) unconnected**. Your manual's pin table (§3) reads:
+We have designed this module onto a carrier board. Our design **drives pin 8 (`RX_EN`) and pin 9
+(`TX_EN`) from two ESP32-S3 GPIOs** (our GPIO budget assigns exactly two lines to these enables). On
+the current board revision they are still unconnected because the pad assignment was only just
+resolved — the questions below are what we need before we commit that routing. Your manual's pin
+table (§3) reads:
 
 | Pin | Item | Type | Application |
 |---|---|---|---|
@@ -19,39 +22,68 @@ We have designed this module onto a carrier board. Our carrier leaves **pin 8 (`
 The manual does document an internal pull-up for one other pin — pin 11 `NRESET`, "built-in pull-up
 resistor 50K" — but says nothing about a default state or internal pull for pins 8 and 9.
 
-**Our concern:** if the LNA and PA are not enabled, the module may transmit at reduced power or not at
-all, and receive with poor sensitivity. That would look like an RF or firmware fault rather than a
-pin-strapping problem, so we want to get it right before we build.
+**Our concern:** with the enables under firmware control, the failure modes are (a) a boot window
+where our GPIOs are still tri-stated and the pins float, and (b) a firmware or boot race asserting
+both enables at once. Either could present as an RF fault rather than a control fault, so we want the
+module's behaviour stated rather than inferred.
 
 ## The questions, numbered
 
-1. **Do pins 8 (`RX_EN`) and 9 (`TX_EN`) have internal pull-up or pull-down resistors in the
-   E28-2G4M27SX?** If yes, what value and to which rail?
+Questions are ordered by **what would change our design**, not by pin number. Two of them could
+force a board change; the rest are documentation.
 
-2. **If both pins are left floating (no external connection), are the LNA and PA enabled or
-   disabled?** Please state the resulting behaviour, not only the intent.
+### Tier 1 — could change the board
 
-3. **What is the recommended connection for each pin if we do not need dynamic control**
-   (i.e. we want the PA and LNA permanently on)? Tie directly to VCC, tie through a resistor, or
-   leave floating? If a series resistor is recommended, what value, and on which side?
+**Q1. Is the antenna IPEX port a FINISHED 50 Ω interface, or is it the raw SX1280 RF pin?**
+Your manual §2 says "Antenna Interface IPEX/PCB, equivalent impedance about 50 Ω". We need it stated
+explicitly: **does the module already contain the PA/LNA matching, harmonic filtering and antenna
+match**, so that an antenna can be connected to the IPEX with no external components?
+*Why:* our design rule (ADR-137) forbids any RF design on our carrier board — no matching network, no
+balun, no controlled-impedance feed. We attach at your IPEX and do nothing else. If the IPEX is
+unmatched, that rule is violated and we would have to change part or re-open the decision.
 
-4. **What supply current difference should we expect** between LNA enabled and LNA disabled
-   (receive mode), and between PA enabled and PA disabled (idle/standby)? We are power-budgeting a
-   battery/balloon payload and need to know what permanent enable costs us.
+**Q2. Is it permitted to hold `TX_EN` and `RX_EN` HIGH at the same time?**
+*Why:* we will drive both from ESP32 GPIOs (your budget allows it). A firmware bug or a boot-time
+race can assert both. If simultaneous PA+LNA enable is damaging or causes excessive current, we must
+add a hardware interlock; if it is harmless, we only need firmware discipline. **We need to know
+which.** If simultaneous assertion is simply "TX wins" or "undefined", say so.
 
-5. **Is there any sequencing requirement** between VCC, `NRESET`, `TX_EN` and `RX_EN`? For example,
-   must `TX_EN` be low during reset, or is any order safe?
+**Q3. Can pins 8 and 9 be driven directly from a 3.3 V GPIO with no series resistor?**
+If a series resistor is required or recommended, what value and on which side? Any maximum input
+current or clamping requirement?
+*Why:* a resistor is a BOM change. We would rather add it now than respin.
 
-6. **Are the two pins safe to drive from a 3.3 V GPIO directly,** or do they require series
-   resistance / level shifting? (Datasheet implies 3.3 V logic, but we would like it stated.)
+### Tier 2 — behaviour at power-up (still matters even though we drive them)
 
-## Secondary question — antenna connector position
+**Q4. What happens during the window when both pins are FLOATING?**
+Our ESP32 tri-states its GPIOs during reset and early boot, so for some milliseconds pins 8 and 9
+will be floating — our drive is not present yet. Do the module's internal pulls hold them low, high,
+or is the state undefined? Are there internal pull resistors at all?
+*Why:* this is the only period our control does not apply. If the PA or LNA is enabled in that window
+while the SX1280 is unclocked or unconfigured, we want to know whether that is harmless.
 
-7. **Where exactly is the IPEX connector on the E28-2G4M27SX module body?** Your manual §2 lists the
-   antenna interface as "IPEX/PCB, equivalent impedance about 50 Ω", and Chapter 3 has the mechanical
-   drawing. We need the connector's position relative to the module's pin-1 corner (x/y offsets in mm),
-   so we can reserve keep-out space for the mating pigtail and its bend radius on our board. A
-   dimensioned drawing or a coordinate (or simply "which edge and what offset") would be enough.
+**Q5. Any sequencing requirement** between VCC, `NRESET`, `TX_EN` and `RX_EN` — e.g. must the enables
+be low while `NRESET` is asserted, or during VCC ramp?
+
+### Tier 3 — documentation / budget
+
+**Q6. Where exactly is the IPEX connector on the module body?**
+Position relative to the pin-1 corner (x/y in mm), or which edge and what offset. Your Chapter 3
+mechanical drawing has it; the text does not.
+*Why:* we reserve a physical keep-out volume for the pigtail and its bend radius. Anchoring that
+volume on a guessed position already produced a phantom collision in our own model, which we had to
+withdraw — so this one we would rather not guess.
+
+**Q7. Supply current difference** between LNA enabled/disabled (receive) and PA enabled/disabled
+(idle), at 3.3 V.
+*Why:* balloon payload power budget. We intend to gate the PA in firmware, so the PA-on delta is the
+number we most want.
+
+### What we no longer need to ask
+
+The original question set led with "do the enables have internal pull-ups" and "what is the default
+if floating", because we planned to strap them. **We are now driving both from the ESP32**, so the
+steady-state default is irrelevant — only the brief boot window (Q4) still matters.
 
 ---
 
@@ -59,10 +91,14 @@ pin-strapping problem, so we want to get it right before we build.
 
 | if the answer is | we do |
 |---|---|
-| internal pull-ups exist / floating = enabled | no board change; record it and close the item |
-| floating = disabled, and tying to VCC is correct | add the strap: two tracks from pins 8 and 9 to the module's own VCC pin (pad 1) — **already scripted, `tracker/hardware/strap_e28_enables.py`, not applied** |
-| floating = disabled, and a series resistor is required | add two resistors; a BOM change, so we would rather know now |
-| sequencing required | add to the power-up sequence in firmware/board bring-up notes |
+| IPEX is already matched 50 Ω | ADR-137 stands unchanged; connect antenna at the IPEX |
+| IPEX is the raw RF pin | **ADR-137 is violated** — re-open it; different part, or accept RF design |
+| simultaneous TX_EN+RX_EN is harmful | add a hardware interlock (inverter/AND gate) between the two enables |
+| simultaneous is harmless | firmware discipline only; record it in the bring-up notes |
+| series resistor required | add two resistors — a BOM change, so we want it before ordering |
+| floating window is dangerous | add pull-downs to hold the enables low until the ESP32 drives them |
+| sequencing required | write it into the power-up sequence in the bring-up notes |
+| IPEX position given | replace the guessed anchor in `reserve_antenna_volume.py` with the real coordinate |
 
 ## Our own measured facts (so Ebyte can check us)
 
@@ -74,11 +110,13 @@ pin-strapping problem, so we want to get it right before we build.
 - The other three radios on the board do **not** leave enables floating: the `LoRa2021F33-2G4` has its
   `CE` strapped to `+3V3`, which is also what ADR-108 specifies for it.
 
-## Note on what we already tried
+## Note: the strap attempt is withdrawn, not pending
 
-We attempted an on-board strap from pins 8 and 9 to the module's VCC pin, routed around the module on
-F.Cu. It produced three `track_dangling` DRC reports at the points where the tracks meet the pads, and
-we could not explain or eliminate them, so **we reverted it rather than ship an unresolved violation**.
-That attempt is committed as a script but **not applied to the board**. If Ebyte says the strap is
-required, the fix should be done by someone with a KiCad GUI session, or after understanding why the
-pad/track junction did not register as connected.
+We briefly planned to strap pins 8 and 9 to VCC. **That plan is withdrawn** — ADR-123 already budgets
+two ESP32 GPIOs for these enables (`E28 extras (RX_EN, TX_EN) | 2`), so they are meant to be driven.
+Our open item was only ever "which pads", which is now answered (`TX_EN` -> `U1.35 / IO42`,
+`RX_EN` -> `U1.16 / IO46`; see `docs/analysis/E28-ENABLES-DRIVE-FROM-ESP32.md`).
+
+A strap attempt was made and reverted because it produced three `track_dangling` reports we could not
+explain. It is kept as `tracker/hardware/strap_e28_enables.py` for the record but is **superseded** by
+the driving approach and should not be applied.
