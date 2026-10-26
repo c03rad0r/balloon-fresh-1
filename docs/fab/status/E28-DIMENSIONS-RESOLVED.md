@@ -132,10 +132,69 @@ These are electrical, not mechanical. No amount of drawing measurement reaches t
 not block placing the board — they block **first power-on** and decide whether an interlock is
 needed.
 
+## Pad geometry — read in full from the rev 1.2 drawing
+
+| item | value |
+|---|---|
+| pad quantity | 16 |
+| pad width (along the edge) | **0.80 mm** |
+| castellated opening | **0.65 mm** |
+| pad depth, top side | 0.50 mm |
+| pad depth, bottom side | 1.00 mm |
+| tolerance | **X.X ± 0.1 mm** |
+| unit | mm |
+
+Measured against `tracker/hardware/hub_board_v10.kicad_pcb` (footprint rotated −90°):
+
+```
+pad size (local)     2.20 x 1.00 mm
+board-space extent   x 1.00 mm  along the row (pitch direction)
+                     y 2.20 mm  radial
+pad 1..8 x           48.555 .. 57.445, pitch measured 1.27 across all 7 gaps
+rows y               59.10 / 74.10  ->  row separation 15.0 mm
+gap adjacent pads    1.27 - 1.00 = 0.27 mm   (vendor's 0.80 pad gives 0.47 mm)
+```
+
+- **Row separation 15.0 mm — correct, leave it alone.** Both readings put the pad *centres* 15.0 mm
+  apart: 15.0 body with pads straddling the edge, or 16.0 body with pads inset 0.5 mm. Do not
+  "correct" this toward a 14 mm figure.
+- **Along-edge pad is 1.00 mm vs the vendor's 0.80 mm** → inter-pad gap 0.27 mm instead of 0.47 mm.
+  Legal (rule is 0.20 mm) and no DRC violation, but 0.10 mm tighter than intent and just outside the
+  vendor's ±0.1 mm tolerance. **Candidate for the next revision; deliberately NOT applied now** —
+  narrowing it would invalidate the routed radio link and the DRC baseline for a cosmetic gain on a
+  board that already passes.
+- **Radial pad is 2.20 mm vs the vendor's 1.00 mm** — more solder fillet. Harmless.
+
+## Rejected source — a pasted AI summary of this same part
+
+An AI-assistant summary was supplied 2026-10-26. What it got right it did not add value on, and what
+it added was wrong. Recorded so it is not re-adopted later.
+
+**Wrong, and it would have changed the board:**
+
+- *"Row Spacing (X-span): 15.0 mm between the outer module edges (center-to-center pad row span is
+  typically **14.2 mm**…)"* — internally contradictory, and the 14.2 mm figure is **invented**. Our
+  footprint is 15.0 mm and that is correct. Adopting 14.2 would put every pad 0.4 mm off and shorten
+  the module's effective span by 0.8 mm.
+- *"Pad Size: 0.8 mm width × **1.8 mm length**"* — the 0.8 matches the drawing; the 1.8 appears
+  nowhere in it (depths are 0.50 and 1.00 mm).
+
+**Correct, but already held from the primary source:** the 16-pin pinout (all 16 rows match Ebyte
+exactly), 15 × 20 mm, 1.27 mm pitch, 1.5 ± 0.1 g. Nothing here was new.
+
+**Correct but not applicable:** the "antenna keep-out for the integrated PCB antenna variant" — we
+use the IPEX variant, so that rule does not apply to us.
+
+**Filler:** "premade CAD files on SnapMagic or GitHub" — no links. SnapEDA carries only the `-S`
+(PCB-antenna) variant and lists no 2D model for it.
+
+The lesson is the repo's existing rule: an AI summary of a document is not the document. Cite the
+drawing.
+
 ## Reproduce
 
 ```bash
-pdftoppm -png -r 400 -f 6 -l 6 docs/modules/e28-2g4m27sx/E28-2G4M27SX_UserManual_v1.0.pdf /tmp/hi
+pdftoppm -png -r 400 -f 6 -l 6 docs/modules/e28-2g4m27sx/E28-2G4M27SX_UserManual_v1.2.pdf /tmp/hi
 # page 5 of the PDF = Ch.3 (pdftoppm -f 6 accounts for the cover offset)
 ```
 

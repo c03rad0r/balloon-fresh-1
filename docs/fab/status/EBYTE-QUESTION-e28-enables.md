@@ -1,8 +1,11 @@
 # Question for Ebyte — E28-2G4M27SX: default state of RX_EN / TX_EN
 
 Status: **DRAFT — for the operator to send.** Not a decision record.
-Part: **E28-2G4M27SX** (Ebyte, SX1280-based, 2.4 GHz, 27 dBm)
-Our document: `E28-2G4M27SX_UserManual_v1.0.pdf`, Chapter 3 pin table and Chapter 9 antenna guidelines.
+Part: **E28-2G4M27SX** (Ebyte, SX1281-based, 2.4 GHz, 27 dBm)
+Our document: `E28-2G4M27SX_UserManual_v1.2.pdf` (rev 1.2, 2024-04-18 — the current one; see
+`docs/modules/e28-2g4m27sx/PROVENANCE.md`), Chapter 3 pin table and Chapter 9 antenna guidelines.
+These three questions are **absent from both the v1.0 and v1.2 revisions** — they are not a document
+gap that a newer revision closed.
 
 ---
 
