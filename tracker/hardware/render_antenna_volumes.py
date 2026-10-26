@@ -28,8 +28,8 @@ OUT = os.path.join(ROOT, "docs/fab/status/hub-antenna-volumes.png")
 BG = "#0f1216"
 BOARD = "#1d6b46"
 MOD = "#3d6fb5"
-CONF = "#e8a33d"      # confirmed volume
-PROV = "#a05cc4"      # provisional volume
+CONF = "#e8a33d"      # datasheet-verified volume
+PROV = "#a05cc4"      # provisional volume (antenna pad unverified)
 TXT = "#f2f2f2"
 DIM = "#9aa2ad"
 
@@ -43,15 +43,16 @@ def main() -> int:
     ax.set_facecolor(BG)
 
     # board
+    LAYERS = d.get("copper_layers", 4)
     ax.add_patch(Rectangle((0, 0), BW, BH, facecolor=BOARD, edgecolor="#7fe0ac",
                            lw=2.0, alpha=0.55, zorder=1))
-    ax.text(BW / 2, BH / 2, f"hub board {BW:.0f} × {BH:.0f} mm\n(2-layer: F.Cu + B.Cu only)",
+    ax.text(BW / 2, BH / 2, f"hub board {BW:.0f} × {BH:.0f} mm\n({LAYERS}-layer copper)",
             color=TXT, ha="center", va="center", fontsize=13, weight="bold", zorder=2)
 
     # volumes, drawn outward from the board edge
     for i, v in enumerate(vols):
         vol = v["volume"]
-        conf = v["status"] == "CONFIRMED"
+        conf = v["status"] == "VERIFIED"
         col = CONF if conf else PROV
         ax.add_patch(Rectangle((vol["x1"], vol["y1"]), vol["x2"] - vol["x1"],
                                vol["y2"] - vol["y1"], facecolor=col, edgecolor=col,
@@ -60,8 +61,8 @@ def main() -> int:
     # Labels: ONE dispatch on the AUTHORITATIVE `side` field. A geometry filter here previously
     # misclassified U2 and silently dropped its label, so side drives placement, not inference.
     def label(v, x, y, ha, va):
-        col = CONF if v["status"] == "CONFIRMED" else PROV
-        ax.text(x, y, f"{v['ref']} · {v['status'].lower()}", color=col, fontsize=10,
+        col = CONF if v["status"] == "VERIFIED" else PROV
+        ax.text(x, y, f"{v['ref']}.{v['pin']} · {v['band']}", color=col, fontsize=10,
                 ha=ha, va=va, weight="bold", zorder=7)
 
     # west/east volumes: stack labels outward, de-collided so they cannot overlap each other
@@ -108,9 +109,9 @@ def main() -> int:
     # legend BELOW the axes, never over the data
     m = d["model"]
     leg = [
-        (CONF, "reserved volume — antenna SIDE confirmed"),
-        (PROV, "reserved volume — side PROVISIONAL (nearest-edge guess)"),
-        (BOARD, "PCB (72 × 80 mm, 2-layer)"),
+        (CONF, "reserved volume — antenna pad VERIFIED (datasheet)"),
+        (PROV, "reserved volume — antenna pad PROVISIONAL (unverified)"),
+        (BOARD, f"PCB (72 × 80 mm, {LAYERS}-layer copper)"),
     ]
     handles = [Rectangle((0, 0), 1, 1, facecolor=c, alpha=0.45, edgecolor=c,
                          linestyle="-" if i < 2 else "-") for i, (c, _t) in enumerate(leg)]

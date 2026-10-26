@@ -82,6 +82,24 @@ def main() -> int:
     for f in fps:
         board.Remove(f)
 
+    # ALSO clear the net assignment on any surviving pad that still carries an ANT* net.
+    # MEASURED DEFECT (found by the gate, not by me): removing the TRACKS and CONNECTORS left
+    # /ANT1_433_TX, /ANT3_2G4_RX, /ANT4_GNSS_L1 and /ANT_C_2G4 still assigned to the modules'
+    # antenna pads. A pad net with no copper still declares an RF net on the board, and the pad is
+    # where the pigtail attaches -- it must be a bare land, not a net.
+    pads_cleared = []
+    ant_net_names = {n for n in
+                     [p.GetNetname() for f in board.GetFootprints() for p in f.Pads()]
+                     if n.startswith("/ANT")}
+    for f in board.GetFootprints():
+        for p in f.Pads():
+            if p.GetNetname() in ant_net_names:
+                pads_cleared.append((f.GetReference(), str(p.GetNumber()), p.GetNetname()))
+                p.SetNetCode(0)
+    print(f"cleared ANT* net from {len(pads_cleared)} pad(s):")
+    for ref, num, net in pads_cleared:
+        print(f"    {ref}.{num}  {net}")
+
     pcbnew.SaveBoard(BOARD, board)
 
     b2 = pcbnew.LoadBoard(BOARD)
