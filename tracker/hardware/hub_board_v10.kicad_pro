@@ -208,7 +208,43 @@
         }
       },
       "via_dimensions": [],
-      "zones_allow_external_fillets": false
+      "zones_allow_external_fillets": false,
+      "copper_layer_count": 4,
+      "stackup": {
+        "layers": [
+          {
+            "type": "copper",
+            "thickness": 0.035
+          },
+          {
+            "type": "dielectric",
+            "thickness": 0.2,
+            "material": "FR4"
+          },
+          {
+            "type": "copper",
+            "thickness": 0.035
+          },
+          {
+            "type": "dielectric",
+            "thickness": 1.065,
+            "material": "FR4 core"
+          },
+          {
+            "type": "copper",
+            "thickness": 0.035
+          },
+          {
+            "type": "dielectric",
+            "thickness": 0.2,
+            "material": "FR4"
+          },
+          {
+            "type": "copper",
+            "thickness": 0.035
+          }
+        ]
+      }
     },
     "ipc2581": {
       "dist": "",
