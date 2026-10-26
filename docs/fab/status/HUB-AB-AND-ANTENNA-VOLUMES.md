@@ -300,6 +300,31 @@ Not applied because it is a netlist change (two new nets) plus routing and a re-
 a recorded decision, not a silent edit. **Check first:** ask Ebyte whether the module pulls these up
 internally; if it does, no change is needed and the datasheet is merely silent.
 
+
+### 5.6 Strap attempt REVERTED — and why that is the right call
+
+I attempted the recommended strap (pins 8/9 to the module's own VCC pad) as an F.Cu ring around
+`U_E28`. Two variants were tried and **both reverted**:
+
+| attempt | result | verdict |
+|---|---|---|
+| 2 vias into the B.Cu `+3V3` pour | `via_dangling` x2, `track_dangling` x2, unconnected 82 → 86 | **rejected** — the vias did not pick up the pour |
+| F.Cu ring: pad1 → left lane → bottom → right lane → pad8, plus a pad9 stub | `track_dangling` x3, unconnected 82 → 85 | **rejected** — 3 stubs that land on pads still report dangling |
+
+Every lane was measured clear before placement (`x=45.8` clear over the full module height;
+`/SPI1_MISO` occupies only y 60.7–63.4, a diagonal ending at x=46.70). The geometry was right and the
+pads did take the `+3V3` net, but the pad↔track junctions did not register as connected and I could
+not establish why. `GetConnectedPads()` returned 0 for pads 1, 8 and 9, which is either an API misuse
+or a real connectivity failure — I could not distinguish the two.
+
+**The board is therefore unchanged: 35 violations, 82 unconnected, radio link 9/9** — byte-identical
+to the merged state. Ship an unexplained violation, or ship nothing? Nothing.
+
+The script is committed as `tracker/hardware/strap_e28_enables.py` (dry-run by default, `--write`
+applies) so the work is not lost, and the Ebyte question is drafted in
+`docs/fab/status/EBYTE-QUESTION-e28-enables.md`. If Ebyte confirms the strap is needed, the fix needs
+a KiCad GUI session or a diagnosis of the pad/track junction.
+
 ## 6. Reproduction
 
 ```bash
