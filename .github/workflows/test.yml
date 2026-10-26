@@ -47,9 +47,16 @@ jobs:
       #
       # pcbnew is needed to read a board. Installed from kicad-cli's own python bindings if available;
       # if it is not, the step reports that it could NOT RUN rather than passing silently.
+      # BOUNDED ON PURPOSE. `continue-on-error` only helps once a step RETURNS; an apt-get that
+      # stalls on a multi-hundred-MB download hangs the whole job indefinitely (measured
+      # 2026-10-25: 22+ minutes in this step, `test` never left `pending`, PR unmergeable on
+      # green host-tests). The step is optional by design -- the pad audit skips cleanly without
+      # pcbnew -- so a hard timeout is correct, not a workaround. --no-install-recommends avoids
+      # pulling the 4.6 GB kicad-packages3d the audit does not need.
       - name: Install pcbnew (optional -- the pad audit skips cleanly without it)
+        timeout-minutes: 6
         run: |
-          sudo apt-get install -y kicad || echo "kicad not installable; the pad audit will report SKIPPED"
+          sudo apt-get install -y --no-install-recommends kicad || echo "kicad not installable; the pad audit will report SKIPPED"
         continue-on-error: true
 
       - name: Pad audit (non-blocking)
