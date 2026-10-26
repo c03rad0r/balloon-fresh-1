@@ -919,6 +919,25 @@ def main():
                                 (a_rect[1] + a_rect[3]) / 2)
                 goal = to_cell(world, args.pitch, (c_rect[0] + c_rect[2]) / 2,
                                (c_rect[1] + c_rect[3]) / 2)
+                # DEBUG_NET=<net> prints the start/goal cells and whether each is blocked.
+                # This separates "the cell is occupied" from "the search is exhausted" — the
+                # two explanations a bare 'failed' line cannot distinguish. Env var rather
+                # than a flag so the argument parser is untouched.
+                if os.environ.get("DEBUG_NET") == name:
+                    def _blk(c):
+                        return f"F={blocked[F][c[1]][c[0]]} B={blocked[B][c[1]][c[0]]}"
+
+                    def _cnt(c):
+                        return sum(blocked[ly][yy][xx]
+                                   for ly in (F, B)
+                                   for yy in range(max(0, c[1] - 2), min(ny, c[1] + 3))
+                                   for xx in range(max(0, c[0] - 2), min(nx, c[0] + 3)))
+
+                    print(f"[debug] {name}: grid {nx}x{ny} pitch {args.pitch}")
+                    print(f"[debug]   start {start} {_blk(start)} 5x5blocked={_cnt(start)}")
+                    print(f"[debug]   goal  {goal} {_blk(goal)} 5x5blocked={_cnt(goal)}")
+                    print(f"[debug]   sides a={sorted(a_sides)} c={sorted(c_sides)}")
+                    print(f"[debug]   pad rects a={a_rect} c={c_rect}")
                 best = None
                 for ls in sorted(a_sides):
                     for lg in sorted(c_sides):
