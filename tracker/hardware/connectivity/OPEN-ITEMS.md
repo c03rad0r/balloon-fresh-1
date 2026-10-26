@@ -16,14 +16,26 @@ the UNASSIGNED list every run; if a pin appears there and not here, that is a de
 - **Blocked on:** Espressif ESP32-S3-WROOM-1 datasheet pin table (not in repo).
 - **Workaround in force:** J_PROG pin 6 dangles. Flashing still works over
   USB-Serial-JTAG (EN + USB D± are connected), which needs no GPIO0.
+- **Likely CLOSED by registry data (2026-10-26):** `GPIO0` = **`U1` pad 27**, per the pad->GPIO map
+  corroborated 20 ways in `docs/analysis/E28-ENABLES-DRIVE-FROM-ESP32.md` §3. `U1.27` is
+  `UNASSIGNED` in the registry, which is exactly consistent with being the `J_PROG` pin that
+  dangles. Weakens the blocker to "still wants the datasheet table pasted in".
 - **Closes when:** datasheet table pasted in, or GPIO0 read off a physical module.
 
 ## OPEN-E28-EN — E28 RX_EN (pin 8) / TX_EN (pin 9)
-- **State:** unassigned. ADR-123 budgeted two spare GPIOs for them but named no pads.
+- **State:** pads now NAMED (2026-10-26); assignment still not landed on the board.
 - **Note:** these are NEW versus the bare SX1280 (which had no PA/LNA enables), so no
   v9 pin carried over.
-- **Closes when:** the ESP32-S3-WROOM-1 pad numbers for two free GPIOs are verified
-  from the datasheet (same blocker as OPEN-16).
+- **Resolved pads** (pad->GPIO map corroborated 20 ways against this registry; see
+  `docs/analysis/E28-ENABLES-DRIVE-FROM-ESP32.md`):
+  `TX_EN -> U1.35 (IO42)` — the only clean spare GPIO; `RX_EN -> U1.16 (IO46)` — a
+  strapping pin whose load is a high-Z module input. Fallback for RX_EN is strapping it
+  high with a resistor rather than spending the strap pin.
+- **DO NOT strap both to +3V3.** ADR-123 explicitly budgets `E28 extras (RX_EN, TX_EN) | 2`
+  and states "fits with 2 spare"; this item was open only because nobody had named the pads.
+  A strap recommendation was made and retracted on 2026-10-26.
+- **Closes when:** the two nets are created, routed and re-graded, and the IO46 strapping
+  behaviour is confirmed from the WROOM-1 datasheet (the OPEN-16 blocker).
 
 ## OPEN-17 / OPEN-25 (merged) — the LAST ADC INPUT on the board
 
@@ -48,8 +60,11 @@ GPIO0 for the supercap divider (it is a strap), and ADR-069 forbids dividers on 
 **The three shapes the analysis allows, in its own order of preference:**
 
 1. **Give the cut-sense the one-GPIO + resistor-ladder/mux shape** ADR-051 §2.6 already allows.
-2. **Free an ADC-capable pin** by relocating one *digital* assignment onto the free IO22–IO34
-   block (currently `U1.26..U1.30`), rather than sharing IO13's analog node. This preserves
+2. **Free an ADC-capable pin** by relocating one *digital* assignment onto a free pin — **but note
+   the correction below: `U1.26..U1.30` is NOT a "free IO22–IO34 block"**. Those pads are
+   `IO45`, `IO0`, `IO35`, `IO36`, `IO37` (two strapping pins + three octal-PSRAM pins), so no
+   digital line can move there. The only clean spare GPIO on this board is `U1.35 (IO42)`; see
+   `docs/analysis/E28-ENABLES-DRIVE-FROM-ESP32.md` §3. This preserves
    rail-monitor accuracy.
 3. **Only if no digital line can move**, share IO13 — and then the divider network must be
    designed and *measured* for burden and post-cut interpretability before flight.
