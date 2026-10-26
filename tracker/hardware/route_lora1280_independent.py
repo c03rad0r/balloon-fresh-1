@@ -113,12 +113,16 @@ def build(board):
     for fp in board.GetFootprints():
         for p in fp.Pads():
             net = p.GetNetname()
-            if not net:
-                continue
             pb = p.GetBoundingBox()
             x0, y0 = pb.GetX() / MM, pb.GetY() / MM
             x1, y1 = x0 + pb.GetWidth() / MM, y0 + pb.GetHeight() / MM
             layers = [lay for lay in (F, B) if p.GetLayerSet().Contains(lay)]
+            if not net:
+                # A netless pad is still copper. ANT on the LoRa1280 is netless by design
+                # (ADR-137); leaving it unclaimed let tracks route across it -> 3 shorts.
+                for lay in layers:
+                    g.mark(lay, x0 - CLEAR, y0 - CLEAR, x1 + CLEAR, y1 + CLEAR)
+                continue
             code = p.GetNetCode()
             pads.append((net, fp.GetReference(), p.GetNumber(), x0, y0, x1, y1, layers, code))
             for lay in layers:                      # every pad claims its own net
@@ -264,7 +268,8 @@ def main():
     board = pcbnew.LoadBoard(a.board)
     ds = board.GetDesignSettings()
     VIA_DRILL = max(ds.m_MinThroughDrill / MM, 0.30)
-    VIA_D = max(0.50, VIA_DRILL + 0.25)
+    ring = getattr(ds, "m_ViasMinAnnularWidth", 0) / MM
+    VIA_D = max(0.50, VIA_DRILL + 2.0 * ring + 0.04)
     print(f"via: drill {VIA_DRILL:.2f} dia {VIA_D:.2f} "
           f"(board min drill {ds.m_MinThroughDrill / MM:.2f})")
 
@@ -324,6 +329,10 @@ def main():
             board.Add(t)
 
     print(f"routed {ok}/{len(NETS)}")
+    if board.Zones():
+        print(f"refilling {len(board.Zones())} zone(s): the router has no zone model, so the "
+              f"pour must be re-knitted around the new copper")
+        pcbnew.ZONE_FILLER(board).Fill(board.Zones())
     pcbnew.SaveBoard(a.out, board)
     print(f"wrote {a.out}")
     return 0 if ok == len(NETS) else 1
