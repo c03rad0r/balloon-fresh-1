@@ -136,19 +136,71 @@ A reseller's listing title is not in this list.
 | Use the T3S3's on-board radio for ranging | It is a plain +13 dBm SX1280, so it *would* range — but it is on a different board and is not part of the flight stack. Recorded as a bench fallback only. |
 | Drop ranging | Operator gate: not acceptable. |
 
-## 8. Open question — must be answered before the footprint is drawn
+## 8. The IPEX gate — RESOLVED, and it turns out to be an advantage
 
-**Does `LoRa1280-TCXO` have an IPEX / u.FL connector, or only a solder `ANT` pad?**
+**Was open:** does the module have an IPEX/u.FL connector, or only a solder `ANT` pad? If only a pad,
+attaching an antenna would mean routing 50 Ω on our carrier — the RF design ADR-137 forbids.
 
-The pin table lists pin 9 as `ANT` — "connect with 50 ohm coaxial antenna". If that is a bare pad,
-then attaching an antenna means **routing 50 Ω from the pad to a connector on our board**, which is
-exactly the RF design **ADR-137 forbids**. The E28 was attractive partly because its IPEX let us do
-nothing RF.
+**Answer: there is no connector on the module.** Confirmed from the vendor datasheet
+(`docs/modules/lora128x/LoRa128X_Series_Datasheet_Rev2.2.pdf`):
 
-**Gate:** confirm an IPEX/u.FL option (or a vendor pigtail) exists. If it does not, this ADR's
-recommendation is void and the choice returns to a module that has both an IPEX *and* a
-vendor-stated ranging capability. Ask NiceRF directly — they are an existing supplier and answer
-sales questions quickly.
+- Pin 9 is `ANT` — "connect with 50 ohm coaxial antenna".
+- §8 "Communication Antenna" expects a **wire or spring antenna**, or a coax pigtail, attached
+  directly at the module.
+- The §9 mechanical drawing shows **no miniature coax connector** on the body; the SMA in the
+  vendor's photo belongs to the *external* cable assembly, not to the module.
+
+**This is not a problem — it is the cleanest ADR-137 outcome available.** A coil/spring antenna
+soldered **directly to the `ANT` pad** has *no* controlled-impedance feed and *no* matching network
+anywhere on our board: the antenna begins at the module's own antenna port. That is precisely what
+ADR-137 asks for, and it is better than the E28's IPEX path, which still needed a U.FL pigtail.
+
+The operator already owns NiceRF coil antennas, so this uses parts on hand.
+
+### 8.1 Mechanical data — read from the vendor drawing, not guessed
+
+`LoRa128X Series` datasheet Rev 2.2, §9 (an image, so rendered at 400 dpi):
+
+| item | value |
+|---|---|
+| outline | **16.00 ± 0.2 × 16.00 ± 0.1 mm** |
+| thickness | **2.10 ± 0.15 mm** (shield/body 1.10 ± 0.1 above the PCB) |
+| pads | **16, 8 per side, castellated** (half-hole) with a Ø0.70 ± 0.1 plated hole in each land |
+| **pad pitch** | **2.00 ± 0.1 mm** |
+| pad land | 1.20 ± 0.1 along the edge × 1.70 ± 0.1 inward |
+| first row offset | 1.00 ± 0.1 mm from the end edge |
+| antenna | **`ANT` pad, no connector** |
+| shield | **yes — the radio is shielded** |
+
+### 8.2 Consequence the shield creates
+
+Because the module is shielded, **ADR-138's chip-marking test cannot be performed on this part.**
+There is nothing to read. That makes the **orderable part number the only lever** for ranging
+certainty — which is why the vendor states the distinction in its own datasheet:
+
+```
+LoRa1280-TCXO   SX1280   ★ Supports ranging with more precision   CE & FCC
+LoRa1281-TCXO   SX1281   Does not support ranging                  CE & FCC
+```
+
+Same package, same 0.5 ppm TCXO, same certifications — **ranging is the only difference.** Buying
+`LoRa1281-TCXO` by mistake cannot be detected after the fact, so the part number must be pinned in
+the BOM and on the assembly drawing.
+
+### 8.3 Footprint impact versus the E28
+
+```
+                 E28-2G4M27SX        LoRa1280-TCXO
+outline          15.0 x 20.0         16.0 x 16.0
+thickness        2.90                2.10
+pads             16                  16
+pad pitch        1.27 mm             2.00 mm     <- 0.73 mm coarser
+inter-pad gap    0.27 mm             ~0.80 mm    <- far more tolerant
+enables          TX_EN, RX_EN        none
+```
+
+A 2.00 mm pitch with a ~0.80 mm gap is materially easier to hand-solder than the E28's 0.27 mm gap —
+relevant because this board is hand-assembled by the operator.
 
 ## 9. Reproduce
 
