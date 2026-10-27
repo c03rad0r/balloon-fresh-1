@@ -89,6 +89,40 @@ def endpoints(pads, net):
     return a, b
 
 
+def attempt_pair(base, claims, pads, cache, fn, removed):
+    """Remove `removed` nets, route fn, then put them back in every order. Returns (ok, got).
+
+    Single-net rip-up cannot free SPI1_SCK or E28_DIO3 in principle or in practice; this is the
+    two-net case. Rebuild the grid without both, route the blocked net, then re-route each removed
+    net, trying both insertion orders because the second has to fit around the first.
+    """
+    g = blank(base)
+    replay(g, claims, skip=tuple(removed))
+    run_f, _why = try_route(g, pads, fn, cache)
+    if not run_f:
+        return False, None
+    order = list(removed)
+    for perm in (order, order[::-1]):
+        g2 = blank(base)
+        replay(g2, claims, skip=tuple(removed))
+        run_f, _why = try_route(g2, pads, fn, cache)
+        if not run_f:
+            return False, None
+        R.stamp(g2, run_f, net_codes[fn])
+        got = {fn: run_f}
+        ok = True
+        for n2 in perm:
+            r2, _w = try_route(g2, pads, n2, cache)
+            if not r2:
+                ok = False
+                break
+            R.stamp(g2, r2, net_codes[n2])
+            got[n2] = r2
+        if ok:
+            return True, got
+    return False, None
+
+
 def try_route(g, pads, net, cache):
     a, b = endpoints(pads, net)
     if a is None:
@@ -138,7 +172,15 @@ def main():
         net_codes[p[0]] = p[8]
     cache = {}
 
-    order = HARD_FIRST + [n for n in NETS if n not in HARD_FIRST]
+    skip = [n for n in (os.environ.get("SKIP") or "").split(",") if n]
+    if skip:
+        print(f"SKIP={skip} -- excluded from this run (geometry problem, not congestion)")
+    todo = [n for n in NETS if n not in skip]
+    order = [n for n in HARD_FIRST if n in todo] + [n for n in todo if n not in HARD_FIRST]
+    first = os.environ.get("FIRST")
+    if first and first in order:
+        order = [first] + [n for n in order if n != first]
+        print(f"FIRST={first} -- given first claim on the corridors")
     g = blank(base)
     runs, claims = {}, {}
     for net in order:
@@ -153,7 +195,7 @@ def main():
     print(f"pass 1: {len(runs)}/{len(NETS)}")
 
     for rnd in range(3):
-        failed = [n for n in NETS if n not in runs]
+        failed = [n for n in todo if n not in runs]
         if not failed:
             break
         progress = False
@@ -185,8 +227,45 @@ def main():
             print(f"  rip-up round {rnd}: no further improvement")
             break
 
-    print(f"final {len(runs)}/{len(NETS)}: {sorted(runs)}")
-    missing = [n for n in NETS if n not in runs]
+    # ---- two-net rip-up: the single-removal pass cannot free SCK or DIO3 ----
+    for rnd in range(2):
+        failed = [n for n in todo if n not in runs]
+        if not failed or time.time() - t0 > a.budget:
+            break
+        progress = False
+        for fn in failed:
+            if time.time() - t0 > a.budget:
+                print("budget reached (pairs)")
+                break
+            target = corridor(pads, fn)
+            cands = [n for n in sorted(runs, key=lambda n: len(claims[n]))
+                     if near(claims[n], target)][:5]
+            tried = 0
+            for i in range(len(cands)):
+                for j in range(i + 1, len(cands)):
+                    if time.time() - t0 > a.budget or tried >= 6:
+                        break
+                    tried += 1
+                    ok2, got = attempt_pair(base, claims, pads, cache, fn, (cands[i], cands[j]))
+                    if not ok2:
+                        continue
+                    for n2, r2 in got.items():
+                        runs[n2] = r2
+                        claims[n2] = boxes_for(r2)
+                    print(f"  pair rip-up round {rnd}: removed {(cands[i], cands[j])} -> "
+                          f"{fn} routed and both re-routed")
+                    progress = True
+                    break
+                if progress:
+                    break
+            if progress:
+                break
+        if not progress:
+            print(f"  pair rip-up round {rnd}: no further improvement")
+            break
+
+    print(f"final {len(runs)}/{len(todo)}: {sorted(runs)}")
+    missing = [n for n in todo if n not in runs]
     if missing:
         print(f"still missing: {missing}")
 
