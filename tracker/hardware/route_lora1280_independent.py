@@ -44,6 +44,11 @@ F, B = pcbnew.F_Cu, pcbnew.B_Cu
 NETS = ["/SPI1_SCK", "/SPI1_MOSI", "/SPI1_MISO", "/E28_CS_N", "/E28_BUSY",
         "/E28_RESET_N", "/E28_DIO1", "/E28_DIO2", "/E28_DIO3"]
 
+# Nets that failed at the legal margin when routed in NETS order. Routing them FIRST is the
+# cheapest form of rip-up: the easy nets then have to find their way around the hard ones
+# instead of the hard ones being boxed out by corridors already taken.
+HARD_FIRST = ["/SPI1_SCK", "/E28_CS_N", "/E28_DIO1", "/E28_DIO2", "/E28_DIO3"]
+
 
 class Grid:
     def __init__(self, board):
@@ -281,7 +286,14 @@ def main():
     cache, rng = {}, random.Random(a.seed)
     best_ok, best_order = -1, None
     for att in range(a.attempts):
-        order = list(NETS) if att == 0 else rng.sample(NETS, len(NETS))
+        if __import__("os").environ.get("ORDER") == "hard":
+            order = HARD_FIRST + [n for n in NETS if n not in HARD_FIRST]
+        elif att == 0:
+            order = list(NETS)
+        elif att == 1:
+            order = HARD_FIRST + [n for n in NETS if n not in HARD_FIRST]
+        else:
+            order = rng.sample(NETS, len(NETS))
         ok, _ = attempt(g0, pads, order, cache)
         print(f"  attempt {att}: routed {ok}/{len(NETS)}")
         if ok > best_ok:

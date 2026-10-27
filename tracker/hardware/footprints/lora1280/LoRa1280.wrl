@@ -1,0 +1,41 @@
+#VRML V2.0 utf8
+# G-NiceRF LoRa1280 / LoRa1280-TCXO, 16 x 16 x 2.10 mm.
+#
+# UNITS ARE 0.1 INCH, NOT MILLIMETRES. KiCad multiplies a .wrl by 2.54 when it loads it, so a
+# model authored in mm renders 2.54x too large -- measured on this board: a 16 mm body drawn as
+# 16 units came out 40.6 mm wide and overhung the board edge by 1.2 mm. Every dimension below is
+# therefore mm / 2.54. Keep the footprint's model scale at (1 1 1).
+#
+# Body-only proxy: the real part is a shielded can with a soldered lid. No pins, no marking, no
+# thermal-pad detail. Its job is to make the part visible and correctly sized in a 3D review,
+# not to replace a vendor STEP model if NiceRF ever publishes one.
+
+Shape {
+  appearance Appearance {
+    material Material {
+      diffuseColor 0.72 0.74 0.78
+      specularColor 0.35 0.36 0.38
+      shininess 0.25
+    }
+  }
+  # 16.00 x 16.00 x 2.05 mm  ->  6.2992 x 6.2992 x 0.8071
+  geometry Box { size 6.2992 6.2992 0.8071 }
+}
+
+Transform {
+  # lid rim sits at the top of the can: 1.05 mm -> 0.4134
+  translation 0 0 0.4134
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.60 0.62 0.66
+          specularColor 0.45 0.46 0.48
+          shininess 0.4
+        }
+      }
+      # 15.60 x 15.60 x 0.14 mm  ->  6.1417 x 6.1417 x 0.0551
+      geometry Box { size 6.1417 6.1417 0.0551 }
+    }
+  ]
+}
