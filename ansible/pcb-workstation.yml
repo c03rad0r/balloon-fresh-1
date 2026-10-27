@@ -47,7 +47,12 @@
           - python3-venv
           - meshlab
           - freecad
-        state: present
+          - xvfb
+          - fonts-dejavu
+        # state: latest, not present -- an already-installed KiCad 7.0.11 from the Ubuntu
+        # archive satisfies "present" and the playbook then reports ok while installing
+        # nothing. Measured on this project: that silently left the wrong major version.
+        state: latest
 
     - name: Install KiCad automation tools via pip
       ansible.builtin.pip:
@@ -67,10 +72,41 @@
       ansible.builtin.debug:
         msg: "KiCad installed: {{ kicad_check.stdout }}"
 
+    # --- verification: the four things that have silently been wrong here before ---
+    - name: Fail if this is not KiCad 9
+      ansible.builtin.assert:
+        that: kicad_check.stdout is search('^9\\.')
+        fail_msg: >-
+          Got {{ kicad_check.stdout }}. Ubuntu 24.04 ships KiCad 7.0.11 unless the KiCad PPA
+          is added; a 7.x install makes every board gate on this repo meaningless.
+
+    - name: Verify pcbnew imports under the distro interpreter (not the venv)
+      ansible.builtin.command: /usr/bin/python3 -c "import pcbnew; print(pcbnew.Version())"
+      register: pcbnew_check
+      changed_when: false
+      failed_when: pcbnew_check.rc != 0
+
+    - name: Show pcbnew version
+      ansible.builtin.debug:
+        msg: "pcbnew {{ pcbnew_check.stdout }} under /usr/bin/python3"
+
+    - name: Verify the 3D model library exists
+      ansible.builtin.stat:
+        path: /usr/share/kicad/3dmodels
+      register: kicad_models
+      failed_when: not kicad_models.stat.exists
+
   post_tasks:
     - name: Done
       ansible.builtin.debug:
         msg: |
-          PCB workstation ready. Open KiCad, then open:
-          v_c3_flight_v7_routed.kicad_pcb
-          Route the 6 unrouted nets per ROUTING-HANDOVER.md
+          PCB workstation ready and verified.
+
+          Next, for the LoRa1280 site on hub v10:
+
+            make lora1280-open     # opens hub_board_v10_lora1280_7of9.kicad_pcb
+            make lora1280-verify   # DRC + net census + renders, fails on any new violation
+
+          Read docs/runbooks/INTERACTIVE-ROUTING-LORA1280.md first: it states the two
+          remaining nets, the design rules you must not change, and the fan-out trick
+          that makes SPI1_SCK routable at all.

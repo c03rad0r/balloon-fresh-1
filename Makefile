@@ -1120,3 +1120,10 @@ include mk/artefacts.mk
 # ---------------------------------------------------------------------------
 include mk/pad-audit.mk
 
+
+# ---------------------------------------------------------------------------
+# Interactive KiCad routing: install/verify KiCad, open and gate the LoRa1280 board.
+# Targets: kicad-setup, kicad-verify, lora1280-open/status/drc/render/verify
+# Runbook: docs/runbooks/INTERACTIVE-ROUTING-LORA1280.md
+# ---------------------------------------------------------------------------
+include mk/kicad-interactive.mk
