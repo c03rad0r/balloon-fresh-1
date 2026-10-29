@@ -26,6 +26,7 @@ from __future__ import annotations
 import argparse
 import heapq
 import math
+import os
 import random
 import sys
 
@@ -34,7 +35,11 @@ import pcbnew
 MM = 1_000_000
 PITCH = 0.1
 CLEAR = 0.30
-EDGE_KEEP = 0.60
+# Measured: 0.60 is enough for tracks that stay in the middle of the board, but NOT for nets that
+# run to an edge connector -- DRC then reports "board edge clearance ... actual 0.00-0.43 mm". The
+# keep-out is measured from the bounding box, so where the real outline cuts inside it (slots,
+# notches) the margin is silently smaller. Raise it with REDGE=<mm> for those runs.
+EDGE_KEEP = float(os.environ.get("REDGE", "0.60"))
 TRACK_W = 0.20
 VIA_D = 0.50          # overwritten from the board's design settings in main()
 VIA_DRILL = 0.30
