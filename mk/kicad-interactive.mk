@@ -22,11 +22,14 @@ DISTRO_PY   ?= /usr/bin/python3
 VENV_PY     ?= python3
 
 LORA_BOARD  ?= tracker/hardware/hub_board_v10_lora1280_7of9.kicad_pcb
-LORA_SWAP   ?= tracker/hardware/hub_board_v10.kicad_pcb
+# The UN-ROUTED swapped board. The router must start here: feeding it the already-routed board
+# makes it re-route on top of existing copper and it scores 5/9 instead of 7/9 (measured).
+LORA_SWAP   ?= tracker/hardware/hub_board_v10_lora1280_swap.kicad_pcb
+LORA_E28    ?= tracker/hardware/hub_board_v10.kicad_pcb
 LORA_OUT    ?= /tmp/lora1280
 
-.PHONY: kicad-setup kicad-verify lora1280-board lora1280-open lora1280-status \
-        lora1280-drc lora1280-render lora1280-verify
+.PHONY: kicad-setup kicad-verify lora1280-swap lora1280-board lora1280-open \
+        lora1280-status lora1280-drc lora1280-render lora1280-verify
 
 kicad-setup: ## Install KiCad 9 + libraries + python bindings (ansible, needs sudo).
 	ansible-playbook ansible/pcb-workstation.yml -K
@@ -44,16 +47,44 @@ kicad-verify: ## Prove the KiCad install works: version, pcbnew, 3D models, suit
 	@echo "== 3D model libraries =="
 	@test -d /usr/share/kicad/3dmodels && echo "ok: /usr/share/kicad/3dmodels" \
 	  || { echo "FAIL: no 3D library -- kicad-cli render is silently body-less"; exit 1; }
-	@echo "== project suite =="
-	@PYTHONPATH=/usr/lib/python3/dist-packages $(VENV_PY) -m pytest tests/ -q \
-	  --continue-on-collection-errors 2>&1 | tail -3
-
-lora1280-board: ## Regenerate the 7/9 LoRa1280 board (swap + independent router + rip-up).
+	@echo "== LoRa1280-specific tests (HARD gate) =="
 	@mkdir -p $(LORA_OUT)
-	@test -f $(LORA_SWAP) || { echo "FAIL: $(LORA_SWAP) missing"; exit 1; }
+	@PYTHONPATH=/usr/lib/python3/dist-packages $(VENV_PY) -m pytest \
+	  tests/test_lora1280_footprint.py tests/test_hub_lora1280_swap.py -q --no-header \
+	  > $(LORA_OUT)/lora_tests.log 2>&1; rc=$$?; tail -2 $(LORA_OUT)/lora_tests.log; \
+	  if [ $$rc -ne 0 ]; then \
+	    echo "FAIL: LoRa1280 tests red (rc=$$rc) -- do not trust this board"; \
+	    grep -E "^FAILED|Error" $(LORA_OUT)/lora_tests.log | head -5; exit 1; fi
+	@echo "== full suite (INFORMATIONAL) =="
+	@PYTHONPATH=/usr/lib/python3/dist-packages $(VENV_PY) -m pytest tests/ -q \
+	  --continue-on-collection-errors 2>&1 | tail -2 || true
+	@echo "   ^ 6 failures are PRE-EXISTING on origin/master (measured 2026-10-27, same list red"
+	@echo "     on a pristine origin/master worktree before any of this branch's changes):"
+	@echo "     test_c_host.py::TestFIPSTransport::test_fips_transport_host"
+	@echo "     test_system_diagram_geometry.py::test_geometry_gate"
+	@echo "     test_v10_connectivity.py::{test_registry_matches_board,"
+	@echo "       test_lane_integrity_clean_board_passes, test_back_side_pads_are_checked}"
+	@echo "     test_v10_hole_clearance.py::test_hole_clearance_clean_on_v10"
+	@echo "     A NEW failure is still yours. Compare against this list, do not ignore it."
+
+# --dy 1.5 is NOT cosmetic: at dy = 0 the 16x16 body overlaps U6's courtyard by 4.76 mm^2, which
+# also produces 3 silk_overlap and an extra silk_over_copper (measured: 79 violations instead of 74).
+# test_hub_lora1280_swap.py::test_placement_clears_the_neighbours fails without it.
+lora1280-swap: ## Rebuild the un-routed swapped board from the E28 board.
+	@mkdir -p $(LORA_OUT)
+	cp $(LORA_E28) $(LORA_OUT)/swap_in.kicad_pcb
+	$(DISTRO_PY) tracker/hardware/swap_u_e28_to_lora1280.py \
+	    --board $(LORA_OUT)/swap_in.kicad_pcb --side F.Cu --rot 0 --dy 1.5 --apply
+	cp $(LORA_OUT)/swap_in.kicad_pcb $(LORA_SWAP)
+	@echo "wrote $(LORA_SWAP)"
+
+lora1280-board: ## Regenerate the 7/9 board from the UN-ROUTED swap board (swap + router + rip-up).
+	@mkdir -p $(LORA_OUT)
+	@test -f $(LORA_SWAP) || { echo "FAIL: $(LORA_SWAP) missing -- run 'make lora1280-swap'"; exit 1; }
 	$(DISTRO_PY) tracker/hardware/route_lora1280_ripup.py \
-	    --board $(LORA_BOARD) --out $(LORA_OUT)/rebuilt.kicad_pcb --budget 300
-	@echo "regenerated $(LORA_OUT)/rebuilt.kicad_pcb -- diff it against $(LORA_BOARD)"
+	    --board $(LORA_SWAP) --out $(LORA_OUT)/rebuilt.kicad_pcb --budget 300
+	@echo "regenerated $(LORA_OUT)/rebuilt.kicad_pcb -- compare with $(LORA_BOARD)"
+	@$(DISTRO_PY) tracker/hardware/tmp_probes/probe_net_alone.py || true
 
 lora1280-open: ## Open the 7/9 board in the KiCad GUI (the interactive routing session).
 	@test -f $(LORA_BOARD) || { echo "FAIL: $(LORA_BOARD) missing"; exit 1; }

@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 """Summarise a kicad-cli DRC report for the LoRa1280 site and fail on rule-breaking copper.
 
-The baseline on hub v10 with the LoRa1280 fitted is 79 violations, all pre-existing:
+The baseline on hub v10 with the LoRa1280 fitted is 74 violations, all pre-existing:
 34 hole-size (0.20/0.25 mm holes against a 0.30 mm minimum), 16 copper-edge, 19 library,
-7 silk, 3 thermal/courtyard. Those are not this task's business.
+3 silk-over-copper, 2 starved-thermal. None of them is this task's business.
+
+It was 79 before the part was placed at the correct +1.5 mm offset: at dy = 0 the 16x16 body
+overlapped U6's courtyard by 4.76 mm^2, which also produced 3 silk_overlap and 1 extra
+silk_over_copper. Fixing the placement removed 5 violations without touching any rule.
 
 Three classes are: `clearance`, `shorting_items`, `solder_mask_bridge`. They must stay at zero,
 because they are the ones that mean copper breaks a rule. Everything else may be counted and
@@ -16,7 +20,7 @@ import json
 import sys
 
 ZERO = ("clearance", "shorting_items", "solder_mask_bridge")
-BASELINE = 79
+BASELINE = 74
 
 
 def main() -> int:
