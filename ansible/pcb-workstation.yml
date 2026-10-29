@@ -1,112 +1,212 @@
 ---
-# Ansible playbook: Install KiCad + PCB design tools on Ubuntu/Debian
-# Target: Ubuntu 24.04 / Debian 12 (auto-detected)
-# Usage: ansible-playbook ansible/pcb-workstation.yml -K
-#        (run on local machine: add -i localhost, -c local if no inventory)
+# Ansible playbook: KiCad 9 + PCB tooling for the LoRa1280 interactive-routing session.
+#
+# Target : Ubuntu 24.04 / Debian 12
+# Usage  : make kicad-setup            (ansible-playbook ansible/pcb-workstation.yml -K)
+#          ansible-playbook ansible/pcb-workstation.yml -K -e install_extras=true
+#
+# WHY THIS FILE LOOKS THE WAY IT DOES — three failures measured on this project, each of which
+# produced a green playbook and a broken workstation:
+#
+#   1. `apt_repository: repo=ppa:kicad/...` shells out to gpg against hkp://keyserver.ubuntu.com:80
+#      and dies with "Unable to get required signing key / gpg: WARNING: nothing exported" when port
+#      80 is blocked or the key is not in the local keyring. Fixed by fetching the SAME key over
+#      HTTPS into /etc/apt/keyrings and pinning it with signed-by. That failure was hit for real on
+#      2026-10-27 on a T14 Gen5.
+#   2. `state: present` never upgrades. Ubuntu 24.04 ships KiCad 7.0.11, which satisfies "present",
+#      so the playbook reports ok and installs nothing — leaving the wrong major version behind.
+#   3. `state: latest` across meshlab + freecad pulls ~1.5 GB that interactive routing never uses.
+#      Extras are therefore opt-in via -e install_extras=true.
+#
+# The playbook asserts its own outcome at the end rather than trusting PLAY RECAP.
 
 - name: Install PCB workstation tools
   hosts: localhost
   connection: local
   become: true
   vars:
-    kicad_version: "9.0"
+    kicad_series: "9.0"
+    kicad_ppa_fingerprint: "FDA854F61C4D0D9572BB95E5245D5502FAD7A805"
+    kicad_keyring: /etc/apt/keyrings/kicad.gpg
+    install_extras: false
+    kicad_force_repo: false   # set true only to re-test the repository path
+    apt_essentials:
+      - kicad
+      - kicad-symbols
+      - kicad-footprints
+      - kicad-templates
+      - kicad-packages3d
+      - python3
+      - python3-venv
+      - fonts-dejavu
+      - xvfb
+    apt_extras:
+      - gerbv
+      - meshlab
+      - freecad
   tasks:
 
-    - name: Detect OS distribution
-      ansible.builtin.setup:
-        filter: ansible_distribution*
+    # ------------------------------------------------------------------ detect
+    - name: Read the installed kicad-cli version (may not exist yet)
+      ansible.builtin.command: kicad-cli --version
+      register: kicad_before
+      changed_when: false
+      failed_when: false
 
-    - name: Add KiCad PPA (Ubuntu)
+    - name: Decide whether the KiCad repository has to be added
+      ansible.builtin.set_fact:
+        need_repo: >-
+          {{ kicad_before.rc != 0
+             or (kicad_before.stdout | default('')) is not search('^' ~ kicad_series)
+             or (kicad_force_repo | bool) }}
+
+    - name: Show what was found
+      ansible.builtin.debug:
+        msg: >-
+          kicad-cli: {{ 'absent' if kicad_before.rc != 0 else kicad_before.stdout }} ->
+          {{ 'adding the KiCad ' ~ kicad_series ~ ' repository' if need_repo else 'already correct, no repository needed' }}
+
+    # ------------------------------------------------------------------ repo
+    # Skipped entirely when KiCad 9 is already installed: that is the common case on a machine that
+    # has been used for this project before, and it avoids touching apt sources for no reason.
+    - name: Ensure the apt keyring directory exists
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: "0755"
+      when: need_repo | bool
+
+    - name: Fetch the KiCad signing key over HTTPS (not hkp:80 — that is the failure this fixes)
+      ansible.builtin.get_url:
+        url: >-
+          https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x{{ kicad_ppa_fingerprint }}
+        dest: /etc/apt/keyrings/kicad.asc
+        mode: "0644"
+        force: false
+      register: kicad_key
+      retries: 3
+      delay: 3
+      until: kicad_key is succeeded
+      when: need_repo | bool
+
+    - name: Fail loudly if the key came back empty (a 200 with no key body is a real mode)
+      ansible.builtin.assert:
+        that: kicad_key.dest is defined and lookup('ansible.builtin.file', '/etc/apt/keyrings/kicad.asc') | length > 200
+        fail_msg: >-
+          The keyserver returned no usable key. Install KiCad 9 from the official AppImage
+          (https://www.kicad.org/download/) and re-run `make kicad-verify`.
+      when: need_repo | bool
+
+    - name: Dearmor the key into the keyring apt can read
+      ansible.builtin.command: >
+        gpg --dearmor --yes --output {{ kicad_keyring }} /etc/apt/keyrings/kicad.asc
+      args:
+        creates: "{{ kicad_keyring }}"
+      when: need_repo | bool
+
+    # A machine that installed KiCad earlier already has a PPA source file WITHOUT signed-by.
+    # Adding ours then makes apt refuse to read the list at all:
+    #   "Conflicting values set for option Signed-By regarding source ...kicad-9.0-releases/ubuntu"
+    # Measured 2026-10-27. Remove the stale ones so exactly one definition exists.
+    - name: Find pre-existing KiCad apt sources
+      ansible.builtin.find:
+        paths: /etc/apt/sources.list.d
+        patterns: "*kicad*"
+        file_type: any
+      register: kicad_old_sources
+      when: need_repo | bool
+
+    - name: Remove pre-existing KiCad sources so Signed-By is unambiguous
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: absent
+      loop: "{{ kicad_old_sources.files | default([]) }}"
+      when:
+        - need_repo | bool
+        - item.path | basename not in ['kicad.list', 'kicad.sources']
+
+    - name: Add the KiCad repository (pinned to that key)
       ansible.builtin.apt_repository:
-        repo: "ppa:kicad/kicad-{{ kicad_version }}-releases"
+        repo: >-
+          deb [signed-by={{ kicad_keyring }}]
+          https://ppa.launchpadcontent.net/kicad/kicad-{{ kicad_series }}-releases/ubuntu
+          {{ ansible_facts['distribution_release'] }} main
+        filename: kicad
         state: present
-      when: ansible_distribution == "Ubuntu"
-
-    - name: Add KiCad repo (Debian)
-      ansible.builtin.apt_repository:
-        repo: "deb https://downloads.kicad.org/kicad-{{ kicad_version }}-releases debian bookworm main"
-        state: present
-      when: ansible_distribution == "Debian"
-
-    - name: Update apt cache
-      ansible.builtin.apt:
         update_cache: true
+      when: need_repo | bool and ansible_facts['distribution'] == 'Ubuntu'
 
-    - name: Install KiCad and PCB tools
+    - name: Refuse on distributions this playbook has not been measured on
+      ansible.builtin.fail:
+        msg: >-
+          This playbook is only measured on Ubuntu ({{ ansible_facts['distribution'] }}
+          {{ ansible_facts['distribution_version'] }} found). Use the KiCad AppImage instead.
+      when: ansible_facts['distribution'] != 'Ubuntu'
+
+    # ------------------------------------------------------------------ packages
+    - name: Install the KiCad essentials
       ansible.builtin.apt:
-        name:
-          - kicad
-          - kicad-symbols
-          - kicad-footprints
-          - kicad-templates
-          - kicad-packages3d
-          - gerbv
-          - git
-          - python3
-          - python3-pip
-          - python3-venv
-          - meshlab
-          - freecad
-          - xvfb
-          - fonts-dejavu
-        # state: latest, not present -- an already-installed KiCad 7.0.11 from the Ubuntu
-        # archive satisfies "present" and the playbook then reports ok while installing
-        # nothing. Measured on this project: that silently left the wrong major version.
+        name: "{{ apt_essentials }}"
+        # latest, not present: "present" is satisfied by KiCad 7.0.11 from the Ubuntu archive.
         state: latest
+        update_cache: true
+        install_recommends: false
 
-    - name: Install KiCad automation tools via pip
-      ansible.builtin.pip:
-        name:
-          - kikit
-          - interactive_bom
-        state: present
-        extra_args: "--break-system-packages"
-      become: false
+    - name: Install optional extras (gera viewer, mesh/freecad)
+      ansible.builtin.apt:
+        name: "{{ apt_extras }}"
+        state: latest
+        install_recommends: false
+      when: install_extras | bool
 
-    - name: Verify KiCad installation
+    # ------------------------------------------------------------------ verify
+    - name: Read the resulting kicad-cli version
       ansible.builtin.command: kicad-cli --version
       register: kicad_check
       changed_when: false
 
-    - name: Show KiCad version
-      ansible.builtin.debug:
-        msg: "KiCad installed: {{ kicad_check.stdout }}"
-
-    # --- verification: the four things that have silently been wrong here before ---
-    - name: Fail if this is not KiCad 9
+    - name: Assert this is really KiCad 9
       ansible.builtin.assert:
-        that: kicad_check.stdout is search('^9\\.')
+        that: kicad_check.stdout is search('^' ~ kicad_series)
         fail_msg: >-
-          Got {{ kicad_check.stdout }}. Ubuntu 24.04 ships KiCad 7.0.11 unless the KiCad PPA
-          is added; a 7.x install makes every board gate on this repo meaningless.
+          Got {{ kicad_check.stdout }}. A 7.x install makes every board gate in this repo
+          meaningless, so this playbook refuses to call itself successful.
 
-    - name: Verify pcbnew imports under the distro interpreter (not the venv)
+    - name: Assert pcbnew imports under the distro interpreter (never the venv)
       ansible.builtin.command: /usr/bin/python3 -c "import pcbnew; print(pcbnew.Version())"
       register: pcbnew_check
       changed_when: false
-      failed_when: pcbnew_check.rc != 0
 
-    - name: Show pcbnew version
-      ansible.builtin.debug:
-        msg: "pcbnew {{ pcbnew_check.stdout }} under /usr/bin/python3"
-
-    - name: Verify the 3D model library exists
+    - name: Assert the 3D model library is present
       ansible.builtin.stat:
         path: /usr/share/kicad/3dmodels
       register: kicad_models
-      failed_when: not kicad_models.stat.exists
+
+    - name: Report the verified state
+      ansible.builtin.debug:
+        msg:
+          - "kicad-cli : {{ kicad_check.stdout }}"
+          - "pcbnew     : {{ pcbnew_check.stdout }} (under /usr/bin/python3)"
+          - "3D models  : {{ 'present' if kicad_models.stat.exists else 'MISSING — renders will be body-less' }}"
+          - "extras     : {{ 'installed' if install_extras | bool else 'skipped (use -e install_extras=true)' }}"
+
+    - name: Fail if the 3D library is missing
+      ansible.builtin.fail:
+        msg: >-
+          /usr/share/kicad/3dmodels is absent. kicad-cli exits 0 with no warning when a model does
+          not resolve, so every render would silently show bare pads. Install kicad-packages3d.
+      when: not kicad_models.stat.exists
 
   post_tasks:
-    - name: Done
+    - name: Next steps
       ansible.builtin.debug:
         msg: |
-          PCB workstation ready and verified.
-
-          Next, for the LoRa1280 site on hub v10:
+          Workstation ready and verified.
 
             make lora1280-open     # opens hub_board_v10_lora1280_7of9.kicad_pcb
-            make lora1280-verify   # DRC + net census + renders, fails on any new violation
+            make lora1280-status   # 7/9 routed, 2 to go
+            make lora1280-verify   # DRC + renders, fails on any rule-breaking copper
 
-          Read docs/runbooks/INTERACTIVE-ROUTING-LORA1280.md first: it states the two
-          remaining nets, the design rules you must not change, and the fan-out trick
-          that makes SPI1_SCK routable at all.
+          Read docs/runbooks/INTERACTIVE-ROUTING-LORA1280.md before routing:
+          it states the two remaining nets, the rules you must not change, and the
+          fan-out that makes SPI1_SCK routable at all.

@@ -25,6 +25,20 @@ make kicad-setup        # ansible playbook: ansible/pcb-workstation.yml
 make kicad-verify       # proves it actually works, before you trust it
 ```
 
+**Verified 2026-10-27**, both paths of the playbook run end to end on a real machine:
+`ok=18 changed=1 failed=0` with the KiCad repository path forced, and idempotent (`ok=18 changed=1`)
+when KiCad 9 is already installed. Three failures were found and fixed while doing that, all of
+which had produced a green playbook and a broken workstation:
+
+| failure | what it looked like | fix |
+|---|---|---|
+| `gpg: WARNING: nothing exported` / "Unable to get required signing key" | `apt_repository: repo=ppa:kicad/...` pulls the key over `hkp://…:80`, which is blocked here | key fetched from the same keyserver over **HTTPS** into `/etc/apt/keyrings/kicad.gpg`, repo pinned with `signed-by` |
+| `E:Conflicting values set for option Signed-By` | a machine that already had the PPA has a source line **without** `signed-by`; apt then refuses to read the list | pre-existing `/etc/apt/sources.list.d/*kicad*` removed before the new one is written |
+| KiCad 7.0.11 left installed | `state: present` is satisfied by the Ubuntu archive package, so the playbook reports `ok` and changes nothing | `state: latest` + an assertion that `kicad-cli` reports 9.x |
+
+`meshlab` and `freecad` are **opt-in** (`-e install_extras=true`): they are ~1.5 GB and interactive
+routing never touches them. `gerbv` is in the same group.
+
 `kicad-setup` installs KiCad 9 from the official repository, the symbol/footprint/3D libraries,
 `gerbv`, `freecad`, `meshlab`, and the Python bindings. `kicad-verify` checks the four things that
 have silently been wrong on this project before:
@@ -84,11 +98,15 @@ carries the old `U_E28`.
 Then `Inspect ▸ Design Rules Checker` once on the untouched board and **write down the baseline**:
 
 ```
-expected: 79 violations, 0 clearance, 0 shorting, 0 solder_mask_bridge
+expected: 74 violations, 0 clearance, 0 shorting, 0 solder_mask_bridge
 ```
 
-Those 79 are pre-existing (34 hole-size, 16 edge, 19 library, 7 silk, 3 thermal/courtyard). They are
-not yours and not this task. What matters is that **you add none**.
+Those 74 are pre-existing (34 hole-size, 16 edge, 19 library, 3 silk, 2 thermal). They are not
+yours and not this task. What matters is that **you add none**.
+
+(It was 79 until the module was placed at the correct **+1.5 mm** offset: at dy = 0 the 16 × 16 body
+overlapped `U6`'s courtyard by 4.76 mm², which dragged in three silk overlaps and an extra silk
+clash. Same rules, correct placement, five fewer violations.)
 
 ---
 
