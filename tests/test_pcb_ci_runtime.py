@@ -91,3 +91,51 @@ def test_general_suite_never_runs_the_pipeline_suite_without_kicad():
 def test_workflows_are_parseable_yaml(workflow):
     yaml = pytest.importorskip("yaml", reason="PyYAML not installed")
     yaml.safe_load(workflow.read_text())
+
+
+def _run_blocks(workflow: Path) -> dict[str, str]:
+    """{job/step label: shell script} for every `run:` in a workflow."""
+    yaml = pytest.importorskip("yaml", reason="PyYAML not installed")
+    doc = yaml.safe_load(workflow.read_text())
+    blocks = {}
+    for job_name, job in (doc.get("jobs") or {}).items():
+        for step in job.get("steps") or []:
+            if "run" in step:
+                blocks[f"{job_name}/{step.get('name', '')}"] = step["run"]
+    return blocks
+
+
+@pytest.mark.parametrize("workflow", [HOST_TESTS, GENERAL_TESTS])
+def test_run_blocks_are_valid_shell(workflow):
+    """A step whose shell does not parse fails the job for the wrong reason."""
+    for label, script in _run_blocks(workflow).items():
+        proc = subprocess.run(["bash", "-n"], input=script, capture_output=True, text=True)
+        assert proc.returncode == 0, f"{workflow.name}:{label} is not valid shell: {proc.stderr}"
+
+
+@pytest.mark.parametrize("workflow", [HOST_TESTS, GENERAL_TESTS])
+def test_no_doubled_backslash_line_continuations(workflow):
+    r"""A doubled backslash in a run block is passed to the shell literally.
+
+    Measured on PR #394's first run: a doubled continuation made pip receive `\`
+    as a requirement ("Invalid requirement: '\\\\'") and the job failed before any
+    test ran -- a CI defect that looks like a product defect.
+    """
+    for label, script in _run_blocks(workflow).items():
+        for line in script.splitlines():
+            assert not line.rstrip().endswith("\\\\"), (
+                f"{workflow.name}:{label}: doubled backslash continuation: {line!r}"
+            )
+
+
+def test_the_pipeline_step_invokes_pytest_under_the_distro_python():
+    """The dedicated job must not fall back to a pcbnew-less interpreter."""
+    label, script = next(
+        (k, v) for k, v in _run_blocks(HOST_TESTS).items() if SUITE in v
+    )
+    pytest_lines = [ln for ln in script.splitlines() if "-m pytest" in ln]
+    assert pytest_lines, f"{label}: no pytest invocation"
+    for line in pytest_lines:
+        assert line.strip().startswith("/usr/bin/python3"), (
+            f"{label}: pipeline suite invoked with a non-distro interpreter: {line!r}"
+        )
