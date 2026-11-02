@@ -18,7 +18,7 @@
 | RP2040 bridge firmware | written, host protocol test passes; hardware build/flash pending |
 | E80 STM32 bridge | built + flashed to one board; HELLO/CFG/STATUS verified; second board SWD blocked |
 | Hardware validation | one E80 bridge verified; two-node RF pending second board SWD |
-| Balloon-fresh PR | pending |
+| Balloon-fresh PR | https://github.com/felixfelix-bot/balloon-fresh/pull/395 |
 
 
 ---
@@ -673,18 +673,18 @@ Legend: `[ ]` pending, `[~]` in progress, `[x]` done, `[!]` blocked.
 
 ### PR
 
-- [ ] Create `pr/fips-lr2021-reference`.
-- [ ] Commit plan/docs.
-- [ ] Commit link layer/tests.
-- [ ] Commit firmware.
-- [ ] Commit FIPS patch/daemon.
-- [ ] Commit configs/scripts.
-- [ ] Commit results/runbook.
-- [ ] Push branch.
-- [ ] Open draft PR.
-- [ ] Update PR with test evidence.
-- [ ] Mark ready when host tests pass; hardware passed or explicitly pending.
-- [ ] Confirm no upstream PR/issue/comment was created.
+- [x] Create `pr/fips-lr2021-reference`.
+- [x] Commit plan/docs.
+- [x] Commit link layer/tests.
+- [x] Commit firmware.
+- [x] Commit FIPS patch/daemon.
+- [x] Commit configs/scripts.
+- [x] Commit results/runbook.
+- [x] Push branch.
+- [x] Open draft PR.
+- [x] Update PR with test evidence.
+- [x] Mark ready when host tests pass; hardware passed or explicitly pending. (PR open; hardware explicitly pending.)
+- [x] Confirm no upstream PR/issue/comment was created.
 
 ---
 

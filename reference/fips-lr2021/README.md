@@ -1,6 +1,7 @@
 # FIPS over LR2021 / FLRC — reference implementation
 
-**Status:** host-tested end-to-end through two virtual bridges; hardware validation pending.
+**Status:** host-tested end-to-end through two virtual bridges; one E80 STM32 bridge verified on hardware; two-node RF pending.  
+**PR:** https://github.com/felixfelix-bot/balloon-fresh/pull/395
 **Purpose:** keep the working LR2021 transport, bridge firmware, band configs and
 event runbook in one place, separate from the flight firmware.
 
