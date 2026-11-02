@@ -1,0 +1,13 @@
+# Profile: us915-robust
+# Merge this block into fips.yaml. Both ends need the same band, radio_payload,
+# mtu and sync_word. local_id must differ per node.
+transports:
+  lr2021:
+    port: /dev/ttyACM0
+    baud: 2000000
+    band: us915-robust
+    local_id: 1
+    mtu: 1400
+    radio_payload: 255
+    # sync_word: "12ad101b"
+    # relay: false

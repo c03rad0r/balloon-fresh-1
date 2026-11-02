@@ -477,3 +477,19 @@ python3 tools/balloon_sweep.py --tx rp2040 --rx esp32 --session <yymmddHHMM> --d
 `REFUSED (pre-hardware, spec enforcement): …` heisst: der Plan verletzt die Spec
 (LEN-Cap 255/511, GAP >= 40 000 us bei LEN > 256, Frequenz-Paar). Plan
 korrigieren, nicht umgehen. 2.4-GHz-Cross-Board ist nur RP2040<->ESP32 erlaubt.
+
+---
+
+## FIPS over LR2021 / FLRC — reference implementation
+
+A self-contained reference transport lives in
+[`reference/fips-lr2021/`](reference/fips-lr2021/README.md).
+
+- native `transports.lr2021` on a pinned FIPS fork (`c03rad0r/fips`, branch
+  `balloon-lr2021`), plus a stock-FIPS UDP daemon fallback;
+- RP2040 + E80/LR2021 bridge firmware;
+- EU 868, US 915 and 2.4 GHz profiles;
+- host tests, hardware test scripts and an event runbook.
+
+No PR or issue is opened against `jmcorgan/fips`; the fork tracks upstream and
+the event build is pinned by tag `event-2026-11`.

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(e80_bench C ASM)
+project(e80_bench C CXX ASM)
 
 find_program(ARM_SIZE_UTIL arm-none-eabi-size REQUIRED)
 find_program(ARM_OBJCOPY arm-none-eabi-objcopy REQUIRED)
@@ -47,10 +47,12 @@ add_executable(e80_bench
     src/pram_patch.c
     src/pram_patch_table.c
     src/pram_patch_platform.c
+    src/bridge.cpp
 )
 
 target_include_directories(e80_bench PRIVATE
     src
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../reference/fips-lr2021/firmware/rp2040-bridge/src
     ${TP}/Drivers/CMSIS/Include
     ${TP}/Drivers/CMSIS/Device/ST/STM32F1xx/Include
     ${TP}/Drivers/STM32F1xx_HAL_Driver/Inc
@@ -61,6 +63,12 @@ target_include_directories(e80_bench PRIVATE
 target_compile_definitions(e80_bench PRIVATE
     STM32F103xB
     USE_HAL_DRIVER
+)
+
+# The bridge protocol header is C++ (it uses a small state machine class), so
+# bridge.cpp is compiled without exceptions/RTTI to stay inside the 64 KB flash.
+target_compile_options(e80_bench PRIVATE
+    $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions -fno-rtti>
 )
 
 # Firmware identity (ID? fw=<sha7>). Preferred value comes from the

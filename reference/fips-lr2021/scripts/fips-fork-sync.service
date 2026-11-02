@@ -1,0 +1,9 @@
+[Unit]
+Description=Sync the FIPS LR2021 fork with upstream (fetch-only upstream)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+Environment=FIPS_DIR=%h/repos/fips-fork
+ExecStart=%h/repos/balloon-fresh/reference/fips-lr2021/scripts/sync-fips-fork.sh

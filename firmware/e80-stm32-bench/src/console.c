@@ -109,6 +109,34 @@ static void line_consumed(void)
     line_ready = 0;
 }
 
+int console_raw_get(void)
+{
+    /* Same polling fallback as console_getline(): an SWD reset can leave the
+     * USART1 NVIC deaf, so drain RXNE by hand before looking at the ring. */
+    if (__HAL_UART_GET_FLAG(&huart1, UART_FLAG_ORE))
+        __HAL_UART_CLEAR_OREFLAG(&huart1);
+    HAL_NVIC_DisableIRQ(USART1_IRQn);
+    while (__HAL_UART_GET_FLAG(&huart1, UART_FLAG_RXNE))
+    {
+        char c = (char)(huart1.Instance->DR & 0xFF);
+        uint8_t next = (uint8_t)((rx_head + 1) % CONSOLE_RX_RING_SIZE);
+        if (next != rx_tail)
+        {
+            rx_ring[rx_head] = c;
+            rx_head = next;
+        }
+        if (__HAL_UART_GET_FLAG(&huart1, UART_FLAG_ORE))
+            __HAL_UART_CLEAR_OREFLAG(&huart1);
+    }
+    HAL_NVIC_EnableIRQ(USART1_IRQn);
+
+    if (rx_tail == rx_head)
+        return -1;
+    int c = (unsigned char)rx_ring[rx_tail];
+    rx_tail = (uint8_t)((rx_tail + 1) % CONSOLE_RX_RING_SIZE);
+    return c;
+}
+
 void console_put(const char* s)
 {
     tx_len = 0;

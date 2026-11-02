@@ -1,0 +1,21 @@
+# E80 STM32 bridge, US 915 MHz. Run on each machine with its own bridge.
+node:
+  identity:
+    nsec: "REPLACE_WITH_NSEC"
+
+tun:
+  enabled: true
+  name: fips0
+  mtu: 1280
+
+dns:
+  enabled: false
+
+transports:
+  lr2021:
+    port: /dev/ttyUSB6
+    baud: 115200
+    band: us915
+    local_id: 2
+    mtu: 1400
+    radio_payload: 255

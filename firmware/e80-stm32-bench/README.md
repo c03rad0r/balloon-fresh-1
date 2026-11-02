@@ -226,3 +226,26 @@ full (~90 s at SF12) window.
 Host tests: `tools/test_e80_sweep_full.py` (9 tests, no serial hardware —
 module IO is faked), wired into ctest as `test_e80_sweep_full_python`
 (`make test-host`).
+
+---
+
+## FIPS bridge mode (reference)
+
+The `BRIDGE` console command switches the board from the bench firmware to the
+binary host protocol used by `reference/fips-lr2021/`. It reuses the same
+`radio_bench` driver, including LF/HF selection, and defaults to 915 MHz /
+FLRC-1300 / +22 dBm / LF.
+
+```bash
+# at the 115200 bench console
+fips-lr2021ctl --serial /dev/ttyUSB6 --baud 115200 bridge
+fips-lr2021ctl --serial /dev/ttyUSB6 --baud 115200 hello
+fips-lr2021ctl --serial /dev/ttyUSB6 --baud 115200 cfg --band us915
+```
+
+The mode is entered once per reset; a reset returns to the bench console. The
+binary protocol and the E80 build/flash procedure are documented in
+[`reference/fips-lr2021/docs/E80-STM32-BRIDGE.md`](../../reference/fips-lr2021/docs/E80-STM32-BRIDGE.md).
+
+The bridge build is 37 KB flash / 15.9 KB RAM. The current host link is
+115200; 2 Mbaud is a follow-up.
