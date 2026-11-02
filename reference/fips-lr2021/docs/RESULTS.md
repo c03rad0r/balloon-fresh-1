@@ -58,6 +58,21 @@ Blocked: second E80 SWD probe `148757200D2D1425` cannot read IDR; CH340 ROM
 bootloader path fails as documented. Two-node RF needs the second board
 re-seated or power-cycled.
 
+## Native FIPS transport start
+
+2026-11-02, patched FIPS rev `1559063`, config `transports.lr2021` on
+`/dev/ttyUSB6` at 115200:
+
+```text
+Transports initialized count=1
+Node started: state=running transports=1
+Transport stopped transport_id=transport:1 transport_type="lr2021"
+```
+
+This proves the native fork path opens the E80 bridge, applies CFG, enters the
+node dataplane, and shuts down cleanly. No peer was present, so this is not a
+handshake result.
+
 ## Known issues observed
 
 - 

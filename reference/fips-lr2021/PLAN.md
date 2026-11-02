@@ -13,7 +13,7 @@
 |---|---|
 | Fork sync + pin | done (`c03rad0r/fips`, `balloon-lr2021`, tag `event-2026-11`) |
 | Link layer + host tests | done (21 link/bridge tests + config test; 20/20 virtual-bridge E2E) |
-| FIPS native transport | done, compiles and parses config (`8aa2dd6`) |
+| FIPS native transport | done; real E80 start verified (`1559063`), transport `lr2021` running/stopped cleanly |
 | Daemon + CLI | done, builds; `per`/`echo` validated over virtual PTYs |
 | RP2040 bridge firmware | written, host protocol test passes; hardware build/flash pending |
 | E80 STM32 bridge | built + flashed to one board; HELLO/CFG/STATUS verified; second board SWD blocked |
