@@ -128,19 +128,6 @@ jobs:
             || python3 -m pip install --quiet --break-system-packages pytest
           python3 -m pytest tests/test_flrc_bt05_parity.py -v --tb=short
 
-      # ── Suite 8: PCB auto-route pipeline gates (t_80d91470) ──────
-      # The PCB-V2 Phase 1 card's five quality gates, expressed as
-      # assertions so they cannot silently rot (a previous run reported
-      # "zone=0" against a file containing two `zone` hits in prose).
-      # The static gates run anywhere.  The behavioural gates need
-      # pcbnew (KiCad) and self-skip on a runner without it — they are
-      # covered locally, where the pipeline is actually exercised.
-      - name: Run PCB pipeline gate tests
-        run: |
-          python3 -m pip install --quiet pytest \
-            || python3 -m pip install --quiet --break-system-packages pytest
-          python3 -m pytest tests/test_pcb_pipeline_gates.py -v --tb=short
-
       # ── Suite 10: v10 connectivity registry + routing gates (ADR-125/126) ─
       # The operator found a lane at 0.000mm over U_C.9, two dead-end stubs and 21.7mm of
       # copper through the F33's body. Each is now a test: the registry must match the
@@ -173,3 +160,38 @@ jobs:
           python3 -m pip install --quiet pytest \
             || python3 -m pip install --quiet --break-system-packages pytest
           python3 -m pytest tests/test_pcb_track_import.py -v --tb=short
+
+  # The four behavioural PCB pipeline gates need pcbnew. Installing KiCad in the
+  # shared host-tests job would also un-skip the v10 board gates, which carry
+  # pre-existing board/registry drift -- turning every PR red for an unrelated
+  # baseline. So the pipeline suite gets its own job, isolated on purpose.
+  pcb-pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install KiCad python bindings
+        timeout-minutes: 8
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends kicad
+          # The pipeline is written against KiCad 9 (see full_pipeline.py); an
+          # image resolving an older pcbnew must fail here, loudly.
+          /usr/bin/python3 -c "import pcbnew; v = pcbnew.Version(); print('pcbnew', v); assert v.startswith('9.'), v"
+
+      - name: Run PCB pipeline gate tests
+        run: |
+          /usr/bin/python3 -m pip install --quiet pytest \\
+            || /usr/bin/python3 -m pip install --quiet --break-system-packages pytest
+          /usr/bin/python3 -m pytest tests/test_pcb_pipeline_gates.py -v --tb=short \\
+            --junitxml="$RUNNER_TEMP/pcb-pipeline.xml"
+
+      # FAIL CLOSED. The four behavioural checks used to skip silently when the
+      # binding was missing, which is how four real failures hid behind a green
+      # tick. A skip here is a missing check, not a pass.
+      - name: Assert the four board checks actually ran
+        run: |
+          /usr/bin/python3 scripts/assert_board_checks_ran.py \
+            "$RUNNER_TEMP/pcb-pipeline.xml"

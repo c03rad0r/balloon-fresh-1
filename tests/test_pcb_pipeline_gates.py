@@ -39,19 +39,26 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PIPELINE = REPO_ROOT / "tracker" / "hardware" / "full_pipeline.py"
 
-# The interpreter the pipeline must run under.  bare "python3" on this box is
-# a uv-managed 3.11 which segfaults importing pcbnew; the card pins 3.14.
-PIPELINE_PYTHON = Path("/usr/bin/python3.14")
+# The interpreter the pipeline runs under: the distro python that owns the
+# KiCad bindings. A pinned minor version can exist on a runner WITHOUT pcbnew
+# in its site-packages (measured 2026-11-02: ubuntu-latest has 3.14 and no
+# KiCad), so the version is not the thing to name here -- capability is, and
+# the probe below checks it. Never import pcbnew in-process: an ABI mismatch
+# can segfault the whole run.
+PIPELINE_PYTHON = Path("/usr/bin/python3")
 
 
 def _pcbnew_usable() -> bool:
     """The interpreter must EXIST *and* be able to import pcbnew.
 
     The original guard only checked existence. Measured 2026-11-02 on the
-    ubuntu-latest runner image: /usr/bin/python3.14 exists there but KiCad is
-    not installed, so every behavioural gate ran and failed with
+    ubuntu-latest runner image: the pinned /usr/bin/python3.14 exists there but
+    KiCad is not installed, so every behavioural gate ran and failed with
     ``ModuleNotFoundError: pcbnew`` -- a red suite that says nothing about this
-    repository. Existence is not capability.
+    repository. Existence is not capability, and capability is not optional:
+    the ``pcb-pipeline`` CI job installs KiCad and runs the four board checks
+    for real, so the skip can only fire on a host that genuinely lacks the
+    binding -- never on the job that owns these gates.
     """
     if not PIPELINE_PYTHON.exists():
         return False
@@ -159,7 +166,7 @@ class TestInterpreterPinning:
         pcbnew must read as NOT usable. Before this probe the gate ran and the
         suite went red on a runner where KiCad was simply absent.
         """
-        fake = tmp_path / "python3.14"
+        fake = tmp_path / "python3"
         fake.write_text("#!/bin/sh\nexit 1\n")
         fake.chmod(0o755)
         monkeypatch.setattr(sys.modules[__name__], "PIPELINE_PYTHON", fake)
@@ -167,7 +174,7 @@ class TestInterpreterPinning:
         assert _pcbnew_usable() is False
 
     def test_probe_accepts_interpreter_that_can_import_pcbnew(self, monkeypatch, tmp_path) -> None:
-        fake = tmp_path / "python3.14"
+        fake = tmp_path / "python3"
         fake.write_text("#!/bin/sh\nexit 0\n")
         fake.chmod(0o755)
         monkeypatch.setattr(sys.modules[__name__], "PIPELINE_PYTHON", fake)
