@@ -24,7 +24,7 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
-BOARD = os.path.join(REPO, "tracker", "hardware", "hub_board_v9.kicad_pcb")
+BOARD = os.path.join(REPO, "tracker", "hardware", "hub_board_v10_lora1280_7of9.kicad_pcb")
 INDEX = os.path.join(REPO, "tracker", "hardware", "footprints", "3dmodels", "MODEL-INDEX.json")
 DOC = os.path.join(REPO, "docs", "3d-model-coverage-hub.md")
 MODELS_DIR_REL = "tracker/hardware/footprints/3dmodels/"
