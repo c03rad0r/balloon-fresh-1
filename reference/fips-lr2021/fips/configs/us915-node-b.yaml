@@ -1,0 +1,21 @@
+# Complete two-node example. Replace the nsec.
+node:
+  identity:
+    nsec: "REPLACE_WITH_NSEC"
+
+tun:
+  enabled: true
+  name: fips0
+  mtu: 1280
+
+dns:
+  enabled: false
+
+transports:
+  lr2021:
+    port: /dev/ttyACM0
+    baud: 2000000
+    band: us915
+    local_id: 2
+    mtu: 1400
+    radio_payload: 255

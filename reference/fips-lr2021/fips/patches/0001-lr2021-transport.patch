@@ -1,0 +1,3490 @@
+diff --git a/Cargo.lock b/Cargo.lock
+index 55595e35..e713e9db 100644
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -675,6 +675,22 @@ dependencies = [
+  "unicode-segmentation",
+ ]
+ 
++[[package]]
++name = "core-foundation"
++version = "0.10.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "b2a6cd9ae233e7f62ba4e9353e81a88df7fc8a5987b8d445b4d90c879bd156f6"
++dependencies = [
++ "core-foundation-sys",
++ "libc",
++]
++
++[[package]]
++name = "core-foundation-sys"
++version = "0.8.7"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "773648b94d0e5d620f64f280777445740e61fe701025087ec8b57f45c791888b"
++
+ [[package]]
+ name = "cpufeatures"
+ version = "0.2.17"
+@@ -1208,6 +1224,18 @@ dependencies = [
+  "zeroize",
+ ]
+ 
++[[package]]
++name = "fips-lr2021"
++version = "0.1.0"
++dependencies = [
++ "clap",
++ "crossbeam-channel",
++ "rand 0.10.2",
++ "serde",
++ "serialport",
++ "thiserror 2.0.20",
++]
++
+ [[package]]
+ name = "fips-mesh"
+ version = "0.6.0-dev"
+@@ -1220,6 +1248,7 @@ dependencies = [
+  "dirs",
+  "dispatch2",
+  "fips-core",
++ "fips-lr2021",
+  "futures",
+  "hex",
+  "if-addrs",
+@@ -1750,6 +1779,16 @@ dependencies = [
+  "web-sys",
+ ]
+ 
++[[package]]
++name = "io-kit-sys"
++version = "0.4.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "617ee6cf8e3f66f3b4ea67a4058564628cde41901316e19f559e14c7c72c5e7b"
++dependencies = [
++ "core-foundation-sys",
++ "mach2",
++]
++
+ [[package]]
+ name = "ipnet"
+ version = "2.12.1"
+@@ -1949,6 +1988,15 @@ version = "1.0.1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "baee0bbc17ce759db233beb01648088061bf678383130602a298e6998eedb2d8"
+ 
++[[package]]
++name = "mach2"
++version = "0.4.3"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "d640282b302c0bb0a2a8e0233ead9035e3bed871f0b7e81fe4a1ec829765db44"
++dependencies = [
++ "libc",
++]
++
+ [[package]]
+ name = "matchers"
+ version = "0.2.0"
+@@ -2080,6 +2128,17 @@ dependencies = [
+  "tokio",
+ ]
+ 
++[[package]]
++name = "nix"
++version = "0.26.4"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "598beaf3cc6fdd9a5dfb1630c2800c7acd31df7aaf0f565796fba2b53ca1af1b"
++dependencies = [
++ "bitflags 1.3.2",
++ "cfg-if",
++ "libc",
++]
++
+ [[package]]
+ name = "nix"
+ version = "0.29.0"
+@@ -3233,6 +3292,24 @@ dependencies = [
+  "unsafe-libyaml",
+ ]
+ 
++[[package]]
++name = "serialport"
++version = "4.10.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "6ba5f8f29aa20853c4e3e85a33ec580eb66be1f057142e77a333834a318bacf2"
++dependencies = [
++ "bitflags 2.13.1",
++ "cfg-if",
++ "core-foundation",
++ "core-foundation-sys",
++ "io-kit-sys",
++ "mach2",
++ "nix 0.26.4",
++ "scopeguard",
++ "unescaper",
++ "windows-sys 0.52.0",
++]
++
+ [[package]]
+ name = "sha1"
+ version = "0.10.7"
+@@ -3884,6 +3961,15 @@ version = "0.1.7"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "2896d95c02a80c6d6a5d6e953d479f5ddf2dfdb6a244441010e373ac0fb88971"
+ 
++[[package]]
++name = "unescaper"
++version = "0.1.10"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "7285e83a80ce76f5e7bce79fa41f68d78ba62d1003cf27bf748ab24413808cf4"
++dependencies = [
++ "thiserror 2.0.20",
++]
++
+ [[package]]
+ name = "unicode-ident"
+ version = "1.0.24"
+diff --git a/Cargo.toml b/Cargo.toml
+index d20af9c4..ada125bb 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -39,8 +39,8 @@ path = "src/lib.rs"
+ # clippy` and `cargo test` cover the core crate too; without it they cover the
+ # root package only.
+ [workspace]
+-members = [".", "core"]
+-default-members = [".", "core"]
++members = [".", "core", "crates/fips-lr2021"]
++default-members = [".", "core", "crates/fips-lr2021"]
+ 
+ # fips-core's rekey simulations, explorer and model runs are CPU-bound and run
+ # more than twice as fast optimized. Only the core is optimized; overflow
+@@ -78,6 +78,7 @@ ring = "0.17"
+ zeroize = { version = "1.9", features = ["zeroize_derive"] }
+ rand = "0.10.1"
+ crossbeam-channel = "0.5"
++fips-lr2021 = { path = "crates/fips-lr2021" }
+ thiserror = "2.0"
+ serde = { version = "1.0", features = ["derive"] }
+ serde_json = "1.0"
+diff --git a/crates/fips-lr2021/Cargo.toml b/crates/fips-lr2021/Cargo.toml
+new file mode 100644
+index 00000000..d41cd2f1
+--- /dev/null
++++ b/crates/fips-lr2021/Cargo.toml
+@@ -0,0 +1,16 @@
++[package]
++name = "fips-lr2021"
++version = "0.1.0"
++edition = "2024"
++description = "LR2021/FLRC link layer and serial bridge for FIPS"
++license = "MIT"
++
++[dependencies]
++serde = { version = "1", features = ["derive"] }
++thiserror = "2"
++crossbeam-channel = "0.5"
++clap = { version = "4", features = ["derive"] }
++serialport = { version = "4", default-features = false }
++
++[dev-dependencies]
++rand = "0.10"
+diff --git a/crates/fips-lr2021/src/bin/fips-lr2021ctl.rs b/crates/fips-lr2021/src/bin/fips-lr2021ctl.rs
+new file mode 100644
+index 00000000..2ca18ad2
+--- /dev/null
++++ b/crates/fips-lr2021/src/bin/fips-lr2021ctl.rs
+@@ -0,0 +1,434 @@
++//! `fips-lr2021ctl` — configure and exercise an LR2021 bridge.
++
++use std::io::{Read, Write};
++use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
++
++use clap::{Parser, Subcommand};
++use fips_lr2021::bridge::{BridgeKind, HelloAckPayload, RxPayload};
++use fips_lr2021::{Band, Lr2021Config, SerialBridge, send_packets};
++
++#[derive(Debug, Parser)]
++#[command(about = "Configure and test an LR2021/FLRC bridge")]
++struct Args {
++    #[arg(long, default_value = "/dev/ttyACM0")]
++    serial: String,
++    #[arg(long, default_value_t = 2_000_000)]
++    baud: u32,
++    #[command(subcommand)]
++    command: Command,
++}
++
++#[derive(Debug, Subcommand)]
++enum Command {
++    /// Put an E80 STM32 bench board into binary bridge mode.
++    Bridge,
++    /// Send HELLO and print the bridge identity.
++    Hello,
++    /// Configure the radio and print the applied values.
++    Cfg {
++        #[arg(long, default_value = "us2400")]
++        band: String,
++        #[arg(long)]
++        frequency_hz: Option<u32>,
++        #[arg(long)]
++        bitrate_kbps: Option<u16>,
++        #[arg(long)]
++        power_dbm: Option<i8>,
++        #[arg(long)]
++        radio_payload: Option<u16>,
++        #[arg(long)]
++        relay: bool,
++    },
++    /// Send PING and print bridge statistics.
++    Status,
++    /// Print received radio packets.
++    Monitor {
++        #[arg(long, default_value = "us2400")]
++        band: String,
++        #[arg(long, default_value_t = 10)]
++        seconds: u64,
++    },
++    /// Send a small PER burst and report delivery.
++    Per {
++        #[arg(long, default_value = "us2400")]
++        band: String,
++        #[arg(long, default_value_t = 100)]
++        count: u32,
++        #[arg(long, default_value_t = 64)]
++        size: usize,
++        #[arg(long, default_value_t = 2)]
++        peer_id: u32,
++        #[arg(long, default_value_t = 1000)]
++        timeout_ms: u64,
++    },
++    /// Run the link-layer responder: ACK received frames and print them.
++    Echo {
++        #[arg(long, default_value = "us2400")]
++        band: String,
++        #[arg(long, default_value_t = 30)]
++        seconds: u64,
++    },
++}
++
++fn now_ms() -> u64 {
++    SystemTime::now()
++        .duration_since(UNIX_EPOCH)
++        .map(|d| d.as_millis() as u64)
++        .unwrap_or(0)
++}
++
++fn main() {
++    let args = Args::parse();
++    if let Err(err) = run(args) {
++        eprintln!("error: {err}");
++        std::process::exit(1);
++    }
++}
++
++fn run(args: Args) -> Result<(), String> {
++    match args.command {
++        Command::Bridge => bridge_command(&args.serial, args.baud),
++        Command::Hello => hello(&args.serial, args.baud),
++        Command::Cfg {
++            band,
++            frequency_hz,
++            bitrate_kbps,
++            power_dbm,
++            radio_payload,
++            relay,
++        } => {
++            let band = Band::parse(&band).ok_or_else(|| format!("unknown band '{band}'"))?;
++            let cfg = Lr2021Config {
++                port: Some(args.serial),
++                baud: Some(args.baud),
++                band: Some(band),
++                frequency_hz,
++                bitrate_kbps,
++                tx_power_dbm: power_dbm,
++                radio_payload,
++                relay: Some(relay),
++                ..Lr2021Config::default()
++            };
++            let bridge_cfg = cfg.bridge_config()?;
++            let link_cfg = cfg.link_config()?;
++            let _ = fips_lr2021::open_device(&bridge_cfg, link_cfg).map_err(|e| e.to_string())?;
++            println!(
++                "configured band={} freq={} Hz flrc={} kbps power={} dBm payload={}B relay={}",
++                bridge_cfg.profile.band.as_str(),
++                bridge_cfg.profile.frequency_hz,
++                bridge_cfg.profile.bitrate_kbps,
++                bridge_cfg.profile.tx_power_dbm,
++                bridge_cfg.profile.radio_payload,
++                bridge_cfg.relay
++            );
++            Ok(())
++        }
++        Command::Status => status(&args.serial, args.baud),
++        Command::Monitor { band, seconds } => {
++            let band = Band::parse(&band).ok_or_else(|| format!("unknown band '{band}'"))?;
++            monitor(&args.serial, args.baud, band, seconds)
++        }
++        Command::Per {
++            band,
++            count,
++            size,
++            peer_id,
++            timeout_ms,
++        } => {
++            let band = Band::parse(&band).ok_or_else(|| format!("unknown band '{band}'"))?;
++            per(
++                &args.serial,
++                args.baud,
++                band,
++                count,
++                size,
++                peer_id,
++                timeout_ms,
++            )
++        }
++        Command::Echo { band, seconds } => {
++            let band = Band::parse(&band).ok_or_else(|| format!("unknown band '{band}'"))?;
++            echo(&args.serial, args.baud, band, seconds)
++        }
++    }
++}
++
++fn bridge_command(serial: &str, baud: u32) -> Result<(), String> {
++    let mut port = serialport::new(serial, baud)
++        .timeout(Duration::from_millis(200))
++        .open()
++        .map_err(|e| e.to_string())?;
++    port.write_all(b"\r\nBRIDGE\r\n")
++        .map_err(|e| e.to_string())?;
++    port.flush().map_err(|e| e.to_string())?;
++    let deadline = Instant::now() + Duration::from_secs(3);
++    let mut buf = [0u8; 256];
++    let mut text = String::new();
++    while Instant::now() < deadline {
++        match port.read(&mut buf) {
++            Ok(0) => {}
++            Ok(n) => {
++                text.push_str(&String::from_utf8_lossy(&buf[..n]));
++                if text.contains("OK BRIDGE") {
++                    print!("{text}");
++                    return Ok(());
++                }
++            }
++            Err(e)
++                if e.kind() == std::io::ErrorKind::TimedOut
++                    || e.kind() == std::io::ErrorKind::WouldBlock => {}
++            Err(e) => return Err(e.to_string()),
++        }
++    }
++    Err(format!("no OK BRIDGE response; saw: {text:?}"))
++}
++
++fn hello(serial: &str, baud: u32) -> Result<(), String> {
++    let mut bridge = SerialBridge::open(serial, baud).map_err(|e| e.to_string())?;
++    bridge
++        .write_frame(BridgeKind::Hello, &[fips_lr2021::BRIDGE_PROTOCOL_VERSION])
++        .map_err(|e| e.to_string())?;
++    let deadline = Instant::now() + Duration::from_secs(2);
++    while Instant::now() < deadline {
++        for frame in bridge.read_frames(100).map_err(|e| e.to_string())? {
++            if frame.kind == BridgeKind::HelloAck {
++                let ack = HelloAckPayload::decode(&frame.payload)
++                    .ok_or_else(|| "malformed HELLO_ACK".to_string())?;
++                println!(
++                    "protocol={} firmware={}.{}.{} chip=0x{:04x} capabilities=0x{:04x}",
++                    ack.protocol,
++                    ack.firmware[0],
++                    ack.firmware[1],
++                    ack.firmware[2],
++                    ack.chip_id,
++                    ack.capabilities
++                );
++                return Ok(());
++            }
++        }
++    }
++    Err("no HELLO_ACK (is the bridge firmware running?)".to_string())
++}
++
++fn status(serial: &str, baud: u32) -> Result<(), String> {
++    let mut bridge = SerialBridge::open(serial, baud).map_err(|e| e.to_string())?;
++    bridge
++        .write_frame(BridgeKind::Ping, &[])
++        .map_err(|e| e.to_string())?;
++    let deadline = Instant::now() + Duration::from_secs(1);
++    let mut saw = false;
++    while Instant::now() < deadline {
++        for frame in bridge.read_frames(100).map_err(|e| e.to_string())? {
++            match frame.kind {
++                BridgeKind::Pong => {
++                    println!("pong");
++                    saw = true;
++                }
++                BridgeKind::Stat => {
++                    if let Some(stat) = fips_lr2021::bridge::StatPayload::decode(&frame.payload) {
++                        println!(
++                            "tx={} rx={} crc={} drops={} timeouts={} resets={}",
++                            stat.tx_packets,
++                            stat.rx_packets,
++                            stat.crc_errors,
++                            stat.drops,
++                            stat.tx_timeouts,
++                            stat.resets
++                        );
++                        saw = true;
++                    }
++                }
++                BridgeKind::Evt => {
++                    println!("event: {}", String::from_utf8_lossy(&frame.payload));
++                    saw = true;
++                }
++                _ => {}
++            }
++        }
++    }
++    if saw {
++        Ok(())
++    } else {
++        Err("no status response".to_string())
++    }
++}
++
++fn monitor(serial: &str, baud: u32, band: Band, seconds: u64) -> Result<(), String> {
++    let (mut bridge, _) = fips_lr2021::open_device(
++        &fips_lr2021::BridgeConfig {
++            port: serial.to_string(),
++            baud,
++            profile: band.default_profile(),
++            relay: false,
++        },
++        fips_lr2021::LinkConfig::default(),
++    )
++    .map_err(|e| e.to_string())?;
++    let deadline = Instant::now() + Duration::from_secs(seconds);
++    let mut packets = 0u64;
++    while Instant::now() < deadline {
++        for frame in bridge.read_frames(200).map_err(|e| e.to_string())? {
++            if frame.kind == BridgeKind::Rx {
++                if let Some(rx) = RxPayload::decode(&frame.payload) {
++                    packets += 1;
++                    println!(
++                        "rx len={} rssi={} snr={} crc={} data={}",
++                        rx.data.len(),
++                        rx.rssi_dbm,
++                        rx.snr_db,
++                        rx.crc_ok,
++                        hex(&rx.data)
++                    );
++                }
++            }
++        }
++    }
++    println!("monitor: {packets} packets");
++    Ok(())
++}
++
++fn per(
++    serial: &str,
++    baud: u32,
++    band: Band,
++    count: u32,
++    size: usize,
++    peer_id: u32,
++    timeout_ms: u64,
++) -> Result<(), String> {
++    let cfg = Lr2021Config {
++        port: Some(serial.to_string()),
++        baud: Some(baud),
++        band: Some(band),
++        ..Lr2021Config::default()
++    };
++    let bridge_cfg = cfg.bridge_config()?;
++    let link_cfg = cfg.link_config()?;
++    let (mut bridge, mut link) =
++        fips_lr2021::open_device(&bridge_cfg, link_cfg).map_err(|e| e.to_string())?;
++
++    let mut delivered = 0u32;
++    let mut rssi_sum = 0i64;
++    let mut rssi_count = 0u32;
++    let start = Instant::now();
++    for seq in 0..count {
++        let mut payload = vec![0u8; size.max(8)];
++        payload[0..4].copy_from_slice(&seq.to_be_bytes());
++        for (i, byte) in payload.iter_mut().enumerate().skip(4) {
++            *byte = (i as u8).wrapping_mul(31).wrapping_add(seq as u8);
++        }
++        let packets = link
++            .submit(&payload, peer_id, now_ms())
++            .map_err(|e| e.to_string())?;
++        send_packets(&mut bridge, &packets).map_err(|e| e.to_string())?;
++
++        let before = delivered;
++        let deadline = Instant::now() + Duration::from_millis(timeout_ms);
++        while Instant::now() < deadline {
++            for frame in bridge.read_frames(20).map_err(|e| e.to_string())? {
++                match frame.kind {
++                    BridgeKind::Rx => {
++                        if let Some(rx) = RxPayload::decode(&frame.payload) {
++                            if rx.crc_ok {
++                                rssi_sum += rx.rssi_dbm as i64;
++                                rssi_count += 1;
++                            }
++                            if let Ok(outcome) = link.process(&rx.data, now_ms()) {
++                                if !outcome.outbound.is_empty() {
++                                    send_packets(&mut bridge, &outcome.outbound)
++                                        .map_err(|e| e.to_string())?;
++                                }
++                                delivered += outcome.delivered.len() as u32;
++                            }
++                        }
++                    }
++                    _ => {}
++                }
++            }
++            let retransmit = link.poll(now_ms());
++            if !retransmit.is_empty() {
++                send_packets(&mut bridge, &retransmit).map_err(|e| e.to_string())?;
++            }
++            if delivered > before || delivered >= count {
++                break;
++            }
++        }
++    }
++    let elapsed = start.elapsed().as_secs_f64();
++    let per = if count == 0 {
++        0.0
++    } else {
++        100.0 * (count.saturating_sub(delivered)) as f64 / count as f64
++    };
++    let avg_rssi = if rssi_count == 0 {
++        f64::NAN
++    } else {
++        rssi_sum as f64 / rssi_count as f64
++    };
++    println!(
++        "per: sent={count} delivered={delivered} loss={per:.1}% elapsed={elapsed:.2}s avg_rssi={avg_rssi:.1} dBm"
++    );
++    Ok(())
++}
++
++fn echo(serial: &str, baud: u32, band: Band, seconds: u64) -> Result<(), String> {
++    let cfg = Lr2021Config {
++        port: Some(serial.to_string()),
++        baud: Some(baud),
++        band: Some(band),
++        local_id: Some(2),
++        ..Lr2021Config::default()
++    };
++    let bridge_cfg = cfg.bridge_config()?;
++    let link_cfg = cfg.link_config()?;
++    let (mut bridge, mut link) =
++        fips_lr2021::open_device(&bridge_cfg, link_cfg).map_err(|e| e.to_string())?;
++    let deadline = Instant::now() + Duration::from_secs(seconds);
++    let mut frames = 0u64;
++    while Instant::now() < deadline {
++        for frame in bridge.read_frames(100).map_err(|e| e.to_string())? {
++            println!(
++                "echo frame kind={:?} len={}",
++                frame.kind,
++                frame.payload.len()
++            );
++            if frame.kind != BridgeKind::Rx {
++                continue;
++            }
++            let Some(rx) = RxPayload::decode(&frame.payload) else {
++                println!("echo: bad RX payload");
++                continue;
++            };
++            match link.process(&rx.data, now_ms()) {
++                Ok(outcome) => {
++                    if !outcome.outbound.is_empty() {
++                        send_packets(&mut bridge, &outcome.outbound).map_err(|e| e.to_string())?;
++                    }
++                    for (src, data) in outcome.delivered {
++                        frames += 1;
++                        println!("echo rx len={} data={}", data.len(), hex(&data));
++                        // Reply so a PER sender can count completed round trips.
++                        if let Ok(reply) = link.submit(&data, src, now_ms()) {
++                            send_packets(&mut bridge, &reply).map_err(|e| e.to_string())?;
++                        }
++                    }
++                }
++                Err(e) => println!("echo: link process error: {e}"),
++            }
++        }
++        let retransmit = link.poll(now_ms());
++        if !retransmit.is_empty() {
++            send_packets(&mut bridge, &retransmit).map_err(|e| e.to_string())?;
++        }
++    }
++    println!("echo: {frames} frames");
++    Ok(())
++}
++
++fn hex(data: &[u8]) -> String {
++    let mut out = String::with_capacity(data.len() * 2);
++    for byte in data {
++        out.push_str(&format!("{byte:02x}"));
++    }
++    out
++}
+diff --git a/crates/fips-lr2021/src/bin/fips-lr2021d.rs b/crates/fips-lr2021/src/bin/fips-lr2021d.rs
+new file mode 100644
+index 00000000..300d6454
+--- /dev/null
++++ b/crates/fips-lr2021/src/bin/fips-lr2021d.rs
+@@ -0,0 +1,278 @@
++//! `fips-lr2021d` — stock-FIPS UDP fallback daemon for the LR2021 bridge.
++//!
++//! FIPS is configured with a normal UDP transport pointing at this daemon.
++//! Every UDP datagram becomes a link-layer frame; every reassembled radio
++//! frame becomes a UDP datagram back to FIPS.
++
++use std::net::{SocketAddr, UdpSocket};
++use std::sync::atomic::{AtomicBool, Ordering};
++use std::sync::{Arc, Mutex};
++use std::thread;
++use std::time::{Duration, SystemTime, UNIX_EPOCH};
++
++use clap::Parser;
++use crossbeam_channel::unbounded;
++use fips_lr2021::bridge::{BridgeKind, RxPayload};
++use fips_lr2021::{Band, Link, Lr2021Config, SerialBridge, send_packets};
++
++#[derive(Debug, Parser)]
++#[command(about = "FIPS over LR2021/FLRC UDP daemon")]
++struct Args {
++    #[arg(long, default_value = "/dev/ttyACM0")]
++    serial: String,
++    #[arg(long, default_value_t = 2_000_000)]
++    baud: u32,
++    #[arg(long, default_value = "us2400")]
++    band: String,
++    #[arg(long)]
++    frequency_hz: Option<u32>,
++    #[arg(long)]
++    bitrate_kbps: Option<u16>,
++    #[arg(long)]
++    power_dbm: Option<i8>,
++    #[arg(long, default_value_t = 1)]
++    local_id: u32,
++    #[arg(long, default_value_t = 2)]
++    peer_id: u32,
++    #[arg(long, default_value = "127.0.0.1:2122")]
++    udp_bind: String,
++    /// Fixed FIPS UDP address. If omitted, replies go to the last sender.
++    #[arg(long)]
++    fips_peer: Option<String>,
++    #[arg(long)]
++    relay: bool,
++    #[arg(long)]
++    mtu: Option<u16>,
++    #[arg(long, default_value_t = 255)]
++    radio_payload: u16,
++}
++
++fn now_ms() -> u64 {
++    SystemTime::now()
++        .duration_since(UNIX_EPOCH)
++        .map(|d| d.as_millis() as u64)
++        .unwrap_or(0)
++}
++
++fn main() {
++    let args = Args::parse();
++    let band = Band::parse(&args.band).unwrap_or_else(|| {
++        eprintln!("unknown band '{}', using us2400", args.band);
++        Band::Us2400
++    });
++    let cfg = Lr2021Config {
++        port: Some(args.serial.clone()),
++        baud: Some(args.baud),
++        band: Some(band),
++        frequency_hz: args.frequency_hz,
++        bitrate_kbps: args.bitrate_kbps,
++        tx_power_dbm: args.power_dbm,
++        local_id: Some(args.local_id),
++        relay: Some(args.relay),
++        mtu: args.mtu,
++        radio_payload: Some(args.radio_payload),
++        ..Lr2021Config::default()
++    };
++    let bridge_cfg = cfg.bridge_config().unwrap_or_else(|e| fatal(&e));
++    let link_cfg = cfg.link_config().unwrap_or_else(|e| fatal(&e));
++
++    eprintln!(
++        "opening {} at {} baud, band {} ({} Hz, FLRC {} kbps, {} dBm, payload {}B)",
++        bridge_cfg.port,
++        bridge_cfg.baud,
++        bridge_cfg.profile.band.as_str(),
++        bridge_cfg.profile.frequency_hz,
++        bridge_cfg.profile.bitrate_kbps,
++        bridge_cfg.profile.tx_power_dbm,
++        bridge_cfg.profile.radio_payload
++    );
++
++    let (reader, _) = fips_lr2021::open_device(&bridge_cfg, link_cfg.clone())
++        .unwrap_or_else(|e| fatal(&e.to_string()));
++    let mut writer = reader
++        .try_clone()
++        .unwrap_or_else(|e| fatal(&format!("cannot clone serial port: {e}")));
++    eprintln!(
++        "bridge ready; local id {:#010x}, peer id {:#010x}",
++        args.local_id, args.peer_id
++    );
++
++    let link = Arc::new(Mutex::new(
++        Link::new(link_cfg.clone()).unwrap_or_else(|e| fatal(&e.to_string())),
++    ));
++    let stop = Arc::new(AtomicBool::new(false));
++    let socket =
++        Arc::new(UdpSocket::bind(&args.udp_bind).unwrap_or_else(|e| fatal(&e.to_string())));
++    socket
++        .set_read_timeout(Some(Duration::from_millis(200)))
++        .unwrap_or_else(|e| fatal(&e.to_string()));
++    let fixed_peer: Option<SocketAddr> = args
++        .fips_peer
++        .as_deref()
++        .and_then(|s: &str| s.parse::<SocketAddr>().ok());
++    let last_peer: Arc<Mutex<Option<SocketAddr>>> = Arc::new(Mutex::new(fixed_peer));
++
++    let (tx_out, rx_out) = unbounded::<Vec<Vec<u8>>>();
++    let (tx_udp, rx_udp) = unbounded::<Vec<u8>>();
++
++    // Single serial writer: all radio packets and ACKs go through here.
++    let writer_stop = Arc::clone(&stop);
++    thread::spawn(move || {
++        while !writer_stop.load(Ordering::Relaxed) {
++            match rx_out.recv_timeout(Duration::from_millis(200)) {
++                Ok(packets) => {
++                    if let Err(e) = send_packets(&mut writer, &packets) {
++                        eprintln!("serial write error: {e}");
++                    }
++                }
++                Err(_) => {}
++            }
++        }
++    });
++
++    // Serial reader: RX packets -> link -> ACKs/delivered.
++    let reader_link = Arc::clone(&link);
++    let reader_stop = Arc::clone(&stop);
++    let reader_tx_out = tx_out.clone();
++    let reader_tx_udp = tx_udp.clone();
++    let reader_socket = Arc::clone(&socket);
++    let reader_peer = Arc::clone(&last_peer);
++    thread::spawn(move || {
++        let mut bridge: SerialBridge = reader;
++        while !reader_stop.load(Ordering::Relaxed) {
++            let frames = match bridge.read_frames(50) {
++                Ok(frames) => frames,
++                Err(e) => {
++                    eprintln!("serial read error: {e}");
++                    thread::sleep(Duration::from_millis(100));
++                    continue;
++                }
++            };
++            for frame in frames {
++                match frame.kind {
++                    BridgeKind::Rx => {
++                        let Some(rx) = RxPayload::decode(&frame.payload) else {
++                            continue;
++                        };
++                        let mut link = reader_link.lock().unwrap();
++                        match link.process(&rx.data, now_ms()) {
++                            Ok(outcome) => {
++                                if !outcome.outbound.is_empty() {
++                                    let _ = reader_tx_out.send(outcome.outbound);
++                                }
++                                for (_, data) in outcome.delivered {
++                                    let peer = *reader_peer.lock().unwrap();
++                                    if let Some(peer) = peer {
++                                        if let Err(e) = reader_socket.send_to(&data, peer) {
++                                            eprintln!("udp send error: {e}");
++                                        }
++                                    } else {
++                                        let _ = reader_tx_udp.send(data);
++                                    }
++                                }
++                            }
++                            Err(e) => eprintln!("link rx drop: {e}"),
++                        }
++                    }
++                    BridgeKind::Evt => {
++                        eprintln!("bridge event: {}", String::from_utf8_lossy(&frame.payload))
++                    }
++                    BridgeKind::Stat => {
++                        if let Some(stat) = fips_lr2021::bridge::StatPayload::decode(&frame.payload)
++                        {
++                            eprintln!(
++                                "bridge stats tx={} rx={} crc={} drops={} timeouts={} resets={}",
++                                stat.tx_packets,
++                                stat.rx_packets,
++                                stat.crc_errors,
++                                stat.drops,
++                                stat.tx_timeouts,
++                                stat.resets
++                            );
++                        }
++                    }
++                    _ => {}
++                }
++            }
++        }
++    });
++
++    // Retransmit timer.
++    let timer_link = Arc::clone(&link);
++    let timer_stop = Arc::clone(&stop);
++    let timer_tx = tx_out.clone();
++    thread::spawn(move || {
++        while !timer_stop.load(Ordering::Relaxed) {
++            thread::sleep(Duration::from_millis(10));
++            let packets = timer_link.lock().unwrap().poll(now_ms());
++            if !packets.is_empty() {
++                let _ = timer_tx.send(packets);
++            }
++        }
++    });
++
++    // UDP side: FIPS datagrams become link frames.
++    let udp_link = Arc::clone(&link);
++    let udp_stop = Arc::clone(&stop);
++    let udp_tx = tx_out.clone();
++    let udp_peer = Arc::clone(&last_peer);
++    thread::spawn(move || {
++        let mut buf = [0u8; 2048];
++        while !udp_stop.load(Ordering::Relaxed) {
++            match socket.recv_from(&mut buf) {
++                Ok((n, src)) => {
++                    let mut peer = udp_peer.lock().unwrap();
++                    if peer.is_none() {
++                        *peer = Some(src);
++                    }
++                    drop(peer);
++                    if n > link_cfg.mtu as usize {
++                        eprintln!("dropping oversized UDP datagram: {n} bytes");
++                        continue;
++                    }
++                    let packets =
++                        match udp_link
++                            .lock()
++                            .unwrap()
++                            .submit(&buf[..n], args.peer_id, now_ms())
++                        {
++                            Ok(packets) => packets,
++                            Err(e) => {
++                                eprintln!("link tx drop: {e}");
++                                continue;
++                            }
++                        };
++                    let _ = udp_tx.send(packets);
++                }
++                Err(e)
++                    if e.kind() == std::io::ErrorKind::WouldBlock
++                        || e.kind() == std::io::ErrorKind::TimedOut => {}
++                Err(e) => {
++                    eprintln!("udp recv error: {e}");
++                    thread::sleep(Duration::from_millis(100));
++                }
++            }
++            while let Ok(data) = rx_udp.try_recv() {
++                let peer = *udp_peer.lock().unwrap();
++                if let Some(peer) = peer {
++                    if let Err(e) = socket.send_to(&data, peer) {
++                        eprintln!("udp send error: {e}");
++                    }
++                }
++            }
++        }
++    });
++
++    eprintln!(
++        "UDP listening on {}; configure FIPS transports.udp to point here",
++        args.udp_bind
++    );
++    while !stop.load(Ordering::Relaxed) {
++        thread::sleep(Duration::from_millis(500));
++    }
++}
++
++fn fatal(message: &str) -> ! {
++    eprintln!("fatal: {message}");
++    std::process::exit(1);
++}
+diff --git a/crates/fips-lr2021/src/bridge.rs b/crates/fips-lr2021/src/bridge.rs
+new file mode 100644
+index 00000000..35095217
+--- /dev/null
++++ b/crates/fips-lr2021/src/bridge.rs
+@@ -0,0 +1,461 @@
++//! Host↔bridge protocol over USB CDC.
++//!
++//! ```text
++//! [A5 5A][type:1][len:2 LE][payload][CRC16:2 LE]
++//! ```
++
++use std::io::{self, Read, Write};
++use std::time::Duration;
++
++use thiserror::Error;
++
++use crate::config::{Band, RadioProfile};
++use crate::crc::crc16;
++
++pub const MAGIC: [u8; 2] = [0xA5, 0x5A];
++pub const MAX_PAYLOAD: usize = 2048;
++
++#[derive(Debug, Clone, Copy, PartialEq, Eq)]
++#[repr(u8)]
++pub enum BridgeKind {
++    Hello = 1,
++    HelloAck = 2,
++    Cfg = 3,
++    CfgAck = 4,
++    Tx = 5,
++    Rx = 6,
++    Stat = 7,
++    Evt = 8,
++    Ping = 9,
++    Pong = 10,
++}
++
++impl BridgeKind {
++    pub fn from_u8(value: u8) -> Option<Self> {
++        match value {
++            1 => Some(Self::Hello),
++            2 => Some(Self::HelloAck),
++            3 => Some(Self::Cfg),
++            4 => Some(Self::CfgAck),
++            5 => Some(Self::Tx),
++            6 => Some(Self::Rx),
++            7 => Some(Self::Stat),
++            8 => Some(Self::Evt),
++            9 => Some(Self::Ping),
++            10 => Some(Self::Pong),
++            _ => None,
++        }
++    }
++}
++
++#[derive(Debug, Clone, PartialEq, Eq)]
++pub struct BridgeFrame {
++    pub kind: BridgeKind,
++    pub payload: Vec<u8>,
++}
++
++pub fn encode(kind: BridgeKind, payload: &[u8]) -> Vec<u8> {
++    let mut out = Vec::with_capacity(6 + payload.len() + 2);
++    out.extend_from_slice(&MAGIC);
++    out.push(kind as u8);
++    out.extend_from_slice(&(payload.len() as u16).to_le_bytes());
++    out.extend_from_slice(payload);
++    let crc = crc16(&out[2..]);
++    out.extend_from_slice(&crc.to_le_bytes());
++    out
++}
++
++/// Incremental decoder. It is deliberately tolerant of leading garbage, which
++/// matters after a USB reconnect or a bridge reset.
++#[derive(Debug, Default)]
++pub struct BridgeDecoder {
++    buf: Vec<u8>,
++}
++
++impl BridgeDecoder {
++    pub fn new() -> Self {
++        Self::default()
++    }
++
++    pub fn push(&mut self, data: &[u8]) -> Vec<BridgeFrame> {
++        self.buf.extend_from_slice(data);
++        let mut out = Vec::new();
++        loop {
++            if self.buf.len() < 5 {
++                break;
++            }
++            if self.buf[0..2] != MAGIC {
++                let next = self
++                    .buf
++                    .windows(2)
++                    .position(|w| w == MAGIC)
++                    .unwrap_or(self.buf.len());
++                self.buf.drain(..next.max(1));
++                continue;
++            }
++            let len = u16::from_le_bytes([self.buf[3], self.buf[4]]) as usize;
++            if len > MAX_PAYLOAD {
++                self.buf.drain(..1);
++                continue;
++            }
++            let total = 7 + len;
++            if self.buf.len() < total {
++                break;
++            }
++            let expected = u16::from_le_bytes([self.buf[total - 2], self.buf[total - 1]]);
++            let actual = crc16(&self.buf[2..total - 2]);
++            if expected != actual {
++                self.buf.drain(..1);
++                continue;
++            }
++            if let Some(kind) = BridgeKind::from_u8(self.buf[2]) {
++                out.push(BridgeFrame {
++                    kind,
++                    payload: self.buf[5..total - 2].to_vec(),
++                });
++            }
++            self.buf.drain(..total);
++        }
++        out
++    }
++}
++
++#[derive(Debug, Error)]
++pub enum BridgeError {
++    #[error("serial port: {0}")]
++    Serial(#[from] serialport::Error),
++    #[error("io: {0}")]
++    Io(#[from] io::Error),
++    #[error("protocol: {0}")]
++    Protocol(String),
++}
++
++/// Blocking serial wrapper. The caller owns the read and write loops.
++pub struct SerialBridge {
++    port: Box<dyn serialport::SerialPort>,
++    decoder: BridgeDecoder,
++}
++
++impl SerialBridge {
++    pub fn open(path: &str, baud: u32) -> Result<Self, BridgeError> {
++        let port = serialport::new(path, baud)
++            .timeout(Duration::from_millis(50))
++            .open()?;
++        Ok(Self {
++            port,
++            decoder: BridgeDecoder::new(),
++        })
++    }
++
++    pub fn try_clone(&self) -> Result<Self, BridgeError> {
++        Ok(Self {
++            port: self.port.try_clone()?,
++            decoder: BridgeDecoder::new(),
++        })
++    }
++
++    pub fn write_frame(&mut self, kind: BridgeKind, payload: &[u8]) -> Result<(), BridgeError> {
++        let bytes = encode(kind, payload);
++        self.port.write_all(&bytes)?;
++        self.port.flush()?;
++        Ok(())
++    }
++
++    /// Read whatever is available and return complete bridge frames.
++    pub fn read_frames(&mut self, timeout_ms: u64) -> Result<Vec<BridgeFrame>, BridgeError> {
++        self.port
++            .set_timeout(Duration::from_millis(timeout_ms.max(1)))?;
++        let mut buf = [0u8; 512];
++        let mut out = Vec::new();
++        match self.port.read(&mut buf) {
++            Ok(0) => {}
++            Ok(n) => out.extend(self.decoder.push(&buf[..n])),
++            Err(err) if err.kind() == io::ErrorKind::TimedOut => {}
++            Err(err) if err.kind() == io::ErrorKind::Interrupted => {}
++            Err(err) => return Err(BridgeError::Io(err)),
++        }
++        Ok(out)
++    }
++}
++
++/// Radio configuration sent in a `Cfg` frame.
++#[derive(Debug, Clone, Copy, PartialEq, Eq)]
++pub struct CfgPayload {
++    pub profile: RadioProfile,
++    pub relay: bool,
++}
++
++impl CfgPayload {
++    pub fn encode(&self) -> Vec<u8> {
++        let mut flags = 0u8;
++        if self.relay {
++            flags |= 0x01;
++        }
++        if self.profile.sub_ghz {
++            flags |= 0x02;
++        }
++        let mut out = Vec::with_capacity(15);
++        out.push(band_to_u8(self.profile.band));
++        out.extend_from_slice(&self.profile.frequency_hz.to_le_bytes());
++        out.extend_from_slice(&self.profile.bitrate_kbps.to_le_bytes());
++        out.push(self.profile.tx_power_dbm as u8);
++        out.extend_from_slice(&self.profile.sync_word);
++        out.extend_from_slice(&self.profile.radio_payload.to_le_bytes());
++        out.push(flags);
++        out
++    }
++
++    pub fn decode(payload: &[u8]) -> Option<Self> {
++        if payload.len() != 15 {
++            return None;
++        }
++        let band = band_from_u8(payload[0])?;
++        let frequency_hz = u32::from_le_bytes(payload[1..5].try_into().ok()?);
++        let bitrate_kbps = u16::from_le_bytes(payload[5..7].try_into().ok()?);
++        let tx_power_dbm = payload[7] as i8;
++        let sync_word = payload[8..12].try_into().ok()?;
++        let radio_payload = u16::from_le_bytes(payload[12..14].try_into().ok()?);
++        let flags = payload[14];
++        let profile = RadioProfile {
++            band,
++            frequency_hz,
++            bitrate_kbps,
++            tx_power_dbm,
++            sync_word,
++            radio_payload,
++            sub_ghz: flags & 0x02 != 0,
++        };
++        profile.validate().ok()?;
++        Some(Self {
++            profile,
++            relay: flags & 0x01 != 0,
++        })
++    }
++}
++
++#[derive(Debug, Clone, Copy, PartialEq, Eq)]
++pub struct CfgAckPayload {
++    pub status: u8,
++    pub frequency_hz: u32,
++    pub bitrate_kbps: u16,
++    pub tx_power_dbm: i8,
++    pub radio_payload: u16,
++}
++
++impl CfgAckPayload {
++    pub fn encode(&self) -> Vec<u8> {
++        let mut out = Vec::with_capacity(10);
++        out.push(self.status);
++        out.extend_from_slice(&self.frequency_hz.to_le_bytes());
++        out.extend_from_slice(&self.bitrate_kbps.to_le_bytes());
++        out.push(self.tx_power_dbm as u8);
++        out.extend_from_slice(&self.radio_payload.to_le_bytes());
++        out
++    }
++
++    pub fn decode(payload: &[u8]) -> Option<Self> {
++        if payload.len() != 10 {
++            return None;
++        }
++        Some(Self {
++            status: payload[0],
++            frequency_hz: u32::from_le_bytes(payload[1..5].try_into().ok()?),
++            bitrate_kbps: u16::from_le_bytes(payload[5..7].try_into().ok()?),
++            tx_power_dbm: payload[7] as i8,
++            radio_payload: u16::from_le_bytes(payload[8..10].try_into().ok()?),
++        })
++    }
++}
++
++#[derive(Debug, Clone, Copy, PartialEq, Eq)]
++pub struct HelloAckPayload {
++    pub protocol: u8,
++    pub firmware: [u8; 3],
++    pub chip_id: u16,
++    pub capabilities: u16,
++}
++
++impl HelloAckPayload {
++    pub fn encode(&self) -> Vec<u8> {
++        let mut out = Vec::with_capacity(8);
++        out.push(self.protocol);
++        out.extend_from_slice(&self.firmware);
++        out.extend_from_slice(&self.chip_id.to_le_bytes());
++        out.extend_from_slice(&self.capabilities.to_le_bytes());
++        out
++    }
++
++    pub fn decode(payload: &[u8]) -> Option<Self> {
++        if payload.len() != 8 {
++            return None;
++        }
++        Some(Self {
++            protocol: payload[0],
++            firmware: payload[1..4].try_into().ok()?,
++            chip_id: u16::from_le_bytes(payload[4..6].try_into().ok()?),
++            capabilities: u16::from_le_bytes(payload[6..8].try_into().ok()?),
++        })
++    }
++}
++
++#[derive(Debug, Clone, PartialEq, Eq)]
++pub struct RxPayload {
++    pub rssi_dbm: i16,
++    pub snr_db: i8,
++    pub crc_ok: bool,
++    pub data: Vec<u8>,
++}
++
++impl RxPayload {
++    pub fn encode(&self) -> Vec<u8> {
++        let mut out = Vec::with_capacity(6 + self.data.len());
++        out.extend_from_slice(&self.rssi_dbm.to_le_bytes());
++        out.push(self.snr_db as u8);
++        out.push(u8::from(self.crc_ok));
++        out.extend_from_slice(&(self.data.len() as u16).to_le_bytes());
++        out.extend_from_slice(&self.data);
++        out
++    }
++
++    pub fn decode(payload: &[u8]) -> Option<Self> {
++        if payload.len() < 6 {
++            return None;
++        }
++        let len = u16::from_le_bytes(payload[4..6].try_into().ok()?) as usize;
++        if payload.len() != 6 + len {
++            return None;
++        }
++        Some(Self {
++            rssi_dbm: i16::from_le_bytes(payload[0..2].try_into().ok()?),
++            snr_db: payload[2] as i8,
++            crc_ok: payload[3] != 0,
++            data: payload[6..].to_vec(),
++        })
++    }
++}
++
++#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
++pub struct StatPayload {
++    pub tx_packets: u32,
++    pub rx_packets: u32,
++    pub crc_errors: u32,
++    pub drops: u32,
++    pub tx_timeouts: u32,
++    pub resets: u32,
++}
++
++impl StatPayload {
++    pub fn encode(&self) -> Vec<u8> {
++        let mut out = Vec::with_capacity(24);
++        for value in [
++            self.tx_packets,
++            self.rx_packets,
++            self.crc_errors,
++            self.drops,
++            self.tx_timeouts,
++            self.resets,
++        ] {
++            out.extend_from_slice(&value.to_le_bytes());
++        }
++        out
++    }
++
++    pub fn decode(payload: &[u8]) -> Option<Self> {
++        if payload.len() != 24 {
++            return None;
++        }
++        let mut values = [0u32; 6];
++        for (i, value) in values.iter_mut().enumerate() {
++            *value = u32::from_le_bytes(payload[i * 4..i * 4 + 4].try_into().ok()?);
++        }
++        Some(Self {
++            tx_packets: values[0],
++            rx_packets: values[1],
++            crc_errors: values[2],
++            drops: values[3],
++            tx_timeouts: values[4],
++            resets: values[5],
++        })
++    }
++}
++
++pub fn band_to_u8(band: Band) -> u8 {
++    match band {
++        Band::Eu868 => 0,
++        Band::Eu868High => 1,
++        Band::Us915 => 2,
++        Band::Us915Robust => 3,
++        Band::Eu2400 => 4,
++        Band::Us2400 => 5,
++        Band::Custom => 6,
++    }
++}
++
++pub fn band_from_u8(value: u8) -> Option<Band> {
++    match value {
++        0 => Some(Band::Eu868),
++        1 => Some(Band::Eu868High),
++        2 => Some(Band::Us915),
++        3 => Some(Band::Us915Robust),
++        4 => Some(Band::Eu2400),
++        5 => Some(Band::Us2400),
++        6 => Some(Band::Custom),
++        _ => None,
++    }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    use crate::config::Band;
++
++    fn sample_frame(kind: BridgeKind, payload: &[u8]) -> Vec<u8> {
++        encode(kind, payload)
++    }
++
++    #[test]
++    fn decodes_split_and_coalesced_frames() {
++        let a = sample_frame(BridgeKind::Tx, b"hello");
++        let b = sample_frame(BridgeKind::Ping, b"");
++        let mut stream = a.clone();
++        stream.extend_from_slice(&b);
++        let mut decoder = BridgeDecoder::new();
++        assert!(decoder.push(&stream[..3]).is_empty());
++        let frames = decoder.push(&stream[3..]);
++        assert_eq!(frames.len(), 2);
++        assert_eq!(frames[0].kind, BridgeKind::Tx);
++        assert_eq!(frames[0].payload, b"hello");
++        assert_eq!(frames[1].kind, BridgeKind::Ping);
++    }
++
++    #[test]
++    fn skips_leading_garbage_and_bad_crc() {
++        let mut stream = vec![0x00, 0xFF, 0x11];
++        stream.extend_from_slice(&sample_frame(BridgeKind::Tx, b"ok"));
++        let mut decoder = BridgeDecoder::new();
++        let frames = decoder.push(&stream);
++        assert_eq!(frames.len(), 1);
++        assert_eq!(frames[0].payload, b"ok");
++    }
++
++    #[test]
++    fn cfg_roundtrip() {
++        let cfg = CfgPayload {
++            profile: Band::Us915.default_profile(),
++            relay: true,
++        };
++        let encoded = cfg.encode();
++        assert_eq!(CfgPayload::decode(&encoded), Some(cfg));
++    }
++
++    #[test]
++    fn rx_roundtrip() {
++        let rx = RxPayload {
++            rssi_dbm: -42,
++            snr_db: 9,
++            crc_ok: true,
++            data: vec![1, 2, 3, 4, 5],
++        };
++        assert_eq!(RxPayload::decode(&rx.encode()), Some(rx));
++    }
++}
+diff --git a/crates/fips-lr2021/src/config.rs b/crates/fips-lr2021/src/config.rs
+new file mode 100644
+index 00000000..42be8819
+--- /dev/null
++++ b/crates/fips-lr2021/src/config.rs
+@@ -0,0 +1,383 @@
++//! Band profiles and configuration types.
++
++use serde::{Deserialize, Serialize};
++
++/// Supported regulatory / band profiles.
++#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
++#[serde(rename_all = "snake_case")]
++pub enum Band {
++    Eu868,
++    Eu868High,
++    Us915,
++    Us915Robust,
++    Eu2400,
++    Us2400,
++    Custom,
++}
++
++impl Band {
++    pub fn parse(s: &str) -> Option<Self> {
++        match s.trim().to_ascii_lowercase().as_str() {
++            "eu868" | "eu-868" => Some(Self::Eu868),
++            "eu868-high" | "eu868_high" | "eu-868-high" => Some(Self::Eu868High),
++            "us915" | "us-915" => Some(Self::Us915),
++            "us915-robust" | "us915_robust" | "us-915-robust" => Some(Self::Us915Robust),
++            "eu2400" | "eu-2400" | "2g4" | "2400" => Some(Self::Eu2400),
++            "us2400" | "us-2400" => Some(Self::Us2400),
++            "custom" => Some(Self::Custom),
++            _ => None,
++        }
++    }
++
++    pub fn as_str(self) -> &'static str {
++        match self {
++            Self::Eu868 => "eu868",
++            Self::Eu868High => "eu868-high",
++            Self::Us915 => "us915",
++            Self::Us915Robust => "us915-robust",
++            Self::Eu2400 => "eu2400",
++            Self::Us2400 => "us2400",
++            Self::Custom => "custom",
++        }
++    }
++
++    pub fn default_profile(self) -> RadioProfile {
++        match self {
++            Self::Eu868 => RadioProfile {
++                band: self,
++                frequency_hz: 868_100_000,
++                bitrate_kbps: 650,
++                tx_power_dbm: 14,
++                sync_word: DEFAULT_SYNC_WORD,
++                radio_payload: 255,
++                sub_ghz: true,
++            },
++            Self::Eu868High => RadioProfile {
++                band: self,
++                frequency_hz: 869_525_000,
++                bitrate_kbps: 650,
++                tx_power_dbm: 14,
++                sync_word: DEFAULT_SYNC_WORD,
++                radio_payload: 255,
++                sub_ghz: true,
++            },
++            Self::Us915 => RadioProfile {
++                band: self,
++                frequency_hz: 915_000_000,
++                bitrate_kbps: 1300,
++                tx_power_dbm: 22,
++                sync_word: DEFAULT_SYNC_WORD,
++                radio_payload: 255,
++                sub_ghz: true,
++            },
++            Self::Us915Robust => RadioProfile {
++                band: self,
++                frequency_hz: 915_000_000,
++                bitrate_kbps: 650,
++                tx_power_dbm: 22,
++                sync_word: DEFAULT_SYNC_WORD,
++                radio_payload: 255,
++                sub_ghz: true,
++            },
++            Self::Eu2400 | Self::Us2400 => RadioProfile {
++                band: self,
++                frequency_hz: 2_440_000_000,
++                bitrate_kbps: 2600,
++                tx_power_dbm: 12,
++                sync_word: DEFAULT_SYNC_WORD,
++                radio_payload: 255,
++                sub_ghz: false,
++            },
++            Self::Custom => RadioProfile {
++                band: self,
++                frequency_hz: 2_440_000_000,
++                bitrate_kbps: 2600,
++                tx_power_dbm: 12,
++                sync_word: DEFAULT_SYNC_WORD,
++                radio_payload: 255,
++                sub_ghz: false,
++            },
++        }
++    }
++}
++
++pub const DEFAULT_SYNC_WORD: [u8; 4] = [0x12, 0xAD, 0x10, 0x1B];
++
++/// Radio parameters sent to the bridge.
++#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
++pub struct RadioProfile {
++    pub band: Band,
++    pub frequency_hz: u32,
++    /// FLRC bitrate in kbps (2600, 1300, 650, 325).
++    pub bitrate_kbps: u16,
++    pub tx_power_dbm: i8,
++    pub sync_word: [u8; 4],
++    /// Raw FLRC payload bytes per radio packet (255 or 511).
++    pub radio_payload: u16,
++    /// True for the sub-GHz (LF) front end, false for 2.4 GHz (HF).
++    pub sub_ghz: bool,
++}
++
++impl RadioProfile {
++    pub fn validate(&self) -> Result<(), String> {
++        if self.frequency_hz < 150_000_000 || self.frequency_hz > 2_500_000_000 {
++            return Err(format!(
++                "frequency {} Hz is outside the LR2021 range",
++                self.frequency_hz
++            ));
++        }
++        match self.bitrate_kbps {
++            2600 | 2080 | 1300 | 650 | 325 => {}
++            other => return Err(format!("unsupported FLRC bitrate {other} kbps")),
++        }
++        if self.radio_payload < 32 || self.radio_payload > 511 {
++            return Err(format!(
++                "radio_payload {} is outside 32..=511",
++                self.radio_payload
++            ));
++        }
++        if self.tx_power_dbm < -18 || self.tx_power_dbm > 22 {
++            return Err(format!(
++                "tx_power {} dBm is outside -18..=22",
++                self.tx_power_dbm
++            ));
++        }
++        if self.sub_ghz != (self.frequency_hz < 1_000_000_000) {
++            return Err("sub_ghz does not match frequency".to_string());
++        }
++        Ok(())
++    }
++}
++
++/// Host-side link configuration.
++#[derive(Debug, Clone, PartialEq, Eq)]
++pub struct LinkConfig {
++    pub local_id: u32,
++    /// Largest FIPS frame accepted from / delivered to FIPS.
++    pub mtu: u16,
++    /// Raw radio packet size; must match the bridge configuration.
++    pub radio_payload: u16,
++    pub max_retries: u8,
++    pub ack_timeout_ms: u64,
++    pub reassembly_timeout_ms: u64,
++    pub dedup_window_ms: u64,
++}
++
++impl Default for LinkConfig {
++    fn default() -> Self {
++        Self {
++            local_id: 1,
++            mtu: 1400,
++            radio_payload: 255,
++            max_retries: 3,
++            ack_timeout_ms: 40,
++            reassembly_timeout_ms: 500,
++            dedup_window_ms: 5_000,
++        }
++    }
++}
++
++impl LinkConfig {
++    /// Maximum DATA payload per radio packet after the link header and CRC.
++    pub fn max_fragment_payload(&self) -> usize {
++        let overhead = crate::frame::HEADER_SIZE + crate::frame::CRC_SIZE;
++        (self.radio_payload as usize).saturating_sub(overhead)
++    }
++}
++
++/// Bridge/serial configuration.
++#[derive(Debug, Clone, PartialEq, Eq)]
++pub struct BridgeConfig {
++    pub port: String,
++    pub baud: u32,
++    pub profile: RadioProfile,
++    pub relay: bool,
++}
++
++impl Default for BridgeConfig {
++    fn default() -> Self {
++        Self {
++            port: "/dev/ttyACM0".to_string(),
++            baud: 2_000_000,
++            profile: Band::Eu2400.default_profile(),
++            relay: false,
++        }
++    }
++}
++
++/// User-facing FIPS configuration for the `lr2021` transport.
++///
++/// Every field has a default so a minimal config is:
++/// ```yaml
++/// transports:
++///   lr2021:
++///     port: /dev/ttyACM0
++///     band: us915
++/// ```
++#[derive(Debug, Clone, Default, Serialize, Deserialize)]
++#[serde(deny_unknown_fields)]
++pub struct Lr2021Config {
++    #[serde(default, skip_serializing_if = "Option::is_none")]
++    pub port: Option<String>,
++    #[serde(default, skip_serializing_if = "Option::is_none")]
++    pub baud: Option<u32>,
++    #[serde(default, skip_serializing_if = "Option::is_none")]
++    pub band: Option<Band>,
++    #[serde(default, skip_serializing_if = "Option::is_none")]
++    pub frequency_hz: Option<u32>,
++    #[serde(default, skip_serializing_if = "Option::is_none")]
++    pub bitrate_kbps: Option<u16>,
++    #[serde(default, skip_serializing_if = "Option::is_none")]
++    pub tx_power_dbm: Option<i8>,
++    /// Four sync-word bytes as hex, e.g. "12ad101b".
++    #[serde(default, skip_serializing_if = "Option::is_none")]
++    pub sync_word: Option<String>,
++    #[serde(default, skip_serializing_if = "Option::is_none")]
++    pub mtu: Option<u16>,
++    #[serde(default, skip_serializing_if = "Option::is_none")]
++    pub radio_payload: Option<u16>,
++    #[serde(default, skip_serializing_if = "Option::is_none")]
++    pub local_id: Option<u32>,
++    #[serde(default, skip_serializing_if = "Option::is_none")]
++    pub relay: Option<bool>,
++    #[serde(default, skip_serializing_if = "Option::is_none")]
++    pub auto_connect: Option<bool>,
++    #[serde(default, skip_serializing_if = "Option::is_none")]
++    pub ack_timeout_ms: Option<u64>,
++    #[serde(default, skip_serializing_if = "Option::is_none")]
++    pub max_retries: Option<u8>,
++}
++
++impl Lr2021Config {
++    pub fn band(&self) -> Band {
++        self.band.unwrap_or(Band::Us2400)
++    }
++
++    pub fn profile(&self) -> Result<RadioProfile, String> {
++        let mut profile = self.band().default_profile();
++        if let Some(frequency_hz) = self.frequency_hz {
++            profile.frequency_hz = frequency_hz;
++            profile.sub_ghz = frequency_hz < 1_000_000_000;
++        }
++        if let Some(bitrate_kbps) = self.bitrate_kbps {
++            profile.bitrate_kbps = bitrate_kbps;
++        }
++        if let Some(tx_power_dbm) = self.tx_power_dbm {
++            profile.tx_power_dbm = tx_power_dbm;
++        }
++        if let Some(radio_payload) = self.radio_payload {
++            profile.radio_payload = radio_payload;
++        }
++        if let Some(sync_word) = &self.sync_word {
++            profile.sync_word = parse_sync_word(sync_word)?;
++        }
++        profile.validate()?;
++        Ok(profile)
++    }
++
++    pub fn port(&self) -> &str {
++        self.port.as_deref().unwrap_or("/dev/ttyACM0")
++    }
++
++    pub fn baud(&self) -> u32 {
++        self.baud.unwrap_or(2_000_000)
++    }
++
++    pub fn relay(&self) -> bool {
++        self.relay.unwrap_or(false)
++    }
++
++    pub fn auto_connect(&self) -> bool {
++        self.auto_connect.unwrap_or(false)
++    }
++
++    pub fn local_id(&self) -> u32 {
++        self.local_id.unwrap_or(1)
++    }
++
++    pub fn bridge_config(&self) -> Result<BridgeConfig, String> {
++        Ok(BridgeConfig {
++            port: self.port().to_string(),
++            baud: self.baud(),
++            profile: self.profile()?,
++            relay: self.relay(),
++        })
++    }
++
++    pub fn link_config(&self) -> Result<LinkConfig, String> {
++        let profile = self.profile()?;
++        let mut cfg = LinkConfig {
++            local_id: self.local_id(),
++            radio_payload: profile.radio_payload,
++            ..LinkConfig::default()
++        };
++        if let Some(mtu) = self.mtu {
++            cfg.mtu = mtu;
++        }
++        if let Some(ack_timeout_ms) = self.ack_timeout_ms {
++            cfg.ack_timeout_ms = ack_timeout_ms;
++        }
++        if let Some(max_retries) = self.max_retries {
++            cfg.max_retries = max_retries;
++        }
++        if cfg.mtu < 64 {
++            return Err("mtu must be at least 64".to_string());
++        }
++        if cfg.max_fragment_payload() < 32 {
++            return Err("radio_payload is too small for the link header".to_string());
++        }
++        Ok(cfg)
++    }
++}
++
++pub fn parse_sync_word(s: &str) -> Result<[u8; 4], String> {
++    let clean: String = s.chars().filter(|c| c.is_ascii_hexdigit()).collect();
++    if clean.len() != 8 {
++        return Err("sync_word must contain exactly 8 hex digits".to_string());
++    }
++    let mut out = [0u8; 4];
++    for (i, byte) in out.iter_mut().enumerate() {
++        *byte = u8::from_str_radix(&clean[i * 2..i * 2 + 2], 16)
++            .map_err(|_| "invalid sync_word".to_string())?;
++    }
++    Ok(out)
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++
++    #[test]
++    fn band_profiles_validate() {
++        for band in [
++            Band::Eu868,
++            Band::Eu868High,
++            Band::Us915,
++            Band::Us915Robust,
++            Band::Eu2400,
++            Band::Us2400,
++            Band::Custom,
++        ] {
++            band.default_profile().validate().unwrap();
++        }
++    }
++
++    #[test]
++    fn sync_word_parses() {
++        assert_eq!(parse_sync_word("12ad101b").unwrap(), DEFAULT_SYNC_WORD);
++        assert_eq!(parse_sync_word("12:AD:10:1B").unwrap(), DEFAULT_SYNC_WORD);
++        assert!(parse_sync_word("12ad10").is_err());
++    }
++
++    #[test]
++    fn custom_frequency_selects_band_path() {
++        let cfg = Lr2021Config {
++            band: Some(Band::Custom),
++            frequency_hz: Some(868_300_000),
++            ..Lr2021Config::default()
++        };
++        let profile = cfg.profile().unwrap();
++        assert!(profile.sub_ghz);
++        assert_eq!(profile.frequency_hz, 868_300_000);
++    }
++}
+diff --git a/crates/fips-lr2021/src/crc.rs b/crates/fips-lr2021/src/crc.rs
+new file mode 100644
+index 00000000..f5da1c19
+--- /dev/null
++++ b/crates/fips-lr2021/src/crc.rs
+@@ -0,0 +1,45 @@
++//! Small, dependency-free CRC implementations.
++
++/// CRC-32/IEEE (reflected, polynomial 0xEDB88320), as used by the radio link.
++pub fn crc32(data: &[u8]) -> u32 {
++    let mut crc = 0xFFFF_FFFFu32;
++    for &byte in data {
++        crc ^= byte as u32;
++        for _ in 0..8 {
++            let mask = (crc & 1).wrapping_neg();
++            crc = (crc >> 1) ^ (0xEDB8_8320 & mask);
++        }
++    }
++    !crc
++}
++
++/// CRC-16/CCITT-FALSE, as used by the host↔bridge protocol.
++pub fn crc16(data: &[u8]) -> u16 {
++    let mut crc = 0xFFFFu16;
++    for &byte in data {
++        crc ^= (byte as u16) << 8;
++        for _ in 0..8 {
++            if crc & 0x8000 != 0 {
++                crc = (crc << 1) ^ 0x1021;
++            } else {
++                crc <<= 1;
++            }
++        }
++    }
++    crc
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++
++    #[test]
++    fn crc32_known_value() {
++        assert_eq!(crc32(b"123456789"), 0xCBF4_3926);
++    }
++
++    #[test]
++    fn crc16_known_value() {
++        assert_eq!(crc16(b"123456789"), 0x29B1);
++    }
++}
+diff --git a/crates/fips-lr2021/src/device.rs b/crates/fips-lr2021/src/device.rs
+new file mode 100644
+index 00000000..04f3864f
+--- /dev/null
++++ b/crates/fips-lr2021/src/device.rs
+@@ -0,0 +1,155 @@
++//! Convenience wrapper for opening and configuring a bridge.
++
++use std::time::{Duration, Instant};
++
++use crate::bridge::{
++    BridgeError, BridgeKind, CfgAckPayload, CfgPayload, HelloAckPayload, RxPayload, SerialBridge,
++};
++use crate::{BRIDGE_PROTOCOL_VERSION, BridgeConfig, Link, LinkConfig, RxOutcome};
++
++/// Open a serial bridge, perform the HELLO/CFG handshake, and return a device
++/// with a link layer attached.
++pub fn open_device(
++    bridge_cfg: &BridgeConfig,
++    link_cfg: LinkConfig,
++) -> Result<(SerialBridge, Link), BridgeError> {
++    let mut bridge = SerialBridge::open(&bridge_cfg.port, bridge_cfg.baud)?;
++    handshake(&mut bridge, bridge_cfg, 2_000)?;
++    let link = Link::new(link_cfg).map_err(|e| BridgeError::Protocol(e.to_string()))?;
++    Ok((bridge, link))
++}
++
++/// Perform HELLO and CFG against an already-open bridge.
++pub fn handshake(
++    bridge: &mut SerialBridge,
++    cfg: &BridgeConfig,
++    timeout_ms: u64,
++) -> Result<(), BridgeError> {
++    bridge.write_frame(BridgeKind::Hello, &[BRIDGE_PROTOCOL_VERSION])?;
++    let hello = wait_for(bridge, BridgeKind::HelloAck, timeout_ms)?;
++    let ack = HelloAckPayload::decode(&hello)
++        .ok_or_else(|| BridgeError::Protocol("malformed HELLO_ACK".to_string()))?;
++    if ack.protocol != BRIDGE_PROTOCOL_VERSION {
++        return Err(BridgeError::Protocol(format!(
++            "bridge protocol {} does not match host {}",
++            ack.protocol, BRIDGE_PROTOCOL_VERSION
++        )));
++    }
++
++    let payload = CfgPayload {
++        profile: cfg.profile,
++        relay: cfg.relay,
++    }
++    .encode();
++    bridge.write_frame(BridgeKind::Cfg, &payload)?;
++    let cfg_ack = wait_for(bridge, BridgeKind::CfgAck, timeout_ms)?;
++    let ack = CfgAckPayload::decode(&cfg_ack)
++        .ok_or_else(|| BridgeError::Protocol("malformed CFG_ACK".to_string()))?;
++    if ack.status != 0 {
++        return Err(BridgeError::Protocol(format!(
++            "bridge rejected configuration (status {})",
++            ack.status
++        )));
++    }
++    if ack.frequency_hz != cfg.profile.frequency_hz
++        || ack.bitrate_kbps != cfg.profile.bitrate_kbps
++        || ack.radio_payload != cfg.profile.radio_payload
++    {
++        return Err(BridgeError::Protocol(format!(
++            "bridge applied {}/{}kbps/{}B, requested {}/{}kbps/{}B",
++            ack.frequency_hz,
++            ack.bitrate_kbps,
++            ack.radio_payload,
++            cfg.profile.frequency_hz,
++            cfg.profile.bitrate_kbps,
++            cfg.profile.radio_payload
++        )));
++    }
++    Ok(())
++}
++
++fn wait_for(
++    bridge: &mut SerialBridge,
++    wanted: BridgeKind,
++    timeout_ms: u64,
++) -> Result<Vec<u8>, BridgeError> {
++    let deadline = Instant::now() + Duration::from_millis(timeout_ms);
++    while Instant::now() < deadline {
++        for frame in bridge.read_frames(50)? {
++            if frame.kind == wanted {
++                return Ok(frame.payload);
++            }
++            if frame.kind == BridgeKind::Evt {
++                eprintln!(
++                    "lr2021 bridge event: {}",
++                    String::from_utf8_lossy(&frame.payload)
++                );
++            }
++        }
++    }
++    Err(BridgeError::Protocol(format!(
++        "timed out waiting for {wanted:?}"
++    )))
++}
++
++/// Write a batch of raw radio packets as `Tx` frames.
++pub fn send_packets(bridge: &mut SerialBridge, packets: &[Vec<u8>]) -> Result<(), BridgeError> {
++    for packet in packets {
++        bridge.write_frame(BridgeKind::Tx, packet)?;
++    }
++    Ok(())
++}
++
++/// Read and process pending `Rx` frames. ACKs are written back immediately.
++pub fn poll_rx(
++    bridge: &mut SerialBridge,
++    link: &mut Link,
++    timeout_ms: u64,
++    now: u64,
++) -> Result<RxOutcome, BridgeError> {
++    let mut result = RxOutcome::default();
++    for frame in bridge.read_frames(timeout_ms)? {
++        match frame.kind {
++            BridgeKind::Rx => {
++                if let Some(rx) = RxPayload::decode(&frame.payload) {
++                    match link.process(&rx.data, now) {
++                        Ok(mut outcome) => {
++                            result.delivered.append(&mut outcome.delivered);
++                            result.outbound.append(&mut outcome.outbound);
++                        }
++                        Err(err) => {
++                            // Corrupt or malformed packets are expected on a
++                            // radio link; the link layer already counted them.
++                            eprintln!("lr2021 rx drop: {err}");
++                        }
++                    }
++                }
++            }
++            BridgeKind::Stat => {
++                if let Some(stat) = crate::bridge::StatPayload::decode(&frame.payload) {
++                    eprintln!(
++                        "lr2021 bridge stats: tx={} rx={} crc={} drops={} timeouts={} resets={}",
++                        stat.tx_packets,
++                        stat.rx_packets,
++                        stat.crc_errors,
++                        stat.drops,
++                        stat.tx_timeouts,
++                        stat.resets
++                    );
++                }
++            }
++            BridgeKind::Evt => {
++                eprintln!(
++                    "lr2021 bridge event: {}",
++                    String::from_utf8_lossy(&frame.payload)
++                );
++            }
++            _ => {}
++        }
++    }
++    if !result.outbound.is_empty() {
++        send_packets(bridge, &result.outbound)?;
++        result.outbound.clear();
++    }
++    Ok(result)
++}
+diff --git a/crates/fips-lr2021/src/frame.rs b/crates/fips-lr2021/src/frame.rs
+new file mode 100644
+index 00000000..21e054b4
+--- /dev/null
++++ b/crates/fips-lr2021/src/frame.rs
+@@ -0,0 +1,249 @@
++//! On-air link frame format.
++//!
++//! ```text
++//! magic F1 50 | version/type | flags | src(4) | dst(4) |
++//! epoch(2) | frame_seq(2) | frag_idx(1) | frag_count(1) |
++//! payload_len(2) | payload | CRC32(4)
++//! ```
++
++use crate::crc::crc32;
++use thiserror::Error;
++
++pub const MAGIC: [u8; 2] = [0xF1, 0x50];
++pub const VERSION: u8 = 1;
++pub const HEADER_SIZE: usize = 20;
++pub const CRC_SIZE: usize = 4;
++pub const MAX_FRAGMENTS: u8 = 255;
++
++#[derive(Debug, Clone, Copy, PartialEq, Eq)]
++#[repr(u8)]
++pub enum FrameKind {
++    Data = 0,
++    Ack = 1,
++    Nack = 2,
++    Beacon = 3,
++}
++
++impl FrameKind {
++    pub fn from_u8(value: u8) -> Option<Self> {
++        match value {
++            0 => Some(Self::Data),
++            1 => Some(Self::Ack),
++            2 => Some(Self::Nack),
++            3 => Some(Self::Beacon),
++            _ => None,
++        }
++    }
++}
++
++#[derive(Debug, Clone, PartialEq, Eq)]
++pub struct Frame<'a> {
++    pub kind: FrameKind,
++    pub flags: u8,
++    pub src: u32,
++    pub dst: u32,
++    pub epoch: u16,
++    pub seq: u16,
++    pub frag_idx: u8,
++    pub frag_count: u8,
++    pub payload: &'a [u8],
++}
++
++#[derive(Debug, Error, PartialEq, Eq)]
++pub enum FrameError {
++    #[error("frame too short: {0} bytes")]
++    TooShort(usize),
++    #[error("bad magic")]
++    BadMagic,
++    #[error("unsupported frame version {0}")]
++    BadVersion(u8),
++    #[error("unknown frame type {0}")]
++    BadKind(u8),
++    #[error("payload length {declared} does not match frame length {actual}")]
++    LengthMismatch { declared: usize, actual: usize },
++    #[error("payload length {0} exceeds u16")]
++    PayloadTooLong(usize),
++    #[error("bad crc32")]
++    BadCrc,
++}
++
++impl<'a> Frame<'a> {
++    pub fn data(
++        src: u32,
++        dst: u32,
++        epoch: u16,
++        seq: u16,
++        frag_idx: u8,
++        frag_count: u8,
++        payload: &'a [u8],
++    ) -> Self {
++        Self {
++            kind: FrameKind::Data,
++            flags: 0,
++            src,
++            dst,
++            epoch,
++            seq,
++            frag_idx,
++            frag_count,
++            payload,
++        }
++    }
++
++    pub fn encode(&self, out: &mut Vec<u8>) -> Result<(), FrameError> {
++        if self.payload.len() > u16::MAX as usize {
++            return Err(FrameError::PayloadTooLong(self.payload.len()));
++        }
++        out.clear();
++        out.reserve(HEADER_SIZE + self.payload.len() + CRC_SIZE);
++        out.extend_from_slice(&MAGIC);
++        out.push((VERSION << 4) | (self.kind as u8));
++        out.push(self.flags);
++        out.extend_from_slice(&self.src.to_le_bytes());
++        out.extend_from_slice(&self.dst.to_le_bytes());
++        out.extend_from_slice(&self.epoch.to_le_bytes());
++        out.extend_from_slice(&self.seq.to_le_bytes());
++        out.push(self.frag_idx);
++        out.push(self.frag_count);
++        out.extend_from_slice(&(self.payload.len() as u16).to_le_bytes());
++        out.extend_from_slice(self.payload);
++        let crc = crc32(out);
++        out.extend_from_slice(&crc.to_le_bytes());
++        Ok(())
++    }
++
++    pub fn decode(buf: &'a [u8]) -> Result<Self, FrameError> {
++        if buf.len() < HEADER_SIZE + CRC_SIZE {
++            return Err(FrameError::TooShort(buf.len()));
++        }
++        if buf[0..2] != MAGIC {
++            return Err(FrameError::BadMagic);
++        }
++        let version = buf[2] >> 4;
++        if version != VERSION {
++            return Err(FrameError::BadVersion(version));
++        }
++        let kind = FrameKind::from_u8(buf[2] & 0x0F).ok_or(FrameError::BadKind(buf[2] & 0x0F))?;
++        let flags = buf[3];
++        let src = u32::from_le_bytes(buf[4..8].try_into().unwrap());
++        let dst = u32::from_le_bytes(buf[8..12].try_into().unwrap());
++        let epoch = u16::from_le_bytes(buf[12..14].try_into().unwrap());
++        let seq = u16::from_le_bytes(buf[14..16].try_into().unwrap());
++        let frag_idx = buf[16];
++        let frag_count = buf[17];
++        let declared = u16::from_le_bytes(buf[18..20].try_into().unwrap()) as usize;
++        let actual = buf.len() - HEADER_SIZE - CRC_SIZE;
++        if declared != actual {
++            return Err(FrameError::LengthMismatch { declared, actual });
++        }
++        let crc_offset = HEADER_SIZE + declared;
++        let expected = u32::from_le_bytes(buf[crc_offset..crc_offset + 4].try_into().unwrap());
++        if crc32(&buf[..crc_offset]) != expected {
++            return Err(FrameError::BadCrc);
++        }
++        Ok(Self {
++            kind,
++            flags,
++            src,
++            dst,
++            epoch,
++            seq,
++            frag_idx,
++            frag_count,
++            payload: &buf[HEADER_SIZE..crc_offset],
++        })
++    }
++}
++
++/// Build the payload of an ACK/NACK frame: fragment count plus received bitmap.
++pub fn ack_payload(frag_count: u8, bitmap: &[u8]) -> Vec<u8> {
++    let mut out = Vec::with_capacity(1 + bitmap.len());
++    out.push(frag_count);
++    out.extend_from_slice(bitmap);
++    out
++}
++
++/// Parse an ACK/NACK payload into `(frag_count, bitmap)`.
++pub fn parse_ack_payload(payload: &[u8]) -> Option<(u8, &[u8])> {
++    let (&frag_count, bitmap) = payload.split_first()?;
++    if frag_count == 0 {
++        return None;
++    }
++    let needed = frag_count.div_ceil(8) as usize;
++    if bitmap.len() != needed {
++        return None;
++    }
++    Some((frag_count, bitmap))
++}
++
++pub fn bitmap_len(frag_count: u8) -> usize {
++    frag_count.div_ceil(8) as usize
++}
++
++pub fn bitmap_get(bitmap: &[u8], index: u8) -> bool {
++    let byte = index as usize / 8;
++    let bit = index as usize % 8;
++    bitmap.get(byte).is_some_and(|b| b & (1 << bit) != 0)
++}
++
++pub fn bitmap_set(bitmap: &mut [u8], index: u8) {
++    let byte = index as usize / 8;
++    let bit = index as usize % 8;
++    if let Some(b) = bitmap.get_mut(byte) {
++        *b |= 1 << bit;
++    }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++
++    fn sample<'a>(payload: &'a [u8]) -> Frame<'a> {
++        Frame::data(0x0102_0304, 0xFFFF_FFFF, 7, 42, 1, 3, payload)
++    }
++
++    #[test]
++    fn roundtrip() {
++        let payload = b"hello lr2021";
++        let frame = sample(payload);
++        let mut buf = Vec::new();
++        frame.encode(&mut buf).unwrap();
++        assert_eq!(buf.len(), HEADER_SIZE + payload.len() + CRC_SIZE);
++        let decoded = Frame::decode(&buf).unwrap();
++        assert_eq!(decoded, frame);
++    }
++
++    #[test]
++    fn rejects_bad_crc() {
++        let mut buf = Vec::new();
++        sample(b"hello").encode(&mut buf).unwrap();
++        let last = buf.len() - 1;
++        buf[last] ^= 0xFF;
++        assert_eq!(Frame::decode(&buf), Err(FrameError::BadCrc));
++    }
++
++    #[test]
++    fn rejects_wrong_length() {
++        let mut buf = Vec::new();
++        sample(b"hello").encode(&mut buf).unwrap();
++        buf[18] = 99;
++        assert!(matches!(
++            Frame::decode(&buf),
++            Err(FrameError::LengthMismatch { .. })
++        ));
++    }
++
++    #[test]
++    fn ack_bitmap_helpers() {
++        let mut bitmap = [0u8; 2];
++        bitmap_set(&mut bitmap, 0);
++        bitmap_set(&mut bitmap, 9);
++        assert!(bitmap_get(&bitmap, 0));
++        assert!(!bitmap_get(&bitmap, 1));
++        assert!(bitmap_get(&bitmap, 9));
++        let payload = ack_payload(10, &bitmap);
++        let (count, parsed) = parse_ack_payload(&payload).unwrap();
++        assert_eq!(count, 10);
++        assert_eq!(parsed, &bitmap);
++    }
++}
+diff --git a/crates/fips-lr2021/src/lib.rs b/crates/fips-lr2021/src/lib.rs
+new file mode 100644
+index 00000000..4b7bbe6e
+--- /dev/null
++++ b/crates/fips-lr2021/src/lib.rs
+@@ -0,0 +1,25 @@
++//! LR2021/FLRC link layer and USB-CDC bridge protocol for FIPS.
++//!
++//! The radio bridge is deliberately dumb: it moves raw FLRC packets between a
++//! USB CDC port and the LR2021. This crate owns the hard parts — framing,
++//! fragmentation, reassembly, ACK/NACK retransmission, deduplication and the
++//! serial bridge protocol — so they can be tested without hardware.
++
++pub mod bridge;
++pub mod config;
++pub mod crc;
++pub mod device;
++pub mod frame;
++pub mod link;
++
++pub use bridge::{BridgeDecoder, BridgeFrame, BridgeKind, SerialBridge};
++pub use config::{Band, BridgeConfig, LinkConfig, Lr2021Config, RadioProfile};
++pub use device::{handshake, open_device, poll_rx, send_packets};
++pub use frame::{Frame, FrameKind};
++pub use link::{Link, LinkError, LinkStats, RxOutcome};
++
++/// Version of the on-air link protocol.
++pub const LINK_PROTOCOL_VERSION: u8 = 1;
++
++/// Version of the host↔bridge protocol.
++pub const BRIDGE_PROTOCOL_VERSION: u8 = 1;
+diff --git a/crates/fips-lr2021/src/link.rs b/crates/fips-lr2021/src/link.rs
+new file mode 100644
+index 00000000..345fe5aa
+--- /dev/null
++++ b/crates/fips-lr2021/src/link.rs
+@@ -0,0 +1,553 @@
++//! Fragmentation, reassembly, ACK/NACK retransmission and deduplication.
++//!
++//! The link is deliberately sans-IO: callers submit frames, feed received
++//! radio packets, and poll for retransmits. That makes every path testable
++//! without a radio or a serial port.
++
++use std::collections::{BTreeMap, HashMap};
++
++use thiserror::Error;
++
++use crate::config::LinkConfig;
++use crate::frame::{
++    CRC_SIZE, Frame, FrameError, FrameKind, HEADER_SIZE, MAX_FRAGMENTS, ack_payload, bitmap_get,
++    bitmap_len, bitmap_set, parse_ack_payload,
++};
++
++pub const BROADCAST_ID: u32 = 0xFFFF_FFFF;
++
++#[derive(Debug, Error)]
++pub enum LinkError {
++    #[error("frame too large: {size} > mtu {mtu}")]
++    FrameTooLarge { size: usize, mtu: usize },
++    #[error("too many fragments: {0}")]
++    TooManyFragments(usize),
++    #[error("pending queue is full")]
++    QueueFull,
++    #[error(transparent)]
++    Frame(#[from] FrameError),
++    #[error("invalid link configuration: {0}")]
++    Config(String),
++}
++
++#[derive(Debug, Clone, Default, PartialEq, Eq)]
++pub struct LinkStats {
++    pub frames_tx: u64,
++    pub frames_rx: u64,
++    pub fragments_tx: u64,
++    pub fragments_rx: u64,
++    pub retransmits: u64,
++    pub dropped_tx: u64,
++    pub dropped_rx: u64,
++    pub duplicates: u64,
++    pub crc_errors: u64,
++    pub acks_tx: u64,
++    pub acks_rx: u64,
++}
++
++#[derive(Debug, Default, Clone)]
++pub struct RxOutcome {
++    /// Complete FIPS frames, with the source link id.
++    pub delivered: Vec<(u32, Vec<u8>)>,
++    /// Encoded packets that must be written to the bridge.
++    pub outbound: Vec<Vec<u8>>,
++}
++
++struct Pending {
++    encoded: Vec<Vec<u8>>,
++    acked: Vec<bool>,
++    sent_at: u64,
++    retries: u8,
++}
++
++struct Reassembly {
++    frag_count: u8,
++    bitmap: Vec<u8>,
++    data: Vec<u8>,
++    lens: Vec<usize>,
++    last_update: u64,
++}
++
++pub struct Link {
++    cfg: LinkConfig,
++    epoch: u16,
++    next_seq: u16,
++    pending: BTreeMap<u16, Pending>,
++    reassembly: HashMap<(u32, u16, u16), Reassembly>,
++    completed: HashMap<(u32, u16, u16), u64>,
++    stats: LinkStats,
++}
++
++impl Link {
++    pub fn new(cfg: LinkConfig) -> Result<Self, LinkError> {
++        if cfg.max_fragment_payload() < 32 {
++            return Err(LinkError::Config(
++                "radio_payload too small for link header".to_string(),
++            ));
++        }
++        if cfg.mtu < 64 {
++            return Err(LinkError::Config("mtu must be at least 64".to_string()));
++        }
++        let epoch = (std::time::SystemTime::now()
++            .duration_since(std::time::UNIX_EPOCH)
++            .map(|d| d.as_millis() as u16)
++            .unwrap_or(1))
++        .max(1);
++        Ok(Self {
++            cfg,
++            epoch,
++            next_seq: 1,
++            pending: BTreeMap::new(),
++            reassembly: HashMap::new(),
++            completed: HashMap::new(),
++            stats: LinkStats::default(),
++        })
++    }
++
++    pub fn local_id(&self) -> u32 {
++        self.cfg.local_id
++    }
++
++    pub fn epoch(&self) -> u16 {
++        self.epoch
++    }
++
++    pub fn mtu(&self) -> u16 {
++        self.cfg.mtu
++    }
++
++    pub fn stats(&self) -> &LinkStats {
++        &self.stats
++    }
++
++    pub fn pending_len(&self) -> usize {
++        self.pending.len()
++    }
++
++    pub fn reassembly_len(&self) -> usize {
++        self.reassembly.len()
++    }
++
++    /// Fragment and encode a FIPS frame. The returned packets should be sent
++    /// immediately; `poll` later returns retransmits.
++    pub fn submit(&mut self, data: &[u8], dst: u32, now: u64) -> Result<Vec<Vec<u8>>, LinkError> {
++        if data.len() > self.cfg.mtu as usize {
++            return Err(LinkError::FrameTooLarge {
++                size: data.len(),
++                mtu: self.cfg.mtu as usize,
++            });
++        }
++        if self.pending.len() >= 64 {
++            return Err(LinkError::QueueFull);
++        }
++        let max_payload = self.cfg.max_fragment_payload();
++        let frag_count = if data.is_empty() {
++            1
++        } else {
++            data.len().div_ceil(max_payload)
++        };
++        if frag_count > MAX_FRAGMENTS as usize {
++            return Err(LinkError::TooManyFragments(frag_count));
++        }
++
++        let mut seq = self.next_seq;
++        while self.pending.contains_key(&seq) {
++            seq = seq.wrapping_add(1);
++        }
++        self.next_seq = seq.wrapping_add(1);
++
++        let mut encoded = Vec::with_capacity(frag_count);
++        for idx in 0..frag_count {
++            let start = idx * max_payload;
++            let end = (start + max_payload).min(data.len());
++            let payload = if start <= end { &data[start..end] } else { &[] };
++            let frame = Frame::data(
++                self.cfg.local_id,
++                dst,
++                self.epoch,
++                seq,
++                idx as u8,
++                frag_count as u8,
++                payload,
++            );
++            let mut buf = Vec::with_capacity(HEADER_SIZE + payload.len() + CRC_SIZE);
++            frame.encode(&mut buf)?;
++            encoded.push(buf);
++        }
++
++        self.stats.frames_tx += 1;
++        self.stats.fragments_tx += frag_count as u64;
++        self.pending.insert(
++            seq,
++            Pending {
++                acked: vec![false; frag_count],
++                encoded: encoded.clone(),
++                sent_at: now,
++                retries: 0,
++            },
++        );
++        Ok(encoded)
++    }
++
++    /// Process one received radio packet.
++    pub fn process(&mut self, packet: &[u8], now: u64) -> Result<RxOutcome, LinkError> {
++        let frame = match Frame::decode(packet) {
++            Ok(frame) => frame,
++            Err(err) => {
++                if matches!(err, FrameError::BadCrc) {
++                    self.stats.crc_errors += 1;
++                }
++                return Err(LinkError::Frame(err));
++            }
++        };
++
++        if frame.src == self.cfg.local_id {
++            return Ok(RxOutcome::default());
++        }
++        if frame.dst != self.cfg.local_id && frame.dst != BROADCAST_ID {
++            return Ok(RxOutcome::default());
++        }
++
++        match frame.kind {
++            FrameKind::Data => self.process_data(&frame, now),
++            FrameKind::Ack | FrameKind::Nack => self.process_ack(&frame, now),
++            FrameKind::Beacon => Ok(RxOutcome::default()),
++        }
++    }
++
++    fn process_data(&mut self, frame: &Frame<'_>, now: u64) -> Result<RxOutcome, LinkError> {
++        let frag_count = frame.frag_count;
++        if frag_count == 0 || frame.frag_idx >= frag_count {
++            self.stats.dropped_rx += 1;
++            return Ok(RxOutcome::default());
++        }
++        let max_payload = self.cfg.max_fragment_payload();
++        let max_frags = self.cfg.mtu.div_ceil(max_payload as u16) + 1;
++        if frag_count as u16 > max_frags {
++            self.stats.dropped_rx += 1;
++            return Ok(RxOutcome::default());
++        }
++        if frame.payload.len() > max_payload {
++            self.stats.dropped_rx += 1;
++            return Ok(RxOutcome::default());
++        }
++
++        let key = (frame.src, frame.epoch, frame.seq);
++        if self.completed.contains_key(&key) {
++            self.stats.duplicates += 1;
++            return self.ack_outcome(
++                frame,
++                frag_count,
++                &vec![0xFF; bitmap_len(frag_count)],
++                false,
++            );
++        }
++
++        let entry = self.reassembly.entry(key).or_insert_with(|| Reassembly {
++            frag_count,
++            bitmap: vec![0u8; bitmap_len(frag_count)],
++            data: vec![0u8; frag_count as usize * max_payload],
++            lens: vec![0usize; frag_count as usize],
++            last_update: now,
++        });
++        if entry.frag_count != frag_count {
++            self.stats.dropped_rx += 1;
++            self.reassembly.remove(&key);
++            return Ok(RxOutcome::default());
++        }
++        let start = frame.frag_idx as usize * max_payload;
++        let end = start + frame.payload.len();
++        if end > entry.data.len() {
++            self.stats.dropped_rx += 1;
++            self.reassembly.remove(&key);
++            return Ok(RxOutcome::default());
++        }
++        entry.data[start..end].copy_from_slice(frame.payload);
++        entry.lens[frame.frag_idx as usize] = frame.payload.len();
++        bitmap_set(&mut entry.bitmap, frame.frag_idx);
++        entry.last_update = now;
++        self.stats.fragments_rx += 1;
++
++        let complete = (0..frag_count).all(|idx| bitmap_get(&entry.bitmap, idx));
++        if !complete {
++            let bitmap = entry.bitmap.clone();
++            return self.ack_outcome(frame, frag_count, &bitmap, false);
++        }
++
++        let last_len = entry.lens[(frag_count - 1) as usize];
++        let total_len = (frag_count as usize - 1) * max_payload + last_len;
++        let data = entry.data[..total_len].to_vec();
++        let bitmap = entry.bitmap.clone();
++        self.reassembly.remove(&key);
++        self.completed.insert(key, now);
++        self.stats.frames_rx += 1;
++
++        let mut outcome = self.ack_outcome(frame, frag_count, &bitmap, false)?;
++        outcome.delivered.push((frame.src, data));
++        Ok(outcome)
++    }
++
++    fn process_ack(&mut self, frame: &Frame<'_>, now: u64) -> Result<RxOutcome, LinkError> {
++        let Some((frag_count, bitmap)) = parse_ack_payload(frame.payload) else {
++            return Ok(RxOutcome::default());
++        };
++        self.stats.acks_rx += 1;
++
++        let Some(pending) = self.pending.get_mut(&frame.seq) else {
++            return Ok(RxOutcome::default());
++        };
++        if frag_count as usize != pending.encoded.len() {
++            return Ok(RxOutcome::default());
++        }
++        for idx in 0..frag_count {
++            if bitmap_get(bitmap, idx) {
++                if let Some(slot) = pending.acked.get_mut(idx as usize) {
++                    *slot = true;
++                }
++            }
++        }
++        if pending.acked.iter().all(|&acked| acked) {
++            self.pending.remove(&frame.seq);
++            return Ok(RxOutcome::default());
++        }
++
++        // Some fragments are still missing. Retransmit them now; the sender's
++        // timer is a backstop for a lost ACK.
++        let mut outbound = Vec::new();
++        for (idx, packet) in pending.encoded.iter().enumerate() {
++            if !pending.acked[idx] {
++                outbound.push(packet.clone());
++            }
++        }
++        pending.sent_at = now;
++        self.stats.retransmits += outbound.len() as u64;
++        Ok(RxOutcome {
++            delivered: Vec::new(),
++            outbound,
++        })
++    }
++
++    fn ack_outcome(
++        &mut self,
++        frame: &Frame<'_>,
++        frag_count: u8,
++        bitmap: &[u8],
++        nack: bool,
++    ) -> Result<RxOutcome, LinkError> {
++        let payload = ack_payload(frag_count, bitmap);
++        let ack = Frame {
++            kind: if nack {
++                FrameKind::Nack
++            } else {
++                FrameKind::Ack
++            },
++            flags: 0,
++            src: self.cfg.local_id,
++            dst: frame.src,
++            epoch: frame.epoch,
++            seq: frame.seq,
++            frag_idx: 0,
++            frag_count: 0,
++            payload: &payload,
++        };
++        let mut buf = Vec::with_capacity(HEADER_SIZE + payload.len() + CRC_SIZE);
++        ack.encode(&mut buf)?;
++        self.stats.acks_tx += 1;
++        Ok(RxOutcome {
++            delivered: Vec::new(),
++            outbound: vec![buf],
++        })
++    }
++
++    /// Return retransmits and expire stale reassemblies / dedup entries.
++    pub fn poll(&mut self, now: u64) -> Vec<Vec<u8>> {
++        let mut out = Vec::new();
++        let mut drop_seqs = Vec::new();
++        for (&seq, pending) in self.pending.iter_mut() {
++            if now.saturating_sub(pending.sent_at) < self.cfg.ack_timeout_ms {
++                continue;
++            }
++            if pending.retries >= self.cfg.max_retries {
++                drop_seqs.push(seq);
++                continue;
++            }
++            pending.retries += 1;
++            pending.sent_at = now;
++            for (idx, packet) in pending.encoded.iter().enumerate() {
++                if !pending.acked[idx] {
++                    out.push(packet.clone());
++                }
++            }
++        }
++        for seq in drop_seqs {
++            if let Some(pending) = self.pending.remove(&seq) {
++                self.stats.dropped_tx += pending.encoded.len() as u64;
++            }
++        }
++        self.stats.retransmits += out.len() as u64;
++
++        let stale: Vec<_> = self
++            .reassembly
++            .iter()
++            .filter(|(_, entry)| {
++                now.saturating_sub(entry.last_update) > self.cfg.reassembly_timeout_ms
++            })
++            .map(|(key, _)| *key)
++            .collect();
++        for key in stale {
++            self.reassembly.remove(&key);
++            self.stats.dropped_rx += 1;
++        }
++
++        self.completed
++            .retain(|_, at| now.saturating_sub(*at) <= self.cfg.dedup_window_ms);
++        out
++    }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++
++    fn cfg(id: u32) -> LinkConfig {
++        LinkConfig {
++            local_id: id,
++            ..LinkConfig::default()
++        }
++    }
++
++    fn pair() -> (Link, Link) {
++        let mut a = Link::new(cfg(1)).unwrap();
++        let mut b = Link::new(cfg(2)).unwrap();
++        // Give the two ends different epochs so keys cannot collide in a test.
++        a.epoch = 10;
++        b.epoch = 20;
++        (a, b)
++    }
++
++    #[test]
++    fn roundtrip_one_frame() {
++        let (mut a, mut b) = pair();
++        let data = vec![0x5A; 500];
++        let packets = a.submit(&data, 2, 0).unwrap();
++        let mut delivered = Vec::new();
++        let mut acks = Vec::new();
++        for packet in &packets {
++            let mut outcome = b.process(packet, 1).unwrap();
++            delivered.append(&mut outcome.delivered);
++            acks.append(&mut outcome.outbound);
++        }
++        assert_eq!(delivered.len(), 1);
++        assert_eq!(delivered[0].1, data);
++        assert_eq!(b.stats().frames_rx, 1);
++        assert!(!acks.is_empty());
++        for packet in &acks {
++            a.process(packet, 2).unwrap();
++        }
++        assert_eq!(a.pending_len(), 0);
++    }
++
++    #[test]
++    fn delivers_large_frame() {
++        let (mut a, mut b) = pair();
++        let data: Vec<u8> = (0..1400).map(|i| (i % 251) as u8).collect();
++        let packets = a.submit(&data, 2, 0).unwrap();
++        let mut delivered = Vec::new();
++        for packet in &packets {
++            delivered.extend(b.process(packet, 1).unwrap().delivered);
++        }
++        assert_eq!(delivered.len(), 1);
++        assert_eq!(delivered[0].0, 1);
++        assert_eq!(delivered[0].1, data);
++    }
++
++    #[test]
++    fn retransmits_missing_fragment() {
++        let (mut a, mut b) = pair();
++        let data = vec![0x77; 700];
++        let packets = a.submit(&data, 2, 0).unwrap();
++        assert!(packets.len() >= 3);
++
++        // Drop the second fragment.
++        let mut delivered = Vec::new();
++        for (idx, packet) in packets.iter().enumerate() {
++            if idx == 1 {
++                continue;
++            }
++            delivered.extend(b.process(packet, 1).unwrap().delivered);
++        }
++        assert!(delivered.is_empty());
++
++        let retransmit = a.poll(41);
++        assert!(!retransmit.is_empty());
++        for packet in &retransmit {
++            delivered.extend(b.process(packet, 42).unwrap().delivered);
++        }
++        assert_eq!(delivered.len(), 1);
++        assert_eq!(delivered[0].1, data);
++    }
++
++    #[test]
++    fn ignores_duplicate_frame() {
++        let (mut a, mut b) = pair();
++        let data = b"duplicate me".to_vec();
++        let packets = a.submit(&data, 2, 0).unwrap();
++        let mut delivered = Vec::new();
++        for packet in &packets {
++            delivered.extend(b.process(packet, 1).unwrap().delivered);
++        }
++        for packet in &packets {
++            delivered.extend(b.process(packet, 2).unwrap().delivered);
++        }
++        assert_eq!(delivered.len(), 1);
++        assert_eq!(b.stats().duplicates, packets.len() as u64);
++    }
++
++    #[test]
++    fn rejects_oversized_frame() {
++        let mut a = Link::new(cfg(1)).unwrap();
++        let data = vec![0u8; 2000];
++        assert!(matches!(
++            a.submit(&data, 2, 0),
++            Err(LinkError::FrameTooLarge { .. })
++        ));
++    }
++
++    #[test]
++    fn expires_incomplete_reassembly() {
++        let (mut a, mut b) = pair();
++        let data = vec![0u8; 700];
++        let packets = a.submit(&data, 2, 0).unwrap();
++        for packet in packets.iter().skip(1) {
++            b.process(packet, 1).unwrap();
++        }
++        assert_eq!(b.reassembly_len(), 1);
++        b.poll(1000);
++        assert_eq!(b.reassembly_len(), 0);
++        assert_eq!(b.stats().dropped_rx, 1);
++    }
++
++    #[test]
++    fn out_of_order_fragments_reassemble() {
++        let (mut a, mut b) = pair();
++        let data = vec![0x42; 900];
++        let packets = a.submit(&data, 2, 0).unwrap();
++        let mut delivered = Vec::new();
++        for packet in packets.iter().rev() {
++            delivered.extend(b.process(packet, 1).unwrap().delivered);
++        }
++        assert_eq!(delivered.len(), 1);
++        assert_eq!(delivered[0].1, data);
++    }
++
++    #[test]
++    fn bad_crc_is_counted() {
++        let (mut a, mut b) = pair();
++        let packets = a.submit(b"hello", 2, 0).unwrap();
++        let mut packet = packets[0].clone();
++        let last = packet.len() - 1;
++        packet[last] ^= 0xFF;
++        assert!(b.process(&packet, 1).is_err());
++        assert_eq!(b.stats().crc_errors, 1);
++    }
++}
+diff --git a/src/config/mod.rs b/src/config/mod.rs
+index b18f163d..e883a036 100644
+--- a/src/config/mod.rs
++++ b/src/config/mod.rs
+@@ -54,8 +54,8 @@ pub use node::{
+ };
+ pub use peer::{ConnectPolicy, PeerAddress, PeerConfig, TransportSpec};
+ pub use transport::{
+-    BleConfig, DirectoryServiceConfig, EthernetConfig, NymConfig, TcpConfig, TorConfig,
+-    TransportInstances, TransportsConfig, UdpConfig,
++    BleConfig, DirectoryServiceConfig, EthernetConfig, Lr2021Config, NymConfig, TcpConfig,
++    TorConfig, TransportInstances, TransportsConfig, UdpConfig,
+ };
+ 
+ /// Default config filename.
+diff --git a/src/config/transport.rs b/src/config/transport.rs
+index 6b83d1fc..5037ac42 100644
+--- a/src/config/transport.rs
++++ b/src/config/transport.rs
+@@ -8,6 +8,8 @@ use std::net::{IpAddr, SocketAddr};
+ 
+ use serde::{Deserialize, Serialize};
+ 
++pub use fips_lr2021::Lr2021Config;
++
+ /// Parse an `external_addr` config string against a known bind port,
+ /// producing the absolute `SocketAddr` to advertise on Nostr.
+ ///
+@@ -982,6 +984,10 @@ pub struct TransportsConfig {
+     /// BLE transport instances.
+     #[serde(default, skip_serializing_if = "is_transport_empty")]
+     pub ble: TransportInstances<BleConfig>,
++
++    /// LR2021/FLRC transport instances.
++    #[serde(default, skip_serializing_if = "is_transport_empty")]
++    pub lr2021: TransportInstances<Lr2021Config>,
+ }
+ 
+ /// Helper for skip_serializing_if on TransportInstances.
+@@ -998,6 +1004,7 @@ impl TransportsConfig {
+             && self.tor.is_empty()
+             && self.nym.is_empty()
+             && self.ble.is_empty()
++            && self.lr2021.is_empty()
+     }
+ 
+     /// Merge another TransportsConfig into this one.
+@@ -1022,6 +1029,9 @@ impl TransportsConfig {
+         if !other.ble.is_empty() {
+             self.ble = other.ble;
+         }
++        if !other.lr2021.is_empty() {
++            self.lr2021 = other.lr2021;
++        }
+     }
+ }
+ 
+@@ -1029,6 +1039,19 @@ impl TransportsConfig {
+ mod tests {
+     use super::*;
+ 
++    #[test]
++    fn lr2021_transport_parses() {
++        let transports: TransportsConfig = serde_yaml::from_str(
++            "lr2021:\n  port: /dev/ttyACM0\n  band: us915\n  local_id: 7\n",
++        )
++        .unwrap();
++        let (_, cfg) = transports.lr2021.iter().next().unwrap();
++        assert_eq!(cfg.port(), "/dev/ttyACM0");
++        assert_eq!(cfg.band(), fips_lr2021::Band::Us915);
++        assert_eq!(cfg.local_id(), 7);
++        assert!(!transports.is_empty());
++    }
++
+     #[test]
+     fn parse_external_addr_accepts_bare_ipv4_with_appended_bind_port() {
+         let sa = parse_external_advert_addr("198.51.100.1", 2121).unwrap();
+diff --git a/src/lib.rs b/src/lib.rs
+index b0e2ced9..dedc9308 100644
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -65,6 +65,7 @@ pub use proto::stp::{
+ pub use proto::bloom::{BloomError, BloomFilter, BloomState};
+ 
+ // Re-export transport types
++pub use transport::lr2021::Lr2021Transport;
+ pub use transport::udp::UdpTransport;
+ pub use transport::{
+     DiscoveredPeer, Link, LinkDirection, LinkId, LinkState, LinkStats, PacketRx, PacketTx,
+diff --git a/src/node/mod.rs b/src/node/mod.rs
+index d704df65..cfd33753 100644
+--- a/src/node/mod.rs
++++ b/src/node/mod.rs
+@@ -1528,6 +1528,25 @@ impl Node {
+             transports.push(TransportHandle::Nym(nym));
+         }
+ 
++        // Create LR2021 transport instances
++        let lr2021_instances: Vec<_> = self
++            .config()
++            .transports
++            .lr2021
++            .iter()
++            .map(|(name, config)| (name.map(|s| s.to_string()), config.clone()))
++            .collect();
++        for (name, lr_config) in lr2021_instances {
++            let transport_id = self.allocate_transport_id();
++            let lr = crate::transport::lr2021::Lr2021Transport::new(
++                transport_id,
++                name,
++                lr_config,
++                packet_tx.clone(),
++            );
++            transports.push(TransportHandle::Lr2021(lr));
++        }
++
+         // Create BLE transport instances
+         #[cfg(all(bluer_available, not(test)))]
+         {
+diff --git a/src/transport/lr2021/mod.rs b/src/transport/lr2021/mod.rs
+new file mode 100644
+index 00000000..d64b2480
+--- /dev/null
++++ b/src/transport/lr2021/mod.rs
+@@ -0,0 +1,269 @@
++//! LR2021/FLRC transport for FIPS.
++//!
++//! The host owns the link layer (fragmentation, reassembly, ACK/NACK and
++//! deduplication); the RP2040 bridge is a raw packet pipe. See
++//! `crates/fips-lr2021` for the protocol and tests.
++
++use std::sync::atomic::{AtomicBool, Ordering};
++use std::sync::{Arc, Mutex};
++use std::thread::{self, JoinHandle};
++use std::time::{SystemTime, UNIX_EPOCH};
++
++use crossbeam_channel::{Sender, unbounded};
++
++use crate::config::Lr2021Config;
++use crate::transport::{
++    DiscoveredPeer, PacketTx, ReceivedPacket, Transport, TransportAddr, TransportError,
++    TransportId, TransportState, TransportType,
++};
++use fips_lr2021::bridge::{BridgeKind, RxPayload};
++use fips_lr2021::{Link, send_packets};
++
++/// Native FIPS transport over an LR2021 USB bridge.
++pub struct Lr2021Transport {
++    transport_id: TransportId,
++    name: Option<String>,
++    config: Lr2021Config,
++    state: TransportState,
++    packet_tx: PacketTx,
++    mtu: u16,
++    link: Arc<Mutex<Option<Link>>>,
++    tx_packets: Sender<Vec<Vec<u8>>>,
++    stop: Arc<AtomicBool>,
++    threads: Vec<JoinHandle<()>>,
++}
++
++impl Lr2021Transport {
++    pub fn new(
++        transport_id: TransportId,
++        name: Option<String>,
++        config: Lr2021Config,
++        packet_tx: PacketTx,
++    ) -> Self {
++        let mtu = config.mtu.unwrap_or(1400);
++        let (tx_packets, _rx_packets) = unbounded();
++        Self {
++            transport_id,
++            name,
++            config,
++            state: TransportState::Configured,
++            packet_tx,
++            mtu,
++            link: Arc::new(Mutex::new(None)),
++            tx_packets,
++            stop: Arc::new(AtomicBool::new(false)),
++            threads: Vec::new(),
++        }
++    }
++
++    pub fn name(&self) -> Option<&str> {
++        self.name.as_deref()
++    }
++
++    pub fn set_state(&mut self, state: TransportState) {
++        self.state = state;
++    }
++
++    fn start_inner(&mut self) -> Result<(), TransportError> {
++        let bridge_cfg = self
++            .config
++            .bridge_config()
++            .map_err(TransportError::StartFailed)?;
++        let link_cfg = self
++            .config
++            .link_config()
++            .map_err(TransportError::StartFailed)?;
++
++        let (reader, link) = fips_lr2021::open_device(&bridge_cfg, link_cfg)
++            .map_err(|e| TransportError::StartFailed(e.to_string()))?;
++        let mut writer = reader
++            .try_clone()
++            .map_err(|e| TransportError::StartFailed(format!("serial clone: {e}")))?;
++
++        *self.link.lock().unwrap() = Some(link);
++        let link = Arc::clone(&self.link);
++        let stop = Arc::clone(&self.stop);
++        let packet_tx = self.packet_tx.clone();
++        let transport_id = self.transport_id;
++        let (tx_packets, rx_packets) = unbounded::<Vec<Vec<u8>>>();
++        self.tx_packets = tx_packets.clone();
++
++        // Writer: every radio packet and ACK is serialized here.
++        let writer_stop = Arc::clone(&stop);
++        self.threads.push(thread::spawn(move || {
++            while !writer_stop.load(Ordering::Relaxed) {
++                match rx_packets.recv_timeout(std::time::Duration::from_millis(200)) {
++                    Ok(packets) => {
++                        if let Err(e) = send_packets(&mut writer, &packets) {
++                            tracing::warn!(error = %e, "lr2021 serial write failed");
++                        }
++                    }
++                    Err(_) => {}
++                }
++            }
++        }));
++
++        // Reader: radio packets -> link -> ACKs / FIPS packets.
++        let reader_link = Arc::clone(&link);
++        let reader_stop = Arc::clone(&stop);
++        let reader_tx = tx_packets.clone();
++        let reader_packet_tx = packet_tx.clone();
++        self.threads.push(thread::spawn(move || {
++            let mut bridge = reader;
++            while !reader_stop.load(Ordering::Relaxed) {
++                let frames = match bridge.read_frames(50) {
++                    Ok(frames) => frames,
++                    Err(e) => {
++                        tracing::warn!(error = %e, "lr2021 serial read failed");
++                        thread::sleep(std::time::Duration::from_millis(100));
++                        continue;
++                    }
++                };
++                for frame in frames {
++                    if frame.kind != BridgeKind::Rx {
++                        continue;
++                    }
++                    let Some(rx) = RxPayload::decode(&frame.payload) else {
++                        continue;
++                    };
++                    let mut guard = reader_link.lock().unwrap();
++                    let Some(link) = guard.as_mut() else {
++                        continue;
++                    };
++                    match link.process(&rx.data, now_ms()) {
++                        Ok(outcome) => {
++                            if !outcome.outbound.is_empty() {
++                                let _ = reader_tx.send(outcome.outbound);
++                            }
++                            for (src, data) in outcome.delivered {
++                                let addr = TransportAddr::from_bytes(&src.to_le_bytes());
++                                if reader_packet_tx
++                                    .try_send(ReceivedPacket::new(transport_id, addr, data))
++                                    .is_err()
++                                {
++                                    tracing::debug!("lr2021 packet channel full; dropping");
++                                }
++                            }
++                        }
++                        Err(e) => tracing::debug!(error = %e, "lr2021 rx drop"),
++                    }
++                }
++            }
++        }));
++
++        // Retransmit / expiry timer.
++        let timer_link = Arc::clone(&link);
++        let timer_stop = Arc::clone(&stop);
++        let timer_tx = tx_packets;
++        self.threads.push(thread::spawn(move || {
++            while !timer_stop.load(Ordering::Relaxed) {
++                thread::sleep(std::time::Duration::from_millis(10));
++                let mut guard = timer_link.lock().unwrap();
++                if let Some(link) = guard.as_mut() {
++                    let packets = link.poll(now_ms());
++                    if !packets.is_empty() {
++                        let _ = timer_tx.send(packets);
++                    }
++                }
++            }
++        }));
++
++        self.state = TransportState::Up;
++        Ok(())
++    }
++}
++
++impl Transport for Lr2021Transport {
++    fn transport_id(&self) -> TransportId {
++        self.transport_id
++    }
++
++    fn transport_type(&self) -> &TransportType {
++        &TransportType::LR2021
++    }
++
++    fn state(&self) -> TransportState {
++        self.state
++    }
++
++    fn mtu(&self) -> u16 {
++        self.mtu
++    }
++
++    fn start(&mut self) -> Result<(), TransportError> {
++        if self.state == TransportState::Up {
++            return Err(TransportError::AlreadyStarted);
++        }
++        self.state = TransportState::Starting;
++        match self.start_inner() {
++            Ok(()) => Ok(()),
++            Err(err) => {
++                self.state = TransportState::Failed;
++                Err(err)
++            }
++        }
++    }
++
++    fn stop(&mut self) -> Result<(), TransportError> {
++        self.stop.store(true, Ordering::Relaxed);
++        for handle in self.threads.drain(..) {
++            let _ = handle.join();
++        }
++        *self.link.lock().unwrap() = None;
++        self.state = TransportState::Down;
++        Ok(())
++    }
++
++    fn send(&self, addr: &TransportAddr, data: &[u8]) -> Result<(), TransportError> {
++        if self.state != TransportState::Up {
++            return Err(TransportError::NotStarted);
++        }
++        let dst = addr_to_id(addr);
++        let now = now_ms();
++        let mut guard = self.link.lock().unwrap();
++        let link = guard.as_mut().ok_or(TransportError::NotStarted)?;
++        if data.len() > link.mtu() as usize {
++            return Err(TransportError::MtuExceeded {
++                packet_size: data.len(),
++                mtu: link.mtu(),
++            });
++        }
++        let packets = link
++            .submit(data, dst, now)
++            .map_err(|e| TransportError::SendFailed(e.to_string()))?;
++        self.tx_packets
++            .send(packets)
++            .map_err(|_| TransportError::SendFailed("writer stopped".to_string()))?;
++        Ok(())
++    }
++
++    fn discover(&self) -> Result<Vec<DiscoveredPeer>, TransportError> {
++        Ok(Vec::new())
++    }
++
++    fn auto_connect(&self) -> bool {
++        self.config.auto_connect()
++    }
++
++    fn accept_connections(&self) -> bool {
++        true
++    }
++}
++
++fn now_ms() -> u64 {
++    SystemTime::now()
++        .duration_since(UNIX_EPOCH)
++        .map(|d| d.as_millis() as u64)
++        .unwrap_or(0)
++}
++
++fn addr_to_id(addr: &TransportAddr) -> u32 {
++    let bytes = addr.as_bytes();
++    if bytes.is_empty() {
++        return fips_lr2021::link::BROADCAST_ID;
++    }
++    let mut buf = [0u8; 4];
++    let n = bytes.len().min(4);
++    buf[..n].copy_from_slice(&bytes[..n]);
++    u32::from_le_bytes(buf)
++}
+diff --git a/src/transport/mod.rs b/src/transport/mod.rs
+index 919fa459..cc730768 100644
+--- a/src/transport/mod.rs
++++ b/src/transport/mod.rs
+@@ -6,6 +6,7 @@
+ 
+ #[cfg(test)]
+ pub mod loopback;
++pub mod lr2021;
+ pub mod nym;
+ pub mod socks5;
+ pub mod tcp;
+@@ -365,6 +366,15 @@ impl TransportType {
+         reliable: true, // L2CAP SeqPacket guarantees delivery
+     };
+ 
++    /// LR2021/FLRC packet radio transport.
++    pub const LR2021: TransportType = TransportType {
++        name: "lr2021",
++        connection_oriented: false,
++        // The link layer retries, but a frame can still be dropped after the
++        // retry budget; FIPS must keep treating it as lossy.
++        reliable: false,
++    };
++
+     /// In-process loopback transport (test harness only).
+     #[cfg(test)]
+     pub const LOOPBACK: TransportType = TransportType {
+@@ -849,6 +859,8 @@ pub enum TransportHandle {
+     Tor(TorTransport),
+     /// Nym mixnet transport (via SOCKS5).
+     Nym(NymTransport),
++    /// LR2021/FLRC packet radio transport.
++    Lr2021(lr2021::Lr2021Transport),
+     /// BLE L2CAP transport.
+     #[cfg(ble_available)]
+     Ble(DefaultBleTransport),
+@@ -867,6 +879,7 @@ impl TransportHandle {
+             TransportHandle::Tcp(t) => t.start_async().await,
+             TransportHandle::Tor(t) => t.start_async().await,
+             TransportHandle::Nym(t) => t.start_async().await,
++            TransportHandle::Lr2021(t) => t.start(),
+             #[cfg(ble_available)]
+             TransportHandle::Ble(t) => t.start_async().await,
+             #[cfg(test)]
+@@ -883,6 +896,7 @@ impl TransportHandle {
+             TransportHandle::Tcp(t) => t.stop_async().await,
+             TransportHandle::Tor(t) => t.stop_async().await,
+             TransportHandle::Nym(t) => t.stop_async().await,
++            TransportHandle::Lr2021(t) => t.stop(),
+             #[cfg(ble_available)]
+             TransportHandle::Ble(t) => t.stop_async().await,
+             #[cfg(test)]
+@@ -899,6 +913,7 @@ impl TransportHandle {
+             TransportHandle::Tcp(t) => t.send_async(addr, data).await,
+             TransportHandle::Tor(t) => t.send_async(addr, data).await,
+             TransportHandle::Nym(t) => t.send_async(addr, data).await,
++            TransportHandle::Lr2021(t) => t.send(addr, data).map(|_| data.len()),
+             #[cfg(ble_available)]
+             TransportHandle::Ble(t) => t.send_async(addr, data).await,
+             #[cfg(test)]
+@@ -929,6 +944,7 @@ impl TransportHandle {
+             TransportHandle::Tcp(t) => t.send_existing(addr, data).await,
+             TransportHandle::Tor(t) => t.send_existing(addr, data).await,
+             TransportHandle::Nym(t) => t.send_existing(addr, data).await,
++            TransportHandle::Lr2021(t) => t.send(addr, data).map(|_| data.len()),
+             #[cfg(ble_available)]
+             TransportHandle::Ble(t) => t.send_async(addr, data).await,
+             #[cfg(test)]
+@@ -955,6 +971,7 @@ impl TransportHandle {
+             TransportHandle::Tcp(t) => t.has_connection(addr).await,
+             TransportHandle::Tor(t) => t.has_connection(addr).await,
+             TransportHandle::Nym(t) => t.has_connection(addr).await,
++            TransportHandle::Lr2021(_) => true,
+             #[cfg(ble_available)]
+             TransportHandle::Ble(t) => t.has_connection(addr).await,
+             #[cfg(test)]
+@@ -971,6 +988,7 @@ impl TransportHandle {
+             TransportHandle::Tcp(t) => t.transport_id(),
+             TransportHandle::Tor(t) => t.transport_id(),
+             TransportHandle::Nym(t) => t.transport_id(),
++            TransportHandle::Lr2021(t) => t.transport_id(),
+             #[cfg(ble_available)]
+             TransportHandle::Ble(t) => t.transport_id(),
+             #[cfg(test)]
+@@ -987,6 +1005,7 @@ impl TransportHandle {
+             TransportHandle::Tcp(t) => t.name(),
+             TransportHandle::Tor(t) => t.name(),
+             TransportHandle::Nym(t) => t.name(),
++            TransportHandle::Lr2021(t) => t.name(),
+             #[cfg(ble_available)]
+             TransportHandle::Ble(t) => t.name(),
+             #[cfg(test)]
+@@ -1003,6 +1022,7 @@ impl TransportHandle {
+             TransportHandle::Tcp(t) => t.transport_type(),
+             TransportHandle::Tor(t) => t.transport_type(),
+             TransportHandle::Nym(t) => t.transport_type(),
++            TransportHandle::Lr2021(t) => t.transport_type(),
+             #[cfg(ble_available)]
+             TransportHandle::Ble(t) => t.transport_type(),
+             #[cfg(test)]
+@@ -1019,6 +1039,7 @@ impl TransportHandle {
+             TransportHandle::Tcp(t) => t.state(),
+             TransportHandle::Tor(t) => t.state(),
+             TransportHandle::Nym(t) => t.state(),
++            TransportHandle::Lr2021(t) => t.state(),
+             #[cfg(ble_available)]
+             TransportHandle::Ble(t) => t.state(),
+             #[cfg(test)]
+@@ -1035,6 +1056,7 @@ impl TransportHandle {
+             TransportHandle::Tcp(t) => t.mtu(),
+             TransportHandle::Tor(t) => t.mtu(),
+             TransportHandle::Nym(t) => t.mtu(),
++            TransportHandle::Lr2021(t) => t.mtu(),
+             #[cfg(ble_available)]
+             TransportHandle::Ble(t) => t.mtu(),
+             #[cfg(test)]
+@@ -1054,6 +1076,7 @@ impl TransportHandle {
+             TransportHandle::Tcp(t) => t.link_mtu(addr),
+             TransportHandle::Tor(t) => t.link_mtu(addr),
+             TransportHandle::Nym(t) => t.link_mtu(addr),
++            TransportHandle::Lr2021(t) => t.link_mtu(addr),
+             #[cfg(ble_available)]
+             TransportHandle::Ble(t) => t.link_mtu(addr),
+             #[cfg(test)]
+@@ -1070,6 +1093,7 @@ impl TransportHandle {
+             TransportHandle::Tcp(t) => t.local_addr(),
+             TransportHandle::Tor(_) => None,
+             TransportHandle::Nym(_) => None,
++            TransportHandle::Lr2021(_) => None,
+             #[cfg(ble_available)]
+             TransportHandle::Ble(_) => None,
+             #[cfg(test)]
+@@ -1090,6 +1114,7 @@ impl TransportHandle {
+             TransportHandle::Tcp(_) => None,
+             TransportHandle::Tor(_) => None,
+             TransportHandle::Nym(_) => None,
++            TransportHandle::Lr2021(_) => None,
+             #[cfg(ble_available)]
+             TransportHandle::Ble(_) => None,
+             #[cfg(test)]
+@@ -1152,6 +1177,7 @@ impl TransportHandle {
+             TransportHandle::Tcp(_) => None,
+             TransportHandle::Tor(_) => None,
+             TransportHandle::Nym(_) => None,
++            TransportHandle::Lr2021(_) => None,
+             #[cfg(ble_available)]
+             TransportHandle::Ble(_) => None,
+             #[cfg(test)]
+@@ -1192,6 +1218,7 @@ impl TransportHandle {
+             TransportHandle::Tcp(t) => t.discover(),
+             TransportHandle::Tor(t) => t.discover(),
+             TransportHandle::Nym(t) => t.discover(),
++            TransportHandle::Lr2021(t) => t.discover(),
+             #[cfg(ble_available)]
+             TransportHandle::Ble(t) => t.discover(),
+             #[cfg(test)]
+@@ -1208,6 +1235,7 @@ impl TransportHandle {
+             TransportHandle::Tcp(t) => t.auto_connect(),
+             TransportHandle::Tor(t) => t.auto_connect(),
+             TransportHandle::Nym(t) => t.auto_connect(),
++            TransportHandle::Lr2021(t) => t.auto_connect(),
+             #[cfg(ble_available)]
+             TransportHandle::Ble(t) => t.auto_connect(),
+             #[cfg(test)]
+@@ -1224,6 +1252,7 @@ impl TransportHandle {
+             TransportHandle::Tcp(t) => t.accept_connections(),
+             TransportHandle::Tor(t) => t.accept_connections(),
+             TransportHandle::Nym(t) => t.accept_connections(),
++            TransportHandle::Lr2021(t) => t.accept_connections(),
+             #[cfg(ble_available)]
+             TransportHandle::Ble(t) => t.accept_connections(),
+             #[cfg(test)]
+@@ -1246,6 +1275,7 @@ impl TransportHandle {
+             TransportHandle::Tcp(t) => t.connect_async(addr).await,
+             TransportHandle::Tor(t) => t.connect_async(addr).await,
+             TransportHandle::Nym(t) => t.connect_async(addr).await,
++            TransportHandle::Lr2021(_) => Ok(()),
+             #[cfg(ble_available)]
+             TransportHandle::Ble(t) => t.connect_async(addr).await,
+             #[cfg(test)]
+@@ -1266,6 +1296,7 @@ impl TransportHandle {
+             TransportHandle::Tcp(t) => t.connection_state_sync(addr),
+             TransportHandle::Tor(t) => t.connection_state_sync(addr),
+             TransportHandle::Nym(t) => t.connection_state_sync(addr),
++            TransportHandle::Lr2021(_) => ConnectionState::Connected,
+             #[cfg(ble_available)]
+             TransportHandle::Ble(t) => t.connection_state_sync(addr),
+             #[cfg(test)]
+@@ -1285,6 +1316,7 @@ impl TransportHandle {
+             TransportHandle::Tcp(t) => t.close_connection_async(addr).await,
+             TransportHandle::Tor(t) => t.close_connection_async(addr).await,
+             TransportHandle::Nym(t) => t.close_connection_async(addr).await,
++            TransportHandle::Lr2021(_) => {}
+             #[cfg(ble_available)]
+             TransportHandle::Ble(t) => t.close_connection_async(addr).await,
+             #[cfg(test)]
+@@ -1304,7 +1336,8 @@ impl TransportHandle {
+             TransportHandle::Udp(_)
+             | TransportHandle::Tcp(_)
+             | TransportHandle::Tor(_)
+-            | TransportHandle::Nym(_) => {}
++            | TransportHandle::Nym(_)
++            | TransportHandle::Lr2021(_) => {}
+             #[cfg(any(target_os = "linux", target_os = "macos"))]
+             TransportHandle::Ethernet(_) => {}
+             #[cfg(ble_available)]
+@@ -1324,7 +1357,8 @@ impl TransportHandle {
+             TransportHandle::Udp(_)
+             | TransportHandle::Tcp(_)
+             | TransportHandle::Tor(_)
+-            | TransportHandle::Nym(_) => {}
++            | TransportHandle::Nym(_)
++            | TransportHandle::Lr2021(_) => {}
+             #[cfg(any(target_os = "linux", target_os = "macos"))]
+             TransportHandle::Ethernet(_) => {}
+             #[cfg(ble_available)]
+@@ -1342,7 +1376,8 @@ impl TransportHandle {
+             TransportHandle::Udp(_)
+             | TransportHandle::Tcp(_)
+             | TransportHandle::Tor(_)
+-            | TransportHandle::Nym(_) => false,
++            | TransportHandle::Nym(_)
++            | TransportHandle::Lr2021(_) => false,
+             #[cfg(any(target_os = "linux", target_os = "macos"))]
+             TransportHandle::Ethernet(_) => false,
+             #[cfg(ble_available)]
+@@ -1370,6 +1405,7 @@ impl TransportHandle {
+             TransportHandle::Tcp(_) => TransportCongestion::default(),
+             TransportHandle::Tor(_) => TransportCongestion::default(),
+             TransportHandle::Nym(_) => TransportCongestion::default(),
++            TransportHandle::Lr2021(_) => TransportCongestion::default(),
+             #[cfg(ble_available)]
+             TransportHandle::Ble(_) => TransportCongestion::default(),
+             #[cfg(test)]
+@@ -1397,6 +1433,7 @@ impl TransportHandle {
+             TransportHandle::Tcp(t) => LiveStats::Tcp(t.stats().clone()),
+             TransportHandle::Tor(t) => LiveStats::Tor(t.stats().clone()),
+             TransportHandle::Nym(t) => LiveStats::Nym(t.stats().clone()),
++            TransportHandle::Lr2021(_) => LiveStats::Lr2021,
+             #[cfg(ble_available)]
+             TransportHandle::Ble(t) => LiveStats::Ble(t.stats().clone()),
+             #[cfg(test)]
+@@ -1426,6 +1463,8 @@ pub(crate) enum LiveStats {
+     /// BLE transport counters.
+     #[cfg(ble_available)]
+     Ble(std::sync::Arc<ble::stats::BleStats>),
++    /// LR2021 counters are not exposed through this path yet.
++    Lr2021,
+     /// No counters (the test loopback transport).
+     #[cfg(test)]
+     Empty,
+@@ -1444,6 +1483,7 @@ impl LiveStats {
+             LiveStats::Nym(s) => serde_json::to_value(s.snapshot()).unwrap_or_default(),
+             #[cfg(ble_available)]
+             LiveStats::Ble(s) => serde_json::to_value(s.snapshot()).unwrap_or_default(),
++            LiveStats::Lr2021 => serde_json::json!({}),
+             #[cfg(test)]
+             LiveStats::Empty => serde_json::json!({}),
+         }
+@@ -1464,6 +1504,7 @@ impl PartialEq for LiveStats {
+             (LiveStats::Nym(a), LiveStats::Nym(b)) => Arc::ptr_eq(a, b),
+             #[cfg(ble_available)]
+             (LiveStats::Ble(a), LiveStats::Ble(b)) => Arc::ptr_eq(a, b),
++            (LiveStats::Lr2021, LiveStats::Lr2021) => true,
+             #[cfg(test)]
+             (LiveStats::Empty, LiveStats::Empty) => true,
+             _ => false,
