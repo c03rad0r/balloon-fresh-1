@@ -34,6 +34,14 @@ The complete diff is vendored at
 
 ```bash
 cd reference/fips-lr2021
+make bootstrap          # clone c03rad0r/fips at the pinned commit
+make host-test          # fork unit/config tests
+make mock-e2e           # two virtual bridges, 20/20 delivered
+```
+
+Or manually:
+
+```bash
 ./scripts/bootstrap-fips.sh
 cd "$FIPS_DIR"
 cargo test -p fips-lr2021
