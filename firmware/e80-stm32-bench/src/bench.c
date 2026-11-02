@@ -29,6 +29,7 @@
 #include "bench_pkt.h"
 #include "bench_safety.h"
 #include "bench_stats.h"
+#include "bridge.h"
 #include "buffer.h"
 #include "console.h"
 #include "pram_patch.h"
@@ -1429,6 +1430,14 @@ int main(void)
         if (iwdg_active)
             HAL_IWDG_Refresh(&hiwdg); /* superloop is non-blocking -> healthy */
 
+        if (bridge_active())
+        {
+            /* Binary mode: console_getline() must not consume the protocol
+             * bytes, so it never runs again after BRIDGE. */
+            bridge_task();
+            continue;
+        }
+
         if (console_binary_active())
         {
             /* BUF LOAD binary phase: consume payload bytes + enforce the
@@ -1442,6 +1451,11 @@ int main(void)
             char* line = console_getline();
             if (line != NULL)
             {
+                if (strcmp(line, "BRIDGE") == 0)
+                {
+                    bridge_start();
+                    continue;
+                }
                 bench_cmd_t cmd;
                 if (bench_cmd_parse(line, &cmd) == BENCH_CMD_OK)
                 {

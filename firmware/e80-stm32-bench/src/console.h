@@ -27,6 +27,10 @@ void console_uart_irq(void);
 /** Returns a NUL-terminated line (without \r\n) when one is complete, else NULL. */
 char* console_getline(void);
 
+/** Pop one raw byte from the console ring, or -1 when empty.
+ *  Used after the `BRIDGE` command switches to the binary host protocol. */
+int console_raw_get(void);
+
 /** Blocking transmit of a NUL-terminated string. */
 void console_put(const char* s);
 
