@@ -26,8 +26,11 @@ jobs:
       - name: Install Python dependencies
         run: pip install pytest pyserial pillow
 
+      # The PCB pipeline suite needs the distro KiCad bindings and runs for real
+      # in the dedicated job in ci-host-tests.yml. Collecting it here, where
+      # pcbnew is absent, produced four false "pipeline failed" results.
       - name: Run all tests
-        run: python -m pytest tests/ -v --tb=short
+        run: python -m pytest tests/ -v --tb=short --ignore=tests/test_pcb_pipeline_gates.py
 
       # ---------------------------------------------------------------------
       # PAD AUDIT -- the checks count-based gates structurally cannot make.
