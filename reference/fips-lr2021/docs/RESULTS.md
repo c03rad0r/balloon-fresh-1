@@ -109,3 +109,18 @@ tx=0 rx=0 crc=0 drops=0 timeouts=0 resets=0
 
 Two requirements, both needed: a **current** OpenOCD and **`adapter speed 5000`**.
 Ubuntu's `openocd 0.12.0-1build2` does not connect to this bridge at any speed.
+
+## Third E80: debug port unresponsive (2026-11-03)
+
+A third E80 board answered neither SWD (5000..50 kHz) nor UART
+(9600..921600 baud). The fault was localised to the board:
+
+- S3 probe **drive** verified: GPIO10 -> C and GPIO8 -> D both toggle at 2 s.
+- S3 probe **read** verified: grounding D produced `MIRROR GPIO8=0` then
+  `MIRROR GPIO8=1`.
+- Board rail `V` = 3.3 V.
+- NRST normal: 3.3 V, pulled to 0 V only while the reset button is pressed.
+- A 70-attempt reset-window connect loop never saw a `DPIDR`.
+
+Conclusion: the STM32 on that board does not service its debug port. Not
+recoverable over SWD; do not use it as an event node.

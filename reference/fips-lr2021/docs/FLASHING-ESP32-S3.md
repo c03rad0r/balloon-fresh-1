@@ -206,3 +206,51 @@ The ESP32-S3 is therefore a verified replacement for the Pico probe.
 - [x] E80 flashed with the bridge firmware through the S3
 - [x] E80 `hello`/`status` over USB
 - [ ] Two-node FIPS test
+
+## When the target does not answer
+
+`cannot read IDR` has two very different causes: the probe, or the board.
+Separate them with a multimeter before touching any firmware.
+
+### 1. Prove the probe can both drive and read
+
+A square-wave test only proves the **output** path. SWD also needs the probe to
+**read** the target's ACK bits, so test the input path too:
+
+```c
+/* GPIO8 = input with pull-up, GPIO10 mirrors it */
+gpio_set_level(10, gpio_get_level(8));
+```
+
+Ground the E80 `D` pad and watch `C`:
+
+| Observation | Conclusion |
+|---|---|
+| C follows D low, returns high | GPIO8 **input** works |
+| C never moves | GPIO8 input is damaged |
+
+Measured 2026-11-03 on serial `94A9902E9484`: one clean falling edge and one
+clean rising edge, so drive and read both work.
+
+### 2. Prove the board is running
+
+Reference is E80 `G`:
+
+| Measure | Healthy | Meaning if wrong |
+|---|---|---|
+| `V` | ~3.3 V | rail down |
+| `D` with nothing driving it | ~3.3 V | STM32 not executing |
+| reset button, not pressed | 3.3 V on one side | NRST shorted |
+
+The power LED is **not** evidence: on these boards it often hangs off USB 5 V,
+not the 3.3 V rail.
+
+### 3. Only then suspect the probe
+
+If the probe drives and reads, the wiring carries both signals to the pads, `V`
+is 3.3 V and NRST is high, yet the target will not connect at any speed — the
+STM32 itself is at fault. A retry loop that presses reset during `openocd init`
+was run 70 times against one such board with no connection at all.
+
+Still use a current OpenOCD and `adapter speed 5000` for the first attempt; the
+speed issue alone can make a healthy board look dead.
