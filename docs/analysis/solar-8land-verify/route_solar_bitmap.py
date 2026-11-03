@@ -210,7 +210,7 @@ def main():
     ap.add_argument("--clearance", type=float, default=0.20)
     ap.add_argument("--track-w", type=float, default=0.20)
     ap.add_argument("--edge", type=float, default=0.50)
-    ap.add_argument("--window-pad", type=float, default=5.0)
+    ap.add_argument("--window-pad", type=float, default=12.0)
     ap.add_argument("--pair", type=int, action="append")
     a = ap.parse_args()
     board = pcbnew.LoadBoard(a.board)
