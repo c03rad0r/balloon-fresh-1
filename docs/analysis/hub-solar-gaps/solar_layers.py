@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
-"""For each solar-gap pair, list the copper layers each pad actually has.
+"""CORRECTED solar gap analysis - per PAD OBJECT, not per pad number.
 
-A gap can only be closed by a TRACK if the two pads share a copper layer. If they
-do not, the only board-side options are (a) a via/through-connection at one end,
-which must land on a pad that is PTH, or (b) the connection is intended to happen
-through the mating tab / harness, not through board copper.
+The previous script (solar_layers.py) built a dict keyed by (ref, number). A J_W
+pad number maps to TWO pad objects (one F.Cu, one B.Cu, same XY, same net), so the
+dict silently kept only one and the layer sets came out wrong. That produced the
+false conclusion "0 of 9 pairs share a copper layer".
 
-This decides which of the 9 gaps are board-fixable at all.
+This version keeps every pad object and computes the true shared-layer set.
 """
 import json
 import re
-from collections import Counter
 
 import pcbnew as k
 
@@ -19,6 +18,7 @@ BASE = ('/home/c08r4d0r/worktrees/hub-repair-candidate/docs/analysis/'
 CLS = ('/home/c08r4d0r/.hermes/profiles/manager/cache/scratch/'
        'unconn-class/classification.json')
 CU = ('F.Cu', 'In1.Cu', 'In2.Cu', 'B.Cu')
+ATTR = {0: 'PTH', 1: 'SMD', 2: 'CONN', 3: 'NPTH'}
 
 
 def main():
@@ -26,18 +26,15 @@ def main():
     d = json.load(open(CLS))
     pat = re.compile(r'Pad (\d+) \[([^\]]*)\] of (\w+) on ([\w.]+)')
 
-    def pad(ref, num):
+    def pad_objs(ref, num):
         fp = b.FindFootprintByReference(ref)
         if fp is None:
-            return None
-        for p in fp.Pads():
-            if p.GetNumber() == num:
-                return p
-        return None
+            return []
+        return [p for p in fp.Pads() if p.GetNumber() == num]
 
     def layers(p):
-        return [l for l in (b.GetLayerName(x) for x in p.GetLayerSet().Seq())
-                if l in CU]
+        return {l for l in (b.GetLayerName(x) for x in p.GetLayerSet().Seq())
+                if l in CU}
 
     rows = []
     for rec in d['details']:
@@ -47,32 +44,27 @@ def main():
         if not all(ms) or len(ms) != 2:
             continue
         (n1, net, r1, l1), (n2, _, r2, l2) = [m.groups() for m in ms]
-        p1, p2 = pad(r1, n1), pad(r2, n2)
-        if p1 is None or p2 is None:
-            rows.append(dict(net=net, a=f'{r1}.{n1}', b=f'{r2}.{n2}',
-                             note='pad missing'))
-            continue
-        L1, L2 = layers(p1), layers(p2)
-        shared = sorted(set(L1) & set(L2))
-        attr1 = int(p1.GetAttribute())
-        attr2 = int(p2.GetAttribute())
-        rows.append(dict(
-            net=net, a=f'{r1}.{n1}', b=f'{r2}.{n2}',
-            a_layers=L1, b_layers=L2, shared=shared,
-            a_attr=('PTH' if attr1 == k.PAD_ATTRIB_PTH else
-                    'SMD' if attr1 == k.PAD_ATTRIB_SMD else str(attr1)),
-            b_attr=('PTH' if attr2 == k.PAD_ATTRIB_PTH else
-                    'SMD' if attr2 == k.PAD_ATTRIB_SMD else str(attr2))))
-        print(f"{net:14s} {r1}.{n1} {L1} ({rows[-1]['a_attr']})  <->  "
-              f"{r2}.{n2} {L2} ({rows[-1]['b_attr']})  shared={shared}")
 
-    fixable = [r for r in rows if r.get('shared')]
-    print(f'\npairs sharing a copper layer (track-fixable): {len(fixable)}/{len(rows)}')
-    c = Counter(r.get('a_attr', '?') + '/' + r.get('b_attr', '?') for r in rows)
-    print('pad type combos:', dict(c))
+        ps1, ps2 = pad_objs(r1, n1), pad_objs(r2, n2)
+        L1 = set().union(*[layers(p) for p in ps1]) if ps1 else set()
+        L2 = set().union(*[layers(p) for p in ps2]) if ps2 else set()
+        shared = sorted(L1 & L2)
+        rows.append(dict(net=net, a=f'{r1}.{n1}', b=f'{r2}.{n2}',
+                         a_all_layers=sorted(L1), b_all_layers=sorted(L2),
+                         shared=shared, routeable=bool(shared),
+                         a_objects=len(ps1), b_objects=len(ps2),
+                         a_attr=[ATTR.get(int(p.GetAttribute()), '?') for p in ps1],
+                         b_attr=[ATTR.get(int(p.GetAttribute()), '?') for p in ps2]))
+        print(f'{net:14s} {r1}.{n1} {sorted(L1)}  <->  {r2}.{n2} {sorted(L2)}  '
+              f'shared={shared}')
+
+    ok = [r for r in rows if r['routeable']]
+    print(f'\nrouteable on a shared layer: {len(ok)}/{len(rows)}')
+    for r in ok:
+        print('  FIXABLE:', r['net'], r['a'], '<->', r['b'], 'on', r['shared'])
 
     json.dump(rows, open('/home/c08r4d0r/.hermes/profiles/manager/cache/scratch/'
-                         'unconn-class/solar_layers.json', 'w'), indent=1)
+                         'unconn-class/solar_layers_corrected.json', 'w'), indent=1)
 
 
 if __name__ == '__main__':

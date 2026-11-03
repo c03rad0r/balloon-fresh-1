@@ -1,4 +1,39 @@
-# Solar gaps: NOT board-fixable by track or via — measured
+# CORRECTION — the solar gaps ARE board-fixable; my earlier conclusion was wrong
+
+> **RETRACTION.** Everything below this box was published and merged (`bf0fb031`)
+> under the heading "NOT board-fixable". **That conclusion is WRONG.**
+>
+> Cause: `solar_layers.py` keyed pads by `(ref, pad_number)` in a **dict**. Every
+> J_W pad number maps to **TWO pad objects** (one F.Cu, one B.Cu, identical XY,
+> same net — a stacked edge-card land), so the dict silently kept only the last
+> object and each J_W pad appeared to have copper on ONE layer. That produced
+> "0 of 9 pairs share a copper layer".
+>
+> Corrected measurement, keeping every pad object:
+> **8 of 9 pairs share B.Cu** and are closable with a plain B.Cu track.
+>
+> ```
+> /W1_SOLAR_N  J_W1.4 ['B.Cu','F.Cu'] <-> D_BP2.1 ['B.Cu']   shared=['B.Cu']
+> /W1_SOLAR_N  D_BP1.2 ['B.Cu']       <-> J_W1.4 ['B.Cu','F.Cu'] shared=['B.Cu']
+> /W1_SOLAR_N  D_BP2.1 ['B.Cu']       <-> J_W2.1 ['B.Cu','F.Cu'] shared=['B.Cu']
+> /W2_SOLAR_N  D_BP2.2 ['B.Cu']       <-> J_W2.4 ['B.Cu','F.Cu'] shared=['B.Cu']
+> /W2_SOLAR_N  J_W3.1 ['B.Cu','F.Cu'] <-> D_BP3.1 ['B.Cu']   shared=['B.Cu']
+> /W3_SOLAR_N  J_W4.1 ['B.Cu','F.Cu'] <-> D_BP4.1 ['B.Cu']   shared=['B.Cu']
+> /W3_SOLAR_N  J_W3.4 ['B.Cu','F.Cu'] <-> D_BP3.2 ['B.Cu']   shared=['B.Cu']
+> /W3_SOLAR_N  D_BP3.2 ['B.Cu']       <-> J_W4.1 ['B.Cu','F.Cu'] shared=['B.Cu']
+> GND          D_BP4.2 ['B.Cu']       <-> U2.4 ['F.Cu']      shared=[]   <- only real exception
+> ```
+>
+> **No operator adjudication is needed for 8 of the 9.** The straight-segment test
+> below is still valid — the direct path is blocked by 1–20 foreign-copper items
+> per pair — so these need *routed* B.Cu segments that go around obstacles. That
+> is ordinary routing, not a design decision.
+>
+> The 9th pair (`D_BP4.2 <-> U2.4`, GND) genuinely shares no layer and remains an
+> open question.
+>
+> Lesson: a dict keyed by a non-unique identifier silently drops records. Pad
+> lookups now keep a LIST of pad objects.
 
 Follow-up to `hub-stitch-20261102/UNCONNECTED-CLASSIFICATION.md`, which found 9
 real J_W pad ↔ bypass-diode pin gaps on `/W1_SOLAR_N`, `/W2_SOLAR_N`,
