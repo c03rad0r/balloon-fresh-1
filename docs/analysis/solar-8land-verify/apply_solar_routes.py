@@ -119,7 +119,7 @@ def main():
     ap.add_argument("--track-w", type=float, default=0.20)
     ap.add_argument("--clearance", type=float, default=0.20)
     ap.add_argument("--edge", type=float, default=0.50)
-    ap.add_argument("--window-pad", type=float, default=5.0)
+    ap.add_argument("--window-pad", type=float, default=12.0)
     a = ap.parse_args()
 
     # ---- control: refilled, untouched ----
@@ -139,8 +139,13 @@ def main():
           f"{c['unconnected']} unconnected")
 
     # ---- route and apply ----
+    # TWO PASSES, and the order matters. Measured 2026-11-03: routing and adding in one pass made
+    # pair 3 fail in this script while the standalone router found it, because pairs 0-2 had already
+    # added /W1_SOLAR_N copper that blocks /W2_SOLAR_N. The routes INTERACT, so every path is
+    # computed against the PRISTINE board first and only then added. Same board state, same result
+    # as route_solar_bitmap.py, and no pair is judged against a board half-modified by its siblings.
     board = pcbnew.LoadBoard(a.src)
-    applied, skipped = [], []
+    applied, skipped, planned = [], [], []
     for pi, (net, sa, sb) in enumerate(R.PAIRS):
         pa, pb = R.bcu_pads(board, sa), R.bcu_pads(board, sb)
         if not pa or not pb:
@@ -187,6 +192,12 @@ def main():
         # 7.5-8.25 mm along the edge — the exact defect the repo's J_W*-pad-scoped allow-list
         # exists to distinguish from legal edge connectors.
         pts = push_off_edge(pts, board, a.clearance, a.track_w / 2.0, a.edge)
+        # DEFER the write: collect every path first (all searched on the pristine board), then add
+        # them in one pass below. Adding inside this loop let each route block the next.
+        planned.append((pi, net, sa, sb, pts))
+        continue
+
+    for (pi, net, sa, sb, pts) in planned:
         netobj = board.FindNet(net)
         if netobj is None:
             skipped.append((pi, net, sa, sb, f"net {net!r} not found on board"))
