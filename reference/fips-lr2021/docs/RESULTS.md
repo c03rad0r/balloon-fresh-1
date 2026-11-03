@@ -120,7 +120,8 @@ A third E80 board answered neither SWD (5000..50 kHz) nor UART
   `MIRROR GPIO8=1`.
 - Board rail `V` = 3.3 V.
 - NRST normal: 3.3 V, pulled to 0 V only while the reset button is pressed.
-- A 70-attempt reset-window connect loop never saw a `DPIDR`.
+- A 120-attempt reset-window connect loop, with the probe firmware confirmed
+  present (`CMSIS-DAP: Interface ready`), never saw a `DPIDR`.
 
 Conclusion: the STM32 on that board does not service its debug port. Not
 recoverable over SWD; do not use it as an event node.

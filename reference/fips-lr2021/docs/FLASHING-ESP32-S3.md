@@ -249,8 +249,14 @@ not the 3.3 V rail.
 
 If the probe drives and reads, the wiring carries both signals to the pads, `V`
 is 3.3 V and NRST is high, yet the target will not connect at any speed — the
-STM32 itself is at fault. A retry loop that presses reset during `openocd init`
-was run 70 times against one such board with no connection at all.
+STM32 itself is at fault. A reset-window retry loop was run 120 times against
+one such board, with `CMSIS-DAP: Interface ready` confirmed before the loop, and
+never saw a `DPIDR`.
+
+Check that the probe firmware is actually running before trusting a negative
+result. A test image left on the S3 enumerates as `303a:1001` and gives the same
+"no connection" output as a dead target — that mistake produced one invalid
+result before it was caught.
 
 Still use a current OpenOCD and `adapter speed 5000` for the first attempt; the
 speed issue alone can make a healthy board look dead.
