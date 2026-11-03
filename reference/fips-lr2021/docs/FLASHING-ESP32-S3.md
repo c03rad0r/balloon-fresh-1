@@ -77,12 +77,48 @@ After reset the S3 should enumerate as:
 The old `303a:1001` USB JTAG/serial device is the blank/default firmware; it is
 not the probe.
 
+## Pin verification with a meter (do this before blaming the probe)
+
+Flash a tiny image that drives one pin as a slow square wave, then measure the
+E80 pad. This separates "is the wire right?" from "is the protocol right?" and
+needs no working probe.
+
+```c
+gpio_set_level(10, level);          /* SWCLK */
+vTaskDelay(pdMS_TO_TICKS(2000));    /* 2 s high, 2 s low */
+```
+
+Measured 2026-11-03 on S3 serial `94A9902E9484`:
+
+| Build | E80 C | E80 D | Conclusion |
+|---|---|---|---|
+| GPIO10 toggles | 3.3 V ↔ 0 V | steady 3.3 V | GPIO10 → C **confirmed** |
+| GPIO8 toggles, GPIO10 held low | steady 0 V | 3.3 V ↔ 0 V | GPIO8 → D **confirmed** |
+| idle | — | — | V = 3.3 V, so the E80 is powered |
+
+Both signal wires are proven. After this, a `cannot read IDR` is **not** a
+wiring, soldering or pin-numbering fault.
+
+Note: the app and the ROM bootloader both enumerate as `303a:1001`, so the USB
+ID alone cannot tell them apart. Probe with `esptool ... chip-id` before
+flashing, and use `--after watchdog-reset` — the "hard reset via RTS" path does
+not reset a chip running over USB-Serial/JTAG.
+
 ## Test the probe
 
+Espressif's own documentation for the SWD bridge gives this invocation:
+
 ```bash
-openocd -f interface/cmsis-dap.cfg -f target/stm32f1x.cfg \
-  -c "adapter speed 100; init; exit"
+openocd -s tcl -f interface/cmsis-dap.cfg -f target/stm32f1x.cfg \
+  -c 'adapter speed 5000'
 ```
+
+Two details matter:
+
+- Use a **current** OpenOCD. Espressif syncs CMSIS-DAP fixes from mainline
+  continuously; Ubuntu 24.04's `openocd 0.12.0-1build2` predates them.
+- The documented speed is **5000 kHz**, not a conservative 100 kHz. The
+  bit-banged SWD path was developed against that speed.
 
 Expected on a good target:
 
@@ -91,11 +127,24 @@ Info : SWD DPIDR 0x1ba01477
 Info : [stm32f1x.cpu] Cortex-M3 r1p1 processor detected
 ```
 
+Build a current OpenOCD (needs `libusb-1.0-0-dev`, `libjim-dev`,
+`libhidapi-dev`, `libtool`):
+
+```bash
+git clone --depth 1 https://github.com/openocd-org/openocd
+cd openocd && ./bootstrap
+./configure --enable-cmsis-dap --disable-werror --prefix=/opt/openocd
+make -j"$(nproc)" && sudo make install
+```
+
+The ESP USB Bridge supports **USB bulk (v2) only**; the HID backend is not
+implemented.
+
 ## Flash the E80
 
 ```bash
 openocd -f interface/cmsis-dap.cfg -f target/stm32f1x.cfg \
-  -c "adapter speed 100; program e80_bench.elf verify reset exit"
+  -c "adapter speed 5000; program e80_bench.elf verify reset exit"
 ```
 
 ## Current status (2026-11-03)
@@ -103,17 +152,13 @@ openocd -f interface/cmsis-dap.cfg -f target/stm32f1x.cfg \
 - S3 bridge build: success.
 - S3 flash: success.
 - S3 enumerates as `303a:1002` CMSIS-DAP, serial `94A9902E9484`.
-- OpenOCD sees the probe.
-- OpenOCD still reports `cannot read IDR` on the E80 that previously had the
-  dead Pico probe.
-- The same failure occurred with the S3 connected to the known-good E80, so the
-  remaining issue is the physical C/D/G hookup or the E80 header mapping, not
-  the CMSIS-DAP firmware.
-- Next checks: confirm J1 pin 16 (GPIO10) is on E80 C, J1 pin 12 (GPIO8) is on
-  E80 D, and J1 pin 22/J3 pin 1 is on E80 G; then swap C/D; then try another S3
-  from the 3-pack.
-- Do not connect V. A 3V3-to-3V3 connection can cause the S3 to reset or the
-  E80 rail to misbehave.
+- GPIO10 → E80 C and GPIO8 → E80 D **verified with a multimeter**.
+- OpenOCD 0.12.0 (Ubuntu) still reports `cannot read IDR`.
+- The Pico probe `203584200D2D0D42` reads `DPIDR 0x1ba01477` on the same board,
+  so the target and the SWD header are healthy.
+- OpenOCD master (`0.12.0+dev-g8443233`, built 2026-11-03) is available for the
+  speed sweep; `adapter speed 5000` is the documented setting.
+- Do not connect V.
 
 ## Checklist
 
@@ -122,7 +167,9 @@ openocd -f interface/cmsis-dap.cfg -f target/stm32f1x.cfg \
 - [x] S3 flashed with bridge
 - [x] S3 enumerates as `303a:1002` CMSIS-DAP
 - [x] OpenOCD sees the CMSIS-DAP probe
-- [ ] OpenOCD reads DPIDR on a known-good E80
+- [x] GPIO10 → E80 C verified by meter
+- [x] GPIO8 → E80 D verified by meter
+- [ ] OpenOCD reads DPIDR through the S3 on a known-good E80
 - [ ] E80 flashed with the bridge firmware
 - [ ] E80 `hello`/`status` over USB
 - [ ] Two-node FIPS test
