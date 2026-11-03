@@ -99,8 +99,21 @@ a reflash recovered it.
 | Board | State |
 |---|---|
 | E80 A | bridge firmware flashed, responded `hello`/`cfg`/`status` |
-| E80 B | failed with Pico `148757` earlier; not retested with the correct invocation |
+| E80 B | MCU alive (UART works), wiring verified, SWD still fails at 5000 kHz — see below |
 | E80 C (this one) | **STM32 debug port dead** — see below |
+
+### E80 B evidence
+
+- MCU **alive**: `ID E80BENCH v1.2 fw=5fa7912` at 115200, and it parses commands
+  (`BRIDGE` returns `ERR UNKNOWN`, so that build predates bridge mode).
+- S3 wiring verified **on this board**: GPIO10 -> C toggles at 2 s, and D sits at
+  3.3 V, which is the target's SWDIO pull-up.
+- SWD fails at 5000 kHz with the CMSIS-DAP probe confirmed present.
+- **Not yet tried: lower adapter speeds on this board.** Only 5000 kHz was
+  attempted here; 2000/1000/500/100 were only tried on E80 C. Given that the
+  probe, the mapping and the live MCU are all verified, a marginal 5 MHz link
+  over dupont wires is the most plausible remaining cause and the cheapest thing
+  left to test.
 
 ### E80 C evidence
 

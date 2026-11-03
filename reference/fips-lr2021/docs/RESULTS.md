@@ -125,3 +125,13 @@ A third E80 board answered neither SWD (5000..50 kHz) nor UART
 
 Conclusion: the STM32 on that board does not service its debug port. Not
 recoverable over SWD; do not use it as an event node.
+
+## E80 B: live MCU, SWD not yet connected (2026-11-03)
+
+- UART works: `ID E80BENCH v1.2 fw=5fa7912`, and `BRIDGE` returns `ERR UNKNOWN`
+  (that build predates bridge mode, so the board must be reflashed).
+- S3 wiring verified on this board: GPIO10 -> C toggles, D sits at 3.3 V (target
+  SWDIO pull-up).
+- SWD connect fails at 5000 kHz with the probe confirmed present.
+- Only 5000 kHz has been tried on this board. Lower speeds were tried on a
+  different board (E80 C), not this one.
