@@ -76,3 +76,36 @@ handshake result.
 ## Known issues observed
 
 - 
+
+## ESP32-S3 probe verification (2026-11-03)
+
+Replaced the Raspberry Pi Pico probe with an ESP32-S3 (serial `94A9902E9484`)
+running `espressif/esp-usb-bridge` in CMSIS-DAP SWD mode.
+
+Pin mapping verified with a multimeter by flashing slow toggles and measuring the
+E80 header: GPIO10 -> pad C (SWCLK), GPIO8 -> pad D (SWDIO), pad V untouched.
+
+Programming the E80 through the S3:
+
+```text
+Info : SWD DPIDR 0x1ba01477
+Info : [stm32f1x.cpu] Cortex-M3 r1p1 processor detected
+** Programming Started **
+Info : device id = 0x20036410
+Info : flash size = 64 KiB
+** Programming Finished **
+** Verified OK **
+```
+
+Bridge after the flash:
+
+```text
+OK BRIDGE 115200
+protocol=1 firmware=0.1.0 chip=0x1801 capabilities=0x0007
+configured band=us915 freq=915000000 Hz flrc=1300 kbps power=22 dBm payload=255B relay=false
+pong
+tx=0 rx=0 crc=0 drops=0 timeouts=0 resets=0
+```
+
+Two requirements, both needed: a **current** OpenOCD and **`adapter speed 5000`**.
+Ubuntu's `openocd 0.12.0-1build2` does not connect to this bridge at any speed.

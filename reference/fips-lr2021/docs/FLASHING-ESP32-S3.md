@@ -57,25 +57,32 @@ build/bridge.bin
 
 ## Flash the S3
 
-Use the S3's native USB port and `esptool` (the ROM USB-JTAG interface works
-even if the application is reset-looping):
+The S3 must be in ROM download mode: **hold BOOT, tap RESET, release BOOT**.
+There is no software path into download mode once `esp-usb-bridge` is running,
+because that firmware owns the USB PHY.
 
 ```bash
 esptool.py --chip esp32s3 -p /dev/ttyACM1 -b 460800 \
-  --before default_reset --after hard_reset \
+  --before no-reset --after watchdog-reset \
   write_flash 0x0 bootloader/bootloader.bin \
               0x8000 partition_table/partition-table.bin \
               0x10000 bridge.bin
 ```
 
-After reset the S3 should enumerate as:
+Two traps, both measured:
+
+- The running app **and** the ROM bootloader enumerate as `303a:1001`, so the
+  USB ID alone does not tell you which one you have. Probe with
+  `esptool ... chip-id` before trusting it.
+- `--after hard-reset` prints "Hard resetting via RTS pin" but does **not**
+  reset a chip running on USB-Serial/JTAG. Use `--after watchdog-reset`; that
+  actually reboots into the application.
+
+After the reset the probe enumerates as:
 
 ```text
 303a:1002  Espressif Systems Co. Ltd. CMSIS-DAP
 ```
-
-The old `303a:1001` USB JTAG/serial device is the blank/default firmware; it is
-not the probe.
 
 ## Pin verification with a meter (do this before blaming the probe)
 
@@ -147,18 +154,44 @@ openocd -f interface/cmsis-dap.cfg -f target/stm32f1x.cfg \
   -c "adapter speed 5000; program e80_bench.elf verify reset exit"
 ```
 
-## Current status (2026-11-03)
+## Root cause of `cannot read IDR`
 
-- S3 bridge build: success.
-- S3 flash: success.
-- S3 enumerates as `303a:1002` CMSIS-DAP, serial `94A9902E9484`.
-- GPIO10 → E80 C and GPIO8 → E80 D **verified with a multimeter**.
-- OpenOCD 0.12.0 (Ubuntu) still reports `cannot read IDR`.
-- The Pico probe `203584200D2D0D42` reads `DPIDR 0x1ba01477` on the same board,
-  so the target and the SWD header are healthy.
-- OpenOCD master (`0.12.0+dev-g8443233`, built 2026-11-03) is available for the
-  speed sweep; `adapter speed 5000` is the documented setting.
-- Do not connect V.
+It was never the hardware. **Two** things had to change, and both were needed:
+
+1. **OpenOCD must be current.** Espressif syncs CMSIS-DAP fixes from mainline
+   into its fork continuously. Ubuntu 24.04 ships `0.12.0-1build2`, which is too
+   old. Git master `0.12.0+dev-g8443233` connects.
+2. **`adapter speed 5000`.** Every failing attempt used 100 kHz or lower. The
+   documented speed for this bridge is 5 MHz, and 5 MHz is what connects.
+
+The Pico works at 100 kHz because it is a different CMSIS-DAP implementation.
+Do not carry its speed over to the ESP32-S3.
+
+## Current status (2026-11-03) — working
+
+Verified end to end on S3 serial `94A9902E9484`, E80 on `/dev/ttyUSB6`:
+
+```text
+Info : SWD DPIDR 0x1ba01477
+Info : [stm32f1x.cpu] Cortex-M3 r1p1 processor detected
+** Programming Started **
+Info : device id = 0x20036410
+Info : flash size = 64 KiB
+** Programming Finished **
+** Verified OK **
+```
+
+Then, over the same board's USB serial:
+
+```text
+OK BRIDGE 115200
+protocol=1 firmware=0.1.0 chip=0x1801 capabilities=0x0007
+configured band=us915 freq=915000000 Hz flrc=1300 kbps power=22 dBm payload=255B relay=false
+pong
+tx=0 rx=0 crc=0 drops=0 timeouts=0 resets=0
+```
+
+The ESP32-S3 is therefore a verified replacement for the Pico probe.
 
 ## Checklist
 
@@ -169,7 +202,7 @@ openocd -f interface/cmsis-dap.cfg -f target/stm32f1x.cfg \
 - [x] OpenOCD sees the CMSIS-DAP probe
 - [x] GPIO10 → E80 C verified by meter
 - [x] GPIO8 → E80 D verified by meter
-- [ ] OpenOCD reads DPIDR through the S3 on a known-good E80
-- [ ] E80 flashed with the bridge firmware
-- [ ] E80 `hello`/`status` over USB
+- [x] OpenOCD reads DPIDR through the S3
+- [x] E80 flashed with the bridge firmware through the S3
+- [x] E80 `hello`/`status` over USB
 - [ ] Two-node FIPS test
