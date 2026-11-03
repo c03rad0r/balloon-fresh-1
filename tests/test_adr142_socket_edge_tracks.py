@@ -11,17 +11,41 @@ pad items (20 -> 4). The real failure mode is a human or agent reading "16 pad
 items, all intentional" and treating the 4 track items as the same class of noise.
 A gate that can say NO, wired into CI, is the only thing that survives that.
 
+WHERE THIS RUNS, AND WHY IT MATTERS. The board-carrying tests need `pcbnew`, which
+only the isolated `pcb-pipeline` job installs — the `test` job deliberately has no
+KiCad bindings (installing them there would un-skip the v10 board gates and turn
+every PR red on pre-existing baseline drift). Measured 2026-11-03: run from the
+`test` job, the three board tests failed with
+`REFUSE: cannot scan ... ModuleNotFoundError: No module named 'pcbnew'`.
+That was the GATE behaving correctly (exit 2, never a false clean) and the TESTS
+being wrong for asking a pcbnew-less job to read a board. So the board tests SKIP
+without pcbnew and `pcb-pipeline` exercises them, and the refusal contract — the
+one thing a pcbnew-less job CAN verify honestly — is asserted unconditionally.
+
 pcbnew lives in the distro interpreter, so the checker runs as a SUBPROCESS —
 importing it in-process has segfaulted a pytest run on this host before.
 """
 import pathlib
+import shutil
 import subprocess
+import tempfile
 
 import pytest
 
 REPO = pathlib.Path(__file__).resolve().parents[1]
 CHECKER = REPO / "tracker" / "hardware" / "check_socket_edge_tracks.py"
 BOARDS = REPO / "docs" / "analysis" / "hub-solar-route" / "output"
+
+
+def _have_pcbnew() -> bool:
+    return subprocess.run(["/usr/bin/python3", "-c", "import pcbnew"],
+                          capture_output=True).returncode == 0
+
+
+HAVE_PCBNEW = _have_pcbnew()
+needs_pcbnew = pytest.mark.skipif(
+    not HAVE_PCBNEW,
+    reason="pcbnew absent; the board gates run in the isolated `pcb-pipeline` job")
 
 
 def run(board, *extra):
@@ -36,6 +60,29 @@ def test_checker_refuses_on_missing_board():
     assert "REFUSE" in r.stdout
 
 
+def test_checker_refuses_without_pcbnew():
+    """Missing binding must exit 2, not 0.
+
+    This is the exact hostile environment the `test` CI job provides. It is the
+    assertion that turned a silent pass into a diagnosable failure, so it is
+    pinned rather than left to chance.
+    """
+    interp = "/usr/bin/python3" if not HAVE_PCBNEW else shutil.which("python3")
+    if HAVE_PCBNEW:
+        if interp is None or subprocess.run(
+                [interp, "-c", "import pcbnew"], capture_output=True).returncode == 0:
+            pytest.skip("every available interpreter has pcbnew")
+    board = BOARDS / "before" / "hub_board_v10_lora1280_7of9.kicad_pcb"
+    if not board.exists():
+        pytest.skip("board not present")
+    r = subprocess.run([interp, str(CHECKER), str(board)],
+                       capture_output=True, text=True)
+    assert r.returncode == 2, (
+        f"checker exited {r.returncode} without pcbnew — it must REFUSE, never "
+        f"report clean. stdout={r.stdout!r}")
+
+
+@needs_pcbnew
 @pytest.mark.skipif(not (BOARDS / "after" / "hub_board_v10_lora1280_7of9.kicad_pcb").exists(),
                     reason="shipped board not present in this checkout")
 def test_shipped_board_has_no_crossing_tracks():
@@ -45,6 +92,7 @@ def test_shipped_board_has_no_crossing_tracks():
     assert "PASS" in r.stdout
 
 
+@needs_pcbnew
 @pytest.mark.skipif(not (BOARDS / "before" / "hub_board_v10_lora1280_7of9.kicad_pcb").exists(),
                     reason="source board not present in this checkout")
 def test_source_board_has_no_crossing_tracks():
@@ -54,6 +102,7 @@ def test_source_board_has_no_crossing_tracks():
     assert r.returncode == 0, r.stdout + r.stderr
 
 
+@needs_pcbnew
 def test_gate_can_say_no():
     """A positive control: prove the checker FAILS a board that does cross an edge.
 
