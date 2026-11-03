@@ -139,6 +139,27 @@ def rasterise(board, net, grid, clear, track_r, edge, win):
             px = wx0 + i * grid
             if near_y or px < ex0 + m or px > ex1 - m:
                 edge_blocked[base + i] = 1
+    fp_edge = []
+    for fp in board.GetFootprints():
+        for g in fp.GraphicalItems():
+            if g.GetLayer() == pcbnew.Edge_Cuts:
+                gb = g.GetBoundingBox()
+                fp_edge.append((gb.GetLeft() / UM, gb.GetTop() / UM,
+                                gb.GetRight() / UM, gb.GetBottom() / UM))
+    for (x0, y0, x1, y1) in fp_edge:
+        i0 = max(0, int((x0 - m - wx0) / grid) - 1)
+        i1 = min(nx - 1, int((x1 + m - wx0) / grid) + 1)
+        j0 = max(0, int((y0 - m - wy0) / grid) - 1)
+        j1 = min(ny - 1, int((y1 + m - wy0) / grid) + 1)
+        for j in range(j0, j1 + 1):
+            py = wy0 + j * grid
+            dyv = max(y0 - py, 0, py - y1)
+            base = j * nx
+            for i in range(i0, i1 + 1):
+                px = wx0 + i * grid
+                dxv = max(x0 - px, 0, px - x1)
+                if math.hypot(dxv, dyv) < m:
+                    edge_blocked[base + i] = 1
     return blocked, edge_blocked, nx, ny, (wx0, wy0)
 
 
