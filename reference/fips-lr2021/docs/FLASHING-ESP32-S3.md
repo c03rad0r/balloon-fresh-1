@@ -13,12 +13,16 @@ FIPS bridge.
 
 ## Wiring
 
-| E80 | Signal | ESP32-S3 |
-|---|---|---|
-| C | SWCLK | GPIO10 |
-| D | SWDIO | GPIO8 |
-| G | GND | GND |
-| V | 3V3 | **leave open** |
+| E80 | Signal | ESP32-S3 | DevKitC-1 header pin |
+|---|---|---|---|
+| C | SWCLK | GPIO10 | **J1 pin 16** |
+| D | SWDIO | GPIO8 | **J1 pin 12** |
+| G | GND | GND | **J1 pin 22** or **J3 pin 1** |
+| V | 3V3 | **leave open** | — |
+
+The physical header pin numbers matter on the DevKitC-1. J1 is the header with
+3V3/RST/GPIO4…GPIO14; J3 is the header with G/TX/RX/GPIO1…GPIO21. GPIO10 is
+**not** pin 10 of the header — it is J1 pin 16.
 
 The E80 is powered by its own USB. The S3 is powered by its own USB. Only GND is
 shared. Do not connect V to the S3.
@@ -102,9 +106,14 @@ openocd -f interface/cmsis-dap.cfg -f target/stm32f1x.cfg \
 - OpenOCD sees the probe.
 - OpenOCD still reports `cannot read IDR` on the E80 that previously had the
   dead Pico probe.
-- Next control: move C/D/G to the known-good E80. If that reads DPIDR, the S3
-  probe is good and the other E80's SWD path is damaged. If it still fails,
-  swap C/D and recheck GND.
+- The same failure occurred with the S3 connected to the known-good E80, so the
+  remaining issue is the physical C/D/G hookup or the E80 header mapping, not
+  the CMSIS-DAP firmware.
+- Next checks: confirm J1 pin 16 (GPIO10) is on E80 C, J1 pin 12 (GPIO8) is on
+  E80 D, and J1 pin 22/J3 pin 1 is on E80 G; then swap C/D; then try another S3
+  from the 3-pack.
+- Do not connect V. A 3V3-to-3V3 connection can cause the S3 to reset or the
+  E80 rail to misbehave.
 
 ## Checklist
 
