@@ -39,8 +39,10 @@ static void spi_xfer(const uint8_t *tx, uint8_t *rx, size_t len)
     spi_device_transmit(s_spi, &t);
 }
 
-#define E80_CS_LOW()   gpio_set_level(PIN_CS, 0)
-#define E80_CS_HIGH()  gpio_set_level(PIN_CS, 1)
+/* The SPI peripheral drives CS via spics_io_num, matching the carrier's own
+ * proven driver (SPI_DEVICE_HALFDUPLEX + hardware CS). */
+#define E80_CS_LOW()   do {} while (0)
+#define E80_CS_HIGH()  do {} while (0)
 #define E80_SPI_TX(b, n) do { spi_xfer((const uint8_t *)(b), NULL, (n)); } while (0)
 #define E80_SPI_RX(b, n) do { spi_xfer(NULL, (uint8_t *)(b), (n)); } while (0)
 #define E80_BUSY_READ() (gpio_get_level(PIN_BUSY) == 1)
@@ -97,17 +99,19 @@ static void setSyncWord(const uint8_t sync[4])
 }
 
 #if E80_BRIDGE_CARRIER_INIT
+/* Sequence taken from this carrier's own proven driver
+ * (tracker/firmware/components/lr2021_transport): XOSC standby, because the
+ * module carries a TCXO and does not answer SPI out of RC standby. */
 static int radioInit(const CfgPayload &cfg)
 {
     rfHardReset();
     vTaskDelay(pdMS_TO_TICKS(10));
 
-    { uint8_t c[] = {0x02, 0x00, 0x01}; rfWriteCmd(c, 3); }  /* SET_STANDBY RC */
+    { uint8_t c[] = {0x01, 0x11, 0x00, 0x00}; rfWriteCmd(c, 4); }  /* CLEAR_ERRORS */
+    { uint8_t c[] = {0x01, 0x28, 0x01}; rfWriteCmd(c, 3); }        /* STANDBY_XOSC */
     vTaskDelay(pdMS_TO_TICKS(5));
-    rfGetErrors();
-    rfClearErrors();
 
-    { uint8_t c[] = {0x02, 0x07, 0x04}; rfWriteCmd(c, 3); }  /* FLRC = 0x04 */
+    { uint8_t c[] = {0x02, 0x07, 0x05}; rfWriteCmd(c, 3); }        /* PACKET_TYPE FLRC */
     vTaskDelay(pdMS_TO_TICKS(1));
 
     rfSetRfFreqHz(cfg.frequency_hz);
@@ -119,14 +123,14 @@ static int radioInit(const CfgPayload &cfg)
 
     uint16_t fe = (uint16_t)(cfg.frequency_hz / 4000000UL);
     if (!cfg.sub_ghz) fe |= 0x8000;
-    { uint8_t c[] = {0x01, 0x23, (uint8_t)(fe >> 8), (uint8_t)(fe & 0xFF), 0, 0, 0, 0, 0, 0};
-      rfWriteCmd(c, 10); }
+    { uint8_t c[] = {0x01, 0x23, (uint8_t)(fe >> 8), (uint8_t)(fe & 0xFF), 0, 0};
+      rfWriteCmd(c, 6); }
     vTaskDelay(pdMS_TO_TICKS(5));
 
-    { uint8_t c[] = {0x01, 0x22, 0x5F}; rfWriteCmd(c, 3); }  /* CALIBRATE */
-    vTaskDelay(pdMS_TO_TICKS(5));
+    { uint8_t c[] = {0x01, 0x22, 0x5F}; rfWriteCmd(c, 3); }        /* CALIBRATE */
+    vTaskDelay(pdMS_TO_TICKS(10));
 
-    if (rfGetVersion(gChipVersion) == 0) return 2;
+    rfGetVersion(gChipVersion);
     bool zero = !gChipVersion[0] && !gChipVersion[1] && !gChipVersion[2] && !gChipVersion[3];
     bool ff = gChipVersion[0] == 0xFF && gChipVersion[1] == 0xFF &&
               gChipVersion[2] == 0xFF && gChipVersion[3] == 0xFF;
@@ -136,10 +140,20 @@ static int radioInit(const CfgPayload &cfg)
     vTaskDelay(pdMS_TO_TICKS(1));
     setSyncWord(cfg.sync_word);
     vTaskDelay(pdMS_TO_TICKS(1));
-    rfFlrcSetPktParams(cfg.radio_payload);
+
+    /* preamble 16 (0x0E), syncTx=1, syncMatch=1, fixed length, CRC on */
+    { uint8_t c[] = {0x02, 0x49, 0x0E, 0x4D,
+                     (uint8_t)(cfg.radio_payload >> 8),
+                     (uint8_t)(cfg.radio_payload & 0xFF)};
+      rfWriteCmd(c, 6); }
     vTaskDelay(pdMS_TO_TICKS(1));
 
-    { uint8_t c[] = {0x02, 0x02, 0x80, 0x00, 0x60, 0x07, 0x10}; rfWriteCmd(c, 7); }
+    if (cfg.sub_ghz) {
+        rfSetPaCfgLf();
+    } else {
+        uint8_t c[] = {0x02, 0x02, 0x80, 0x00, 0x60, 0x07, 0x10};
+        rfWriteCmd(c, 7);
+    }
     vTaskDelay(pdMS_TO_TICKS(1));
 
     rfSetTxParams(powerHalfDb(cfg.tx_power_dbm));
@@ -351,7 +365,7 @@ static void handleFrame(const BridgeFrame &f)
 extern "C" void app_main(void)
 {
     gpio_config_t out = {
-        .pin_bit_mask = (1ULL << PIN_CS) | (1ULL << PIN_RST),
+        .pin_bit_mask = (1ULL << PIN_RST),
         .mode = GPIO_MODE_OUTPUT,
     };
     gpio_config(&out);
@@ -360,7 +374,6 @@ extern "C" void app_main(void)
         .mode = GPIO_MODE_INPUT,
     };
     gpio_config(&in);
-    gpio_set_level(PIN_CS, 1);
 
     spi_bus_config_t bus = {};
     bus.mosi_io_num = PIN_MOSI;
@@ -369,13 +382,14 @@ extern "C" void app_main(void)
     bus.quadwp_io_num = -1;
     bus.quadhd_io_num = -1;
     bus.max_transfer_sz = 64;
-    ESP_ERROR_CHECK(spi_bus_initialize(SPI2_HOST, &bus, SPI_DMA_DISABLED));
+    ESP_ERROR_CHECK(spi_bus_initialize(SPI2_HOST, &bus, SPI_DMA_CH_AUTO));
 
     spi_device_interface_config_t dev = {};
     dev.clock_speed_hz = E80_SPI_HZ;
     dev.mode = 0;
-    dev.spics_io_num = -1;
+    dev.spics_io_num = PIN_CS;
     dev.queue_size = 1;
+    dev.flags = SPI_DEVICE_HALFDUPLEX;
     ESP_ERROR_CHECK(spi_bus_add_device(SPI2_HOST, &dev, &s_spi));
 
     usb_serial_jtag_driver_config_t uj = {};
