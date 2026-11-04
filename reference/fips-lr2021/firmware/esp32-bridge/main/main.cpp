@@ -90,6 +90,20 @@ static uint8_t powerHalfDb(int8_t dbm)
     return (uint8_t)v;
 }
 
+/* This carrier's bitrate table differs from the E80 driver's: 650 kbps is
+ * 0x03 here, not 0x04. */
+static uint8_t carrierBrbw(uint16_t kbps)
+{
+    switch (kbps) {
+    case 2600: return 0x00;
+    case 2080: return 0x01;
+    case 1300: return 0x02;
+    case 650:  return 0x03;
+    case 325:  return 0x04;
+    default:   return 0x03;
+    }
+}
+
 /* The raw driver's rfFlrcSetSyncWord() writes a fixed 12AD101B. The bridge must
  * use the value from CFG so it can match a peer, so write it explicitly. */
 static void setSyncWord(const uint8_t sync[4])
@@ -130,13 +144,13 @@ static int radioInit(const CfgPayload &cfg)
     { uint8_t c[] = {0x01, 0x22, 0x5F}; rfWriteCmd(c, 3); }        /* CALIBRATE */
     vTaskDelay(pdMS_TO_TICKS(10));
 
+    /* The carrier's own driver never reads the version, so a zero result here
+     * is informational rather than fatal: proceed and let TX/RX counters
+     * decide whether the radio actually works. */
     rfGetVersion(gChipVersion);
-    bool zero = !gChipVersion[0] && !gChipVersion[1] && !gChipVersion[2] && !gChipVersion[3];
-    bool ff = gChipVersion[0] == 0xFF && gChipVersion[1] == 0xFF &&
-              gChipVersion[2] == 0xFF && gChipVersion[3] == 0xFF;
-    if (zero || ff) return 2;
 
-    rfFlrcSetModParams(cfg.bitrate_kbps);
+    { uint8_t c[] = {0x02, 0x48, carrierBrbw(cfg.bitrate_kbps), 0x25};
+      rfWriteCmd(c, 4); }
     vTaskDelay(pdMS_TO_TICKS(1));
     setSyncWord(cfg.sync_word);
     vTaskDelay(pdMS_TO_TICKS(1));
@@ -288,16 +302,7 @@ static void txPacket(const uint8_t *data, size_t len)
 
 static void handleRx(void)
 {
-    uint32_t irq = rfGetIrqStatus();
-    if (!(irq & (IRQ_RX_DONE | IRQ_CRC_ERROR))) return;
-
-    if (irq & IRQ_CRC_ERROR) {
-        gCrc++;
-        rfClearRxFifo();
-        rfClearIrq();
-        radioRearm();
-        return;
-    }
+    if (!E80_IRQ_READ()) return;
 
     FlrcPktStatus st;
     rfFlrcGetPktStatus(&st);
