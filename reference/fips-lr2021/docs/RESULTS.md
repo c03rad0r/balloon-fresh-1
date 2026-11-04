@@ -135,3 +135,23 @@ recoverable over SWD; do not use it as an event node.
 - SWD connect fails at 5000 kHz with the probe confirmed present.
 - Only 5000 kHz has been tried on this board. Lower speeds were tried on a
   different board (E80 C), not this one.
+
+## Node A: RP2040 + LR2021 bridge verified (2026-11-04)
+
+The dual-RP2040 GPS carrier was reflashed from its sweep firmware to the
+reference bridge, using env `rp2040-bridge-gpsboard` (20 MHz SPI, `Serial1` log
+compiled out because GP12/GP13 are the GPS UART on that carrier).
+
+Host protocol verified at `/dev/ttyACM2`, Pico `E663B035977F242D`:
+
+```text
+protocol=1 firmware=0.1.0 chip=0x1801 capabilities=0x0007
+
+configured band=us915 freq=915000000 Hz flrc=1300 kbps power=22 dBm payload=255B relay=false
+
+pong
+tx=0 rx=0 crc=0 drops=0 timeouts=0 resets=0
+```
+
+That is HELLO_ACK, a matching CFG_ACK, and PONG+STAT. Node A is ready; it has not
+yet exchanged a frame with a second node.

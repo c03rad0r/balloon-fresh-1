@@ -43,7 +43,10 @@ reading GP13 would be wrong, so logging is compiled out for this board.
 4. Copy the UF2, let it reboot.
 5. Verify: `fips-lr2021ctl --serial /dev/ttyACM2 hello` → `HELLO_ACK`.
 
-**Risks.** The second RP2040 is not enumerated, so we cannot tell from USB alone
+**Status 2026-11-04: done.** Reflashed and verified (HELLO/CFG/STATUS). The
+enumerated Pico did turn out to be the one wired to the LR2021.
+
+**Risks (historical).** The second RP2040 is not enumerated, so we cannot tell from USB alone
 which one is wired to the LR2021. `multi_radio_sweep_gps` implies one device does
 GPS + radio, so the enumerated Pico is the likely candidate — but this is the
 first thing to falsify. If `hello` never answers after flashing, the radio is on
