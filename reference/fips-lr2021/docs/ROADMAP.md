@@ -23,6 +23,19 @@ tangled.
 
 **If it fails:** Phase 2 yields the same pair via the RP2040 node.
 
+## Regulatory constraint (bind every test to this)
+
+**The bench is in the EU. Use `eu868` or `eu2400` only — never `us915`.**
+
+- `eu868` = 868.1 MHz, FLRC-650, +14 dBm, 1% duty cycle in 868.0–868.6 MHz.
+  Keep bursts short; do not run continuous throughput sweeps on this band.
+- `eu2400` = 2440 MHz, FLRC-2600, +12 dBm. Better suited to sustained testing.
+- 915 MHz is a US DTS band and is not permitted here.
+
+Several early bench runs used `us915` before this was flagged. They were brief and
+low-duty, but every command example in these docs should be read as `eu868` or
+`eu2400`.
+
 ## Phase 1 — validate every radio pair
 
 - [ ] E80 ↔ E80
