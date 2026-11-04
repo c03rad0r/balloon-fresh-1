@@ -84,3 +84,45 @@ Wire an **auto-reset circuit** (DTR/RTS to EN/IO0) on the ESP32 carriers, or use
 board with a USB-UART bridge that exposes it — then flashing needs no button and
 this constraint disappears. Same for the RP2040: firmware with the 1200-baud touch
 reset makes BOOTSEL unnecessary.
+
+## Access matrix (measured 2026-11-04)
+
+### Fully automatic — flash and control, no physical access
+
+| Board | Identifier | Evidence |
+|---|---|---|
+| ESP32-C3 + NiceRF | `B0:A6:04:00:96:DC` | `usb_reset` → C3 detected |
+| ESP32 + NiceRF | `88:56:A6:7B:C6:98` | `usb_reset` → C3 detected, flashed twice |
+| ESP32 (GPS carrier) | `70:AF:09:21:FB:18` | `usb_reset` → C3 detected |
+
+`esptool --chip auto -p <port> --before usb_reset chip-id` is the test. If it
+returns a chip type, the board can be reflashed remotely.
+
+### Control only — no flashing
+
+| Board | Status |
+|---|---|
+| E80 A (STM32, `f89eca4`) | working bridge; reconfigurable and testable over USB, but a firmware change needs the SWD probe |
+| RP2040 carrier | bridge running, TX works; reflashing needs BOOTSEL, or the 1200-baud touch if the core supports it |
+
+### Physical access required
+
+| Board | Why |
+|---|---|
+| `123456` | does not answer `usb_reset`; firmware appears to own the USB PHY |
+| E80 B (`5fa7912`) | no `BRIDGE` command, no probe wired → cannot be flashed |
+| RP2040 carrier | only if the 1200-baud touch does not work |
+
+### Consequence
+
+The week is not blocked on button presses — it is blocked on the radio. The
+ESP32 firmware can be iterated remotely for as long as needed, and the outstanding
+`chip=0x0000` problem (radio not answering SPI) is a code/configuration issue, not
+an access issue.
+
+### Two tests worth doing while access exists
+
+1. **RP2040 1200-baud touch** — if supported, the Pico becomes remotely flashable
+   and no board needs a button again.
+2. **Wire the Pico probe to E80 B permanently** — SWD is the only route to that
+   board, so one probe converts a stuck board into a remotely-flashable one.
