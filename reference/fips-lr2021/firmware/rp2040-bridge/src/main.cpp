@@ -52,13 +52,24 @@ static uint32_t gRelayHash[RELAY_CACHE] = {0};
 static uint32_t gRelayAt[RELAY_CACHE] = {0};
 static size_t gRelayNext = 0;
 
+/* Serial1 logging defaults on (GP12/GP13 free, as on the E80 SPI bypass).
+ * Build with -D E80_BRIDGE_UART_LOG=0 on carriers where those pins belong to
+ * another peripheral (e.g. the GPS UART on the dual-RP2040 carrier). */
+#ifndef E80_BRIDGE_UART_LOG
+#define E80_BRIDGE_UART_LOG 1
+#endif
+
 static void logf(const char* fmt, ...) {
+#if E80_BRIDGE_UART_LOG
   char buf[240];
   va_list args;
   va_start(args, fmt);
   vsnprintf(buf, sizeof(buf), fmt, args);
   va_end(args);
   Serial1.println(buf);
+#else
+  (void)fmt;
+#endif
 }
 
 static void sendFrame(uint8_t kind, const uint8_t* payload, uint16_t len) {
@@ -376,9 +387,11 @@ static void watchdog() {
 
 void setup() {
   Serial.begin(2000000);
+#if E80_BRIDGE_UART_LOG
   Serial1.setTX(12);
   Serial1.setRX(13);
   Serial1.begin(115200);
+#endif
   delay(1500);
 
   pinMode(PIN_CS, OUTPUT);
