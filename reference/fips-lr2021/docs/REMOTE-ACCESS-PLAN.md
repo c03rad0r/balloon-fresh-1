@@ -8,13 +8,17 @@ worth taking before that window starts.
 
 | MCU | Flash entry | Physical button required? |
 |---|---|---|
-| ESP32-C3 / S3 | ROM download mode | **Yes** — BOOT + RESET. No DTR/RTS auto-reset is wired on these carriers |
+| ESP32-C3 / S3 | ROM download mode | **No** — proved: `esptool --before usb_reset` enters download mode over USB-Serial/JTAG. Exception: firmware that takes over the USB PHY (e.g. `esp-usb-bridge` on USB-OTG) cannot be reset this way |
 | RP2040 | BOOTSEL mass storage | **Yes**, unless the firmware implements the 1200-baud touch reset |
 | STM32 (E80) | SWD via probe, or UART ROM bootloader | **No**, *if* a probe is already wired to the debug header |
 
-`uhubctl` can power-cycle a USB port remotely, so a hung board can be recovered —
-but a power cycle boots the **application**, not the bootloader. It does not get
-anything into flashing mode.
+`uhubctl` can power-cycle a USB port remotely, so a hung board can be recovered.
+
+**Proved on 2026-11-04:** an ESP32-C3 running firmware whose console is on
+USB-Serial/JTAG can be put into ROM download mode over the wire with
+`esptool --before usb_reset`. No button is required. The exception is firmware
+that claims the USB PHY for OTG (e.g. `esp-usb-bridge`), which cannot be reset
+this way — that is why the probe firmware still needed a button.
 
 ## Board status at the start of the window
 
@@ -23,9 +27,9 @@ anything into flashing mode.
 | E80 A (STM32, `f89eca4`) | yes, verified | only if the probe is wired | **yes** |
 | E80 B (STM32, `5fa7912`) | no `BRIDGE` command | only if the probe is wired | **no** |
 | RP2040 carrier | yes, TX works | probably not | **yes** |
-| ESP32-C3 + NiceRF (`B0:A6:…`) | no | **no** | **no** |
-| ESP32 + NiceRF (`88:56:…`) | no | **no** | **no** |
-| ESP32-S3 + E80 SPI (`123456`) | no | **no** | **no** |
+| ESP32-C3 + NiceRF (`B0:A6:…`) | bridge flashed | **yes** via `usb_reset` | radio untested |
+| ESP32 + NiceRF (`88:56:…`) | bridge flashed | **yes** via `usb_reset` | radio untested |
+| ESP32-S3 + E80 SPI (`123456`) | no | **no** — does not answer `usb_reset` | **no** |
 
 Without a button press: **2 usable, 4 not** — and the four are exactly the boards
 the new ESP-IDF bridge was written for.
