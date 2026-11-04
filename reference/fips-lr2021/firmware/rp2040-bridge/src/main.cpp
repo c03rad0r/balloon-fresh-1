@@ -59,6 +59,13 @@ static size_t gRelayNext = 0;
 #define E80_BRIDGE_UART_LOG 1
 #endif
 
+/* Poll the radio's IRQ status register over SPI instead of reading the module's
+ * DIO line. Needed on carriers where the IRQ is not routed to a usable GPIO
+ * (their sweep firmware may use a different DIO, or none at all). */
+#ifndef E80_BRIDGE_POLL_IRQ
+#define E80_BRIDGE_POLL_IRQ 0
+#endif
+
 static void logf(const char* fmt, ...) {
 #if E80_BRIDGE_UART_LOG
   char buf[240];
@@ -225,15 +232,18 @@ static void txPacket(const uint8_t* data, size_t len) {
   uint32_t start = millis();
   bool done = false;
   while ((millis() - start) < 60) {
-    if (rfIrq()) {
-      uint32_t irq = rfGetIrqStatus();
-      if (irq & IRQ_TX_DONE) {
-        done = true;
-        break;
-      }
-      if (irq & IRQ_CRC_ERROR) {
-        break;
-      }
+#if E80_BRIDGE_POLL_IRQ
+    uint32_t irq = rfGetIrqStatus();
+#else
+    if (!rfIrq()) continue;
+    uint32_t irq = rfGetIrqStatus();
+#endif
+    if (irq & IRQ_TX_DONE) {
+      done = true;
+      break;
+    }
+    if (irq & IRQ_CRC_ERROR) {
+      break;
     }
   }
   if (!done) gStatsTimeouts++;
@@ -243,8 +253,13 @@ static void txPacket(const uint8_t* data, size_t len) {
 }
 
 static void handleRx() {
+#if E80_BRIDGE_POLL_IRQ
+  uint32_t irq = rfGetIrqStatus();
+  if (!(irq & (IRQ_RX_DONE | IRQ_CRC_ERROR))) return;
+#else
   if (!rfIrq()) return;
   uint32_t irq = rfGetIrqStatus();
+#endif
   if (irq & IRQ_CRC_ERROR) {
     gStatsCrc++;
     rfClearRxFifo();
