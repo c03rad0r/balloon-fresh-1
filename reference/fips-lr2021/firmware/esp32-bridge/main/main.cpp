@@ -88,6 +88,14 @@ static uint8_t powerHalfDb(int8_t dbm)
     return (uint8_t)v;
 }
 
+/* The raw driver's rfFlrcSetSyncWord() writes a fixed 12AD101B. The bridge must
+ * use the value from CFG so it can match a peer, so write it explicitly. */
+static void setSyncWord(const uint8_t sync[4])
+{
+    uint8_t p[5] = {0x01, sync[0], sync[1], sync[2], sync[3]};
+    rfWrite2(OC_FLRC_SYNCWORD, p, 5);
+}
+
 #if E80_BRIDGE_CARRIER_INIT
 static int radioInit(const CfgPayload &cfg)
 {
@@ -126,7 +134,7 @@ static int radioInit(const CfgPayload &cfg)
 
     rfFlrcSetModParams(cfg.bitrate_kbps);
     vTaskDelay(pdMS_TO_TICKS(1));
-    rfFlrcSetSyncWord();
+    setSyncWord(cfg.sync_word);
     vTaskDelay(pdMS_TO_TICKS(1));
     rfFlrcSetPktParams(cfg.radio_payload);
     vTaskDelay(pdMS_TO_TICKS(1));
@@ -187,6 +195,7 @@ static int radioInit(const CfgPayload &cfg)
     }
     rfSetTxParams(powerHalfDb(cfg.tx_power_dbm));
     rfSetFallbackFs();
+    setSyncWord(cfg.sync_word);
     rfFlrcSetModParams(cfg.bitrate_kbps);
     rfFlrcSetPktParams(cfg.radio_payload);
     rfSetDioIrqMask(IRQ_RX_DONE | IRQ_TX_DONE | IRQ_CRC_ERROR);
