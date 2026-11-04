@@ -12,7 +12,8 @@ debugprobe. No new firmware if it can be avoided.
 radio work". Only the first matters for the transport, and the two have been
 tangled.
 
-- [ ] Pico debugprobe reaches `DPIDR` on the second E80
+- [x] Node A (E80 `fw=f89eca4`, USB path `4.1.3`): `BRIDGE`, `HELLO_ACK`, `CFG_ACK` at 915 MHz
+- [ ] Pico debugprobe reaches `DPIDR` on the second E80 (`fw=5fa7912`, path `1.1`)
 - [ ] Bridge firmware flashed and verified
 - [ ] `BRIDGE` mode entered, `HELLO_ACK` + `CFG_ACK`
 - [ ] `per`/`echo` across the pair: 20/20, 0% loss
