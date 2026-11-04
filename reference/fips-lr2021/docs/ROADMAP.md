@@ -57,11 +57,20 @@ Approach: port the carrier's own init sequence from
 `firmware/rp2040/src/dual_radio_gps_sweep*.cpp` into the bridge's `radioApply`,
 keeping the host protocol.
 
-- [ ] Extract the carrier init sequence
-- [ ] Replace `radioApply` internals, keep the protocol
-- [ ] `GET_VERSION` still reads
-- [ ] `timeouts` stops incrementing on a `per` run
+- [x] Extract the carrier init sequence
+- [x] Replace `radioApply` internals, keep the protocol (`E80_BRIDGE_CARRIER_INIT`)
+- [x] `GET_VERSION` still reads
+- [x] `timeouts` stops incrementing on a `per` run (was 20/20, now 0/20)
 - [ ] A peer receives frames
+
+Root cause of the silent TX: the carrier needs FLRC packet type `0x04` (not `0x05`),
+`CALIB_FRONT_END` before `CALIBRATE 0x5F`, and the HF PA config on all bands.
+
+Two builds are kept ready for an A/B on the frequency encoding, which is the next
+suspect for the remaining 100% loss:
+
+- `rp2040-bridge-gpsboard` — FRF encoding
+- `rp2040-bridge-gpsboard-hz` — plain 4-byte Hz
 
 ## Phase 3 — the ESP-IDF bridge
 
