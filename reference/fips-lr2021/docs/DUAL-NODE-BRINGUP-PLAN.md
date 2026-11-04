@@ -101,3 +101,48 @@ it does not measure throughput. A throughput number needs SPI hosts on both ends
 - Both nodes answer `HELLO_ACK` and `CFG_ACK`.
 - 20/20 frames delivered across the radio with 0% loss at bench distance.
 - FIPS handshake completes between two hosts.
+
+## Current situation (2026-11-04)
+
+| Component | State |
+|---|---|
+| Node A — RP2040 + LR2021 (`/dev/ttyACM2`) | **verified**: HELLO/CFG/STATUS, 915 MHz FLRC-1300, +22 dBm |
+| Node B — E80 STM32 (`/dev/ttyUSB2`) | `fw=f89eca4` present, in bench mode; needs `BRIDGE` |
+| Over-the-air frame | **not yet sent** |
+| Fourth E80 + S3 probe | SWD still `cannot read IDR`; harness suspected |
+
+Node A's firmware is the reference bridge built with
+`-e rp2040-bridge-gpsboard`: 20 MHz SPI, `Serial1` log compiled out because
+GP12/GP13 are the GPS UART on that carrier.
+
+## Throughput expectations (important)
+
+| Path | Host link | Practical ceiling | Bound by |
+|---|---|---|---|
+| E80 STM32 @ 115200 (current node B) | UART 115200 | ~92 kbps | serial |
+| E80 STM32 @ 2 Mbaud (firmware change) | UART 2 Mbaud | ~1.6 Mbps | radio @ 915 |
+| RP2040 + SPI bypass | USB CDC + SPI 20 MHz | ~0.6–0.9 Mbps @ FLRC-1300 | radio |
+| ESP32 + SPI bypass, 2.4 GHz | USB CDC + SPI 20 MHz | ~1.3–1.8 Mbps @ FLRC-2600 | radio |
+
+The radio side is **already SPI on the E80** — the STM32 drives the LR2021 over
+SPI. The 115200 UART between the STM32 and the CH340 is the only bottleneck, and
+it sits on the host side of the bridge.
+
+Consequences:
+
+- The current pair proves the transport, not its throughput.
+- FIPS handshake, `ping6` and low-rate UDP fit inside 92 kbps.
+- TCP is possible but slow (double retransmission: FIPS session layer + link ARQ
+  + TCP), and video is not viable at this rate.
+
+## Immediate steps
+
+1. Put node B into bridge mode: `fips-lr2021ctl --serial /dev/ttyUSB2 --baud 115200 bridge`.
+2. `hello` → `HELLO_ACK`; `cfg --band us915` must match node A.
+3. Cross-node link test: `echo` on one, `per` on the other.
+4. Then two FIPS instances (namespaces or two hosts) for `ping6`.
+
+## Later
+
+- Raise the E80 bridge to 2 Mbaud (biggest throughput win without rewiring).
+- Or move node B to SPI bypass so the STM32 stops mattering.
