@@ -80,11 +80,11 @@ Inputs that exist: SPI/radio in `firmware/esp32-c3-flrc`, protocol in
 `reference/fips-lr2021/firmware/rp2040-bridge`, framing in
 `docs/BRIDGE-PROTOCOL.md`.
 
-- [ ] Port `bridge_protocol` + TX/RX loop to plain C
-- [ ] USB CDC host link
-- [ ] Per-carrier settings: IRQ DIO, frequency encoding, sync word
-- [ ] Build for `esp32c3`
-- [ ] Build for `esp32s3`
+- [x] Port `bridge_protocol` + TX/RX loop to ESP-IDF (`firmware/esp32-bridge`)
+- [x] USB-Serial/JTAG host link
+- [x] Per-carrier settings: IRQ DIO, frequency encoding, init variant
+- [x] Build for `esp32c3`
+- [x] Build for `esp32s3`
 - [ ] `fips-lr2021ctl hello` returns `HELLO_ACK` on an ESP32 board
 - [ ] `per`/`echo` against an E80
 
