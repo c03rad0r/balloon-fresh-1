@@ -210,7 +210,8 @@ static int radioInit(const CfgPayload &cfg)
 
 static void sendFrame(uint8_t kind, const uint8_t *payload, uint16_t len)
 {
-    uint8_t out[BRIDGE_MAX_PAYLOAD + 16];
+    /* Static, not stack: this is 2 KB and the main task stack is small. */
+    static uint8_t out[BRIDGE_MAX_PAYLOAD + 16];
     size_t n = bridgeEncode(kind, payload, len, out, sizeof(out));
     if (n) usb_serial_jtag_write_bytes(out, n, pdMS_TO_TICKS(50));
 }
@@ -293,7 +294,7 @@ static void handleRx(void)
     size_t len = want;
 
     if (len > 0) {
-        uint8_t payload[6 + 255];
+        static uint8_t payload[6 + 255];
         int16_t rssi = (int16_t)(st.rssi_avg_dbm);
         payload[0] = (uint8_t)(rssi & 0xFF);
         payload[1] = (uint8_t)((rssi >> 8) & 0xFF);
@@ -395,7 +396,7 @@ extern "C" void app_main(void)
     gLastOkMs = now_ms();
     gLastInitMs = now_ms();
 
-    uint8_t buf[256];
+    static uint8_t buf[256];
     uint32_t lastStat = now_ms();
 
     for (;;) {
