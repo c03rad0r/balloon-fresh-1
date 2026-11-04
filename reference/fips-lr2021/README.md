@@ -132,6 +132,7 @@ the hardware gate and exact commands are in
 | `scripts/` | bootstrap, sync, build, flash, demo |
 | `tests/hardware/` | PER, ping, relay and soak scripts |
 | `docs/` | protocol, bands, hardware, runbook, results, bring-up findings |
+| `docs/BOARD-INVENTORY.md` | every bench LR2021 board: USB IDs, wiring, firmware state |
 
 ## Known limitations
 
