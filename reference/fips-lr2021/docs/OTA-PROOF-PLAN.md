@@ -50,6 +50,24 @@ tracker reference board's pin map (GPIO6/2/7/10/3/4/5).
 The pin map of the original firmware on `B0:A6` was overwritten when we flashed
 the bridge, so it cannot be read back from the device.
 
+Two further findings narrow this down:
+
+- The `TX: seq=… rssi=OK` output that looked like proof of transmission is **not**
+  evidence. In `tracker/firmware/radio_test/main/main.cpp` that line is printed
+  whenever `send_packet()` returns `Ok`, which only means the SPI command was
+  accepted — never that the radio transmitted.
+- The module on these carriers is a **G-NiceRF LoRa2021-868**, i.e. a real LR2021.
+  So the zeros are not a "wrong chip" problem.
+
+That leaves one explanation standing: **the NiceRF carrier's ESP32↔LR2021 pin map
+differs from the tracker reference board's** (GPIO6/2/7/10/3/4/5). The reference
+driver's pin constants are compiled in, so a carrier that routes the radio to
+different GPIOs will read all zeros and fail both TX and RX — exactly what we see.
+
+Resolving it needs continuity measurement on the carrier (physical), or a firmware
+that scans candidate pin combinations. There is no purely software way to discover
+the map on a board we cannot see.
+
 ### What this means for a two-node test
 
 The only confirmed working node is the Pico. The only other candidate is the E80,
