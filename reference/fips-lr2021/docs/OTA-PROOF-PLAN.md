@@ -206,3 +206,35 @@ writing down even if the event build stays pragmatic.
 - RP2040 reflashing needs BOOTSEL — physical access.
 - E80 reflashing needs SWD — physical access.
 - Prefer 2440 MHz for sustained testing; 868.0–868.6 MHz has a 1% duty cycle.
+
+
+## E80 UART ROM bootloader — tried and failed (2026-11-05)
+
+The E80 accepts `FLASH` and answers `OK JUMPING TO BOOTLOADER`, but
+`stm32flash` cannot complete the handshake over the onboard CH340:
+
+```
+stm32flash -b 115200 -w e80_bridge.bin -v /dev/ttyUSB1
+  -> Failed to init device, timeout.
+
+-i none            -> Failed to send boot enter sequence
+-i -dtr&-rts       -> Failed to init device, timeout
+-b 9600            -> Failed to init device, timeout
+```
+
+The STM32 ROM bootloader requires 8E1; the CH340 path does not appear to deliver
+it. This confirms the earlier result on a different host, so it is a property of
+the onboard CH340, not of one machine.
+
+**Consequence:** the E80 cannot be reflashed without SWD. It currently sits in the
+ROM bootloader and needs a **power cycle** to return to the application. Note that
+`uhubctl` is not installed on `archipelago.local`, so a remote power cycle is not
+available there.
+
+## Remaining physical actions
+
+1. Power-cycle the E80 (returns it to the old bench firmware).
+2. Wire the Pico debugprobe to the E80's debug header and reflash over SWD — the
+   only route to a second working node.
+3. Meter one ESP32 carrier: radio module supply, and continuity on SCK/MOSI/MISO
+   between the ESP32 and the module.
