@@ -331,8 +331,12 @@ static inline uint8_t rfFlrcBrCode(uint32_t kbps) {
 
 // SET_FLRC_MODULATION_PARAMS 0x0248 {br_bw, (cr<<4)|bt} — proven bytes 0x25
 // (cr code 2, BT 1.0 == multi_radio_sweep.cpp:350)
+#ifndef E80_MOD_BYTE1
+#define E80_MOD_BYTE1 0x25
+#endif
+
 static inline void rfFlrcSetModParams(uint32_t kbps) {
-  uint8_t p[2] = { rfFlrcBrCode(kbps), 0x25 };
+  uint8_t p[2] = { rfFlrcBrCode(kbps), (uint8_t)E80_MOD_BYTE1 };
   rfWrite2(OC_FLRC_MOD_PARAMS, p, 2);
 }
 

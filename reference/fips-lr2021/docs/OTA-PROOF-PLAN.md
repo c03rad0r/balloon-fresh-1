@@ -284,3 +284,39 @@ Read the exact FLRC command bytes the E80's firmware sends
 (`firmware/e80-stm32-bench/src/radio_bench.c` and the vendor HAL it calls), and
 mirror those bytes literally in the RP2040 bridge rather than deriving them from
 the packet-parameter encoding.
+
+
+## Vendor-exact FLRC bytes extracted and applied (2026-11-05)
+
+Read from the E80's vendor driver (`third_party/Radio/lr20xx_driver`), not inferred:
+
+| Command | Vendor bytes | Our driver had |
+|---|---|---|
+| `SET_RF_FREQ` (0x0200) | `freq` as 4-byte big-endian Hz | same (correct) |
+| `SET_MOD_PARAMS` (0x0248) @650 | `04 17` — br_bw 0x04, (CR_3_4<<4)\|BT_1.0 | `04 25` |
+| `SET_PKT_PARAMS` (0x0249) | `1E 7D` — sync4B+(pre32<<2), CRC2\|FIX<<2\|match123<<3\|txsw1<<6 | `0C 4C` / `0E 4D` |
+
+The RP2040 bridge now sends the vendor bytes exactly (`E80_PKT_BYTE0=0x1E`,
+`E80_PKT_BYTE1=0x7D`, `E80_MOD_BYTE1=0x17`, plain-Hz frequency).
+
+### Result: still no cross-node frame
+
+```
+E80 : tx=192 rx=0 crc=5 timeouts=0
+Pico: tx=0   rx=0
+```
+
+The E80 transmits cleanly (`timeouts=0`) and occasionally sees CRC errors, but no
+valid frame from the Pico. The Pico only transmits after receiving, so it stayed
+silent.
+
+With framing now copied literally from the vendor driver, the remaining
+explanations are no longer software-parameter drift:
+
+1. **The two modules are on different absolute frequencies** — different band
+   variants, or one of them not actually tuning where we think.
+2. **The Pico side is not radiating usefully** at 868 (its module may be a
+   2.4 GHz-only part, or the LF PA config is wrong for it).
+
+Both need a measurement, not another parameter change: an SDR (or any third
+receiver) to see where each radio actually transmits.
