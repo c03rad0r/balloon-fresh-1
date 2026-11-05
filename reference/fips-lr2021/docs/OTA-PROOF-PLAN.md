@@ -238,3 +238,49 @@ available there.
    only route to a second working node.
 3. Meter one ESP32 carrier: radio module supply, and continuity on SCK/MOSI/MISO
    between the ESP32 and the module.
+
+
+## Cross-node results, 2026-11-05 late
+
+Two nodes now transmit and self-receive:
+
+```
+Pico : tx=40 rx=40 crc=0 timeouts=0   (self-reception)
+E80  : tx=140 rx=0 crc=4 timeouts=0   (transmits; 4 CRC errors seen)
+```
+
+But **neither hears the other**:
+
+- E80 transmitting → Pico `echo` receives 0 frames
+- Pico transmitting → E80 `echo` receives 0 frames
+
+Both are internally consistent (they hear their own packets), which proves the
+radio and firmware work but says nothing about the absolute frequency.
+
+### Framing variants already tried against the E80
+
+| Pico encoding | Pico framing | Result |
+|---|---|---|
+| FRF | 0x0C / 0x4C | no cross-node frames |
+| plain Hz | 0x0E / 0x4D | no cross-node frames |
+
+### Remaining suspects, in order
+
+1. **Bitrate code.** The E80 driver maps 650 kbps to `0x04`; the NiceRF driver
+   maps it to `0x03`. If the E80's vendor HAL uses a third mapping, the two
+   transmit at different rates and cannot decode each other. At 2600 both tables
+   agree on `0x00`, which argues for testing at 2.4 GHz where the table
+   discrepancy disappears.
+2. **Absolute frequency.** Pico self-reception is consistent under either
+   encoding, so it cannot distinguish them. Only a known-good receiver or a
+   spectrum analyser can.
+3. **Framing bytes inferred rather than read.** The `0x0E/0x4D` values were
+   derived from the vendor's preamble/sync/CRC settings; they were not read back
+   from the E80's actual SPI traffic.
+
+### Next step that removes guesswork
+
+Read the exact FLRC command bytes the E80's firmware sends
+(`firmware/e80-stm32-bench/src/radio_bench.c` and the vendor HAL it calls), and
+mirror those bytes literally in the RP2040 bridge rather than deriving them from
+the packet-parameter encoding.
