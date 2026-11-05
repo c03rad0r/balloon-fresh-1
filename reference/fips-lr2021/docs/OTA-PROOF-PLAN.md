@@ -59,14 +59,26 @@ Two further findings narrow this down:
 - The module on these carriers is a **G-NiceRF LoRa2021-868**, i.e. a real LR2021.
   So the zeros are not a "wrong chip" problem.
 
-That leaves one explanation standing: **the NiceRF carrier's ESP32↔LR2021 pin map
-differs from the tracker reference board's** (GPIO6/2/7/10/3/4/5). The reference
-driver's pin constants are compiled in, so a carrier that routes the radio to
-different GPIOs will read all zeros and fail both TX and RX — exactly what we see.
+**Pin map hypothesis: DISPROVED.** The NiceRF variant's own build flags
+(`mesh-stack/meshcore-lr2021/patches/variant/platformio.ini`) confirm exactly the
+pins we used:
 
-Resolving it needs continuity measurement on the carrier (physical), or a firmware
-that scans candidate pin combinations. There is no purely software way to discover
-the map on a board we cannot see.
+```
+P_LORA_SCLK=6  P_LORA_MISO=2  P_LORA_MOSI=7
+P_LORA_NSS=10  P_LORA_RESET=3 P_LORA_BUSY=4  P_LORA_DIO_1=5
+```
+
+So the ESP32 carriers are wired to the pins the driver expects, yet two separate
+boards return zeros for every SPI read and fail both TX and RX. With the software
+explanations now exhausted — pins correct, module is a real LR2021, framing
+aligned, sequence taken from a proven driver — the remaining candidates are
+hardware-side:
+
+- the radio module is not powered (an enable pin or jumper not asserted)
+- the SPI bus is damaged on both carriers
+- both carriers are faulty in the same way
+
+None of these can be resolved without a meter on the board.
 
 ### What this means for a two-node test
 
