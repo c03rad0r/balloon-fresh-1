@@ -34,16 +34,36 @@ the state to pick up from.
 
 ## Checklist
 
-- [ ] Copy `fips-lr2021ctl` to the host
-- [ ] `hello` on each port; record which are bridges
-- [ ] Flash the **refactored** ESP32 bridge (proven driver) to `88:56` via `usb_reset`
-- [ ] `hello` → `HELLO_ACK`
-- [ ] `cfg --band us2400` → `CFG_ACK`
-- [ ] `per` at 2440 MHz → `timeouts` stays 0
-- [ ] `cfg --band eu868` → `CFG_ACK`
-- [ ] `per` at 868.1 MHz → `timeouts` stays 0
+- [x] Copy `fips-lr2021ctl` to the host
+- [x] `hello` on each port (Pico = bridge 0.1.0; `88:56` = bridge 0.2.0→0.3.0; E80 in bench mode)
+- [x] Flash the **refactored** ESP32 bridge (proven driver) to `88:56` via `usb_reset`
+- [x] `hello` → `HELLO_ACK`, firmware `0.3.0`
+- [x] `cfg --band us2400` → `CFG_ACK` (radio init returned Ok, so SPI + calibration work)
+- [ ] `per` at 2440 MHz → **fails: `timeouts=20/20`**
+- [ ] `cfg --band eu868`
+- [ ] `per` at 868.1 MHz
 - [ ] `per`/`echo` against the E80 (`ttyUSB1`)
 - [ ] Record results in `docs/RESULTS.md`
+
+## Result on 2026-11-05 — blocked on TX completion
+
+With the proven driver linked, `cfg` succeeds (SPI and calibration are fine) but
+`per` reports `timeouts=20/20`: the driver issues `SET_TX` and then never sees the
+DIO line assert. An `echo` on the Pico received nothing, so either the ESP32 is
+not radiating or the Pico's RX path is also unproven.
+
+Two hypotheses, untested:
+
+1. **The IRQ DIO is not wired on this carrier.** The driver polls GPIO5; if DIO9
+   is not routed there, TX_DONE is never observed even though transmission
+   succeeds. Test: read the FLRC packet status over SPI after `SET_TX`, or probe
+   GPIO5 during a TX burst.
+2. **The radio is not powered / not the same module.** However SPI works and
+   calibration returns success, which argues against this.
+
+Note the Pico's **RX** has never been independently verified — its TX works
+(`timeouts=0`), but no test has ever shown it receiving. So a null result from the
+Pico is not proof that the ESP32 failed to transmit.
 
 ## Why the refactor matters
 
