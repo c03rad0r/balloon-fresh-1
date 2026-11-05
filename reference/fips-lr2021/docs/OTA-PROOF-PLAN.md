@@ -31,8 +31,33 @@ Configure one node, transmit, and check whether its **own** bridge `rx` counter
 increments. Self-reception means the radio demonstrably transmits *and* receives,
 with no peer involved.
 
-- [ ] RP2040: `cfg`, `per`, then `status` → `rx > 0`?
-- [ ] ESP32: same
+- [x] **RP2040: `tx=20 rx=20 timeouts=0` — transmits AND receives.** The radio,
+      the wiring and the bridge firmware all work. This is the first confirmed
+      working node in the project.
+- [x] **ESP32 `88:56`: `tx=20 rx=0 timeouts=20` — no TX completion, no RX.**
+- [x] **ESP32 `B0:A6`: identical failure** after flashing the same build.
+
+### Consequence
+
+Both ESP32 carriers fail identically while the Pico succeeds on the same host, so
+the fault is specific to the ESP32 carrier, not to the transport or the protocol.
+
+Crucially: **`cfg` no longer proves anything.** The version gate was removed, so
+`cfg` returns success unconditionally. `chip=0x0000` on both boards may mean the
+SPI bus is not reaching the radio at all — i.e. the ESP32 carriers may not use the
+tracker reference board's pin map (GPIO6/2/7/10/3/4/5).
+
+The pin map of the original firmware on `B0:A6` was overwritten when we flashed
+the bridge, so it cannot be read back from the device.
+
+### What this means for a two-node test
+
+The only confirmed working node is the Pico. The only other candidate is the E80,
+which is running old firmware without a `BRIDGE` command and needs SWD to reflash.
+So **no two-node test is currently possible on this bench** without either:
+
+- recovering an ESP32 carrier's pin map, or
+- reflashing the E80 over SWD (physical access).
 
 If a node hears itself, the fault is purely parameter interop. If it does not,
 the parameter question is premature.
