@@ -8,3 +8,6 @@ idf_component_register(
                  "${LR2021_DIR}/include"
                  "../../rp2040-bridge/src"
     REQUIRES driver esp_timer)
+
+# Match the E80/RP2040 family's FLRC framing so the two can interoperate.
+target_compile_options(${COMPONENT_LIB} PRIVATE -DLR2021_PKT_BYTE0=0x0C -DLR2021_FORCE_CRC_OFF=1)
