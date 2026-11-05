@@ -14,6 +14,49 @@ except where noted.
 | 4 | FIPS handshake over the radio | blocked by 1 |
 | 5 | SSH over the FIPS IPv6 address | blocked by 1–4 |
 
+## Three distinct problems, only one of which is interop
+
+| # | Problem | Evidence | Nature |
+|---|---|---|---|
+| 1 | Is anything transmitted at all? | ESP32 `timeouts=40` | instrumentation or TX fault |
+| 2 | Do the radio parameters match? | framing, bitrate table, encoding | interop |
+| 3 | Can any node receive? | no frame ever observed | RX unproven |
+
+Problems 1 and 3 must be settled before 2 is testable: a link that does not exist
+cannot be tuned.
+
+## Stage 0 — self-reception (settles problems 1 and 3, one board)
+
+Configure one node, transmit, and check whether its **own** bridge `rx` counter
+increments. Self-reception means the radio demonstrably transmits *and* receives,
+with no peer involved.
+
+- [ ] RP2040: `cfg`, `per`, then `status` → `rx > 0`?
+- [ ] ESP32: same
+
+If a node hears itself, the fault is purely parameter interop. If it does not,
+the parameter question is premature.
+
+## Parameter table — what must match exactly
+
+| Parameter | RP2040 carrier | ESP32 driver | E80 STM32 |
+|---|---|---|---|
+| Frequency encoding | FRF | FRF | **plain Hz** |
+| Bitrate code @650 | 0x04 | 0x03 | 0x04 |
+| Bitrate code @2600 | 0x00 | 0x00 | 0x00 |
+| Framing byte0/byte1 | 0x0C/0x4C | 0x0E/0x4D → now 0x0C/0x4C | 0x0C/0x4C |
+| CRC | off | now off | off |
+| Sync word | cfg | cfg | hardcoded 0x2DD4D4B2 |
+
+Two consequences:
+
+- **At FLRC-2600 both bitrate tables agree (0x00).** At 650 they do not. Test at
+  2440 MHz / FLRC-2600 where the discrepancy disappears.
+- **RP2040 and ESP32 now agree on everything** (FRF, 0x00, aligned framing, CRC
+  off, same sync), so a null result from that pair is meaningful.
+- **The E80 is the odd one out** (plain Hz). Mixing it with the NiceRF modules is
+  the hardest case and goes last.
+
 ## Stage 1 — can a radio transmit at all?
 
 The DIO line never asserts on the ESP32 carrier, so `timeouts` is ambiguous. Two
@@ -69,12 +112,22 @@ work. One successful `per`/`echo` proves both directions of one pair.
 - [ ] RP2040 → ESP32 frames received
 - [ ] ESP32 → RP2040 frames received
 
-## Stage 3 — two independent pairs
+## Stage 3 — two independent pairs, easiest first
 
-- [ ] RP2040 ↔ ESP32 (`ttyACM0` ↔ ESP32)
-- [ ] E80 (`ttyUSB1`) ↔ RP2040 (`ttyACM0`)
+- [ ] RP2040 ↔ ESP32 at 2440 MHz / FLRC-2600 (same encoding, same bitrate code,
+      aligned framing) — the most likely pair to work
+- [ ] E80 (`ttyUSB1`) ↔ RP2040 (`ttyACM0`) — cross-family, expect the frequency
+      encoding to fight back
 
 Both pairs must pass before believing the transport is sound.
+
+## Structural fix (prevents recurrence)
+
+The bench has three firmware families, each carrying its own copy of "the air
+configuration", and they drifted. The durable fix is a **single canonical
+air-config definition** — frequency, bitrate, framing, CRC, sync — shared by all
+three bridges, plus a self-test that transmits and confirms reception. Worth
+writing down even if the event build stays pragmatic.
 
 ## Stage 4 — FIPS over the radio, same host
 
