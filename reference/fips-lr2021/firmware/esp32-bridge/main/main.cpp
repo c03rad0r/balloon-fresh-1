@@ -5,10 +5,10 @@
  * tracker/firmware/components/lr2021_transport (EspIdfLr2021Radio). That driver
  * already encodes every carrier quirk we hit while reimplementing it:
  *   - SET_STANDBY_XOSC (TCXO module, RC standby leaves it unclocked)
- *   - hardware CS + SPI_DEVICE_HALFDUPLEX
+ *   - hardware CS; full-duplex transfers with dummy TX on reads
  *   - FLRC packet type 0x05
- *   - IRQ status register reads back 0 on this chip -> poll the DIO pin
- *   - carrier-specific bitrate table (650 kbps = 0x03)
+ *   - E80 build: DIO8 IRQ, 32-bit frequency in Hz, LF PA, Semtech bitrates
+ *   - 2.4 GHz carrier build: poll DIO9 as its IRQ status reads back zero
  *
  * This file only implements the host protocol on top, so an ESP32-hosted LR2021
  * looks identical to the RP2040 and STM32 bridges and works with
@@ -25,8 +25,17 @@
 #include "lr2021_spi.h"
 #include "bridge_protocol.h"
 
-static const uint8_t FW_VERSION[3] = {0, 3, 0};
+static const uint8_t FW_VERSION[3] = {0, 4, 0};
 static const uint16_t CAPS = 0x0007;
+
+#ifndef LR2021_E80_COMPAT
+#define LR2021_E80_COMPAT 0
+#endif
+#if LR2021_E80_COMPAT
+static constexpr uint32_t E80_IRQ_RX_DONE = 1UL << 18;
+static constexpr uint32_t E80_IRQ_TX_DONE = 1UL << 19;
+static constexpr uint32_t E80_IRQ_CRC_ERROR = 1UL << 22;
+#endif
 
 static EspIdfLr2021Radio gRadio;
 static Lr2021Config gRadioCfg;
@@ -98,18 +107,47 @@ static void txPacket(const uint8_t *data, size_t len)
     gRadio.send_packet(data, len);
     gTx++;
 
-    /* Wait for the DIO line: the IRQ status register is unusable on this chip. */
     bool asserted = false;
+    bool done = false;
     uint32_t start = now_ms();
     while ((now_ms() - start) < 60) {
-        if (lr2021_ok(gRadio.check_irq(asserted)) && asserted) break;
+        if (!lr2021_ok(gRadio.check_irq(asserted)) || !asserted) {
+            esp_rom_delay_us(50);
+            continue;
+        }
+#if LR2021_E80_COMPAT
+        /* The pin tells us there is work; the status register tells us which
+         * event it was. RX_DONE can also arrive while waiting for our TX. */
+        uint32_t irq = 0;
+        if (lr2021_ok(gRadio.get_irq_status(irq)) && (irq & E80_IRQ_TX_DONE)) {
+            done = true;
+            break;
+        }
+#else
+        break;
+#endif
         esp_rom_delay_us(50);
     }
-    if (!asserted) gTimeouts++;
+#if !LR2021_E80_COMPAT
+    done = asserted;
+#endif
+    if (!done) gTimeouts++;
 
     gRadio.clear_irq();
     gRadio.start_rx();
     gLastOkMs = now_ms();
+}
+
+/* Fixed-length FLRC packets are zero-padded. Trim to the link header's
+ * declared payload length before giving the strict host parser the frame. */
+static size_t frameLength(const uint8_t *data, size_t len)
+{
+    if (len < 20 || data[0] != 0xF1 || data[1] != 0x50 || (data[2] >> 4) != 1) {
+        return len;
+    }
+    size_t payload_len = (size_t)data[18] | ((size_t)data[19] << 8);
+    size_t total = 20 + payload_len + 4;
+    return total <= len ? total : len;
 }
 
 static void handleRx(void)
@@ -118,6 +156,22 @@ static void handleRx(void)
 
     bool asserted = false;
     if (!lr2021_ok(gRadio.check_irq(asserted)) || !asserted) return;
+
+#if LR2021_E80_COMPAT
+    uint32_t irq = 0;
+    if (!lr2021_ok(gRadio.get_irq_status(irq))) return;
+    if (irq & E80_IRQ_CRC_ERROR) {
+        gCrc++;
+        gRadio.clear_irq();
+        gRadio.start_rx();
+        return;
+    }
+    if (!(irq & E80_IRQ_RX_DONE)) {
+        gRadio.clear_irq();
+        gRadio.start_rx();
+        return;
+    }
+#endif
 
     static uint8_t buf[255];
     PacketStatus st;
@@ -132,14 +186,15 @@ static void handleRx(void)
     }
 
     static uint8_t payload[6 + 255];
+    size_t len = frameLength(buf, st.length);
     payload[0] = (uint8_t)(st.rssi_dbm & 0xFF);
     payload[1] = (uint8_t)((st.rssi_dbm >> 8) & 0xFF);
     payload[2] = (uint8_t)st.snr_db;
     payload[3] = 1;
-    payload[4] = (uint8_t)(st.length & 0xFF);
-    payload[5] = (uint8_t)(st.length >> 8);
-    memcpy(payload + 6, buf, st.length);
-    sendFrame(BR_RX, payload, (uint16_t)(6 + st.length));
+    payload[4] = (uint8_t)(len & 0xFF);
+    payload[5] = (uint8_t)(len >> 8);
+    memcpy(payload + 6, buf, len);
+    sendFrame(BR_RX, payload, (uint16_t)(6 + len));
     gRx++;
     gLastOkMs = now_ms();
 }

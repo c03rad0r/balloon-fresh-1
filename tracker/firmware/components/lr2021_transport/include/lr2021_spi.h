@@ -353,10 +353,16 @@ private:
     spi_device_handle_t spi_dev_;
     bool spi_initialized_;
     bool is_tx_;
+    uint8_t payload_length_ = 255;
 
     // SPI helper methods
     Lr2021Error spi_write(const uint8_t* data, size_t len);
     Lr2021Error spi_read(const uint8_t* opcode, size_t opcode_len, uint8_t* buf, size_t buf_len);
+    /// Vendor HAL read: opcode frame, then two status/dummy bytes, then payload.
+    Lr2021Error spi_read_radio(const uint8_t* opcode, size_t opcode_len,
+                               uint8_t* buf, size_t buf_len);
+    /// FLRC FIFO read: opcode and data in one continuous CS transaction.
+    Lr2021Error direct_fifo_read(uint8_t* buf, size_t len);
     Lr2021Error wait_busy();
     bool check_irq_pin();
     Lr2021Error hardware_reset();
