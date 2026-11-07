@@ -364,7 +364,7 @@ Lr2021Error EspIdfLr2021Radio::init_sequence(const Lr2021Config& config) {
     if (err != Lr2021Error::Ok) return err;
     err = step({0x01, 0x22, 0x7F});                   // CALIBRATE all
     if (err != Lr2021Error::Ok) return err;
-    vTaskDelay(pdMS_TO_TICKS(5));
+    vTaskDelay(pdMS_TO_TICKS(10));
     err = step({0x01, 0x11, 0x00, 0x00});
     if (err != Lr2021Error::Ok) return err;
     err = step({0x01, 0x28, 0x01});                   // STANDBY_XOSC
@@ -385,6 +385,17 @@ Lr2021Error EspIdfLr2021Radio::init_sequence(const Lr2021Config& config) {
     bool sub_ghz = config.freq_mhz < 1000.0f;
     err = step({0x02, 0x01, (uint8_t)(sub_ghz ? 0x00 : 0x01), 0x00});
     if (err != Lr2021Error::Ok) return err;
+
+    /* Image-reject/front-end calibration is required before RX. LF does NOT
+     * set bit 15; the HF-only flag caused band-path errors in earlier ports.
+     * Round to the next 4 MHz grid point and allow the vendor-adjacent 30 ms. */
+    uint16_t fe = (uint16_t)(hz / 4000000UL);
+    if (!sub_ghz) fe |= 0x8000;
+    err = step({0x01, 0x23, (uint8_t)(fe >> 8), (uint8_t)fe,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
+    if (err != Lr2021Error::Ok) return err;
+    vTaskDelay(pdMS_TO_TICKS(30));
+
     if (sub_ghz) {
         err = step({0x02, 0x02, 0x00, 0x76, 0x10});   // LF PA, FSM/duty/slices
     } else {
@@ -392,12 +403,14 @@ Lr2021Error EspIdfLr2021Radio::init_sequence(const Lr2021Config& config) {
     }
     if (err != Lr2021Error::Ok) return err;
 
+    // Fallback to STDBY_RC + 304 us PA ramp, as used by the STM32 bridge's
+    // vendor-HAL call. The E80 path leaves RX continuous and rearms it below.
     int power = (int)config.tx_power_dbm * 2;
     if (power < 0) power = 0;
     if (power > 44) power = 44;
-    err = step({0x02, 0x03, (uint8_t)power, 0x04});
+    err = step({0x02, 0x03, (uint8_t)power, 0x12});
     if (err != Lr2021Error::Ok) return err;
-    err = step({0x02, 0x06, 0x03});                   // fallback = FS
+    err = step({0x02, 0x06, 0x00});                   // fallback = STDBY_RC
     if (err != Lr2021Error::Ok) return err;
 
     err = step({0x02, 0x4C, 0x01,
@@ -554,8 +567,16 @@ Lr2021Error EspIdfLr2021Radio::init(const Lr2021Config& config) {
 
 Lr2021Error EspIdfLr2021Radio::start_rx() {
     is_tx_ = false;
+    Lr2021Error err;
+#if LR2021_E80_COMPAT
+    // The STM32 bridge changes fixed-length packet params for every TX and
+    // restores the configured receive length before arming continuous RX.
+    uint8_t pkt_len[6] = {0x02, 0x49, 0x1E, LR2021_PKT_BYTE1, 0x00, payload_length_};
+    err = cmd(pkt_len, sizeof(pkt_len));
+    if (err != Lr2021Error::Ok) return err;
+#endif
     // Clear RX FIFO before entering RX
-    Lr2021Error err = cmd(Lr2021Opcodes::OP_CLR_RX_FIFO, sizeof(Lr2021Opcodes::OP_CLR_RX_FIFO));
+    err = cmd(Lr2021Opcodes::OP_CLR_RX_FIFO, sizeof(Lr2021Opcodes::OP_CLR_RX_FIFO));
     if (err != Lr2021Error::Ok) return err;
     err = cmd(Lr2021Opcodes::OP_CLEAR_IRQ, sizeof(Lr2021Opcodes::OP_CLEAR_IRQ));
     if (err != Lr2021Error::Ok) return err;
@@ -567,6 +588,15 @@ Lr2021Error EspIdfLr2021Radio::send_packet(const uint8_t* data, size_t len) {
     if (len > LR2021_MAX_PACKET) return Lr2021Error::PacketTooLong;
 
     is_tx_ = true;
+
+#if LR2021_E80_COMPAT
+    // Match radio_bench_tx_packet(): fixed-length FLRC still carries the
+    // actual air packet length, updated for every transmission.
+    uint8_t pkt_len[6] = {0x02, 0x49, 0x1E, LR2021_PKT_BYTE1,
+                          (uint8_t)(len >> 8), (uint8_t)len};
+    Lr2021Error len_err = cmd(pkt_len, sizeof(pkt_len));
+    if (len_err != Lr2021Error::Ok) return len_err;
+#endif
 
     // Clear TX FIFO (MANDATORY — stale bytes corrupt sync word)
     Lr2021Error err = cmd(Lr2021Opcodes::OP_CLR_TX_FIFO, sizeof(Lr2021Opcodes::OP_CLR_TX_FIFO));
@@ -693,6 +723,20 @@ Lr2021Error EspIdfLr2021Radio::standby() {
 
 Lr2021Error EspIdfLr2021Radio::sleep() {
     return cmd(Lr2021Opcodes::OP_SET_SLEEP, sizeof(Lr2021Opcodes::OP_SET_SLEEP));
+}
+
+Lr2021Error EspIdfLr2021Radio::get_flrc_rx_stats(uint16_t& packets,
+                                                   uint16_t& crc_errors,
+                                                   uint16_t& length_errors)
+{
+    static const uint8_t get_stats[] = {0x02, 0x4A};
+    uint8_t counters[6] = {};
+    Lr2021Error err = spi_read_radio(get_stats, 2, counters, sizeof(counters));
+    if (err != Lr2021Error::Ok) return err;
+    packets = ((uint16_t)counters[0] << 8) | counters[1];
+    crc_errors = ((uint16_t)counters[2] << 8) | counters[3];
+    length_errors = ((uint16_t)counters[4] << 8) | counters[5];
+    return Lr2021Error::Ok;
 }
 
 Lr2021Error EspIdfLr2021Radio::get_version(uint8_t out[4])

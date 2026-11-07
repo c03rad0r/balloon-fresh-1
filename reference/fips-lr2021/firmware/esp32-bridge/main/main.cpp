@@ -25,7 +25,7 @@
 #include "lr2021_spi.h"
 #include "bridge_protocol.h"
 
-static const uint8_t FW_VERSION[3] = {0, 4, 0};
+static const uint8_t FW_VERSION[3] = {0, 4, 7};
 static const uint16_t CAPS = 0x0007;
 
 #ifndef LR2021_E80_COMPAT
@@ -78,7 +78,16 @@ static bool radioApply(const CfgPayload &cfg)
     gRadioCfg.payload_length = (uint8_t)cfg.radio_payload;
     memcpy(gRadioCfg.sync_word, cfg.sync_word, 4);
 
-    Lr2021Error err = gRadio.init(gRadioCfg);
+    Lr2021Error err = Lr2021Error::WrongState;
+    for (int attempt = 1; attempt <= 3; attempt++) {
+        err = gRadio.init(gRadioCfg);
+        if (err == Lr2021Error::Ok) break;
+        char msg[48];
+        snprintf(msg, sizeof(msg), "radio init attempt=%d err=%d",
+                 attempt, (int)err);
+        sendFrame(BR_EVT, (const uint8_t *)msg, (uint16_t)strlen(msg));
+        vTaskDelay(pdMS_TO_TICKS(20));
+    }
     gLastInitMs = now_ms();
     gRadioOk = (err == Lr2021Error::Ok);
     if (gRadioOk) {
@@ -111,19 +120,19 @@ static void txPacket(const uint8_t *data, size_t len)
     bool done = false;
     uint32_t start = now_ms();
     while ((now_ms() - start) < 60) {
-        if (!lr2021_ok(gRadio.check_irq(asserted)) || !asserted) {
-            esp_rom_delay_us(50);
-            continue;
-        }
 #if LR2021_E80_COMPAT
-        /* The pin tells us there is work; the status register tells us which
-         * event it was. RX_DONE can also arrive while waiting for our TX. */
+        /* Poll the status register directly. This also works if DIO8 is not
+         * routed to the host, and is the method used by the RP2040 bridge. */
         uint32_t irq = 0;
         if (lr2021_ok(gRadio.get_irq_status(irq)) && (irq & E80_IRQ_TX_DONE)) {
             done = true;
             break;
         }
 #else
+        if (!lr2021_ok(gRadio.check_irq(asserted)) || !asserted) {
+            esp_rom_delay_us(50);
+            continue;
+        }
         break;
 #endif
         esp_rom_delay_us(50);
@@ -154,23 +163,25 @@ static void handleRx(void)
 {
     if (!gRadioOk) return;
 
-    bool asserted = false;
-    if (!lr2021_ok(gRadio.check_irq(asserted)) || !asserted) return;
-
 #if LR2021_E80_COMPAT
     uint32_t irq = 0;
     if (!lr2021_ok(gRadio.get_irq_status(irq))) return;
-    if (irq & E80_IRQ_CRC_ERROR) {
-        gCrc++;
+    if (!(irq & (E80_IRQ_RX_DONE | E80_IRQ_CRC_ERROR))) return;
+#else
+    bool asserted = false;
+    if (!lr2021_ok(gRadio.check_irq(asserted)) || !asserted) return;
+#endif
+
+#if LR2021_E80_COMPAT
+    bool phy_crc_error = (irq & E80_IRQ_CRC_ERROR) != 0;
+    if (phy_crc_error) gCrc++;
+    if (!(irq & E80_IRQ_RX_DONE) && !phy_crc_error) {
         gRadio.clear_irq();
         gRadio.start_rx();
         return;
     }
-    if (!(irq & E80_IRQ_RX_DONE)) {
-        gRadio.clear_irq();
-        gRadio.start_rx();
-        return;
-    }
+#else
+    bool phy_crc_error = false;
 #endif
 
     static uint8_t buf[255];
@@ -190,7 +201,7 @@ static void handleRx(void)
     payload[0] = (uint8_t)(st.rssi_dbm & 0xFF);
     payload[1] = (uint8_t)((st.rssi_dbm >> 8) & 0xFF);
     payload[2] = (uint8_t)st.snr_db;
-    payload[3] = 1;
+    payload[3] = phy_crc_error ? 0 : 1;
     payload[4] = (uint8_t)(len & 0xFF);
     payload[5] = (uint8_t)(len >> 8);
     memcpy(payload + 6, buf, len);
@@ -229,7 +240,21 @@ static void handleFrame(const BridgeFrame &f)
     case BR_HELLO: handleHello(); break;
     case BR_CFG:   handleCfg(f); break;
     case BR_TX:    txPacket(f.payload, f.len); break;
-    case BR_PING:  sendFrame(BR_PONG, NULL, 0); sendStat(); break;
+    case BR_PING:
+        sendFrame(BR_PONG, NULL, 0);
+        sendStat();
+#if LR2021_E80_COMPAT
+        {
+            uint16_t packets = 0, crc_errors = 0, length_errors = 0;
+            Lr2021Error e = gRadio.get_flrc_rx_stats(packets, crc_errors, length_errors);
+            char msg[64];
+            snprintf(msg, sizeof(msg), "flrc_rx valid=%u crc=%u len=%u err=%d",
+                     (unsigned)packets, (unsigned)crc_errors,
+                     (unsigned)length_errors, (int)e);
+            sendFrame(BR_EVT, (const uint8_t *)msg, (uint16_t)strlen(msg));
+        }
+#endif
+        break;
     default: break;
     }
 }

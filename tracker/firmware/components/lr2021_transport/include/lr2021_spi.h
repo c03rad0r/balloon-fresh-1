@@ -348,6 +348,10 @@ public:
     /// Read the chip version (0x0101). Proves the SPI bus reaches the radio.
     Lr2021Error get_version(uint8_t out[4]);
 
+    /// FLRC cumulative RX counters (0x024A): valid, CRC error, length error.
+    Lr2021Error get_flrc_rx_stats(uint16_t& packets, uint16_t& crc_errors,
+                                  uint16_t& length_errors);
+
 private:
     // SPI/GPIO handles
     spi_device_handle_t spi_dev_;
